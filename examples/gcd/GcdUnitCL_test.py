@@ -35,7 +35,7 @@ def test_gcd():
 
 @pytest.mark.parametrize( **test_case_table )
 def test( test_params, dump_vcd ):
-  run_sim( TestHarness( GcdUnitCL(),
+  run_sim( TestHarness( GcdUnitCL,
                         test_params.msgs[::2], test_params.msgs[1::2],
                         test_params.src_delay, test_params.sink_delay ),
            dump_vcd )

@@ -28,7 +28,7 @@ class TestHarness (Model):
     # Instantiate models
 
     s.src  = TestSource ( GcdUnitReqMsg(), src_msgs,  src_delay  )
-    s.gcd  = GcdUnit
+    s.gcd  = GcdUnit ()
     s.sink = TestSink   ( Bits(16),        sink_msgs, sink_delay )
 
     # Dump VCD
@@ -115,7 +115,7 @@ test_case_table = mk_test_case_table([
 
 @pytest.mark.parametrize( **test_case_table )
 def test( test_params, dump_vcd ):
-  run_sim( TestHarness( GcdUnitFL(),
+  run_sim( TestHarness( GcdUnitFL,
                         test_params.msgs[::2], test_params.msgs[1::2],
                         test_params.src_delay, test_params.sink_delay ),
            dump_vcd )
