@@ -9,8 +9,8 @@ class RouteUnitDOR( Model ):
 
     # Constants 
     s.num_outports = 5
-    s.x_addr_nbits = msg_type.dst_x_addr.nbits
-    s.y_addr_nbits = msg_type.dst_y_addr.nbits 
+    s.x_addr_nbits = msg_type.dst_x.nbits
+    s.y_addr_nbits = msg_type.dst_y.nbits 
     NORTH = 0
     SOUTH = 1
     WEST  = 2
@@ -29,7 +29,7 @@ class RouteUnitDOR( Model ):
     s.dst_y    = Wire( s.y_addr_nbits )
 
     # Connections
-    for i in range( num_outports ):
+    for i in range( s.num_outports ):
       s.connect( s.in_.msg,       s.out[i].msg )
       s.connect( s.out_rdys[i],   s.out[i].rdy )
       s.connect( s.in_.msg.dst_x, s.dst_x      )
@@ -40,36 +40,38 @@ class RouteUnitDOR( Model ):
       s.in_.rdy.value = reduce_or( s.out_rdys )
 
     # Routing logic
-    if dimension.lower() == 'x':
-      for i in range( num_outports ):
-        s.out[i].val.value = 0
-      if s.pos_x == s.dst_x and s.pos_y == s.dst_y:
-        s.out[SELF].val.value  = s.in_.val
-      elif s.dst_x < s.pos_x:
-        s.out[NORTH].val.value = s.in_.val
-      elif s.dst_x > s.pos_x:
-        s.out[SOUTH].val.value = s.in_.val
-      elif s.dst_y < s.pos_y:
-        s.out[WEST].val.value  = s.in_.val
-      else:
-        s.out[EAST].val.value  = s.in_.val
+    @s.combinational
+    def routingLogic():
+      if dimension.lower() == 'x':
+        for i in range( s.num_outports ):
+          s.out[i].val.value = 0
+        if s.pos_x == s.dst_x and s.pos_y == s.dst_y:
+          s.out[SELF].val.value  = s.in_.val
+        elif s.dst_x < s.pos_x:
+          s.out[NORTH].val.value = s.in_.val
+        elif s.dst_x > s.pos_x:
+          s.out[SOUTH].val.value = s.in_.val
+        elif s.dst_y < s.pos_y:
+          s.out[WEST].val.value  = s.in_.val
+        else:
+          s.out[EAST].val.value  = s.in_.val
 
-    elif dimension.lower() == 'y':
-      for i in range( num_outports ):
-        s.out[i].val.value = 0
-      if s.pos_x == s.dst_x and s.pos_y == s.dst_y:
-        s.out[SELF].val.value  = s.in_.val
-      elif s.dst_y < s.pos_y:
-        s.out[WEST].val.value = s.in_.val
-      elif s.dst_y > s.pos_y:
-        s.out[EAST].val.value = s.in_.val
-      elif s.dst_x < s.pos_x:
-        s.out[NORTH].val.value  = s.in_.val
-      else:
-        s.out[SOUTH].val.value  = s.in_.val
+      elif dimension.lower() == 'y':
+        for i in range( s.num_outports ):
+          s.out[i].val.value = 0
+        if s.pos_x == s.dst_x and s.pos_y == s.dst_y:
+          s.out[SELF].val.value  = s.in_.val
+        elif s.dst_y < s.pos_y:
+          s.out[WEST].val.value = s.in_.val
+        elif s.dst_y > s.pos_y:
+          s.out[EAST].val.value = s.in_.val
+        elif s.dst_x < s.pos_x:
+          s.out[NORTH].val.value  = s.in_.val
+        else:
+          s.out[SOUTH].val.value  = s.in_.val
 
-    else:
-      raise AssertionError( "Invalid input for dimension: %s " % dimension )
+      else:
+        raise AssertionError( "Invalid input for dimension: %s " % dimension )
 
   def line_trace( s ):
     out_str = [ "" for _ in range( 5 ) ]
@@ -78,4 +80,4 @@ class RouteUnitDOR( Model ):
           s.out[i].msg.opaque, s.out[i].msg.dst_x, s.out[i].msg.dst_y ) )
     return "({},{})({}||{}|{}|{}|{}|{})".format(
         s.pos_x, s.pos_y, s.in_, 
-        out_str[0], out_str[1], out_str[2]out_str[3], out_str[4] )
+        out_str[0], out_str[1], out_str[2], out_str[3], out_str[4] )
