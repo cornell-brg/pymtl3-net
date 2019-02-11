@@ -1,7 +1,7 @@
 from pymtl import *
 from pclib.ifcs import InValRdyBundle, OutValRdyBundle
 from pclib.rtl import Mux, RoundRobinArbiterEn
-from pc import Encoder
+from pc.Encoder import Encoder
 
 class SwitchUnit( Model ):
   """
@@ -24,11 +24,12 @@ class SwitchUnit( Model ):
 
     # Connections
     s.connect( s.arbiter.grants, s.encoder.in_ )
-    s.connect( s.encoder.out,    s.mux.sel )
-    s.connect( s.mux.out,    s.out.val     )
+    s.connect( s.encoder.out,    s.mux.sel     )
+    s.connect( s.mux.out,        s.out.msg     )
 
     for i in range( num_inports ):
-      s.connect( s.in_[i].msg, s.mux.in_[i] )
+      s.connect( s.in_[i].msg, s.mux.in_[i]      )
+      s.connect( s.in_[i].val, s.arbiter.reqs[i] )
 
     @s.combinational
     def inRdy():
@@ -37,8 +38,9 @@ class SwitchUnit( Model ):
 
     @s.combinational
     def enableArbiter():
+      s.out.val.value = s.arbiter.grants > 0
       s.arbiter.en.value = (s.arbiter.grants > 0) and s.out.rdy
-
+  
   # TODO: implement line trace
   def line_trace( s ):
     return ""
