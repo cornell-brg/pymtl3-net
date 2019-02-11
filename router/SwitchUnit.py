@@ -37,7 +37,7 @@ class SwitchUnit( Model ):
 
     @s.combinational
     def enableArbiter():
-      s.arbiter.en = (s.arbiter.grants > 0) and s.out.rdy
+      s.arbiter.en.value = (s.arbiter.grants > 0) and s.out.rdy
 
   # TODO: implement line trace
   def line_trace( s ):
