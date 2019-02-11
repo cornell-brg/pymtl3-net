@@ -1,81 +1,44 @@
 from pymtl import *
 from pclib.ifcs import InValRdyBundle, OutValRdyBundle
+from pclib.rtl import Mux, RoundRobinArbiterEn
+from pc import Encoder
 
-class RouteUnitDOR( Model ):
+class SwitchUnit( Model ):
   """
-  A route unit implementing dimension-order routing.
+  A simple switch unit that supports single-phit packet.
   """
-  def __init__( s, msg_type, dimension ):
+  def __init__( s, msg_type, num_inports ):
 
-    # Constants 
-    s.num_outports = 5
-    s.x_addr_nbits = msg_type.dst_x_addr.nbits
-    s.y_addr_nbits = msg_type.dst_y_addr.nbits 
-    NORTH = 0
-    SOUTH = 1
-    WEST  = 2
-    EAST  = 3
-    SELF  = 4
+    # Constants
+    s.num_inports = num_inports
+    s.sel_width   = clog2( num_inports )
 
     # Interface
-    s.in_ =  InValRdyBundle( msg_type )
-    s.out = OutValRdyBundle[ s.num_outports ]( msg_type )
-    s.pos_x = InPort( s.x_addr_nbits )
-    s.pos_y = InPort( s.y_addr_nbits )
+    s.in_ =  InValRdyBundle[ s.num_inports ]( msg_type )
+    s.out = OutValRdyBundle( msg_type )
 
-    # Componets
-    s.out_rdys = Wire( s.num_outports )
-    s.dst_x    = Wire( s.x_addr_nbits )
-    s.dst_y    = Wire( s.y_addr_nbits )
+    # Components
+    s.arbiter = RoundRobinArbiterEn( num_inports )
+    s.encoder = Encoder( num_inports, sel_width )
+    s.mux_msg = Mux( msg_type, num_inports )
+    s.mux_val = Mux( 1,        num_inports )
 
     # Connections
-    for i in range( num_outports ):
-      s.connect( s.in_.msg,       s.out[i].msg )
-      s.connect( s.out_rdys[i],   s.out[i].rdy )
-      s.connect( s.in_.msg.dst_x, s.dst_x      )
-      s.connect( s.in_.msg.dst_y, s.dst_y      )
-    
+    s.connect( s.arbiter.grants, s.encoder.in_ )
+    s.connect( s.encoder.out,    s.mux_msg.sel )
+    s.connect( s.encoder.out,    s.mux_val.sel )
+    s.connect( s.mux_val.out,    s.out.val     )
+    s.connect( s.mux_msg.out,    s.out.msg     )
+
+    for i in range( num_inports ):
+      s.connect( s.in_[i].msg, s.mux_msg.in_[i] )
+      s.connect( s.in_[i].val, s.mux_val.in_[i] )
+
     @s.combinational
-    def assignInRdy():
-      s.in_.rdy.value = reduce_or( s.out_rdys )
+    def inRdy():
+      for i in range( num_inports ):
+        s.in_[i].rdy.value = s.arbiter.grants[i] and s.out.rdy
 
-    # Routing logic
-    if dimension.lower() == 'x':
-      for i in range( num_outports ):
-        s.out[i].val.value = 0
-      if s.pos_x == s.dst_x and s.pos_y == s.dst_y:
-        s.out[SELF].val.value  = s.in_.val
-      elif s.dst_x < s.pos_x:
-        s.out[NORTH].val.value = s.in_.val
-      elif s.dst_x > s.pos_x:
-        s.out[SOUTH].val.value = s.in_.val
-      elif s.dst_y < s.pos_y:
-        s.out[WEST].val.value  = s.in_.val
-      else:
-        s.out[EAST].val.value  = s.in_.val
-
-    elif dimension.lower() == 'y':
-      for i in range( num_outports ):
-        s.out[i].val.value = 0
-      if s.pos_x == s.dst_x and s.pos_y == s.dst_y:
-        s.out[SELF].val.value  = s.in_.val
-      elif s.dst_y < s.pos_y:
-        s.out[WEST].val.value = s.in_.val
-      elif s.dst_y > s.pos_y:
-        s.out[EAST].val.value = s.in_.val
-      elif s.dst_x < s.pos_x:
-        s.out[NORTH].val.value  = s.in_.val
-      else:
-        s.out[SOUTH].val.value  = s.in_.val
-
-    else:
-      raise AssertionError( "Invalid input for dimension: %s " % dimension )
-
+  # TODO: implement line trace
   def line_trace( s ):
-    out_str = [ "" for _ in range( 5 ) ]
-    for i in range( 5 ):
-      out_str[i] = s.out[i].to_str( "{}:<{},{}>".format( 
-          s.out[i].msg.opaque, s.out[i].msg.dst_x, s.out[i].msg.dst_y ) )
-    return "({},{})({}||{}|{}|{}|{}|{})".format(
-        s.pos_x, s.pos_y, s.in_, 
-        out_str[0], out_str[1], out_str[2]out_str[3], out_str[4] )
+    return ""
