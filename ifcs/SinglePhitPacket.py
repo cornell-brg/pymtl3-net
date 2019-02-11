@@ -31,10 +31,6 @@ class SinglePhitPacket( BitStructDefinition ):
 
   # TODO: Implement better __str__ funtion.
   def __str__( s ):
-    return "single-phit-pkt"
+    return "{}:({},{})>({},{})".format( 
+      s.opaque, s.src_x, s.src_y, s.dst_x, s.dst_y )
 
- #-----------------------------------------------------------------------
- # Helper function to make a single-phit packet
- #-----------------------------------------------------------------------
-
- def mk_1phit_pkt( src
