@@ -54,7 +54,18 @@ class TestHarness( Model ):
 
   # TODO: Implement line trace.
   def line_trace( s ):
-    return s.dut.line_trace()
+    in_ = '|'.join( [ x.out.to_str( "%02s:(%1s,%1s)>(%1s,%1s)" % (
+                                     x.out.msg.opaque, 
+                                     x.out.msg.src_x, x.out.msg.src_y,
+                                     x.out.msg.dst_x, x.out.msg.dst_y ) )
+                      for x in s.src  ] )
+
+    out = '|'.join( [ x.in_.to_str( "%02s:(%1s,%1s)>(%1s,%1s)" % (
+                                     x.in_.msg.opaque, 
+                                     x.in_.msg.src_x, x.in_.msg.src_y,
+                                     x.in_.msg.dst_x, x.in_.msg.dst_y ) )
+                      for x in s.sink ] )
+    return in_ + '>' + s.dut.line_trace() + '>' + out
 
 #=======================================================================
 # Driver function  
@@ -132,6 +143,10 @@ def mk_test_msgs( num_ports, base_pkt, msg_list ):
   return [ src_msgs, sink_msgs ]
 
 def compute_src_sink( pos_x, pos_y, dimension, msg_list ):
+  """
+  A helper function that computes the corresponding test src/sink
+  based on the input packet and the router's position.
+  """
   test_list = []
   tsrc  = 0
   tsink = 0
