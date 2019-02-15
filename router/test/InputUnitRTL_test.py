@@ -8,6 +8,7 @@
 
 from pymtl import *
 from router.InputUnitRTL import InputUnitRTL
+from pymtl.passes.PassGroups import SimpleSim
 # from pclib.rtl.valrdy_queues_test import TestVectorSimulator
 
 class TestVectorSimulator( object ):
@@ -23,7 +24,8 @@ class TestVectorSimulator( object ):
 
   def run_test( self ):
 
-    self.model.elaborate()
+    # self.model.elaborate()
+    self.model.apply( SimpleSim )
 
     print()
     for test_vector in self.test_vectors:
@@ -37,6 +39,7 @@ class TestVectorSimulator( object ):
 
       # Verify outputs
       self.verify_outputs_func( self.model, test_vector )
+      
 
 #-------------------------------------------------------------------------
 # run_test_queue
