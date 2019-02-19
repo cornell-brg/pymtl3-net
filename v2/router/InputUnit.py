@@ -1,11 +1,19 @@
+#=========================================================================
+# InputUnit.py
+#=========================================================================
+# Input unit of the router. Just one normal queue, no virtual channels.
+#
+# Author: Cheng Tan, Yanghui Ou
+#   Date: Feb 18, 2019
+
 from pymtl import *
 from pclib.ifcs import InValRdyBundle, OutValRdyBundle
 from pclib.rtl  import NormalQueue
 
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+
 class InputUnit( Model ):
-  """
-  Input unit of the router. Just one normal queue, no virtual channels.
-  """
   def __init__( s, num_entries, msg_type ):
     
     # Interfacel

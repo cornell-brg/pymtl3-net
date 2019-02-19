@@ -1,10 +1,15 @@
+#=========================================================================
+# RouteUnitDOR.py
+#=========================================================================
+# A route unit implementing dimension-order routing.
+#
+# Author : Yanghui Ou, Cheng Tan
+#   Date : Feb 14, 2019
+
 from pymtl import *
 from pclib.ifcs import InValRdyBundle, OutValRdyBundle
 
 class RouteUnitDOR( Model ):
-  """
-  A route unit implementing dimension-order routing.
-  """
   def __init__( s, msg_type, dimension ):
 
     # Constants 

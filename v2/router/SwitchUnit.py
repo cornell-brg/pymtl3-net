@@ -1,12 +1,17 @@
+#=========================================================================
+# SwitchUnit.py
+#=========================================================================
+# A simple switch unit that supports single-phit packet.
+#
+# Author : Yanghui Ou, Cheng Tan
+#   Date : Feb 18, 2019
+
 from pymtl import *
 from pclib.ifcs import InValRdyBundle, OutValRdyBundle
 from pclib.rtl import Mux, RoundRobinArbiterEn
 from pc.Encoder import Encoder
 
 class SwitchUnit( Model ):
-  """
-  A simple switch unit that supports single-phit packet.
-  """
   def __init__( s, msg_type, num_inports ):
 
     # Constants

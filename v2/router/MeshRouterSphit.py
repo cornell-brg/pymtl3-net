@@ -1,3 +1,11 @@
+#=========================================================================
+# MeshRouterSphit.py
+#=========================================================================
+# A simple mesh-based router that supports single-phit packet.
+#
+# Author : Yanghui Ou, Cheng Tan
+#   Date : Feb 18, 2019
+
 from pymtl import *
 from pclib.ifcs import InValRdyBundle, OutValRdyBundle
 from ifcs.SinglePhitPacket import SinglePhitPacket

@@ -1,11 +1,16 @@
+#=========================================================================
+# OutputUnit.py
+#=========================================================================
+# An Output unit of the router. Just one normal queue, no credit.
+#
+# Author : Yanghui Ou, Cheng Tan
+#   Date : Feb 18, 2019
+
 from pymtl import *
 from pclib.ifcs import InValRdyBundle, OutValRdyBundle
 from pclib.rtl  import NormalQueue
 
 class OutputUnit( Model ):
-  """
-  Output unit of the router. Just one normal queue, no credit.
-  """
   def __init__( s, num_entries, msg_type ):
     
     # Interfacel
