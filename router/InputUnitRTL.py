@@ -27,4 +27,4 @@ class InputUnitRTL( RTLComponent ):
   
   # TODO: implement line trace.
   def line_trace( s ):
-    return ""
+    return "{} || {}".format( s.in_, s.out )
