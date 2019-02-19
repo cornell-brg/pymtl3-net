@@ -8,10 +8,9 @@
 
 from pymtl import *
 from pclib.ifcs import InValRdyIfc, OutValRdyIfc 
-from pclib.rtl  import NormalQueue1RTL
+from pclib.rtl  import NormalQueueRTL
 
 class InputUnitRTL( RTLComponent ):
-  # TODO: use multi-entry queue!
   def construct( s, num_entries, pkt_type ):
 
     # Interface
@@ -19,7 +18,7 @@ class InputUnitRTL( RTLComponent ):
     s.out = OutValRdyIfc( pkt_type )
 
     # Component
-    s.queue = NormalQueue1RTL( pkt_type )
+    s.queue = NormalQueueRTL( num_entries, pkt_type )
 
     # Connections
     s.connect( s.in_, s.queue.enq )
