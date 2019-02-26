@@ -3,6 +3,7 @@
 #=========================================================================
 # An input unit for the router that supports single-phit packet.
 # Note that the interface is send/recv-based.
+# Enabling parameter passing.
 #
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Feb 23, 2019
@@ -14,7 +15,7 @@ from pclib.rtl  import NormalQueueRTL
 from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 
 class InputUnitRTL( RTLComponent ):
-  def construct( s, num_entries, pkt_type ):
+  def construct( s, pkt_type, num_entries=2 ):
 
     # Interface
 #    s.in_      =  InValRdyIfc( pkt_type )
@@ -23,7 +24,9 @@ class InputUnitRTL( RTLComponent ):
     s.send = OutEnRdyIfc( pkt_type )
 
     # Component
-    s.queue = NormalQueueRTL( num_entries, pkt_type )
+    s.queue_entries = num_entries
+#    s.queue_size = 9
+    s.queue = NormalQueueRTL( s.queue_entries, pkt_type )
 
     # Connections
 #    s.connect( s.in_, s.queue.enq )
@@ -40,4 +43,4 @@ class InputUnitRTL( RTLComponent ):
   
   # TODO: implement line trace.
   def line_trace( s ):
-    return "{} || {}".format( s.recv.msg, s.send.msg )
+    return "{} || {} entry({})".format( s.recv.msg, s.send.msg, s.queue_entries )

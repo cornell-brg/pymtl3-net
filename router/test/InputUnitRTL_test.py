@@ -26,14 +26,14 @@ from ocn_pclib.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
 
 class TestHarness( RTLComponent ):
 
-  def construct( s, num_msgs, MsgType, src_msgs, sink_msgs, stall_prob,
+  def construct( s, MsgType, src_msgs, sink_msgs, stall_prob,
                  src_delay, sink_delay ):
 
     s.src      = TestSourceValRdy( MsgType, src_msgs  )
     s.vr_to_er = ValRdy2EnRdy    ( MsgType            )
     s.er_to_vr = EnRdy2ValRdy    ( MsgType            )
     s.sink     = TestSinkValRdy  ( MsgType, sink_msgs )
-    s.input_unit   = InputUnitRTL    ( num_msgs, MsgType  )
+    s.input_unit   = InputUnitRTL    ( MsgType  )
 
     # Connections
     s.connect( s.src.out,      s.vr_to_er.in_ )
@@ -54,9 +54,14 @@ class TestHarness( RTLComponent ):
 
 def run_rtl_sim( test_harness, max_cycles=100 ):
 
+  # Set parameters
+
+  test_harness.set_parameter("top.input_unit.elaborate.num_entries", 4)
+
   # Create a simulator
 
   test_harness.apply( SimpleSim )
+
 
   # Run simulation
 
@@ -94,8 +99,8 @@ def basic_msgs():
 #-------------------------------------------------------------------------
 
 test_case_table = mk_test_case_table([
-  ( "         num_msgs   msg_func    stall src_delay sink_delay" ),
-  [ "basic",      4,      basic_msgs, 0.0,  0,        0           ]
+  ( "          msg_func    stall src_delay sink_delay" ),
+  [ "basic",  basic_msgs,   0.0,     0,        0        ]
 ])
 
 #-------------------------------------------------------------------------
@@ -121,7 +126,7 @@ def test( test_params ):
   
   print ""
   run_rtl_sim( 
-    TestHarness( test_params.num_msgs, Bits16, src_msgs, sink_msgs, test_params.stall, 
+    TestHarness( Bits16, src_msgs, sink_msgs, test_params.stall, 
                  test_params.src_delay, test_params.sink_delay )
   )
 
