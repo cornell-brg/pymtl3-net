@@ -15,7 +15,7 @@ from pclib.rtl  import NormalQueueRTL
 from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 
 class InputUnitRTL( RTLComponent ):
-  def construct( s, pkt_type, num_entries=2 ):
+  def construct( s, pkt_type, QueueType ):
 
     # Interface
 #    s.in_      =  InValRdyIfc( pkt_type )
@@ -24,10 +24,10 @@ class InputUnitRTL( RTLComponent ):
     s.send = OutEnRdyIfc( pkt_type )
 
     # Component
-    s.queue_entries = num_entries
+#    s.queue_entries = num_entries
 #    s.queue_size = 9
-    s.queue = NormalQueueRTL( s.queue_entries, pkt_type )
-
+    s.queue = QueueType( Type=pkt_type )
+    
     # Connections
 #    s.connect( s.in_, s.queue.enq )
 #    s.connect( s.out, s.queue.deq )
@@ -43,4 +43,4 @@ class InputUnitRTL( RTLComponent ):
   
   # TODO: implement line trace.
   def line_trace( s ):
-    return "{} || {} entry({})".format( s.recv.msg, s.send.msg, s.queue_entries )
+    return "{}({}){}".format( s.recv.msg, s.queue.ctrl.num_entries, s.send.msg )

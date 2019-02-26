@@ -20,6 +20,9 @@ from pymtl.passes.PassGroups import SimpleSim
 from router.InputUnitRTL import InputUnitRTL
 from ocn_pclib.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
 
+from pclib.rtl  import NormalQueueRTL
+from pclib.rtl  import BypassQueue1RTL
+
 #-------------------------------------------------------------------------
 # TestHarness
 #-------------------------------------------------------------------------
@@ -56,7 +59,8 @@ def run_rtl_sim( test_harness, max_cycles=100 ):
 
   # Set parameters
 
-  test_harness.set_parameter("top.input_unit.elaborate.num_entries", 4)
+  test_harness.set_parameter("top.input_unit.queue.elaborate.num_entries", 4)
+  test_harness.set_parameter("top.input_unit.elaborate.QueueType", NormalQueueRTL)
 
   # Create a simulator
 
