@@ -1,58 +1,143 @@
-import tempfile
-from pymtl                import *
-from pclib.test           import TestVectorSimulator, TestSource, TestSink
+#=========================================================================
+#OutputUnitRTLSourceSink_test.py
+#=========================================================================
+# Test for OutputUnitRTL using Source and Sink
+#
+# Author : Cheng Tan, Yanghui Ou
+#   Date : Feb 28, 2019
+
+import pytest
+
+from pymtl import *
+from pclib.rtl.valrdy_queues import PipeQueue1RTL, BypassQueue1RTL
+from pclib.rtl.TestSource import TestSourceValRdy
+from pclib.rtl.TestSink   import TestSinkValRdy
+from pclib.ifcs import InValRdyIfc, OutValRdyIfc 
+from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pclib.test import mk_test_case_table
+from pymtl.passes.PassGroups import SimpleSim
+
 from router.SwitchUnitRTL import SwitchUnitRTL
+from ocn_pclib.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
 
-def run_test( model, test_vectors ):
- 
-  model.elaborate()
+from pclib.rtl  import NormalQueueRTL
+from pclib.rtl  import BypassQueue1RTL
 
-  def tv_in( model, test_vector ):
-    model.out.rdy.value = test_vector[2]
-    for i in range( model.num_inports ):
-      model.in_[i].val.value = test_vector[0][i]
-      model.in_[i].msg.value = test_vector[1][i]
+#-------------------------------------------------------------------------
+# TestHarness
+#-------------------------------------------------------------------------
 
-  def tv_out( model, test_vector ):
-    if test_vector[4] != '?':
-      assert model.out.val == test_vector[3]
-      if model.out.val == 1:      
-        assert model.out.msg == test_vector[4]
+class TestHarness( RTLComponent ):
+
+  def construct( s, MsgType, src_msgs, sink_msgs, stall_prob,
+                 src_delay, sink_delay ):
+
+    s.src      = TestSourceValRdy( MsgType, src_msgs  )
+    s.vr_to_er = ValRdy2EnRdy    ( MsgType            )
+    s.er_to_vr = EnRdy2ValRdy    ( MsgType            )
+    s.sink     = TestSinkValRdy  ( MsgType, sink_msgs )
+    s.switch_unit   = SwitchUnitRTL    ( MsgType )
+
+    # Connections
+    s.connect( s.src.out,      s.vr_to_er.in_ )
+    s.connect( s.vr_to_er.out, s.switch_unit.recv  )
+    s.connect( s.switch_unit.send,  s.er_to_vr.in_ )
+    s.connect( s.er_to_vr.out, s.sink.in_     )
   
-  sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
-  sim.run_test()
+  def done( s ):
+    return s.src.done() and s.sink.done()
 
-def test_SwitchUnit( dump_vcd, test_verilog ):
-  model = SwitchUnitRTL( 16, 5 )
+  def line_trace( s ):
+    return s.src.line_trace() + "-> | " + s.switch_unit.line_trace() + \
+                               " | -> " + s.sink.line_trace()
 
-  run_test( model, [
-    # val            msg      out_rdy    out_val    out_msg 
-   [[0,0,0,0,0], [5,6,7,8,9],    0,         0,         '?'   ],
-   [[0,1,0,0,0], [1,2,3,4,5],    1,         1,          2    ],
-   [[0,1,1,1,0], [9,8,7,6,5],    0,         1,          7    ],
-   [[0,1,1,1,0], [9,8,7,6,5],    1,         1,          7    ],
-   [[0,1,1,1,0], [5,4,3,2,1],    1,         1,          2    ],
-   [[1,0,0,0,1], [3,4,5,6,7],    1,         1,          7    ],
-   [[0,1,1,0,1], [3,4,5,6,7],    1,         1,          4    ],
-  ])
+#-------------------------------------------------------------------------
+# run_rtl_sim
+#-------------------------------------------------------------------------
 
-#  run_test( model, [
-#    # val_index   msg      out_rdy    out_val    out_msg 
-#   [     1,        7,         0,         1,         '?'   ],
-#   [     4,        9,         0,         1,          9    ],
-#   [     2,        5,         0,         1,          5    ],
-#   [     3,        2,         1,         1,          2    ],
-#   [     0,        4,         1,         1,          4    ],
-#  ])
+def run_rtl_sim( test_harness, max_cycles=100 ):
+
+  # Set parameters
+
+  test_harness.set_parameter("top.switch_unit.elaborate.num_inports", 4)
+
+  # Create a simulator
+
+  test_harness.apply( SimpleSim )
 
 
+  # Run simulation
 
+  ncycles = 0
+  print ""
+  print "{}:{}".format( ncycles, test_harness.line_trace() )
+  while not test_harness.done() and ncycles < max_cycles:
+    test_harness.tick()
+    ncycles += 1
+    print "{}:{}".format( ncycles, test_harness.line_trace() )
 
+  # Check timeout
 
+  assert ncycles < max_cycles
 
+  test_harness.tick()
+  test_harness.tick()
+  test_harness.tick()
 
+#-------------------------------------------------------------------------
+# directed tests
+#-------------------------------------------------------------------------
 
+def basic_msgs():
+  return [
+    # src, sink
+    [ Bits16( 0  ),  Bits16( 0  )  ],
+    [ Bits16( 4  ),  Bits16( 4  )  ],
+    [ Bits16( 9  ),  Bits16( 9  )  ],
+    [ Bits16( 11 ),  Bits16( 11 )  ],
+  ]
 
+#-------------------------------------------------------------------------
+# directed tests
+#-------------------------------------------------------------------------
 
+test_case_table = mk_test_case_table([
+  ( " val            msg      out_rdy    out_val    out_msg"),
+  [[0,0,0,0,0], [5,6,7,8,9],    0,         0,         '?'   ],
+  [[0,1,0,0,0], [1,2,3,4,5],    1,         1,          2    ],
+  [[0,1,1,1,0], [9,8,7,6,5],    0,         1,          7    ],
+  [[0,1,1,1,0], [9,8,7,6,5],    1,         1,          7    ],
+  [[0,1,1,1,0], [5,4,3,2,1],    1,         1,          2    ],
+  [[1,0,0,0,1], [3,4,5,6,7],    1,         1,          7    ],
+  [[0,1,1,0,1], [3,4,5,6,7],    1,         1,          4    ],
+ ])
+#  ( "          msg_func    stall src_delay sink_delay" ),
+
+#-------------------------------------------------------------------------
+# mk_test_msgs
+#-------------------------------------------------------------------------
+
+def mk_test_msgs( msg_list ):
+
+  src_msgs  = []
+  sink_msgs = []
+
+  for m in msg_list:
+    src_msgs.append ( m[0] )
+    sink_msgs.append( m[1] )
+
+  return ( src_msgs, sink_msgs )
+
+@pytest.mark.parametrize( **test_case_table )
+def test( test_params ):
+ 
+  msgs = test_params.msg_func()
+  src_msgs, sink_msgs = mk_test_msgs( msgs )
+  
+  print ""
+  run_rtl_sim( 
+    TestHarness( Bits16, src_msgs, sink_msgs, test_params.stall, 
+                 test_params.src_delay, test_params.sink_delay )
+  )
 
 
