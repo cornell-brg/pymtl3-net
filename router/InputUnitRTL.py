@@ -9,9 +9,6 @@
 #   Date : Feb 23, 2019
 
 from pymtl import *
-from pclib.ifcs import InValRdyIfc, OutValRdyIfc 
-from pclib.rtl  import NormalQueueRTL
-
 from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 
 class InputUnitRTL( RTLComponent ):
@@ -25,7 +22,6 @@ class InputUnitRTL( RTLComponent ):
 
     # Component
 #    s.queue_entries = num_entries
-#    s.queue_size = 9
     s.queue = QueueType( Type=pkt_type )
     
     # Connections
@@ -36,7 +32,7 @@ class InputUnitRTL( RTLComponent ):
     s.connect( s.recv.msg, s.queue.enq.msg )
 
     @s.update
-    def store():
+    def proceed():
       s.send.msg  = s.queue.deq.msg
       s.send.en   = s.send.rdy and s.queue.deq.val
       s.queue.deq.rdy = s.send.rdy
