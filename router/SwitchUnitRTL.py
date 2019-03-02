@@ -10,8 +10,9 @@
 
 from pymtl import *
 from pclib.ifcs import InValRdyIfc, OutValRdyIfc
-from pclib.rtl import Mux, RoundRobinArbiterEn
-from pc.Encoder import Encoder
+from pclib.rtl import Mux
+from Arbiter import RoundRobinArbiterEn
+from Encoder import Encoder
 from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 
 class SwitchUnitRTL( RTLComponent ):
@@ -25,7 +26,7 @@ class SwitchUnitRTL( RTLComponent ):
 #    s.in_ =  InValRdyIfc[ s.num_inports ]( msg_type )
 #    s.out = OutValRdyIfc ( msg_type )
 
-    s.recv = InEnRdyIfc[ s.num_inports ]( msg_type )
+    s.recv = [ InEnRdyIfc( msg_type ) for _ in range( s.num_inports ) ]
     s.send = OutEnRdyIfc ( msg_type )
 
     # Components
@@ -52,7 +53,7 @@ class SwitchUnitRTL( RTLComponent ):
 
     @s.update
     def enableArbiter():
-      s.send.en = s.arbiter.grants > 0
+      s.send.en = s.arbiter.grants > 0 and s.send.rdy
       s.arbiter.en = (s.arbiter.grants > 0) and s.send.rdy
   
   # TODO: implement line trace
