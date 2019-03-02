@@ -54,8 +54,13 @@ class SwitchUnitRTL( RTLComponent ):
     @s.update
     def enableArbiter():
       s.send.en = s.arbiter.grants > 0 and s.send.rdy
-      s.arbiter.en = (s.arbiter.grants > 0) and s.send.rdy
+#      s.arbiter.en = (s.arbiter.grants > 0) and s.send.rdy
+      s.arbiter.en = 1
   
   # TODO: implement line trace
   def line_trace( s ):
-    return ""
+    recv_str = '[ '
+    for i in range( s.num_inports ):
+      recv_str = recv_str + str(s.recv[i].msg) + ', '
+    recv_str = recv_str + ']'
+    return "{} (s.send.en:{}; s.send.rdy:{}, s.arbiter.grants:{}, s.arbiter.reqs:{}, s.mux.in:{}, s.mux.sel:{}) {}".format( recv_str, s.send.en, s.send.rdy, s.arbiter.grants, s.arbiter.reqs, s.mux.in_, s.mux.sel, s.send.msg )
