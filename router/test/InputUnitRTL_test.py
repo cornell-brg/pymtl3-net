@@ -1,5 +1,5 @@
 #=========================================================================
-#InputUnitRTLSourceSink_test.py
+# InputUnitRTLSourceSink_test.py
 #=========================================================================
 # Test for InputUnitRTL using Source and Sink
 #

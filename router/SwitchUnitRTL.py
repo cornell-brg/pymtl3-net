@@ -53,7 +53,7 @@ class SwitchUnitRTL( RTLComponent ):
 
     @s.update
     def enableArbiter():
-      s.send.en = s.arbiter.grants > 0 and s.send.rdy
+      s.arbiter.en = (s.arbiter.grants > 0) and s.send.rdy
 #      s.arbiter.en = (s.arbiter.grants > 0) and s.send.rdy
       s.arbiter.en = 1
   

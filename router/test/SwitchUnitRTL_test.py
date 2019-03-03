@@ -1,5 +1,5 @@
 #=========================================================================
-#SwitchUnitRTL_test.py
+# SwitchUnitRTL_test.py
 #=========================================================================
 # Test for SwitchUnitRTL
 #
@@ -17,6 +17,7 @@ def run_test( model, test_vectors ):
 
   def tv_in( model, test_vector ):
     model.send.rdy = test_vector[2]
+#    model.send.en  = test_vector[3]
     for i in range( model.num_inports ):
       model.recv[i].en = test_vector[0][i]
       model.recv[i].msg = test_vector[1][i]
