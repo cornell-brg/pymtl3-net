@@ -1,19 +1,19 @@
 #=========================================================================
-# RouteUnitDORRTL_test.py
+# RouteUnitRTL_test.py
 #=========================================================================
-# Test for RouteUnitDORRTL
+# Test for RouteUnitRTL
 #
 # Author : Cheng Tan, Yanghui Ou
-#   Date : Mar 2, 2019
+#   Date : Mar 3, 2019
 
 import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
-from router.RouteUnitDORRTL  import RouteUnitDORRTL
+from router.RouteUnitRTL  import RouteUnitRTL
 from router.Packet import Packet
 
 def run_test( model, test_vectors ):
-
+ 
   def tv_in( model, test_vector ):
     pkt = mk_pkt( test_vector[0], test_vector[1], test_vector[2], test_vector[3],
             test_vector[4], test_vector[5])
@@ -35,10 +35,12 @@ def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
   return pkt
 
 def test_RouteUnit( dump_vcd, test_verilog ):
-  dimension = 'y'
+  routing = 'DOR_Y'
+#  routing = 'WFR'
+#  routing = 'NLR'
   pos_x = 1
   pos_y = 1
-  model = RouteUnitDORRTL( dimension, 5, pos_x, pos_y)
+  model = RouteUnitRTL( routing, 5, pos_x, pos_y)
 
   run_test( model, [
     #  src_x  src_y  dst_x  dst_y  opaque  payload  
@@ -46,4 +48,5 @@ def test_RouteUnit( dump_vcd, test_verilog ):
    [     0,     0,     2,     2,     1,    0xdeadcafe  ],
    [     1,     0,     2,     1,     1,    0xdead0afe  ],
    [     0,     0,     1,     2,     1,    0x00000afe  ],
+   [     2,     2,     0,     0,     1,    0x00000afe  ],
   ])

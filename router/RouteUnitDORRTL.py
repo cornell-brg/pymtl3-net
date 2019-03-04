@@ -1,7 +1,7 @@
 #=========================================================================
 # RouteUnitDORRTL.py
 #=========================================================================
-# A route unit with configurable routing strategies.
+# A route unit with DOR routing strategies.
 #
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 2, 2019
@@ -47,7 +47,7 @@ class RouteUnitDORRTL( RTLComponent ):
     s.out_rdys = Wire( mk_bits( s.num_outports ) )
 
     s.pkt     = Wire( Packet )
-    s.out_dir = 'N'
+    s.out_dir = 0
 
     # Connections
     s.connect( s.pkt,         s.recv.msg    )
@@ -58,43 +58,43 @@ class RouteUnitDORRTL( RTLComponent ):
     # Routing logic
     @s.update
     def routingLogic():
-      if dimension.lower() == 'x':
+      if dimension == 'x':
         for i in range( s.num_outports ):
           s.send[i].en = 0
         if s.pos_x == s.pkt.dst_x and s.pos_y == s.pkt.dst_y:
           s.send[SELF].en  = s.recv.en
-          s.out_dir = 'C'
+          s.out_dir = SELF
         elif s.pkt.dst_x < s.pos_x:
           s.send[NORTH].en = s.recv.en
-          s.out_dir = 'N'
+          s.out_dir = NORTH
         elif s.pkt.dst_x > s.pos_x:
           s.send[SOUTH].en = s.recv.en
-          s.out_dir = 'S'
+          s.out_dir = SOUTH
         elif s.pkt.dst_y < s.pos_y:
           s.send[WEST].en  = s.recv.en
-          s.out_dir = 'W'
+          s.out_dir = WEST
         else:
           s.send[EAST].en  = s.recv.en
-          s.out_dir = 'E'
+          s.out_dir = EAST
 
-      elif dimension.lower() == 'y':
+      elif dimension == 'y':
         for i in range( s.num_outports ):
           s.send[i].en = 0
         if s.pos_x == s.pkt.dst_x and s.pos_y == s.pkt.dst_y:
           s.send[SELF].en  = s.recv.en
-          s.out_dir = 'C'
+          s.out_dir = SELF
         elif s.pkt.dst_y < s.pos_y:
           s.send[WEST].en = s.recv.en
-          s.out_dir = 'W'
+          s.out_dir = WEST
         elif s.pkt.dst_y > s.pos_y:
           s.send[EAST].en = s.recv.en
-          s.out_dir = 'E'
+          s.out_dir = EAST
         elif s.pkt.dst_x < s.pos_x:
           s.send[NORTH].en = s.recv.en
-          s.out_dir = 'N'
+          s.out_dir = NORTH
         else:
           s.send[SOUTH].en = s.recv.en
-          s.out_dir = 'S'
+          s.out_dir = SOUTH
 
       else:
         raise AssertionError( "Invalid input for dimension: %s " % dimension )
