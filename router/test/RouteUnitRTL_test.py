@@ -10,7 +10,11 @@ import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
 from router.RouteUnitRTL  import RouteUnitRTL
-from router.Packet import Packet
+from router.Packet import Packet, mk_pkt
+
+from router.routing.RoutingDOR import RoutingDOR
+from router.routing.RoutingWFR import RoutingWFR
+from router.routing.RoutingNLR import RoutingNLR
 
 def run_test( model, test_vectors ):
  
@@ -29,18 +33,22 @@ def run_test( model, test_vectors ):
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
 
-def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
-  pkt = Packet( src_x, src_y, dst_x, dst_y, opaque, payload )
-  pkt.set( src_x, src_y, dst_x, dst_y, opaque, payload )
-  return pkt
-
 def test_RouteUnit( dump_vcd, test_verilog ):
-  routing = 'DOR_Y'
-#  routing = 'WFR'
-#  routing = 'NLR'
+
+  routing = RoutingDOR
+#  routing = RoutingWFR
+#  routing = RoutingNLR
+
   pos_x = 1
   pos_y = 1
-  model = RouteUnitRTL( routing, 5, pos_x, pos_y)
+  num_outports = 1
+#  model = RouteUnitRTL( routing, num_outports, pos_x, pos_y )
+  model = RouteUnitRTL( routing )
+
+  model.set_parameter("top.routing_logic.elaborate.dimension", 'y')
+  model.set_parameter("top.elaborate.num_outports", 5)
+  model.set_parameter("top.elaborate.pos_x", 1)
+  model.set_parameter("top.elaborate.pos_y", 1)
 
   run_test( model, [
     #  src_x  src_y  dst_x  dst_y  opaque  payload  

@@ -8,18 +8,22 @@
 
 from pymtl import *
 
-class Packet( RTLComponent ):
-  src_x   = 5
-  src_y   = 5
-  dst_x   = 5
-  dst_y   = 5
-  opaque  = 5
-  payload = 5
+class Packet( object ):
+  def __init__(s):
+    
+    s.src_x   = Bits4
+    s.src_y   = Bits4 
+    s.dst_x   = Bits4 
+    s.dst_y   = Bits4 
+    s.opaque  = Bits4 
+    s.payload = Bits16
 
-  def set( self, src_x, src_y, dst_x, dst_y, opaque, payload ):
-    self.src_x   = src_x
-    self.src_y   = src_y
-    self.dst_x   = dst_x
-    self.dst_y   = dst_y
-    self.opaque  = opaque
-    self.payload = payload
+def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
+  pkt = Packet()
+  pkt.src_x   = src_x
+  pkt.src_y   = src_y
+  pkt.dst_x   = dst_x
+  pkt.dst_y   = dst_y
+  pkt.opaque  = opaque
+  pkt.payload = payload
+  return pkt
