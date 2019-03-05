@@ -39,22 +39,22 @@ def run_test( model, test_vectors ):
 def test_RouteUnit( dump_vcd, test_verilog ):
 
   # pass the arguments/parameters and configure the module here
-  print sys.argv[2:]
-  configs = configure_network(sys.argv[2:])
+#  print sys.argv[2:]
+#  configs = configure_network(sys.argv[2:])
+#
+#  if configs.routing_strategy == 'DOR':
+#    Routing = RoutingDOR
+#  elif configs.routing_strategy == 'WFR':
+#    Routing = RoutingWFR
+#  elif configs.routing_strategy == 'NLR':
+#    Routing = RoutingNLR
+#  else:
+#    print 'Please specific a valid Routing strategy!'
 
-  if configs.routing_strategy == 'DOR':
-    routing = RoutingDOR
-  elif configs.routing_strategy == 'WFR':
-    routing = RoutingWFR
-  elif configs.routing_strategy == 'NLR':
-    routing = RoutingNLR
-  else:
-    print 'Please specific a valid routing strategy!'
-    routing = RoutingDOR
+  Routing = RoutingDOR
+  model = RouteUnitRTL( Routing )
 
-  model = RouteUnitRTL( routing )
-
-#  model.set_parameter("top.routing_logic.elaborate.dimension", 'y')
+  model.set_parameter("top.routing_logic.elaborate.dimension", 'y')
   model.set_parameter("top.elaborate.num_outports", 5)
   model.set_parameter("top.elaborate.pos_x", 1)
   model.set_parameter("top.elaborate.pos_y", 1)

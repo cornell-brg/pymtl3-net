@@ -12,34 +12,29 @@ from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 from Packet     import Packet
 
 class RouteUnitRTL( RTLComponent ):
-  def construct( s, routing_logic, num_outports=5, pos_x=0, pos_y=0):
+  def construct( s, RoutingLogic, num_outports=5, pos_x=0, pos_y=0):
 
     # Constants 
     s.num_outports = num_outports
 
     s.x_addr_nbits = 4
     s.y_addr_nbits = 4
-    NORTH = 0
-    SOUTH = 1
-    WEST  = 2
-    EAST  = 3
-    SELF  = 4
 
     # Interface
     s.recv  = InEnRdyIfc( Packet )
     s.send  = [ OutEnRdyIfc (Packet) for _ in range ( s.num_outports ) ]
+    # set position as a type? and instantiate as a type...
     s.pos_x = pos_x
     s.pos_y = pos_y
 
     # Componets
     # routing_logic passed in as a type
-    s.routing_logic = routing_logic(Packet)
+    s.routing_logic = RoutingLogic(Packet)
     s.src_x    = Wire( Bits4 )
     s.src_y    = Wire( Bits4 )
     s.out_rdys = Wire( mk_bits( s.num_outports ) )
     s.pkt      = Wire( Packet )
     s.out_dir  = Wire( Bits3  ) 
-
 
     # Connections
     s.connect( s.pkt,           s.recv.msg    )
