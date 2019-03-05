@@ -16,6 +16,9 @@ from router.routing.RoutingDOR import RoutingDOR
 from router.routing.RoutingWFR import RoutingWFR
 from router.routing.RoutingNLR import RoutingNLR
 
+import sys
+from router.Configs import configure_network
+
 def run_test( model, test_vectors ):
  
   def tv_in( model, test_vector ):
@@ -35,17 +38,23 @@ def run_test( model, test_vectors ):
 
 def test_RouteUnit( dump_vcd, test_verilog ):
 
-  routing = RoutingDOR
-#  routing = RoutingWFR
-#  routing = RoutingNLR
+  # pass the arguments/parameters and configure the module here
+  print sys.argv[2:]
+  configs = configure_network(sys.argv[2:])
 
-  pos_x = 1
-  pos_y = 1
-  num_outports = 1
-#  model = RouteUnitRTL( routing, num_outports, pos_x, pos_y )
+  if configs.routing_strategy == 'DOR':
+    routing = RoutingDOR
+  elif configs.routing_strategy == 'WFR':
+    routing = RoutingWFR
+  elif configs.routing_strategy == 'NLR':
+    routing = RoutingNLR
+  else:
+    print 'Please specific a valid routing strategy!'
+    routing = RoutingDOR
+
   model = RouteUnitRTL( routing )
 
-  model.set_parameter("top.routing_logic.elaborate.dimension", 'y')
+#  model.set_parameter("top.routing_logic.elaborate.dimension", 'y')
   model.set_parameter("top.elaborate.num_outports", 5)
   model.set_parameter("top.elaborate.pos_x", 1)
   model.set_parameter("top.elaborate.pos_y", 1)
