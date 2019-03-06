@@ -9,7 +9,7 @@
 from pymtl import *
 from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 
-from Packet import Packet
+from ocn_pclib.Packet import Packet
 
 class RouteUnitDORRTL( RTLComponent ):
 #  def __init__( s, msg_type, dimension ):

@@ -9,8 +9,8 @@
 import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
+from ocn_pclib.Packet import Packet, mk_pkt
 from router.RouteUnitDORRTL  import RouteUnitDORRTL
-from router.Packet import Packet
 
 def run_test( model, test_vectors ):
 

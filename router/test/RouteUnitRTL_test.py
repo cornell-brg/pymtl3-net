@@ -9,15 +9,16 @@
 import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
+from ocn_pclib.Packet import Packet, mk_pkt
 from router.RouteUnitRTL  import RouteUnitRTL
-from router.Packet import Packet, mk_pkt
 
 from router.routing.RoutingDORX import RoutingDORX
 from router.routing.RoutingDORY import RoutingDORY
 from router.routing.RoutingWFR  import RoutingWFR
 from router.routing.RoutingNLR  import RoutingNLR
 
-import sys
+from ocn_pclib.Position import *
+
 from router.Configs import configure_network
 
 def run_test( model, test_vectors ):
@@ -45,6 +46,8 @@ def run_test( model, test_vectors ):
 def test_RouteUnit( dump_vcd, test_verilog ):
 
   configs = configure_network()
+
+  pos = MeshPosition( 2, 1, 1)
 
   if configs.routing_strategy == 'DORX':
     Routing = RoutingDORX

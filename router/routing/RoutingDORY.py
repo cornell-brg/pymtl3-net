@@ -7,7 +7,7 @@
 #   Date : Mar 3, 2019
 
 from pymtl  import *
-from router.Packet import Packet
+from ocn_pclib.Packet import Packet
 
 class RoutingDORY( RTLComponent ):
   def construct( s, PktType, addr_wid=Bits4, dimension='x' ):
