@@ -12,9 +12,10 @@ from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
 from router.RouteUnitRTL  import RouteUnitRTL
 from router.Packet import Packet, mk_pkt
 
-from router.routing.RoutingDOR import RoutingDOR
-from router.routing.RoutingWFR import RoutingWFR
-from router.routing.RoutingNLR import RoutingNLR
+from router.routing.RoutingDORX import RoutingDORX
+from router.routing.RoutingDORY import RoutingDORY
+from router.routing.RoutingWFR  import RoutingWFR
+from router.routing.RoutingNLR  import RoutingNLR
 
 import sys
 from router.Configs import configure_network
@@ -22,6 +23,10 @@ from router.Configs import configure_network
 def run_test( model, test_vectors ):
  
   def tv_in( model, test_vector ):
+
+    model.pos_x = 1
+    model.pos_y = 1
+
     pkt = mk_pkt( test_vector[0], test_vector[1], test_vector[2], test_vector[3],
             test_vector[4], test_vector[5])
     model.recv.msg = pkt
@@ -35,29 +40,27 @@ def run_test( model, test_vectors ):
   
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
+  model.sim_reset()
 
 def test_RouteUnit( dump_vcd, test_verilog ):
 
-  # pass the arguments/parameters and configure the module here
-#  print sys.argv[2:]
-#  configs = configure_network(sys.argv[2:])
-#
-#  if configs.routing_strategy == 'DOR':
-#    Routing = RoutingDOR
-#  elif configs.routing_strategy == 'WFR':
-#    Routing = RoutingWFR
-#  elif configs.routing_strategy == 'NLR':
-#    Routing = RoutingNLR
-#  else:
-#    print 'Please specific a valid Routing strategy!'
+  configs = configure_network()
 
-  Routing = RoutingDOR
+  if configs.routing_strategy == 'DORX':
+    Routing = RoutingDORX
+  elif configs.routing_strategy == 'DORY':
+    Routing = RoutingDORY
+  elif configs.routing_strategy == 'WFR':
+    Routing = RoutingWFR
+  elif configs.routing_strategy == 'NLR':
+    Routing = RoutingNLR
+  else:
+    print 'Please specific a valid Routing strategy!'
+
+#  Routing = RoutingDORX
   model = RouteUnitRTL( Routing )
 
-  model.set_parameter("top.routing_logic.elaborate.dimension", 'y')
   model.set_parameter("top.elaborate.num_outports", 5)
-  model.set_parameter("top.elaborate.pos_x", 1)
-  model.set_parameter("top.elaborate.pos_y", 1)
 
   run_test( model, [
     #  src_x  src_y  dst_x  dst_y  opaque  payload  

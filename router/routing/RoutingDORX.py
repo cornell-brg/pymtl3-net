@@ -9,7 +9,7 @@
 from pymtl  import *
 from router.Packet import Packet
 
-class RoutingDOR( RTLComponent ):
+class RoutingDORX( RTLComponent ):
   def construct( s, PktType, addr_wid=Bits4, dimension='x' ):
     
     # Interface
@@ -28,33 +28,21 @@ class RoutingDOR( RTLComponent ):
     s.EAST  = 3
     s.SELF  = 4
 
+#    print s.pkt_in
     @s.update
     def process():
       s.out_dir = 0
-      if s.dimension == 'x':
-        if s.pos_x == s.pkt_in.dst_x and s.pos_y == s.pkt_in.dst_y:
-          s.out_dir = s.SELF
-        elif s.pkt_in.dst_x < s.pos_x:
-          s.out_dir = s.WEST
-        elif s.pkt_in.dst_x > s.pos_x:
-          s.out_dir = s.EAST
-        elif s.pkt_in.dst_y < s.pos_y:
-          s.out_dir = s.NORTH
-        else:
-          s.out_dir = s.SOUTH
+      if s.pos_x == s.pkt_in.dst_x and s.pos_y == s.pkt_in.dst_y:
+        s.out_dir = s.SELF
+      elif s.pkt_in.dst_x < s.pos_x:
+        s.out_dir = s.WEST
+      elif s.pkt_in.dst_x > s.pos_x:
+        s.out_dir = s.EAST
+      elif s.pkt_in.dst_y < s.pos_y:
+        s.out_dir = s.NORTH
+      else:
+        s.out_dir = s.SOUTH
     
-      elif s.dimension == 'y':
-        if s.pos_x == s.pkt_in.dst_x and s.pos_y == s.pkt_in.dst_y:
-          s.out_dir = s.SELF
-        elif s.pkt_in.dst_y < s.pos_y:
-          s.out_dir = s.NORTH
-        elif s.pkt_in.dst_y > s.pos_y:
-          s.out_dir = s.SOUTH
-        elif s.pkt_in.dst_x < s.pos_x:
-          s.out_dir = s.WEST
-        else:
-          s.out_dir = s.EAST
-  
 #      else:
 #        raise AssertionError( "Invalid input for dimension: %s " % dimension )
 

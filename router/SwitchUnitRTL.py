@@ -40,7 +40,7 @@ class SwitchUnitRTL( RTLComponent ):
     s.connect( s.arbiter.grants, s.encoder.in_ )
 #    s.connect( s.arbiter.grants, s.random_wire )
     s.connect( s.encoder.out,    s.mux.sel     )
-    s.connect( s.mux.out,        s.send.msg     )
+    s.connect( s.mux.out,        s.send.msg    )
 
     for i in range( num_inports ):
 #      s.connect( s.in_[i].msg, s.mux.in_[i]      )
@@ -63,6 +63,7 @@ class SwitchUnitRTL( RTLComponent ):
  
   # TODO: implement line trace
   def line_trace( s ):
+
     recv_str = '[ '
     for i in range( s.num_inports ):
       recv_str = recv_str + str(s.recv[i].msg) + ', '

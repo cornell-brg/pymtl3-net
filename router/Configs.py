@@ -10,7 +10,8 @@
 
 import argparse
 
-def configure_network(args):
+#def configure_network(args):
+def configure_network():
 
   parser = argparse.ArgumentParser()
 
@@ -38,12 +39,11 @@ def configure_network(args):
                     help="""number of virtual channels per virtual network
                           inside garnet network.""")
 
-  parser.add_argument("--routing-strategy", type=str, default='DOR',
-                    action="store", choices=['DOR', 'WFR', 'NLR'],
+  parser.add_argument("--routing-strategy", type=str, default='DORY',
+                    action="store", choices=['DORX', 'DORY', 'WFR', 'NLR'],
                     help="routing algorithm in network.")
-#
-  configs = parser.parse_args(args)
-  return configs
 
-if __name__ == "__main__": configure_network()
+#  configs = parser.parse_args(args)
+  configs = parser.parse_args( [] )
+  return configs
 

@@ -11,12 +11,12 @@ from pymtl import *
 class Packet( object ):
   def __init__(s):
     
-    s.src_x   = Bits4
-    s.src_y   = Bits4 
-    s.dst_x   = Bits4 
-    s.dst_y   = Bits4 
-    s.opaque  = Bits4 
-    s.payload = Bits16
+    s.src_x   = Bits4 ( 0 )
+    s.src_y   = Bits4 ( 0 ) 
+    s.dst_x   = Bits4 ( 0 ) 
+    s.dst_y   = Bits4 ( 0 ) 
+    s.opaque  = Bits4 ( 0 ) 
+    s.payload = Bits16( 0 )
 
 def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
   pkt = Packet()

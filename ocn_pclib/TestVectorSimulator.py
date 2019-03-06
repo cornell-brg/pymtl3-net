@@ -22,8 +22,9 @@ class TestVectorSimulator( object ):
 
   def run_test( self ):
 
-    # self.model.elaborate()
+    #  self.model.elaborate()
     self.model.apply( SimpleSim )
+    self.model.sim_reset()
 
     print()
     for test_vector in self.test_vectors:
