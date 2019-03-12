@@ -13,9 +13,10 @@ from ocn_pclib.Packet    import Packet
 from ocn_pclib.Position  import *
 
 class RouterRTL( RTLComponent ):
-  def construct( s, RoutingStrategyType, RouteUnitType, PositionType ):
+  def construct( s, router_id, RoutingStrategyType, RouteUnitType, PositionType ):
 
     s.num_outports = 5
+    s.router_id = router_id
 
     # Interface
     s.recv = InEnRdyIfc( Packet )

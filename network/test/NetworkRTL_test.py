@@ -21,16 +21,12 @@ def run_test( model, test_vectors ):
   def tv_in( model, test_vector ):
 
     pos = MeshPosition( 2, 1, 1)
-#    model.route_unit.pos = pos
     model.pos = pos
 
     pkt = mk_pkt( test_vector[0], test_vector[1], test_vector[2], test_vector[3],
             test_vector[4], test_vector[5])
     model.recv.msg = pkt
-#    model.recv.rdy = 1
-#    model.recv.en  = 1
     for i in range( model.num_outports ):
-#      model.route_unit.send[i].rdy = 1
       model.send[i].rdy = 1
 
   def tv_out( model, test_vector ):
@@ -42,9 +38,6 @@ def run_test( model, test_vectors ):
 
 def test_Network( dump_vcd, test_verilog ):
 
-#  routing_strategy = RoutingStrategyType( Packet )
-#  model = RouteUnitRTL( routing_logic, MeshPosition )
-#  model = MeshRouterRTL( routing_strategy, MeshRouteUnitRTL )
   model = NetworkRTL()
 
 #  model.set_parameter("top.elaborate.num_outports", 5)
