@@ -23,7 +23,8 @@ class RingPosition( object ):
     
     s.pos_id = pos_id
 
-def mk_pos( Topology ):
-  pos = MeshPosition()
+#def mk_pos( Topology ):
+def mk_pos( pos_id=0, pos_x=0, pos_y=0, size=0 ):
+  pos = MeshPosition( pos_id, pos_x, pos_y, size )
   return pos
 

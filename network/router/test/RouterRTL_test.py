@@ -1,39 +1,39 @@
 #=========================================================================
-# RouteUnitRTL_test.py
+# RouterRTL_test.py
 #=========================================================================
-# Test for RouteUnitRTL
+# Test for RouterRTL
 #
 # Author : Cheng Tan, Yanghui Ou
-#   Date : Mar 3, 2019
+#   Date : Mar 10, 2019
 
 import tempfile
-from pymtl                import *
-from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
-from ocn_pclib.Packet import Packet, mk_pkt
-from router.RouteUnitRTL  import RouteUnitRTL
+from pymtl                         import *
+from ocn_pclib.TestVectorSimulator import TestVectorSimulator
+from ocn_pclib.Packet              import Packet, mk_pkt
+from network.router.RouterRTL      import RouterRTL
+from network.router.RouteUnitRTL   import RouteUnitRTL
 
-from router.routing.RoutingDORX import RoutingDORX
-from router.routing.RoutingDORY import RoutingDORY
-from router.routing.RoutingWFR  import RoutingWFR
-from router.routing.RoutingNLR  import RoutingNLR
+from network.routing.RoutingDORX   import RoutingDORX
+from network.routing.RoutingDORY   import RoutingDORY
 
 from ocn_pclib.Position import *
 
-from router.Configs import configure_network
+from Configs import configure_network
 
 def run_test( model, test_vectors ):
  
   def tv_in( model, test_vector ):
 
-    model.pos_x = 1
-    model.pos_y = 1
+    pos = MeshPosition( 2, 1, 1)
+    model.pos = pos
 
     pkt = mk_pkt( test_vector[0], test_vector[1], test_vector[2], test_vector[3],
             test_vector[4], test_vector[5])
     model.recv.msg = pkt
-    model.recv.rdy = 1
-    model.recv.en  = 1
+#    model.recv.rdy = 1
+#    model.recv.en  = 1
     for i in range( model.num_outports ):
+#      model.route_unit.send[i].rdy = 1
       model.send[i].rdy = 1
 
   def tv_out( model, test_vector ):
@@ -43,27 +43,20 @@ def run_test( model, test_vectors ):
   sim.run_test()
   model.sim_reset()
 
-def test_RouteUnit( dump_vcd, test_verilog ):
+def test_Router( dump_vcd, test_verilog ):
 
   configs = configure_network()
 
-  pos = MeshPosition( 2, 1, 1)
-
   if configs.routing_strategy == 'DORX':
-    Routing = RoutingDORX
+    RoutingStrategyType = RoutingDORX
   elif configs.routing_strategy == 'DORY':
-    Routing = RoutingDORY
-  elif configs.routing_strategy == 'WFR':
-    Routing = RoutingWFR
-  elif configs.routing_strategy == 'NLR':
-    Routing = RoutingNLR
+    RoutingStrategyType = RoutingDORY
   else:
     print 'Please specific a valid Routing strategy!'
 
-#  Routing = RoutingDORX
-  model = RouteUnitRTL( Routing )
+  model = RouterRTL( RoutingStrategyType, RouteUnitRTL, MeshPosition )
 
-  model.set_parameter("top.elaborate.num_outports", 5)
+#  model.set_parameter("top.elaborate.num_outports", 5)
 
   run_test( model, [
     #  src_x  src_y  dst_x  dst_y  opaque  payload  
