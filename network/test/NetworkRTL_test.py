@@ -10,11 +10,7 @@ import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
 from ocn_pclib.Packet import Packet, mk_pkt
-from network.router.MeshRouterRTL import MeshRouterRTL
-from network.router.MeshRouteUnitRTL  import MeshRouteUnitRTL
-
-from network.routing.RoutingDORX  import RoutingDORX
-from network.routing.RoutingDORY  import RoutingDORY
+from network.NetworkRTL import NetworkRTL
 
 from ocn_pclib.Position import *
 
@@ -44,21 +40,12 @@ def run_test( model, test_vectors ):
   sim.run_test()
   model.sim_reset()
 
-def test_Router( dump_vcd, test_verilog ):
-
-  configs = configure_network()
-
-  if configs.routing_strategy == 'DORX':
-    RoutingStrategyType = RoutingDORX
-  elif configs.routing_strategy == 'DORY':
-    RoutingStrategyType = RoutingDORY
-  else:
-    print 'Please specific a valid Routing strategy!'
+def test_Network( dump_vcd, test_verilog ):
 
 #  routing_strategy = RoutingStrategyType( Packet )
 #  model = RouteUnitRTL( routing_logic, MeshPosition )
 #  model = MeshRouterRTL( routing_strategy, MeshRouteUnitRTL )
-  model = MeshRouterRTL( RoutingStrategyType, MeshRouteUnitRTL )
+  model = NetworkRTL()
 
 #  model.set_parameter("top.elaborate.num_outports", 5)
 

@@ -22,7 +22,7 @@ class RouterRTL( RTLComponent ):
     s.send = [ OutEnRdyIfc (Packet) for _ in range ( s.num_outports ) ]
 
     s.pos  = InVPort( PositionType )
-    s.output = Wire( Bits3 )
+    s.output = OutVPort( Bits3 )
 
     # Components
     s.routing_logic = RoutingStrategyType( Packet )
@@ -66,9 +66,6 @@ class RouterRTL( RTLComponent ):
 
   # TODO: Implement line trace.
   def line_trace( s ):
-    out_str = [ "" for _ in range( s.num_outports ) ]
-    for i in range (s.num_outports):
-      out_str[i] = "<{}>".format( s.route_unit.send[i].en )
-    return "pos:({},{}); src:({},{}); dst:({},{}); out_dir:({});".format( 
+    return "pos:({},{}); src:({},{}); dst:({},{}); out_dir:({})".format( 
 s.pos.pos_x, s.pos.pos_y, s.recv.msg.src_x, s.recv.msg.src_y, s.recv.msg.dst_x, 
-s.recv.msg.dst_y, s.output, out_str[0], out_str[1], out_str[2], out_str[3], out_str[4] )
+s.recv.msg.dst_y, s.output )
