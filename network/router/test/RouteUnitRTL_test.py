@@ -10,7 +10,7 @@ import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
 from ocn_pclib.Packet import Packet, mk_pkt
-from network.router.RouteUnitWithRoutingRTL  import RouteUnitWithRoutingRTL
+from network.router.RouteUnitRTL  import RouteUnitRTL
 
 from network.routing.RoutingDORX import RoutingDORX
 from network.routing.RoutingDORY import RoutingDORY
@@ -53,7 +53,7 @@ def test_RouteUnitWithRouting( dump_vcd, test_verilog ):
     print 'Please specific a valid Routing strategy!'
 
   routing_strategy = Routing( Packet )
-  model = RouteUnitWithRoutingRTL( routing_strategy, MeshPosition )
+  model = RouteUnitRTL( routing_strategy, MeshPosition )
 
   model.set_parameter("top.elaborate.num_outports", 5)
 

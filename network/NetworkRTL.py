@@ -40,19 +40,21 @@ class NetworkRTL( RTLComponent ):
 #    s.output = Wire( Bits3 )
 
     # Components
-    s.routers = [ RouterRTL( _, s.RoutingStrategyType, s.RouteUnitType, s.PositionType ) 
-                  for _ in range( s.num_routers ) ]
+    s.routers = [ RouterRTL( i, s.RoutingStrategyType, s.RouteUnitType, s.PositionType ) 
+                  for i in range( s.num_routers ) ]
 
     # Connections
     for i in range( s.num_routers ):
-      s.connect( s.recv.msg, s.routers[i].recv.msg )
+#      s.connect( s.recv.msg, s.routers[i].recv.msg )
+      s.connect( s.recv, s.routers[i].recv )
       s.connect( s.pos,         s.routers[i].pos      )
       s.connect( s.outputs[i],  s.routers[i].output   )
 
     for i in range( s.num_routers ):
       for j in range( s.num_outports ):
-        s.connect( s.routers[i].send[j].rdy, s.send[i * s.num_outports + j].rdy )
-        s.connect( s.routers[i].send[j].msg, s.send[i * s.num_outports + j].msg )
+        s.connect( s.routers[i].send[j], s.send[i * s.num_outports + j] )
+#        s.connect( s.routers[i].send[j].rdy, s.send[i * s.num_outports + j].rdy )
+#        s.connect( s.routers[i].send[j].msg, s.send[i * s.num_outports + j].msg )
     
     s.topology.mkTopology( s.routers )
 

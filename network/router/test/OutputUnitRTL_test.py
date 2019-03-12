@@ -17,7 +17,7 @@ from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 from pclib.test import mk_test_case_table
 from pymtl.passes.PassGroups import SimpleSim
 
-from router.OutputUnitRTL import OutputUnitRTL
+from network.router.OutputUnitRTL import OutputUnitRTL
 from ocn_pclib.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
 
 from pclib.rtl  import NormalQueueRTL

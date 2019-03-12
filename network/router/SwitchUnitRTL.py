@@ -54,6 +54,7 @@ class SwitchUnitRTL( RTLComponent ):
 #      s.arbiter.en = (s.arbiter.grants > 0) and s.send.rdy
       s.arbiter.en   = Bits1( 1 )
       s.arbiter.reqs = Bits5( 0b11111 )
+      s.send.en = Bits1( 1 )
  
     @s.update
     def inRdy():

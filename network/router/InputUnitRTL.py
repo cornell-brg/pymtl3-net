@@ -10,9 +10,11 @@
 
 from pymtl import *
 from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
+from pclib.rtl  import NormalQueueRTL
+from ocn_pclib.Packet import Packet
 
 class InputUnitRTL( RTLComponent ):
-  def construct( s, pkt_type, QueueType ):
+  def construct( s, pkt_type=Packet, QueueType=NormalQueueRTL ):
 
     # Interface
 #    s.in_      =  InValRdyIfc( pkt_type )
@@ -23,6 +25,7 @@ class InputUnitRTL( RTLComponent ):
     # Component
 #    s.queue_entries = num_entries
     s.queue = QueueType( Type=pkt_type )
+#    s.queue = NormalQueueRTL( Packet )
     
     # Connections
 #    s.connect( s.in_, s.queue.enq )
@@ -39,4 +42,5 @@ class InputUnitRTL( RTLComponent ):
   
   # TODO: implement line trace.
   def line_trace( s ):
-    return "{}({}){}".format( s.recv.msg, s.queue.ctrl.num_entries, s.send.msg )
+    return "{}({}){}".format( s.recv.msg.src_x, s.queue.ctrl.num_entries, 
+            s.send.msg.src_x )

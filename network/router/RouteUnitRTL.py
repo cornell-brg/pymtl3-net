@@ -13,7 +13,7 @@ from ocn_pclib.Packet    import Packet
 from ocn_pclib.Position  import *
 
 class RouteUnitRTL( RTLComponent ):
-  def construct( s, PositionType, num_outports=5 ):
+  def construct( s, routing_strategy, PositionType, num_outports=5 ):
 #  def construct( s, routing_logic, TypePosition, num_outports=5 ):
 
     # Constants 
@@ -28,9 +28,11 @@ class RouteUnitRTL( RTLComponent ):
     s.pos   = InVPort( PositionType )
 
     # Componets
+#    s.routing_logic = RoutingLogic( Packet )
+    s.routing_logic = routing_strategy
     s.out_rdys = Wire( mk_bits( s.num_outports ) )
 #    s.pkt      = Wire( Packet )
-    s.out_dir  = Wire( Bits3  ) 
+    s.out_dir  = OutVPort( Bits3  ) 
 
     # Connections
 #    s.connect( s.pkt,           s.recv.msg    )
@@ -38,9 +40,10 @@ class RouteUnitRTL( RTLComponent ):
       s.connect( s.recv.msg,    s.send[i].msg )
       s.connect( s.out_rdys[i], s.send[i].rdy )
     
-#    s.connect( s.pos,      s.routing_logic.pos     )  
-#    s.connect( s.recv.msg, s.routing_logic.pkt_in  )
-#    s.connect( s.out_dir,  s.routing_logic.out_dir )
+    s.connect( s.pos,      s.routing_logic.pos     )  
+#    s.connect( s.pkt,     s.routing_logic.pkt_in  )
+    s.connect( s.recv.msg, s.routing_logic.pkt_in  )
+    s.connect( s.out_dir,  s.routing_logic.out_dir )
 
 #    s.connect( s.pos,     routing_logic.pos     )  
 #    s.connect( s.pkt,     routing_logic.pkt_in  )
@@ -52,6 +55,10 @@ class RouteUnitRTL( RTLComponent ):
       for i in range( s.num_outports ):
         s.send[i].en = 0
       s.send[s.out_dir].en = s.recv.en
+#      s.recv.rdy = ( s.out_rdys == 0b11111 )
+#      s.recv.rdy =  s.send[s.out_dir].rdy
+      s.recv.rdy = 1
+#              .out_rdys == 0b11111 )
 
   def line_trace( s ):
     out_str = [ "" for _ in range( s.num_outports ) ]

@@ -15,6 +15,7 @@ class Mesh( RTLComponent ):
   def construct( s ):
     pass
 
+  # Manipulate the input and output ports of routers to connect each other.
   def mkTopology( s, routers ):
-    for i in range ( 2 ):
+    for i in range ( len( routers ) ):
       print 'making topology here...', routers[i].router_id

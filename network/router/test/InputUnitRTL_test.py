@@ -17,11 +17,13 @@ from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 from pclib.test import mk_test_case_table
 from pymtl.passes.PassGroups import SimpleSim
 
-from router.InputUnitRTL import InputUnitRTL
+from network.router.InputUnitRTL import InputUnitRTL
 from ocn_pclib.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
 
 from pclib.rtl  import NormalQueueRTL
 from pclib.rtl  import BypassQueue1RTL
+
+from ocn_pclib.Packet import *
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -92,10 +94,10 @@ def run_rtl_sim( test_harness, max_cycles=100 ):
 def basic_msgs():
   return [
     # src, sink
-    [ Bits16( 0  ),  Bits16( 0  )  ],
-    [ Bits16( 4  ),  Bits16( 4  )  ],
-    [ Bits16( 9  ),  Bits16( 9  )  ],
-    [ Bits16( 11 ),  Bits16( 11 )  ],
+    [ Bits4( 0  ),  Bits4( 0  )  ],
+    [ Bits4( 4  ),  Bits4( 4  )  ],
+    [ Bits4( 9  ),  Bits4( 9  )  ],
+    [ Bits4( 11 ),  Bits4( 11 )  ],
   ]
 
 #-------------------------------------------------------------------------
@@ -117,8 +119,13 @@ def mk_test_msgs( msg_list ):
   sink_msgs = []
 
   for m in msg_list:
-    src_msgs.append ( m[0] )
-    sink_msgs.append( m[1] )
+#    src_msgs.append ( m[0] )
+#    sink_msgs.append( m[1] )
+    src_msgs.append(mk_pkt(m[0], m[0], m[0], m[0], m[0], m[0]))
+    sink_msgs.append(mk_pkt(m[1], m[1], m[1], m[1], m[1], m[1]))
+  print src_msgs[0].src_x
+  print src_msgs[1].src_x
+  print src_msgs[2].src_x
 
   return ( src_msgs, sink_msgs )
 
@@ -130,7 +137,8 @@ def test( test_params ):
   
   print ""
   run_rtl_sim( 
-    TestHarness( Bits16, src_msgs, sink_msgs, test_params.stall, 
+#    TestHarness( Bits16, src_msgs, sink_msgs, test_params.stall, 
+    TestHarness( Packet, src_msgs, sink_msgs, test_params.stall, 
                  test_params.src_delay, test_params.sink_delay )
   )
 

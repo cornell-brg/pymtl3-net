@@ -25,11 +25,12 @@ def run_test( model, test_vectors ):
   def tv_in( model, test_vector ):
 
     pos = MeshPosition( 2, 1, 1)
-    model.pos = pos
 
     pkt = mk_pkt( test_vector[0], test_vector[1], test_vector[2], test_vector[3],
             test_vector[4], test_vector[5])
-    model.recv.msg = pkt
+    for i in range (5):
+      model.pos[i] = MeshPosition(i * i, i, i)
+      model.recv[i].msg = pkt
 #    model.recv.rdy = 1
 #    model.recv.en  = 1
     for i in range( model.num_outports ):
@@ -54,7 +55,7 @@ def test_Router( dump_vcd, test_verilog ):
   else:
     print 'Please specific a valid Routing strategy!'
 
-  model = RouterRTL( RoutingStrategyType, RouteUnitRTL, MeshPosition )
+  model = RouterRTL( 0, RoutingStrategyType, RouteUnitRTL, MeshPosition )
 
 #  model.set_parameter("top.elaborate.num_outports", 5)
 
