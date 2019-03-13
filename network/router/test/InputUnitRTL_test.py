@@ -94,10 +94,10 @@ def run_rtl_sim( test_harness, max_cycles=100 ):
 def basic_msgs():
   return [
     # src, sink
-    [ Bits4( 0  ),  Bits4( 0  )  ],
-    [ Bits4( 4  ),  Bits4( 4  )  ],
-    [ Bits4( 9  ),  Bits4( 9  )  ],
-    [ Bits4( 11 ),  Bits4( 11 )  ],
+    [ Bits16( 0  ),  Bits16( 0  )  ],
+    [ Bits16( 4  ),  Bits16( 4  )  ],
+    [ Bits16( 9  ),  Bits16( 9  )  ],
+    [ Bits16( 11 ),  Bits16( 11 )  ],
   ]
 
 #-------------------------------------------------------------------------
@@ -119,13 +119,13 @@ def mk_test_msgs( msg_list ):
   sink_msgs = []
 
   for m in msg_list:
-#    src_msgs.append ( m[0] )
-#    sink_msgs.append( m[1] )
-    src_msgs.append(mk_pkt(m[0], m[0], m[0], m[0], m[0], m[0]))
-    sink_msgs.append(mk_pkt(m[1], m[1], m[1], m[1], m[1], m[1]))
-  print src_msgs[0].src_x
-  print src_msgs[1].src_x
-  print src_msgs[2].src_x
+    src_msgs.append ( m[0] )
+    sink_msgs.append( m[1] )
+#    src_msgs.append(  mk_pkt(m[0], m[0], m[0], m[0], m[0], Bits16( 9 )))
+#    sink_msgs.append( mk_pkt(m[1], m[1], m[1], m[1], m[1], Bits16( 9 )))
+#  print src_msgs[0].src_x
+#  print src_msgs[1].src_x
+#  print src_msgs[2].src_x
 
   return ( src_msgs, sink_msgs )
 
@@ -137,8 +137,8 @@ def test( test_params ):
   
   print ""
   run_rtl_sim( 
-#    TestHarness( Bits16, src_msgs, sink_msgs, test_params.stall, 
-    TestHarness( Packet, src_msgs, sink_msgs, test_params.stall, 
+#    TestHarness( Packet, src_msgs, sink_msgs, test_params.stall, 
+    TestHarness( Bits16, src_msgs, sink_msgs, test_params.stall, 
                  test_params.src_delay, test_params.sink_delay )
   )
 

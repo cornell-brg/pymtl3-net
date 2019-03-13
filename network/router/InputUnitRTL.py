@@ -14,33 +14,37 @@ from pclib.rtl  import NormalQueueRTL
 from ocn_pclib.Packet import Packet
 
 class InputUnitRTL( RTLComponent ):
-  def construct( s, pkt_type=Packet, QueueType=NormalQueueRTL ):
+  def construct( s, pkt_type, QueueType=None ):
+#  def construct( s ):
 
     # Interface
 #    s.in_      =  InValRdyIfc( pkt_type )
 #    s.out      = OutValRdyIfc( pkt_type )
+#    pkt_type = Packet
     s.recv =  InEnRdyIfc( pkt_type )
     s.send = OutEnRdyIfc( pkt_type )
 
-    # Component
-#    s.queue_entries = num_entries
-    s.queue = QueueType( Type=pkt_type )
-#    s.queue = NormalQueueRTL( Packet )
-    
-    # Connections
-#    s.connect( s.in_, s.queue.enq )
-#    s.connect( s.out, s.queue.deq )
-    s.connect( s.recv.rdy, s.queue.enq.rdy )
-    s.connect( s.recv.en,  s.queue.enq.val )
-    s.connect( s.recv.msg, s.queue.enq.msg )
-
-    @s.update
-    def proceed():
-      s.send.msg  = s.queue.deq.msg
-      s.send.en   = s.send.rdy and s.queue.deq.val
-      s.queue.deq.rdy = s.send.rdy
+    if QueueType != None:
+      # Component
+  #    s.queue_entries = num_entries
+      s.queue = QueueType( Type=pkt_type )
+      
+      # Connections
+  #    s.connect( s.in_, s.queue.enq )
+  #    s.connect( s.out, s.queue.deq )
+      s.connect( s.recv.rdy, s.queue.enq.rdy )
+      s.connect( s.recv.en,  s.queue.enq.val )
+      s.connect( s.recv.msg, s.queue.enq.msg )
+  
+      @s.update
+      def proceed():
+        s.send.msg  = s.queue.deq.msg
+        s.send.en   = s.send.rdy and s.queue.deq.val
+        s.queue.deq.rdy = s.send.rdy
+    else:
+      s.connect( s.recv, s.send )
   
   # TODO: implement line trace.
   def line_trace( s ):
-    return "{}({}){}".format( s.recv.msg.src_x, s.queue.ctrl.num_entries, 
-            s.send.msg.src_x )
+    return "{}({}){}".format( s.recv.msg, s.queue.ctrl.num_entries, 
+            s.send.msg )

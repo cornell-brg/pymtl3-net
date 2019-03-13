@@ -21,6 +21,7 @@ class NetworkRTL( RTLComponent ):
   def construct( s ):
 
     s.num_outports = 5
+    s.num_inports = 5
     s.num_routers  = 2
     s.pos = MeshPosition( 2, 1, 1)
     s.RouteUnitType = RouteUnitRTL
@@ -31,35 +32,33 @@ class NetworkRTL( RTLComponent ):
     s.topology = s.TopologyType()
 
     # Interface
-    s.recv = InEnRdyIfc( Packet )
-#    s.send = OutEnRdyIfc( Packet ) 
-    s.send = [ OutEnRdyIfc( Packet ) for _ in range ( s.num_outports * s.num_routers ) ]
+    s.recv = [  InEnRdyIfc( Packet ) for _ in range( s.num_routers *  s.num_inports ) ]
+    s.send = [ OutEnRdyIfc( Packet ) for _ in range( s.num_routers * s.num_outports ) ]
+
+    s.outputs = [ Wire( Bits3 )  for _ in range( s.num_routers *  s.num_inports ) ]
 
     s.pos  = InVPort( s.PositionType )
-    s.outputs = [ OutVPort( Bits3 ) for _ in range( s.num_routers ) ]
-#    s.output = Wire( Bits3 )
 
     # Components
-    s.routers = [ RouterRTL( i, s.RoutingStrategyType, s.RouteUnitType, s.PositionType ) 
-                  for i in range( s.num_routers ) ]
+    s.routers = [ RouterRTL( i, s.RoutingStrategyType, s.PositionType ) 
+                for i in range( s.num_routers ) ]
 
     # Connections
     for i in range( s.num_routers ):
-#      s.connect( s.recv.msg, s.routers[i].recv.msg )
-      s.connect( s.recv, s.routers[i].recv )
-      s.connect( s.pos,         s.routers[i].pos      )
-      s.connect( s.outputs[i],  s.routers[i].output   )
+      for j in range( s.num_inports):
+        s.connect( s.recv[i * s.num_inports + j], s.routers[i].recv[j] )
+        s.connect( s.outputs[i*s.num_inports+j],  s.routers[i].outs[j]   )
+      s.connect( s.pos, s.routers[i].pos )
 
     for i in range( s.num_routers ):
       for j in range( s.num_outports ):
         s.connect( s.routers[i].send[j], s.send[i * s.num_outports + j] )
-#        s.connect( s.routers[i].send[j].rdy, s.send[i * s.num_outports + j].rdy )
-#        s.connect( s.routers[i].send[j].msg, s.send[i * s.num_outports + j].msg )
     
     s.topology.mkTopology( s.routers )
 
+  # TODO: Implement line trace.
   def line_trace( s ):
     return "pos:({},{}); src:({},{}); dst:({},{}); out_dir:({})".format(
-s.pos.pos_x, s.pos.pos_y, s.recv.msg.src_x, s.recv.msg.src_y, s.recv.msg.dst_x,
-s.recv.msg.dst_y, s.outputs )
+s.pos.pos_x, s.pos.pos_y, s.recv[0].msg.src_x, s.recv[0].msg.src_y, s.recv[0].msg.dst_x,
+s.recv[0].msg.dst_y, s.outputs[0] )
     
