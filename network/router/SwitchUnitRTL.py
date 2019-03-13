@@ -60,7 +60,8 @@ class SwitchUnitRTL( RTLComponent ):
     def inRdy():
       for i in range( num_inports ):
 #        s.in_[i].rdy.value = s.arbiter.grants[i] and s.out.rdy
-        s.recv[i].rdy = s.arbiter.grants[i] and s.send.rdy
+#        s.recv[i].rdy = s.arbiter.grants[i] and s.send.rdy
+        s.recv[i].rdy = 1
  
   # TODO: implement line trace
   def line_trace( s ):

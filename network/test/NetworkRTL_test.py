@@ -18,11 +18,13 @@ from Configs import configure_network
 
 def run_test( model, test_vectors ):
  
+  configs = configure_network()
+  positions = mk_mesh_pos( configs.rows, configs.routers )
   def tv_in( model, test_vector ):
 
-    pos = MeshPosition( 2, 1, 1)
-    model.pos = pos
-
+#    pos = MeshPosition( 2, 1, 1)
+    for i in range( configs.routers ):
+      model.pos_ports[i] = positions[i]
     pkt = mk_pkt( test_vector[0], test_vector[1], test_vector[2], test_vector[3],
             test_vector[4], test_vector[5])
     for i in range( model.num_outports*model.num_routers ):
@@ -31,7 +33,7 @@ def run_test( model, test_vectors ):
 
   def tv_out( model, test_vector ):
     assert 1 == 1
-  
+     
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
   model.sim_reset()

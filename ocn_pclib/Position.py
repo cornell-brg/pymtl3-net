@@ -28,3 +28,12 @@ def mk_pos( pos_id=0, pos_x=0, pos_y=0, size=0 ):
   pos = MeshPosition( pos_id, pos_x, pos_y, size )
   return pos
 
+def mk_mesh_pos( row=0, size=0 ):
+  pos_list = []
+  pos_id   = 0
+  for c in range( size/row ):
+    for r in range( row ):
+      pos_id = pos_id + 1
+      pos_list.append( MeshPosition( pos_id, c, r ) )
+  return pos_list
+
