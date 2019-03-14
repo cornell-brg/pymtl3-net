@@ -11,40 +11,36 @@
 from pymtl import *
 from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 from pclib.rtl  import NormalQueueRTL
-from ocn_pclib.Packet import Packet
 
 class InputUnitRTL( RTLComponent ):
-  def construct( s, pkt_type, QueueType=None ):
-#  def construct( s ):
+  def construct( s, PktType, QueueType=None ):
 
     # Interface
-#    s.in_      =  InValRdyIfc( pkt_type )
-#    s.out      = OutValRdyIfc( pkt_type )
-#    pkt_type = Packet
-    s.recv =  InEnRdyIfc( pkt_type )
-    s.send = OutEnRdyIfc( pkt_type )
+    s.recv =  InEnRdyIfc( PktType )
+    s.send = OutEnRdyIfc( PktType )
+    s.QueueType = QueueType
 
-    if QueueType != None:
+    if s.QueueType != None:
       # Component
-  #    s.queue_entries = num_entries
-      s.queue = QueueType( Type=pkt_type )
+#      s.queue_entries = num_entries
+      s.queue = s.QueueType( Type=PktType )
       
       # Connections
-  #    s.connect( s.in_, s.queue.enq )
-  #    s.connect( s.out, s.queue.deq )
       s.connect( s.recv.rdy, s.queue.enq.rdy )
       s.connect( s.recv.en,  s.queue.enq.val )
       s.connect( s.recv.msg, s.queue.enq.msg )
   
       @s.update
-      def proceed():
+      def process():
         s.send.msg  = s.queue.deq.msg
         s.send.en   = s.send.rdy and s.queue.deq.val
         s.queue.deq.rdy = s.send.rdy
     else:
       s.connect( s.recv, s.send )
   
-  # TODO: implement line trace.
   def line_trace( s ):
-    return "{}({}){}".format( s.recv.msg, s.queue.ctrl.num_entries, 
+    if s.QueueType != None:
+      return "{}({}){}".format( s.recv.msg, s.queue.ctrl.num_entries, 
             s.send.msg )
+    else:
+      return "{}(0){}".format( s.recv.msg, s.send.msg)

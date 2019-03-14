@@ -17,13 +17,13 @@ class OutputUnitRTL( RTLComponent ):
     # Interface
     s.recv =  InEnRdyIfc( pkt_type )
     s.send = OutEnRdyIfc( pkt_type )
+    s.QueueType = QueueType
 
     # If no queue type is assigned
-    if QueueType != None:
+    if s.QueueType != None:
 
       # Component
-      # s.queue = NormalQueue( num_entries, pkt_type ) 
-      s.queue = QueueType( Type=pkt_type ) 
+      s.queue = s.QueueType( Type=pkt_type ) 
   
       # Connections
       s.connect( s.recv.rdy, s.queue.enq.rdy )
@@ -41,4 +41,8 @@ class OutputUnitRTL( RTLComponent ):
       s.connect( s.recv, s.send ) 
 
   def line_trace( s ):
-    return "{} || {}".format( s.recv.msg, s.send.msg )
+    if s.QueueType != None:
+      return "{}({}){}".format( s.recv.msg, s.queue.ctrl.num_entries,
+            s.send.msg )
+    else:
+      return "{}(0){}".format( s.recv.msg, s.send.msg)
