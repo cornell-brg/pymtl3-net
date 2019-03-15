@@ -36,6 +36,9 @@ def run_test( model, test_vectors ):
 
   def tv_out( model, test_vector ):
     assert model.send[test_vector[7]].en == test_vector[6][test_vector[7]]
+    # msg assert
+    # recv rdy
+    # send en
   
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()

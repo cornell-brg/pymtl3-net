@@ -39,11 +39,14 @@ class RouteUnitRTL( RTLComponent ):
 
     # Routing logic
     @s.update
-    def process():
+    def up_ru_recv_rdy():
+      s.recv.rdy =  s.send[s.out_dir].rdy
+
+    @s.update
+    def up_ru_send_en():
       for i in range( s.num_outports ):
         s.send[i].en = 0
-      s.recv.rdy =  s.send[s.out_dir].rdy
-      s.send[s.out_dir].en = s.recv.rdy and s.send[s.out_dir].rdy 
+      s.send[s.out_dir].en = s.recv.en and s.send[s.out_dir].rdy 
 
   def line_trace( s ):
     out_str = [ "" for _ in range( s.num_outports ) ]

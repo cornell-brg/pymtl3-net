@@ -24,15 +24,19 @@ def run_test( model, test_vectors ):
  
   def tv_in( model, test_vector ):
 
-    model.pos = MeshPosition( 5, 1, 1)
+    model.pos = MeshPosition( 3, 1, 1)
     pkts = []
     for i in range (5):
+#    i = 0
       pkts.append(mk_pkt( (test_vector[0]+i)%4, (test_vector[1]+i)%4, 
                           (test_vector[2]+i)%4, (test_vector[3]+i)%4, 
                           (test_vector[4]+i)%4, (test_vector[5]+i)%4 ))
 
     for i in range (5):
       model.recv[i].msg = pkts[i]
+      if model.recv[i].rdy == 1:
+        model.recv[i].en = 1
+
 #    model.recv.rdy = 1
 #    model.recv.en  = 1
     for i in range( model.num_outports ):

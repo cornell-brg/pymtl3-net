@@ -70,8 +70,53 @@ class RouterRTL( RTLComponent ):
     tmp_str =  "({},{}): ".format( s.pos.pos_x, s.pos.pos_y )
     out_str = [ "" for _ in range( s.num_inports ) ]
     for i in range (s.num_inports):
-      out_str[i] = "({},{})->({},{}) ".format( s.recv[i].msg.src_x, s.recv[i].msg.src_y,
-                                        s.recv[i].msg.dst_x, s.recv[i].msg.dst_y )
-      tmp_str = tmp_str + out_str[i]
-    tmp_str = tmp_str + "| {}".format( s.outs )
+      out_str[i] = "[{}]->({},{}) ".format( i, s.recv[i].msg.dst_x, s.recv[i].msg.dst_y )
+      tmp_str += out_str[i]
+    tmp_str += ' recv.rdy:<'
+    for i in range (s.num_inports):
+      tmp_str += " {}".format(s.input_units[i].recv.rdy)
+
+    tmp_str += ' recv.en:<'
+    for i in range (s.num_inports):
+      tmp_str += " {}".format(s.input_units[i].recv.en)
+
+    tmp_str += ' route.rdy:<'
+    for i in range (s.num_inports):
+      tmp_str += " {}".format(s.route_units[i].recv.rdy)
+
+    tmp_str += '\n route.send.rdy:<'
+    for i in range (s.num_inports):
+      tmp_str += ' ru.sd['+ str( i ) + ']:'
+      for j in range (s.num_outports):
+        tmp_str += " {}".format(s.route_units[i].send[j].rdy)
+
+
+    tmp_str += '\n switch.bypass_queue.rdy:<'
+    for i in range (s.num_outports):
+      tmp_str += ' bq['+ str( i ) + ']:'
+      for j in range (s.num_inports):
+        tmp_str += " {}".format(s.switch_units[i].bypass_queue[j].enq.rdy)
+
+    tmp_str += '\n switch.bypass_queue.full:<'
+    for i in range (s.num_outports):
+      tmp_str += ' bqfull['+ str( i ) + ']:'
+      for j in range (s.num_inports):
+        tmp_str += " {}".format(s.switch_units[i].bypass_queue[j].full)
+
+    tmp_str += '\n switch.bypass_queue.deq.rdy:<'
+    for i in range (s.num_outports):
+      tmp_str += ' bqdeq.rdy['+ str( i ) + ']:'
+      for j in range (s.num_inports):
+        tmp_str += " {}".format(s.switch_units[i].bypass_queue[j].deq.rdy)
+
+
+    tmp_str += '> arbiter.grants:<'
+    for i in range (s.num_outports):
+      tmp_str += " {}".format(s.switch_units[i].arbiter.grants)
+    tmp_str += '> send.en:<'
+    for i in range (s.num_outports):
+      tmp_str += " {}".format(s.output_units[i].send.en)
+
+    tmp_str += "> | {}".format( s.outs )
+    tmp_str += "\n---------------"
     return tmp_str
