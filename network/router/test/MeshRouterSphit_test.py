@@ -1,10 +1,9 @@
 import pytest
 
 from pymtl import *
-from router.MeshRouterSphit import MeshRouterSphit
-from ifcs.SinglePhitPacket import SinglePhitPacket
+from network.router.MeshRouterSphit import MeshRouterSphit
+from ocn_pclib.SinglePhitPacket import SinglePhitPacket
 from pclib.test import TestSource, TestSink, mk_test_case_table
-from RouteUnit_test import dimension_order_routing
 import copy
 
 #=======================================================================
@@ -139,6 +138,67 @@ def mk_test_msgs( num_ports, base_pkt, msg_list ):
     sink_msgs[tsink].append( pkt )
 
   return [ src_msgs, sink_msgs ]
+
+def dimension_order_routing( dimension, pos_x, pos_y,
+                             src_x, src_y, dest_x, dest_y ):
+  tsrc  = 0
+  tsink = 0
+  north = 0
+  south = 1
+  west  = 2
+  east  = 3
+  inout = 4
+  # determine source port
+  if src_x == pos_x and src_y == pos_y:
+    tsrc = inout
+
+  elif dimension == 'y':
+    if src_x == pos_x:
+      if src_y < pos_y:
+        tsrc = west
+      else:
+        tsrc = east
+    elif src_x < pos_x:
+      tsrc = north
+    else:
+      tsrc = west
+
+  elif dimension == 'x':
+    if src_y == pos_y:
+      if src_x < pos_x:
+        tsrc = north
+      else:
+        tsrc = south
+    elif src_y > pos_y:
+      tsrc = east
+    else:
+      tsrc = west
+  else:
+    raise AssertionError( "Invalid dimension input for DOR! " )
+  # determine dest port
+  if dest_x == pos_x and dest_y == pos_y:
+    tsink = inout
+  elif dimension == 'y':
+    if dest_y > pos_y:
+      tsink = east
+    elif dest_y < pos_y:
+      tsink = west
+    elif dest_x > pos_x:
+      tsink = south
+    else:
+      tsink = north
+  elif dimension == 'x':
+    if dest_x > pos_x:
+      tsink = south
+    elif dest_x < pos_x:
+      tsink = north
+    elif dest_y > pos_y:
+      tsink = east
+    else:
+      tsink = west
+  else:
+    raise AssertionError( "Invalid dimension input for DOR! " )
+  return (tsrc, tsink)
 
 def compute_src_sink( pos_x, pos_y, dimension, msg_list ):
   """
