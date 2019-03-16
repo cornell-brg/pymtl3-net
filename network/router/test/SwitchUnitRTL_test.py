@@ -21,13 +21,18 @@ def run_test( model, test_vectors ):
     model.send.rdy = test_vector[2]
 #    model.send.en  = test_vector[3]
     for i in range( model.num_inports ):
-      model.recv[i].en = test_vector[0][i]
+      if model.recv[i].rdy == 1:
+        model.recv[i].en = test_vector[0][i]
 #      model.recv[i].msg = test_vector[1][i]
-      pkt = mk_pkt( test_vector[1][0], test_vector[1][1], test_vector[1][2], test_vector[1][3], 0, test_vector[1][4])
+      pkt = mk_pkt( 0, 0, 1, 1, 1, test_vector[1][i])
       model.recv[i].msg = pkt
 
   def tv_out( model, test_vector ):
-    assert 1 == 1
+    for i in range( model.num_inports ):
+      assert model.recv[i].rdy == test_vector[5][i]
+    assert model.send.en == test_vector[3]
+    if model.send.en == 1:
+      assert model.send.msg.payload == test_vector[4]
 #    assert Bits16(model.send.en)  == Bits16(test_vector[3])
 #    assert Bits16(model.send.msg) == Bits16(test_vector[4])
   
@@ -37,18 +42,19 @@ def run_test( model, test_vectors ):
 def test_SwitchUnit( dump_vcd, test_verilog ):
 #  model = SwitchUnitRTL(Bits16)
   model = SwitchUnitRTL(Packet)
-
+  x = 'x'
   run_test( model, [
-    # recv_en        msg     send_rdy   send_en     send_msg 
-   [[1,0,0,0,0], [5,6,7,8,9],    0,         0,          5    ],
-   [[0,0,0,0,0], [5,6,7,8,9],    1,         1,          5    ],
-   [[0,1,0,0,0], [1,2,3,4,5],    1,         1,          2    ],
-   [[0,1,1,1,0], [9,8,7,6,5],    0,         0,          7    ],
-   [[0,1,1,1,0], [8,7,6,5,4],    0,         0,          7    ],
-   [[0,1,1,1,0], [9,8,7,6,5],    1,         1,          7    ],
-   [[0,1,1,1,0], [8,7,6,5,4],    0,         0,          6    ],
-   [[0,1,1,1,0], [9,8,7,6,5],    0,         0,          6    ],
-   [[0,1,1,1,0], [5,4,3,2,1],    1,         1,          6    ],
-   [[1,0,0,0,1], [3,4,5,6,7],    1,         1,          7    ],
-   [[0,1,1,0,1], [3,4,5,6,7],    1,         1,          3    ],
+    # recv_en        msg     send_rdy   send_en    send_msg   recv.rdy
+   [[1,0,0,0,0], [5,6,7,8,9],    0,         0,        5,    [1,1,1,1,1] ],
+   [[0,0,0,0,0], [6,7,8,9,5],    1,         1,        5,    [0,1,1,1,1] ],
+   [[0,0,0,0,0], [7,8,9,1,2],    1,         0,        x,    [1,1,1,1,1] ],
+   [[0,1,0,0,0], [1,2,3,4,5],    1,         1,        2,    [1,1,1,1,1] ],
+   [[0,1,1,1,0], [9,8,7,6,5],    0,         0,        x,    [1,1,1,1,1] ],
+   [[0,1,1,1,0], [8,7,6,5,4],    0,         0,        x,    [1,0,0,0,1] ],
+   [[0,1,1,1,0], [7,6,5,4,3],    1,         1,        7,    [1,0,0,0,1] ],
+   [[0,1,1,1,0], [8,7,6,5,4],    0,         0,        x,    [1,0,1,0,1] ],
+   [[0,1,1,1,0], [9,8,7,6,5],    0,         0,        x,    [1,0,0,0,1] ],
+   [[0,1,1,1,0], [5,4,3,2,1],    1,         1,        6,    [1,0,0,0,1] ],
+   [[1,0,0,1,1], [3,4,5,6,7],    1,         1,        7,    [1,0,0,1,1] ],
+   [[0,1,1,0,1], [3,4,5,6,7],    1,         1,        3,    [0,0,0,0,1] ],
   ])
