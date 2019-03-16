@@ -1,45 +1,25 @@
 #=========================================================================
-# OutputUnitRTL_test.py
+# InputUnitRTL_test.py
 #=========================================================================
-# Unit tests for OutputUnitRTL.
+# Unit tests for InputUnitRTL.
 # 
 # Author : Yanghui Ou, Cheng Tan
 #   date : Feb 14, 2019
 
 from pymtl import *
-from router.OutputUnitRTL import OutputUnitRTL
-from pymtl.passes.PassGroups import SimpleSim
-# from pclib.rtl.valrdy_queues_test import TestVectorSimulator
+from router.InputUnitRTL import InputUnitRTL
+from ocn_pclib.TestVectorSimulator import TestVectorSimulator
 
-class TestVectorSimulator( object ):
+#TODO: need implement
 
-  def __init__( self, model, test_vectors,
-                set_inputs_func, verify_outputs_func, wait_cycles = 0 ):
 
-    self.model               = model
-    self.set_inputs_func     = set_inputs_func
-    self.verify_outputs_func = verify_outputs_func
-    self.test_vectors        = test_vectors
-    self.wait_cycles         = wait_cycles
 
-  def run_test( self ):
 
-    # self.model.elaborate()
-    self.model.apply( SimpleSim )
 
-    print()
-    for test_vector in self.test_vectors:
 
-      # Set inputs
-      self.set_inputs_func( self.model, test_vector )
-      self.model.tick()
 
-      # Print the line trace
-      print self.model.line_trace()
 
-      # Verify outputs
-      self.verify_outputs_func( self.model, test_vector )
-      
+
 
 #-------------------------------------------------------------------------
 # run_test_queue
@@ -70,12 +50,12 @@ def run_test_queue( model, test_vectors ):
 #-------------------------------------------------------------------------
 
 def test_compile():
-  _ = OutputUnitRTL( num_entries=1, pkt_type=Bits32 ) 
+  _ = InputUnitRTL( num_entries=1, pkt_type=Bits32 ) 
 
 def test_32bits():
   B1  = mk_bits(1)
   B32 = mk_bits(32)
-  run_test_queue( OutputUnitRTL( 1, Bits32 ), [
+  run_test_queue( InputUnitRTL( 1, Bits32 ), [
     # enq.val enq.rdy enq.msg  deq.val deq.rdy deq.msg
     [  B1(1) , B1(1) ,B32(123), B1(0) , B1(1) ,  '?'    ],
     [  B1(1) , B1(0) ,B32(345), B1(1) , B1(0) ,B32(123) ],

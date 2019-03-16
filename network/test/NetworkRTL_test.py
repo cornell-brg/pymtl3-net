@@ -29,6 +29,8 @@ def run_test( model, test_vectors ):
             test_vector[4], test_vector[5])
     for i in range( model.num_outports*model.num_routers ):
       model.recv[i].msg = pkt
+      if model.recv[i].rdy == 1:
+        model.recv[i].en = 1
       model.send[i].rdy = 1
 
   def tv_out( model, test_vector ):

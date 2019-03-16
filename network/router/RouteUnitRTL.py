@@ -52,7 +52,5 @@ class RouteUnitRTL( RTLComponent ):
     out_str = [ "" for _ in range( s.num_outports ) ]
     for i in range (s.num_outports):
       out_str[i] = "<{}>".format( s.send[i].en ) 
-    return "pos:({},{}); src:({},{}); dst:({},{}); out_dir:({});\
- ({}|{}|{}|{}|{})".format( s.pos.pos_x, s.pos.pos_y, s.recv.msg.src_x, s.recv.msg.src_y, 
-s.recv.msg.dst_x, s.recv.msg.dst_y, s.out_dir, out_str[0], out_str[1], out_str[2], 
-out_str[3], out_str[4] )
+
+    return "({},{})->({},{}); dir:({}); ({}|{}|{}|{}|{}); recv.rdy({}); send.rdy({})".format(s.recv.msg.src_x, s.recv.msg.src_y, s.recv.msg.dst_x, s.recv.msg.dst_y, s.out_dir, out_str[0], out_str[1], out_str[2], out_str[3], out_str[4], s.recv.rdy, s.send[s.out_dir].rdy )
