@@ -26,7 +26,8 @@ class NetworkRTL( RTLComponent ):
 
     s.num_outports = configs.router_outports
     s.num_inports  = configs.router_inports
-    s.num_routers  = configs.routers
+#    s.num_routers  = configs.routers
+    s.num_routers  = 2
     s.RoutingStrategyType = RoutingDORY
 
     s.topology = Mesh()
@@ -50,10 +51,24 @@ class NetworkRTL( RTLComponent ):
                 for i in range( s.num_routers ) ]
 
     # Connections
-    for i in range(s.num_routers):
-      s.connect(s.recv[i], s.routers[i].recv[4])
-      s.connect(s.send[i], s.routers[i].send[4])
-      print 'self router: ', i
+#    for i in range(s.num_routers):
+#      s.connect(s.recv[i], s.routers[i].recv[4])
+#      s.connect(s.send[i], s.routers[i].send[4])
+#      print 'self router: ', i
+
+    for i in range(s.num_inports-1):
+      s.connect(s.recv[i], s.routers[0].recv[i])
+    for i in range(s.num_inports-1):
+      s.connect(s.recv[i+s.num_inports], s.routers[1].recv[i])
+
+    for i in range(s.num_outports-1):
+      s.connect(s.send[i], s.routers[0].send[i])
+    for i in range(s.num_outports-1):
+      s.connect(s.send[i+s.num_outports], s.routers[1].send[i])
+
+    s.connect(s.routers[0].send[4], s.routers[1].recv[4])
+    s.connect(s.routers[0].recv[4], s.routers[1].send[4])
+
 #
 #    for i in range(s.num_cols):
 #      # North port connection
@@ -84,11 +99,12 @@ class NetworkRTL( RTLComponent ):
 #      for j in range( s.num_outports ):
 #        s.connect( s.routers[i].send[j], s.send[i * s.num_outports + j] )
     
-    s.topology.mk_topology( s, s.routers, s.num_rows )
+#    s.topology.mk_topology( s, s.routers, s.num_rows )
 
   # TODO: Implement line trace.
   def line_trace( s ):
-    return "pos:({},{}); src:({},{}); dst:({},{}); out_dir:({})".format(
-s.pos_ports[3].pos_x, s.pos_ports[3].pos_y, s.recv[3].msg.src_x, s.recv[3].msg.src_y, 
-s.recv[3].msg.dst_x, s.recv[3].msg.dst_y, s.outputs[15] )
+    return 'done'
+#    return "pos:({},{}); src:({},{}); dst:({},{}); out_dir:({})".format(
+#s.pos_ports[3].pos_x, s.pos_ports[3].pos_y, s.recv[3].msg.src_x, s.recv[3].msg.src_y, 
+#s.recv[3].msg.dst_x, s.recv[3].msg.dst_y, s.outputs[15] )
     

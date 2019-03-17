@@ -70,13 +70,13 @@ class RouterRTL( RTLComponent ):
     tmp_str =  "({},{}):".format( s.pos.pos_x, s.pos.pos_y )
     out_str = [ "" for _ in range( s.num_inports ) ]
     for i in range (s.num_inports):
-      out_str[i] = "[{}]->({},{})".format( i, s.recv[i].msg.dst_x, s.recv[i].msg.dst_y )
+      out_str[i] = " {}->({},{})".format( i, s.recv[i].msg.dst_x, s.recv[i].msg.dst_y )
       tmp_str += out_str[i]
-    tmp_str += 'recv.rdy:<'
+    tmp_str += ' recv.rdy:<'
     for i in range (s.num_inports):
       tmp_str += "{}".format(s.input_units[i].recv.rdy)
-    tmp_str += '>send.en:<'
+    tmp_str += '> send.en:<'
     for i in range (s.num_outports):
       tmp_str += "{}".format(s.send[i].en)
-    tmp_str += ">|{}".format( s.outs )
+    tmp_str += ">"
     return tmp_str

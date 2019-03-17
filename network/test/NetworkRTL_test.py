@@ -23,7 +23,8 @@ def run_test( model, test_vectors ):
   def tv_in( model, test_vector ):
 
 #    pos = MeshPosition( 2, 1, 1)
-    for i in range( configs.routers ):
+#    for i in range( configs.routers ):
+    for i in range( 2 ):
       model.pos_ports[i] = positions[i]
     pkt = mk_pkt( test_vector[0], test_vector[1], test_vector[2], test_vector[3],
             test_vector[4], test_vector[5])

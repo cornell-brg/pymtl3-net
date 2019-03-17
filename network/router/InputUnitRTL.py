@@ -15,14 +15,15 @@ from pclib.rtl  import NormalQueueRTL
 class InputUnitRTL( RTLComponent ):
   def construct( s, PktType, QueueType=None ):
 
+    # Constant
+    s.QueueType = QueueType
+
     # Interface
     s.recv =  InEnRdyIfc( PktType )
     s.send = OutEnRdyIfc( PktType )
-    s.QueueType = QueueType
 
     if s.QueueType != None:
       # Component
-#      s.queue_entries = num_entries
       s.queue = s.QueueType( Type=PktType )
       
       # Connections
