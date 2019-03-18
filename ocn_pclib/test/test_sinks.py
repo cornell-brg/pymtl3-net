@@ -22,37 +22,43 @@ class TestSinkCL( ComponentLevel6 ):
     s.idx  = 0
     s.msgs = list( msgs )
     
-    s.initial_cnt    = initial_delay
+    s.initial_count    = initial_delay
     s.interval_delay = interval_delay
-    s.interval_cnt   = 0
+    s.interval_count   = 0
 
     s.recv_msg    = None 
     s.recv_called = False 
+    s.recv_rdy    = False
     s.trace_len   = len( str( s.msgs[0] ) )
 
     @s.update
-    def decr_cnt():
+    def decr_count():
 
       # if recv was called in previous cycle
       if s.recv_called:
-        s.interval_cnt = s.interval_delay
+        s.interval_count = s.interval_delay
+
+      elif s.initial_count != 0:
+        s.initial_count -= 1
+
+      elif s.interval_count != 0:
+        s.interval_count -= 1
+
+      else:
+        s.interval_count = 0
 
       s.recv_called = False
       s.recv_msg    = None
+      s.recv_rdy    = s.recv.rdy()
 
-      if s.initial_cnt != 0:
-        s.initial_cnt -= 1
-      elif s.interval_cnt != 0:
-        s.interval_cnt -= 1
-      else:
-        s.interval_cnt = 0
-
-    s.add_constraints( U( decr_cnt ) < M( s.recv ) )
+    s.add_constraints( 
+      U( decr_count ) < M( s.recv ),
+      U( decr_count ) < M( s.recv.rdy )
+    )
  
-  @method_port( lambda s: s.recv_rdy() )
+  @method_port( lambda s: s.initial_count==0 and s.interval_count==0 )
   def recv( s, msg ):
 
-    s.recv_called = True
     s.recv_msg = msg
     # Sanity check 
     if s.idx >= len( s.msgs ):
@@ -66,17 +72,15 @@ class TestSinkCL( ComponentLevel6 ):
         """.format( s.msgs[s.idx], s.recv_msg ) )
     else:
       s.idx += 1
-
-  def recv_rdy( s ):
-    return s.initial_cnt == 0 and s.interval_cnt==0
+      s.recv_called = True
 
   def done( s ):
     return s.idx >= len( s.msgs )
   
   def line_trace( s ):
-    trace = "." if not s.recv_called and s.recv.rdy() else \
-            "#" if not s.recv_called and not s.recv.rdy() else \
-            "X" if s.recv_called and not s.recv.rdy() else \
+    trace = " " if not s.recv_called and s.recv_rdy else \
+            "#" if not s.recv_called and not s.recv_rdy else \
+            "X" if s.recv_called and not s.recv_rdy else \
             str( s.recv_msg )
 
     return "{}".format( trace.ljust( s.trace_len ) )
@@ -107,4 +111,5 @@ class TestSinkRTL( ComponentLevel6 ):
   # Line trace
 
   def line_trace( s ):
-    return s.sink.line_trace()
+    return "|{}|->{}".format(
+      s.adapter.line_trace(), s.sink.line_trace() )

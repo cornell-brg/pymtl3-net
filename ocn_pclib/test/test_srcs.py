@@ -30,10 +30,11 @@ class TestSrcCL( ComponentLevel6 ):
 
     s.msg_to_send = None
     s.send_called = False
+    s.send_rdy    = False
     s.trace_len   = len( str( s.msgs[0] ) )
  
     @s.update
-    def send_msg():
+    def up_src_send():
 
       s.send_called = False
       if not s.initial_cnt==0:
@@ -48,6 +49,9 @@ class TestSrcCL( ComponentLevel6 ):
           # reset interval_cnt only after a message is sent
           s.interval_cnt = s.interval_delay
           s.send_called = True
+          s.send_rdy    = True
+
+    s.add_constraints( U( up_src_send ) < M( s.send ) )
 
   def done( s ):
     return not s.msgs
@@ -55,9 +59,9 @@ class TestSrcCL( ComponentLevel6 ):
   # Line trace
 
   def line_trace( s ):
-    trace = "." if not s.send_called and s.send.rdy() else \
-            "#" if not s.send_called and not s.send.rdy() else \
-            "X" if s.send_called and not s.send.rdy() else \
+    trace = " " if not s.send_called and s.send_rdy else \
+            "#" if not s.send_called and not s.send_rdy else \
+            "X" if s.send_called and not s.send_rdy else \
             str( s.msg_to_send )
 
     return "{}".format( trace.ljust( s.trace_len ) )
@@ -88,4 +92,4 @@ class TestSrcRTL( ComponentLevel6 ):
   # Line trace
 
   def line_trace( s ):
-    return s.src.line_trace()
+    return "{}|{}|".format( s.src.line_trace(), s.adapter.line_trace() )

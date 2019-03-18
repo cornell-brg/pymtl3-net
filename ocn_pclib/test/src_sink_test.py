@@ -71,6 +71,8 @@ def run_sim( th, max_cycles=100 ):
 
   th.elaborate()
   th.apply( simple_sim_pass )
+  
+  print th._schedule
 
   # Run simluation
 
@@ -137,3 +139,4 @@ def test_src_sink_rtl( msgs, src_init_delay,  src_inter_delay,
   th = TestHarnessRTL( Bits16, msgs, msgs, src_init_delay,  src_inter_delay, 
                                 sink_init_delay, sink_inter_delay )
   run_sim( th )
+  # print th._dsl.__dict__
