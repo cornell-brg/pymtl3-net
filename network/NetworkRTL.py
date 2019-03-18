@@ -13,7 +13,7 @@ from pclib.rtl  import NormalQueueRTL
 from network.router.RouteUnitRTL  import RouteUnitRTL
 from network.router.RouterRTL     import RouterRTL
 from network.routing.RoutingDORY  import RoutingDORY
-from network.topology.Mesh        import Mesh
+from network.topology.Mesh        import *
 from network.LinkUnitRTL          import LinkUnitRTL
 from ocn_pclib.Packet             import Packet
 from ocn_pclib.Position           import *
@@ -28,90 +28,47 @@ class NetworkRTL( RTLComponent ):
 
     s.num_outports = configs.router_outports
     s.num_inports  = configs.router_inports
-#    s.num_routers  = configs.routers
-    s.num_routers  = 2
+    s.num_routers  = configs.routers
     s.RoutingStrategyType = RoutingDORY
 
-    s.topology = Mesh()
-    s.PositionType = MeshPosition
-    s.num_rows     = configs.rows
-    s.num_cols     = s.num_routers/s.num_rows
-#    s.positions = mk_mesh_pos( configs.rows, s.num_routers)
+    s.PosType = MeshPosition
+    s.rows     = configs.rows
+    s.cols     = s.num_routers/s.rows
 
     # Interface
-    s.recv = [InEnRdyIfc(Packet)  for _ in range(s.num_routers*s.num_inports*2)]
-    s.send = [OutEnRdyIfc(Packet) for _ in range(s.num_routers*s.num_outports*2)]
-#+2*s.num_cols+2*s.num_rows)]
+    s.recv = [InEnRdyIfc(Packet)  for _ in range(s.num_routers*4)]
+    s.send = [OutEnRdyIfc(Packet) for _ in range(s.num_routers*4)]
+    s.recv_noc_ifc = [InEnRdyIfc(Packet)  for _ in range(s.num_routers)]
+    s.send_noc_ifc = [OutEnRdyIfc(Packet) for _ in range(s.num_routers)]
 
-    s.outputs = [ Wire( Bits3 )  for _ in range( s.num_routers *  s.num_inports ) ]
-
-    s.pos_ports = [ InVPort( s.PositionType ) for _ in range ( s.num_routers ) ]
-#    s.pos = InVPort( s.PositionType )
-    s.links = [LinkUnitRTL(Packet, NormalQueueRTL, num_stages=2) for _ in range(s.num_routers*(s.num_inports+s.num_outports))]
+    # This outputs used to print the direction of the routing
+    s.outputs = [ Wire( Bits3 )  for _ in range(s.num_routers*s.num_inports)]
+    s.pos_ports = [ InVPort( s.PosType ) for _ in range(s.num_routers)]
 
     # Components
-    s.routers = [ RouterRTL( i, s.RoutingStrategyType, s.PositionType ) 
-                for i in range( s.num_routers ) ]
+    s.routers = [RouterRTL(i, s.RoutingStrategyType, s.PosType, 
+        QueueType=NormalQueueRTL) for i in range(s.num_routers)]
 
-    # Connections
-#    for i in range(s.num_routers):
-#      s.connect(s.recv[i], s.routers[i].recv[4])
-#      s.connect(s.send[i], s.routers[i].send[4])
-#      print 'self router: ', i
+    s.links   = [LinkUnitRTL(Packet, NormalQueueRTL, num_stages=2)             
+            for _ in range(s.num_routers*(s.rows*(s.cols-1)+s.cols*(s.rows-1)))]
 
-    for i in range(s.num_inports):
-      s.connect(s.recv[i+2*s.num_outports], s.routers[0].recv[i])
-#      s.connect(s.recv[i], s.links[i].recv)
-#      s.connect(s.links[i].send, s.routers[0].recv[i])
-    for i in range(s.num_inports):
-      s.connect(s.recv[i+s.num_inports], s.routers[1].recv[i])
-#      s.connect(s.recv[i+s.num_inports], s.links[i+s.num_inports].recv)
-#      s.connect(s.links[i+s.num_inports].send, s.routers[1].recv[i])
-
-    for i in range(s.num_outports):
-      s.connect(s.send[i], s.routers[0].send[i])
-    for i in range(s.num_outports):
-      s.connect(s.send[i+s.num_outports], s.routers[1].send[i])
-
-#    s.connect(s.routers[0].send[4], s.routers[1].recv[4])
-#    s.connect(s.routers[0].recv[4], s.routers[1].send[4])
-
-#
-#    for i in range(s.num_cols):
-#      # North port connection
-#      s.connect(s.send[i+s.num_routers], s.routers[i].send[0])
-#      # South port connection
-#      s.connect(s.send[s.num_routers+s.num_cols*2-i-1], 
-#                s.routers[s.num_cols*s.num_rows-i-1].send[1])
-#      print 'north router: ', i, '; and south router: ', s.num_cols*s.num_rows-i-1
-#      print 'send: ', i+s.num_routers, '; and send: ', s.num_routers+s.num_cols*2-i-1
-#
-#    for i in range(s.num_rows):
-#      # West port connection
-#      s.connect(s.send[i+s.num_routers+s.num_cols*2], 
-#                s.routers[i*s.num_cols].send[2])
-#      # East port connection
-#      s.connect(s.send[i+s.num_routers+s.num_cols*2+s.num_rows], 
-#                s.routers[(i+1)*s.num_cols-1].send[3])
-#      print 'west router: ', i*s.num_cols, '; and east router: ', (i+1)*s.num_cols-1
-#      print 'send: ', i+s.num_routers+s.num_cols*2, '; and send: ', i+s.num_routers+s.num_cols*2+s.num_rows
+    mk_mesh_topology(s)
 
     for i in range( s.num_routers ):
       for j in range( s.num_inports):
-#        s.connect( s.recv[i * s.num_inports + j], s.routers[i].recv[j] )
         s.connect( s.outputs[i*s.num_inports+j],  s.routers[i].outs[j]   )
       s.connect( s.pos_ports[i], s.routers[i].pos )
 
-#    for i in range( s.num_routers ):
-#      for j in range( s.num_outports ):
-#        s.connect( s.routers[i].send[j], s.send[i * s.num_outports + j] )
-    
-#    s.topology.mk_topology( s, s.routers, s.num_rows )
 
-  # TODO: Implement line trace.
   def line_trace( s ):
-    return 'done'
-#    return "pos:({},{}); src:({},{}); dst:({},{}); out_dir:({})".format(
-#s.pos_ports[3].pos_x, s.pos_ports[3].pos_y, s.recv[3].msg.src_x, s.recv[3].msg.src_y, 
-#s.recv[3].msg.dst_x, s.recv[3].msg.dst_y, s.outputs[15] )
+    trace = ''
+    for r in range(s.num_routers):
+      trace += '\n({},{})|'.format(s.pos_ports[r].pos_x, s.pos_ports[r].pos_y)
+      for i in range(s.num_inports):
+          trace += '|{}:({})->({},{})'.format( i, 
+                s.routers[r].recv[i].msg.payload, 
+                s.routers[r].recv[i].msg.dst_x,
+                s.routers[r].recv[i].msg.dst_y)
+
+    return trace
     
