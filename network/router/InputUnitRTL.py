@@ -13,11 +13,10 @@ from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 from pclib.rtl  import NormalQueueRTL
 
 class InputUnitRTL( RTLComponent ):
-  def construct( s, PktType, QueueType=None, num_entries=2 ):
+  def construct( s, PktType, QueueType=None, num_entries=1 ):
 
     # Constant
     s.QueueType = QueueType
-#    s.num_entries = num_entries
 
     # Interface
     s.recv =  InEnRdyIfc( PktType )
@@ -29,18 +28,15 @@ class InputUnitRTL( RTLComponent ):
       
       # Connections
       s.connect( s.recv.rdy, s.queue.enq.rdy )
-#      s.connect( s.recv.en,  s.queue.enq.val )
-#      s.connect( s.recv.msg, s.queue.enq.msg )
+      s.connect( s.recv.en,  s.queue.enq.val )
+      s.connect( s.recv.msg, s.queue.enq.msg )
+
+      s.connect( s.send.msg, s.queue.deq.msg )
   
       @s.update
-      def process():
-        s.send.msg  = s.queue.deq.msg
+      def enSend():
         s.send.en   = s.send.rdy and s.queue.deq.val
         s.queue.deq.rdy = s.send.rdy
-
-        if s.recv.en == 1:
-          s.queue.enq.msg = s.recv.msg
-          s.queue.enq.val = 1
 
     else:
       s.connect( s.recv, s.send )

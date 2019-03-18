@@ -42,9 +42,8 @@ class LinkUnitRTL( RTLComponent ):
           s.queues[i+1].enq.val = s.queues[i].deq.rdy and s.queues[i].deq.val
 
         # recv is enabled only when the enq is ready!
-        if s.recv.en == 1:  
-          s.queues[0].enq.msg = s.recv.msg
-          s.queues[0].enq.val = 1
+        s.queues[0].enq.msg = s.recv.msg
+        s.queues[0].enq.val = s.recv.en
 
         s.send.msg  = s.queues[last].deq.msg
         s.send.en   = s.send.rdy and s.queues[last].deq.val

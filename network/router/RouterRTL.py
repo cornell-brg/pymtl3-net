@@ -20,8 +20,8 @@ from network.router.OutputUnitRTL import OutputUnitRTL
 from pclib.rtl  import NormalQueueRTL
 
 class RouterRTL( RTLComponent ):
-  def construct( s, router_id, RoutingStrategyType, PositionType, num_inports=5, 
-                 num_outports=5 ):
+  def construct( s, router_id, RoutingStrategyType, PositionType, QueueType=None, 
+                 num_inports=5, num_outports=5 ):
 
     s.router_id    = router_id
     s.num_inports  = num_inports
@@ -36,7 +36,7 @@ class RouterRTL( RTLComponent ):
 
     # Components
     # TODO: modify InputUnit to adapt Packet
-    s.input_units  = [ InputUnitRTL( Packet, NormalQueueRTL )
+    s.input_units  = [ InputUnitRTL( Packet, QueueType )
                      for _ in range( s.num_inports ) ]
 
     routing_logics = [ RoutingStrategyType( Packet )
@@ -76,7 +76,7 @@ class RouterRTL( RTLComponent ):
       tmp_str += out_str[i]
     tmp_str += ' recv.rdy:<'
     for i in range (s.num_inports):
-      tmp_str += "{}".format(s.input_units[i].recv.rdy)
+      tmp_str += "{}".format(int(s.input_units[i].recv.rdy))
     tmp_str += '> send.en:<'
     for i in range (s.num_outports):
       tmp_str += "{}".format(s.send[i].en)

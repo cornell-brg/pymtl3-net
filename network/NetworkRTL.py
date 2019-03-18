@@ -59,8 +59,8 @@ class NetworkRTL( RTLComponent ):
 #      s.connect(s.send[i], s.routers[i].send[4])
 #      print 'self router: ', i
 
-#    for i in range(s.num_inports):
-#      s.connect(s.recv[i+2*s.num_outports], s.routers[0].recv[i])
+    for i in range(s.num_inports):
+      s.connect(s.recv[i+2*s.num_outports], s.routers[0].recv[i])
 #      s.connect(s.recv[i], s.links[i].recv)
 #      s.connect(s.links[i].send, s.routers[0].recv[i])
     for i in range(s.num_inports):

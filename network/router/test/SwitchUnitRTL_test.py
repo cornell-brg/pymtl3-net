@@ -19,11 +19,9 @@ def run_test( model, test_vectors ):
 
   def tv_in( model, test_vector ):
     model.send.rdy = test_vector[2]
-#    model.send.en  = test_vector[3]
     for i in range( model.num_inports ):
       if model.recv[i].rdy == 1:
         model.recv[i].en = test_vector[0][i]
-#      model.recv[i].msg = test_vector[1][i]
       pkt = mk_pkt( 0, 0, 1, 1, 1, test_vector[1][i])
       model.recv[i].msg = pkt
 
@@ -33,14 +31,11 @@ def run_test( model, test_vectors ):
     assert model.send.en == test_vector[3]
     if model.send.en == 1:
       assert model.send.msg.payload == test_vector[4]
-#    assert Bits16(model.send.en)  == Bits16(test_vector[3])
-#    assert Bits16(model.send.msg) == Bits16(test_vector[4])
   
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
 
 def test_SwitchUnit( dump_vcd, test_verilog ):
-#  model = SwitchUnitRTL(Bits16)
   model = SwitchUnitRTL(Packet)
   x = 'x'
   run_test( model, [
