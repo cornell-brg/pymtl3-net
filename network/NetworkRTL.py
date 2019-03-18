@@ -8,11 +8,13 @@
 
 from pymtl                        import *
 from pclib.ifcs.EnRdyIfc          import InEnRdyIfc, OutEnRdyIfc
+from pclib.rtl  import NormalQueueRTL
 
 from network.router.RouteUnitRTL  import RouteUnitRTL
 from network.router.RouterRTL     import RouterRTL
 from network.routing.RoutingDORY  import RoutingDORY
 from network.topology.Mesh        import Mesh
+from network.LinkUnitRTL          import LinkUnitRTL
 from ocn_pclib.Packet             import Packet
 from ocn_pclib.Position           import *
 
@@ -37,14 +39,15 @@ class NetworkRTL( RTLComponent ):
 #    s.positions = mk_mesh_pos( configs.rows, s.num_routers)
 
     # Interface
-    s.recv = [InEnRdyIfc(Packet)  for _ in range(s.num_routers*s.num_inports)]
-    s.send = [OutEnRdyIfc(Packet) for _ in range(s.num_routers*s.num_outports)]
+    s.recv = [InEnRdyIfc(Packet)  for _ in range(s.num_routers*s.num_inports*2)]
+    s.send = [OutEnRdyIfc(Packet) for _ in range(s.num_routers*s.num_outports*2)]
 #+2*s.num_cols+2*s.num_rows)]
 
     s.outputs = [ Wire( Bits3 )  for _ in range( s.num_routers *  s.num_inports ) ]
 
     s.pos_ports = [ InVPort( s.PositionType ) for _ in range ( s.num_routers ) ]
 #    s.pos = InVPort( s.PositionType )
+    s.links = [LinkUnitRTL(Packet, NormalQueueRTL, num_stages=2) for _ in range(s.num_routers*(s.num_inports+s.num_outports))]
 
     # Components
     s.routers = [ RouterRTL( i, s.RoutingStrategyType, s.PositionType ) 
@@ -56,18 +59,22 @@ class NetworkRTL( RTLComponent ):
 #      s.connect(s.send[i], s.routers[i].send[4])
 #      print 'self router: ', i
 
-    for i in range(s.num_inports-1):
-      s.connect(s.recv[i], s.routers[0].recv[i])
-    for i in range(s.num_inports-1):
+#    for i in range(s.num_inports):
+#      s.connect(s.recv[i+2*s.num_outports], s.routers[0].recv[i])
+#      s.connect(s.recv[i], s.links[i].recv)
+#      s.connect(s.links[i].send, s.routers[0].recv[i])
+    for i in range(s.num_inports):
       s.connect(s.recv[i+s.num_inports], s.routers[1].recv[i])
+#      s.connect(s.recv[i+s.num_inports], s.links[i+s.num_inports].recv)
+#      s.connect(s.links[i+s.num_inports].send, s.routers[1].recv[i])
 
-    for i in range(s.num_outports-1):
+    for i in range(s.num_outports):
       s.connect(s.send[i], s.routers[0].send[i])
-    for i in range(s.num_outports-1):
+    for i in range(s.num_outports):
       s.connect(s.send[i+s.num_outports], s.routers[1].send[i])
 
-    s.connect(s.routers[0].send[4], s.routers[1].recv[4])
-    s.connect(s.routers[0].recv[4], s.routers[1].send[4])
+#    s.connect(s.routers[0].send[4], s.routers[1].recv[4])
+#    s.connect(s.routers[0].recv[4], s.routers[1].send[4])
 
 #
 #    for i in range(s.num_cols):

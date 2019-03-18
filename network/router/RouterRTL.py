@@ -17,6 +17,8 @@ from network.router.RouteUnitRTL  import RouteUnitRTL
 from network.router.SwitchUnitRTL import SwitchUnitRTL
 from network.router.OutputUnitRTL import OutputUnitRTL
 
+from pclib.rtl  import NormalQueueRTL
+
 class RouterRTL( RTLComponent ):
   def construct( s, router_id, RoutingStrategyType, PositionType, num_inports=5, 
                  num_outports=5 ):
@@ -34,7 +36,7 @@ class RouterRTL( RTLComponent ):
 
     # Components
     # TODO: modify InputUnit to adapt Packet
-    s.input_units  = [ InputUnitRTL( Packet )
+    s.input_units  = [ InputUnitRTL( Packet, NormalQueueRTL )
                      for _ in range( s.num_inports ) ]
 
     routing_logics = [ RoutingStrategyType( Packet )

@@ -27,15 +27,19 @@ class OutputUnitRTL( RTLComponent ):
   
       # Connections
       s.connect( s.recv.rdy, s.queue.enq.rdy )
-      s.connect( s.recv.en,  s.queue.enq.val )
-      s.connect( s.recv.msg, s.queue.enq.msg )
+#      s.connect( s.recv.en,  s.queue.enq.val )
+#      s.connect( s.recv.msg, s.queue.enq.msg )
   
       @s.update
       def proceed():
         s.send.msg  = s.queue.deq.msg
         s.send.en   = s.send.rdy and s.queue.deq.val
         s.queue.deq.rdy = s.send.rdy
-      
+
+        if s.recv.en == 1:
+          s.queue.enq.msg = s.recv.msg
+          s.queue.enq.val = 1
+     
     # No ouput queue
     else:
       s.connect( s.recv, s.send ) 

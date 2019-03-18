@@ -38,7 +38,7 @@ class TestHarness( RTLComponent ):
     s.vr_to_er = ValRdy2EnRdy    ( MsgType            )
     s.er_to_vr = EnRdy2ValRdy    ( MsgType            )
     s.sink     = TestSinkValRdy  ( MsgType, sink_msgs )
-    s.link_unit   = LinkUnitRTL    ( MsgType )
+    s.link_unit   = LinkUnitRTL    ( MsgType, num_stages=3 )
 
     # Connections
     s.connect( s.src.out,      s.vr_to_er.in_ )

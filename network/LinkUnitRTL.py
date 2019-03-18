@@ -55,7 +55,7 @@ class LinkUnitRTL( RTLComponent ):
 
   def line_trace( s ):
     if s.QueueType != None and s.num_stages != 0:
-      return "{},{}({}){},{}".format(s.recv.msg, s.queues[0].deq.msg, s.num_stages, s.queues[s.num_stages-1].deq.msg, s.send.msg)
+      return "{}({}){}".format(s.recv.msg, s.num_stages, s.send.msg)
     else:
       return "{}(0){}".format( s.recv.msg, s.send.msg)
 
