@@ -22,25 +22,27 @@ def run_test( model, test_vectors ):
 #  positions = mk_mesh_pos( configs.rows, configs.routers )
   def tv_in( model, test_vector ):
 
-    for i in range( configs.routers ):
+    for i in range (configs.routers):
       model.pos_ports[i] = MeshPosition(i, i%(configs.routers/configs.rows),
               i/(configs.routers/configs.rows))
-      model.routers[i].send[4].rdy = 1
-      model.routers[i].recv[4].en  = 1
-    router_id = test_vector[0]
-    pkt = mk_pkt( router_id%(configs.routers/configs.rows),
+    if test_vector[0] != 'x':
+      router_id = test_vector[0]
+      pkt = mk_pkt( router_id%(configs.routers/configs.rows),
                   router_id/(configs.routers/configs.rows),
                   test_vector[1][0], test_vector[1][1], 1, test_vector[1][2])
     
-    # Enable the network interface on specific router
-    model.recv_noc_ifc[router_id].msg = pkt
-    model.recv_noc_ifc[router_id].en  = 1
-    model.send_noc_ifc[router_id].rdy  = 1
+      # Enable the network interface on specific router
+      for i in range (configs.routers):
+        model.recv_noc_ifc[i].en  = 0
+      model.recv_noc_ifc[router_id].msg = pkt
+      model.recv_noc_ifc[router_id].en  = 1
+
+    for i in range (configs.routers):
+      model.send_noc_ifc[i].rdy = 1
 
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
-      print model.send_noc_ifc[test_vector[2]].msg.payload
-    assert 1 == 1
+      assert model.send_noc_ifc[test_vector[2]].msg.payload == test_vector[3]
      
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
@@ -53,24 +55,25 @@ def test_Network( dump_vcd, test_verilog ):
 #  model.set_parameter("top.elaborate.num_outports", 5)
 
   x = 'x'
+  # Specific for wire connection (link delay = 0)
   simple_test = [
 #  router   [packet]   arr_router  msg 
   [  0,    [1,0,1001],     x,       x  ],
   [  0,    [1,1,1002],     x,       x  ],
-  [  0,    [0,1,1003],     2,       x  ],
-  [  0,    [0,1,1004],     2,     1002 ],
-  [  0,    [1,0,1005],     1,     1001 ], ##
-  [  2,    [0,0,1006],     2,     1003 ],
-  [  1,    [1,1,1007],     2,     1003 ], ##
-  [  2,    [1,1,1008],     2,     1003 ],
-  [  0,    [0,0,0000],     3,      0  ],
-  [  0,    [0,0,0000],     3,     1007 ],
-  [  0,    [0,0,0000],     3,     1007 ], ##
-  [  0,    [0,0,0000],     3,      0  ],
-  [  0,    [0,0,0000],     3,      0  ],
-  [  0,    [0,0,0000],     3,      0  ],
-  [  0,    [0,0,0000],     3,      0  ],
-  [  0,    [0,0,0000],     3,      0  ],
+  [  0,    [0,1,1003],     1,     1001 ],
+  [  0,    [0,1,1004],     x,       x  ],
+  [  0,    [1,0,1005],     2,     1003 ],
+  [  2,    [0,0,1006],     x,       x  ],
+  [  1,    [0,1,1007],     1,     1005 ],
+  [  2,    [1,1,1008],     0,     1006 ],
+  [  x,    [0,0,0000],     x,       x  ],
+  [  x,    [0,0,0000],     2,     1007 ],
+  [  x,    [0,0,0000],     x,       x  ],
+  [  x,    [0,0,0000],     3,     1008 ],
+  [  x,    [0,0,0000],     x,       x  ],
+  [  x,    [0,0,0000],     x,       x  ],
+  [  x,    [0,0,0000],     x,       x  ],
+  [  x,    [0,0,0000],     x,       x  ],
   ]
 
   run_test( model, simple_test)

@@ -49,8 +49,8 @@ class NetworkRTL( RTLComponent ):
     s.routers = [RouterRTL(i, s.RoutingStrategyType, s.PosType, 
         QueueType=NormalQueueRTL) for i in range(s.num_routers)]
 
-    s.links   = [LinkUnitRTL(Packet, NormalQueueRTL, num_stages=2)             
-            for _ in range(s.num_routers*(s.rows*(s.cols-1)+s.cols*(s.rows-1)))]
+    s.links   = [LinkUnitRTL(Packet, NormalQueueRTL, num_stages=0)
+            for _ in range(s.num_routers+s.rows*(s.cols-1)+s.cols*(s.rows-1))]
 
     mk_mesh_topology(s)
 
@@ -65,10 +65,15 @@ class NetworkRTL( RTLComponent ):
     for r in range(s.num_routers):
       trace += '\n({},{})|'.format(s.pos_ports[r].pos_x, s.pos_ports[r].pos_y)
       for i in range(s.num_inports):
-          trace += '|{}:({})->({},{})'.format( i, 
+        trace += '|{}:{}->({},{})'.format( i, 
                 s.routers[r].recv[i].msg.payload, 
                 s.routers[r].recv[i].msg.dst_x,
                 s.routers[r].recv[i].msg.dst_y)
-
+      trace += '\n out: '
+      for i in range(s.num_outports):
+        trace += '|{}:{}->({},{})'.format( i, 
+                s.routers[r].send[i].msg.payload, 
+                s.routers[r].send[i].msg.dst_x,
+                s.routers[r].send[i].msg.dst_y)
     return trace
     
