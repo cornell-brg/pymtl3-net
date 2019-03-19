@@ -19,7 +19,6 @@ from Configs import configure_network
 def run_test( model, test_vectors ):
  
   configs = configure_network()
-#  positions = mk_mesh_pos( configs.rows, configs.routers )
   def tv_in( model, test_vector ):
 
     for i in range (configs.routers):
@@ -43,6 +42,7 @@ def run_test( model, test_vectors ):
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
       assert model.send_noc_ifc[test_vector[2]].msg.payload == test_vector[3]
+#      assert 1 == 1
      
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
@@ -55,7 +55,8 @@ def test_Network( dump_vcd, test_verilog ):
 #  model.set_parameter("top.elaborate.num_outports", 5)
 
   x = 'x'
-  # Specific for wire connection (link delay = 0)
+
+  # Specific for wire connection (link delay = 0) in Mesh topology
   simple_test = [
 #  router   [packet]   arr_router  msg 
   [  0,    [1,0,1001],     x,       x  ],
