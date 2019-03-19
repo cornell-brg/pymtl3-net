@@ -10,17 +10,13 @@
 </pre>
 NoC Generator
 
-### Hierarchy:
-- Network
-    - NetworkInterface
-    - Router
-      - InputUnit
-      - VirtualChannelArbitrator
-      - RoutingUnit
-      - Xbar*
-      - SwitchUnit
-
+### NoC generator hierarchy:
+<img src="https://github.com/cornell-brg/wiki/blob/master/members/ct535/notes/hierarchy.png" width="400">
 (*)Note: diffused inside RoutingUnit and XbarArbitrator
+
+### test a set of simple tests.
+![test table](https://github.com/cornell-brg/wiki/blob/master/members/ct535/notes/test.png)
+
 
 ### parameter:
 
