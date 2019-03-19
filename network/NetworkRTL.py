@@ -14,7 +14,7 @@ from network.router.RouteUnitRTL  import RouteUnitRTL
 from network.router.RouterRTL     import RouterRTL
 from network.routing.RoutingDORY  import RoutingDORY
 from network.topology.Mesh        import *
-from network.topology.Torus       import *
+#from network.topology.Torus       import *
 from network.LinkUnitRTL          import LinkUnitRTL
 from ocn_pclib.Packet             import Packet
 from ocn_pclib.Position           import *
@@ -47,15 +47,18 @@ class NetworkRTL( RTLComponent ):
     s.pos_ports = [ InVPort( s.PosType ) for _ in range(s.num_routers)]
 
     # Components
+
+    topology  = Mesh()
+
     s.routers = [RouterRTL(i, s.RoutingStrategyType, s.PosType, 
         QueueType=NormalQueueRTL) for i in range(s.num_routers)]
 
     s.links   = [LinkUnitRTL(Packet, NormalQueueRTL, num_stages=0)
 #            for _ in range(s.num_routers*s.cols*s.rows)]
-            for _ in range(s.num_routers+s.rows*(s.cols-1)+s.cols*(s.rows-1))]
+            for _ in range(topology.get_num_links())]
 
 #    mk_torus_topology(s)
-    mk_mesh_topology(s)
+    topology.mk_topology(s)
 
     for i in range( s.num_routers ):
       for j in range( s.num_inports):

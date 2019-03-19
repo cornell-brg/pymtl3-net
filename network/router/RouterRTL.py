@@ -20,6 +20,10 @@ from network.router.OutputUnitRTL import OutputUnitRTL
 from pclib.rtl  import NormalQueueRTL
 
 class RouterRTL( RTLComponent ):
+
+  # TODO:
+  # packettype, positiontype, in, out
+  # and also unit types
   def construct( s, router_id, RoutingStrategyType, PositionType, QueueType=None, 
                  num_inports=5, num_outports=5 ):
 
@@ -31,13 +35,13 @@ class RouterRTL( RTLComponent ):
     s.recv  = [  InEnRdyIfc( Packet ) for _ in range( s.num_inports  ) ]
     s.send  = [ OutEnRdyIfc( Packet ) for _ in range( s.num_outports ) ]
 
+    # delete outs...
     s.outs  = [ OutVPort    ( Bits3 ) for _ in range( s.num_inports  ) ]
     s.pos   = InVPort( PositionType )
 
     # Components
     # TODO: modify InputUnit to adapt Packet
-    s.input_units  = [ InputUnitRTL( Packet, QueueType )
-                     for _ in range( s.num_inports ) ]
+    s.input_units  = [ InputUnitRTL( Packet, QueueType ) for _ in range( s.num_inports ) ]
 
     routing_logics = [ RoutingStrategyType( Packet )
                      for _ in range( s.num_inports ) ]
@@ -54,10 +58,10 @@ class RouterRTL( RTLComponent ):
 
     # Connections
     for i in range( s.num_inports ):
-      s.connect(      s.recv[i],        s.input_units[i].recv    )
+      s.connect( s.recv[i],             s.input_units[i].recv    )
       s.connect( s.input_units[i].send, s.route_units[i].recv    )
-      s.connect(       s.pos,           s.route_units[i].pos     )
-      s.connect(      s.outs[i],        s.route_units[i].out_dir )
+      s.connect( s.pos,                 s.route_units[i].pos     )
+      s.connect( s.outs[i],             s.route_units[i].out_dir )
 
     for i in range( s.num_inports ):
       for j in range( s.num_outports ):
@@ -65,7 +69,7 @@ class RouterRTL( RTLComponent ):
 
     for j in range( s.num_outports ):
       s.connect( s.switch_units[j].send, s.output_units[j].recv )
-      s.connect( s.output_units[j].send,       s.send[j]        )
+      s.connect( s.output_units[j].send, s.send[j]        )
 
   # TODO: Implement line trace.
   def line_trace( s ):
