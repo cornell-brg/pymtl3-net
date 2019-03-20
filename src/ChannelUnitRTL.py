@@ -10,7 +10,7 @@ from pymtl import *
 from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 from pclib.rtl  import NormalQueueRTL
 
-class LinkUnitRTL( RTLComponent ):
+class ChannelUnitRTL( RTLComponent ):
   def construct(s, PktType, QueueType=None, num_stages=2, num_entries=2):
 
     # Constant

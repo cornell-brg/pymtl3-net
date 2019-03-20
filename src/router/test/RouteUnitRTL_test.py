@@ -10,10 +10,10 @@ import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
 from ocn_pclib.Packet import Packet, mk_pkt
-from network.router.RouteUnitRTL  import RouteUnitRTL
+from src.router.RouteUnitRTL  import RouteUnitRTL
 
-from network.routing.RoutingDORX import RoutingDORX
-from network.routing.RoutingDORY import RoutingDORY
+from src.routing.RoutingDORX import RoutingDORX
+from src.routing.RoutingDORY import RoutingDORY
 
 from ocn_pclib.Position import *
 

@@ -1,10 +1,10 @@
 #=========================================================================
-# InputUnitRTLSourceSink_test.py
+# OutputUnitRTLSourceSink_test.py
 #=========================================================================
-# Test for InputUnitRTL using Source and Sink
+# Test for OutputUnitRTL using Source and Sink
 #
 # Author : Cheng Tan, Yanghui Ou
-#   Date : Feb 23, 2019
+#   Date : Feb 28, 2019
 
 import pytest
 
@@ -17,13 +17,11 @@ from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 from pclib.test import mk_test_case_table
 from pymtl.passes.PassGroups import SimpleSim
 
-from network.router.InputUnitRTL import InputUnitRTL
+from src.router.OutputUnitRTL import OutputUnitRTL
 from ocn_pclib.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
 
 from pclib.rtl  import NormalQueueRTL
 from pclib.rtl  import BypassQueue1RTL
-
-from ocn_pclib.Packet import *
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -38,19 +36,19 @@ class TestHarness( RTLComponent ):
     s.vr_to_er = ValRdy2EnRdy    ( MsgType            )
     s.er_to_vr = EnRdy2ValRdy    ( MsgType            )
     s.sink     = TestSinkValRdy  ( MsgType, sink_msgs )
-    s.input_unit   = InputUnitRTL    ( MsgType  )
+    s.output_unit   = OutputUnitRTL    ( MsgType  )
 
     # Connections
     s.connect( s.src.out,      s.vr_to_er.in_ )
-    s.connect( s.vr_to_er.out, s.input_unit.recv  )
-    s.connect( s.input_unit.send,  s.er_to_vr.in_ )
+    s.connect( s.vr_to_er.out, s.output_unit.recv  )
+    s.connect( s.output_unit.send,  s.er_to_vr.in_ )
     s.connect( s.er_to_vr.out, s.sink.in_     )
   
   def done( s ):
     return s.src.done() and s.sink.done()
 
   def line_trace( s ):
-    return s.src.line_trace() + "-> | " + s.input_unit.line_trace() + \
+    return s.src.line_trace() + "-> | " + s.output_unit.line_trace() + \
                                " | -> " + s.sink.line_trace()
 
 #-------------------------------------------------------------------------
@@ -61,8 +59,8 @@ def run_rtl_sim( test_harness, max_cycles=100 ):
 
   # Set parameters
 
-#  test_harness.set_parameter("top.input_unit.queue.elaborate.num_entries", 4)
-  test_harness.set_parameter("top.input_unit.elaborate.QueueType", NormalQueueRTL)
+  test_harness.set_parameter("top.output_unit.queue.elaborate.num_entries", 4)
+  test_harness.set_parameter("top.output_unit.elaborate.QueueType", NormalQueueRTL)
 
   # Create a simulator
 
@@ -122,11 +120,6 @@ def mk_test_msgs( msg_list ):
   for m in msg_list:
     src_msgs.append ( m[0] )
     sink_msgs.append( m[1] )
-#    src_msgs.append(  mk_pkt(m[0], m[0], m[0], m[0], m[0], Bits16( 9 )))
-#    sink_msgs.append( mk_pkt(m[1], m[1], m[1], m[1], m[1], Bits16( 9 )))
-#  print src_msgs[0].src_x
-#  print src_msgs[1].src_x
-#  print src_msgs[2].src_x
 
   return ( src_msgs, sink_msgs )
 
@@ -138,7 +131,6 @@ def test( test_params ):
   
   print ""
   run_rtl_sim( 
-#    TestHarness( Packet, src_msgs, sink_msgs, test_params.stall, 
     TestHarness( Bits16, src_msgs, sink_msgs, test_params.stall, 
                  test_params.src_delay, test_params.sink_delay )
   )

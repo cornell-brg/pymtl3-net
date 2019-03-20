@@ -10,7 +10,7 @@ import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
 from ocn_pclib.Packet import Packet, mk_pkt
-from network.NetworkRTL import NetworkRTL
+from src.network.MeshNetworkRTL import MeshNetworkRTL
 
 from ocn_pclib.Position import *
 
@@ -48,9 +48,9 @@ def run_test( model, test_vectors ):
   sim.run_test()
   model.sim_reset()
 
-def test_Network( dump_vcd, test_verilog ):
+def test_MeshNetwork( dump_vcd, test_verilog ):
 
-  model = NetworkRTL()
+  model = MeshNetworkRTL()
 
 #  model.set_parameter("top.elaborate.num_outports", 5)
 

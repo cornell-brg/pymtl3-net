@@ -7,7 +7,7 @@
 #   date : Feb 14, 2019
 
 from pymtl import *
-from router.InputUnitRTL import InputUnitRTL
+from src.router.InputUnitRTL import InputUnitRTL
 from ocn_pclib.TestVectorSimulator import TestVectorSimulator
 
 #TODO: need implement

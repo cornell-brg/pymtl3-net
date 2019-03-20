@@ -12,10 +12,10 @@ from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 from ocn_pclib.Packet    import Packet
 from ocn_pclib.Position  import *
 
-from network.router.InputUnitRTL  import InputUnitRTL
-from network.router.RouteUnitRTL  import RouteUnitRTL
-from network.router.SwitchUnitRTL import SwitchUnitRTL
-from network.router.OutputUnitRTL import OutputUnitRTL
+from src.router.InputUnitRTL  import InputUnitRTL
+from src.router.RouteUnitRTL  import RouteUnitRTL
+from src.router.SwitchUnitRTL import SwitchUnitRTL
+from src.router.OutputUnitRTL import OutputUnitRTL
 
 from pclib.rtl  import NormalQueueRTL
 

@@ -10,22 +10,27 @@ from pymtl                        import *
 from pclib.ifcs.EnRdyIfc          import InEnRdyIfc, OutEnRdyIfc
 from pclib.rtl  import NormalQueueRTL
 
-from network.router.RouteUnitRTL  import RouteUnitRTL
-from network.router.RouterRTL     import RouterRTL
-from network.routing.RoutingDORY  import RoutingDORY
-from network.topology.Mesh        import *
-#from network.topology.Torus       import *
-from network.LinkUnitRTL          import LinkUnitRTL
+from src.router.RouteUnitRTL  import RouteUnitRTL
+from src.router.RouterRTL     import RouterRTL
+from src.router.RoutingDORY  import RoutingDORY
+from src.ChannelUnitRTL          import ChannelUnitRTL
 from ocn_pclib.Packet             import Packet
 from ocn_pclib.Position           import *
 
 from Configs import configure_network
 
-class NetworkRTL( RTLComponent ):
+class TorusNetworkRTL( RTLComponent ):
 #  def construct( s, RouterType, RoutingStrategyType, TopologyType ):
   def construct( s ):
 
+    # Constants
     configs = configure_network()
+
+    NORTH = 0
+    SOUTH = 1
+    WEST  = 2
+    EAST  = 3
+    SELF  = 4
 
     s.num_outports = configs.router_outports
     s.num_inports  = configs.router_inports
@@ -48,23 +53,49 @@ class NetworkRTL( RTLComponent ):
 
     # Components
 
-    topology  = Mesh()
-
     s.routers = [RouterRTL(i, s.RoutingStrategyType, s.PosType, 
         QueueType=NormalQueueRTL) for i in range(s.num_routers)]
 
-    s.links   = [LinkUnitRTL(Packet, NormalQueueRTL, num_stages=0)
-#            for _ in range(s.num_routers*s.cols*s.rows)]
-            for _ in range(topology.get_num_links())]
+    num_channels = 4*s.rows*s.cols
 
-#    mk_torus_topology(s)
-    topology.mk_topology(s)
+    s.channels   = [ChannelUnitRTL(Packet, NormalQueueRTL, num_stages=0)
+#            for _ in range(s.num_routers*s.cols*s.rows)]
+            for _ in range(num_channels) ]
 
     for i in range( s.num_routers ):
       for j in range( s.num_inports):
         s.connect( s.outputs[i*s.num_inports+j],  s.routers[i].outs[j]   )
       s.connect( s.pos_ports[i], s.routers[i].pos )
 
+    channel_index  = 0
+    # recv/send_index
+    rs_i = s.num_routers
+
+    for i in range (s.num_routers):
+      # Connect s.routers together in Mesh
+      s.connect(s.routers[i].send[NORTH], s.channels[channel_index].recv)
+      s.connect(s.channels[channel_index].send, s.routers[(s.routers[i].
+           router_id-s.rows+s.num_routers)%s.num_routers].recv[SOUTH])
+      channel_index += 1
+ 
+      s.connect(s.routers[i].send[SOUTH], s.channels[channel_index].recv)
+      s.connect(s.channels[channel_index].send, s.routers[(s.routers[i].
+           router_id+s.rows+s.num_routers)%s.num_routers].recv[NORTH])
+      channel_index += 1
+ 
+      s.connect(s.routers[i].send[WEST],  s.channels[channel_index].recv)
+      s.connect(s.channels[channel_index].send, s.routers[(s.routers[i].
+           router_id-1+s.num_routers)%s.num_routers].recv[EAST])
+      channel_index += 1
+ 
+      s.connect(s.routers[i].send[EAST],  s.channels[channel_index].recv)
+      s.connect(s.channels[channel_index].send, s.routers[(s.routers[i].
+           router_id+1+s.num_routers)%s.num_routers].recv[WEST])
+      channel_index += 1
+
+      # Connect the self port (with Network Interface)
+      s.connect(s.recv_noc_ifc[i], s.routers[i].recv[SELF])
+      s.connect(s.send_noc_ifc[i], s.routers[i].send[SELF])
 
   def line_trace( s ):
     trace = ''

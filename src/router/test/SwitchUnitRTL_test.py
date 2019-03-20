@@ -9,7 +9,7 @@
 import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
-from network.router.SwitchUnitRTL import SwitchUnitRTL
+from src.router.SwitchUnitRTL import SwitchUnitRTL
 
 from ocn_pclib.Packet import Packet, mk_pkt
 

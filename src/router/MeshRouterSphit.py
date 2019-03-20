@@ -9,10 +9,10 @@
 from pymtl import *
 from pclib.ifcs import InValRdyBundle, OutValRdyBundle
 from ifcs.SinglePhitPacket import SinglePhitPacket
-from router.InputUnit    import InputUnit
-from router.RouteUnitDOR import RouteUnitDOR
-from router.SwitchUnit   import SwitchUnit
-from router.OutputUnit   import OutputUnit
+from src.router.InputUnit    import InputUnit
+from src.router.RouteUnitDOR import RouteUnitDOR
+from src.router.SwitchUnit   import SwitchUnit
+from src.router.OutputUnit   import OutputUnit
 
 class MeshRouterSphit( Model ):
 

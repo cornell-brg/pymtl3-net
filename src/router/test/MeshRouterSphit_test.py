@@ -1,7 +1,7 @@
 import pytest
 
 from pymtl import *
-from network.router.MeshRouterSphit import MeshRouterSphit
+from src.router.MeshRouterSphit import MeshRouterSphit
 from ocn_pclib.SinglePhitPacket import SinglePhitPacket
 from pclib.test import TestSource, TestSink, mk_test_case_table
 import copy
