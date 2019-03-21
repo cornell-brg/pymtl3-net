@@ -13,7 +13,7 @@ from ocn_pclib.Packet    import Packet
 from ocn_pclib.Position  import *
 
 from src.router.InputUnitRTL  import InputUnitRTL
-from src.router.RouteUnitRTL  import RouteUnitRTL
+from src.router.DORYRouteUnitRTL  import DORYRouteUnitRTL
 from src.router.SwitchUnitRTL import SwitchUnitRTL
 from src.router.OutputUnitRTL import OutputUnitRTL
 
@@ -24,8 +24,8 @@ class RouterRTL( RTLComponent ):
   # TODO:
   # packettype, positiontype, in, out
   # and also unit types
-  def construct( s, router_id, RoutingStrategyType, PositionType, QueueType=None, 
-                 num_inports=5, num_outports=5 ):
+  def construct( s, router_id, RouteUnitType, PositionType, 
+QueueType=None, num_inports=5, num_outports=5 ):
 
     s.router_id    = router_id
     s.num_inports  = num_inports
@@ -43,11 +43,7 @@ class RouterRTL( RTLComponent ):
     # TODO: modify InputUnit to adapt Packet
     s.input_units  = [ InputUnitRTL( Packet, QueueType ) for _ in range( s.num_inports ) ]
 
-    routing_logics = [ RoutingStrategyType( Packet )
-                     for _ in range( s.num_inports ) ]
-
-    s.route_units  = [ RouteUnitRTL( routing_logics[i], PositionType )
-                     for i in range( s.num_inports ) ]
+    s.route_units  = [ RouteUnitType( PositionType ) for i in range( s.num_inports ) ]
 
     s.switch_units = [ SwitchUnitRTL( Packet, s.num_inports )
                      for _ in range( s.num_outports ) ]

@@ -11,9 +11,8 @@ from pymtl                         import *
 from ocn_pclib.TestVectorSimulator import TestVectorSimulator
 from ocn_pclib.Packet              import Packet, mk_pkt
 from src.router.RouterRTL      import RouterRTL
-from src.router.RouteUnitRTL   import RouteUnitRTL
-from src.router.RoutingDORX   import RoutingDORX
-from src.router.RoutingDORY   import RoutingDORY
+from src.router.DORXRouteUnitRTL   import DORXRouteUnitRTL
+from src.router.DORYRouteUnitRTL   import DORYRouteUnitRTL
 
 from ocn_pclib.Position import *
 
@@ -58,9 +57,9 @@ def test_Router( dump_vcd, test_verilog ):
   configs = configure_network()
 
   if configs.routing_strategy == 'DORX':
-    RoutingStrategyType = RoutingDORX
+    RouteUnitType = DORXRouteUnitRTL
   elif configs.routing_strategy == 'DORY':
-    RoutingStrategyType = RoutingDORY
+    RouteUnitType = DORYRouteUnitRTL
   else:
     print 'Please specific a valid Routing strategy!'
 
@@ -87,7 +86,7 @@ def test_Router( dump_vcd, test_verilog ):
 #  model = RouterRTL( 0, RoutingStrategyType, MeshPosition, NormalQueueRTL )
 #  run_test(model, inputs_1_buffer)
 
-  model = RouterRTL( 0, RoutingStrategyType, MeshPosition )
+  model = RouterRTL( 0, RouteUnitType, MeshPosition )
   run_test(model, inputs_0_buffer)
 
 

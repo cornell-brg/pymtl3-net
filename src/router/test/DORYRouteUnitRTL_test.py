@@ -1,7 +1,7 @@
 #=========================================================================
-# RouteUnitWithRoutingRTL_test.py
+# DORYRouteUnitRTL_test.py
 #=========================================================================
-# Test for RouteUnitWithRoutingRTL
+# Test for DORYRouteUnitRTL
 #
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 3, 2019
@@ -10,10 +10,7 @@ import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
 from ocn_pclib.Packet import Packet, mk_pkt
-from src.router.RouteUnitRTL  import RouteUnitRTL
-
-from src.routing.RoutingDORX import RoutingDORX
-from src.routing.RoutingDORY import RoutingDORY
+from src.router.DORYRouteUnitRTL  import DORYRouteUnitRTL
 
 from ocn_pclib.Position import *
 
@@ -50,15 +47,7 @@ def test_RouteUnit( dump_vcd, test_verilog ):
 
   configs = configure_network()
 
-  if configs.routing_strategy == 'DORX':
-    Routing = RoutingDORX
-  elif configs.routing_strategy == 'DORY':
-    Routing = RoutingDORY
-  else:
-    print 'Please specific a valid Routing strategy!'
-
-  routing_logic = Routing( Packet )
-  model = RouteUnitRTL( routing_logic, MeshPosition )
+  model = DORYRouteUnitRTL( MeshPosition )
 
   model.set_parameter("top.elaborate.num_outports", 5)
 

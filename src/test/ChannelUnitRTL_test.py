@@ -17,7 +17,7 @@ from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 from pclib.test import mk_test_case_table
 from pymtl.passes.PassGroups import SimpleSim
 
-from src.network.ChannelUnitRTL import ChannelUnitRTL
+from src.ChannelUnitRTL import ChannelUnitRTL
 from ocn_pclib.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
 
 from pclib.rtl  import NormalQueueRTL
@@ -38,19 +38,19 @@ class TestHarness( RTLComponent ):
     s.vr_to_er = ValRdy2EnRdy    ( MsgType            )
     s.er_to_vr = EnRdy2ValRdy    ( MsgType            )
     s.sink     = TestSinkValRdy  ( MsgType, sink_msgs )
-    s.link_unit   = LinkUnitRTL    ( MsgType, num_stages=3 )
+    s.channel_unit   = ChannelUnitRTL    ( MsgType, num_stages=3 )
 
     # Connections
     s.connect( s.src.out,      s.vr_to_er.in_ )
-    s.connect( s.vr_to_er.out, s.link_unit.recv  )
-    s.connect( s.link_unit.send,  s.er_to_vr.in_ )
+    s.connect( s.vr_to_er.out, s.channel_unit.recv  )
+    s.connect( s.channel_unit.send,  s.er_to_vr.in_ )
     s.connect( s.er_to_vr.out, s.sink.in_     )
   
   def done( s ):
     return s.src.done() and s.sink.done()
 
   def line_trace( s ):
-    return s.src.line_trace() + "-> | " + s.link_unit.line_trace() + \
+    return s.src.line_trace() + "-> | " + s.channel_unit.line_trace() + \
                                " | -> " + s.sink.line_trace()
 
 #-------------------------------------------------------------------------
@@ -61,8 +61,8 @@ def run_rtl_sim( test_harness, max_cycles=100 ):
 
   # Set parameters
 
-#  test_harness.set_parameter("top.link_unit.queue.elaborate.num_entries", 2)
-  test_harness.set_parameter("top.link_unit.elaborate.QueueType", NormalQueueRTL)
+#  test_harness.set_parameter("top.channel_unit.queue.elaborate.num_entries", 2)
+  test_harness.set_parameter("top.channel_unit.elaborate.QueueType", NormalQueueRTL)
 
   # Create a simulator
 

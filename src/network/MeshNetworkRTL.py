@@ -10,9 +10,8 @@ from pymtl                        import *
 from pclib.ifcs.EnRdyIfc          import InEnRdyIfc, OutEnRdyIfc
 from pclib.rtl  import NormalQueueRTL
 
-from src.router.RouteUnitRTL  import RouteUnitRTL
+from src.router.DORYRouteUnitRTL  import DORYRouteUnitRTL
 from src.router.RouterRTL     import RouterRTL
-from src.router.RoutingDORY  import RoutingDORY
 from src.ChannelUnitRTL          import ChannelUnitRTL
 from ocn_pclib.Packet             import Packet
 from ocn_pclib.Position           import *
@@ -35,7 +34,7 @@ class MeshNetworkRTL( RTLComponent ):
     s.num_outports = configs.router_outports
     s.num_inports  = configs.router_inports
     s.num_routers  = configs.routers
-    s.RoutingStrategyType = RoutingDORY
+    s.RouteUnitType = DORYRouteUnitRTL
 
     s.PosType = MeshPosition
     s.rows     = configs.rows
@@ -53,7 +52,7 @@ class MeshNetworkRTL( RTLComponent ):
 
     # Components
 
-    s.routers = [RouterRTL(i, s.RoutingStrategyType, s.PosType, 
+    s.routers = [RouterRTL(i, s.RouteUnitType, s.PosType, 
         QueueType=NormalQueueRTL) for i in range(s.num_routers)]
 
     num_channels = s.num_routers+s.rows*(s.cols-1)+s.cols*(s.rows-1)
