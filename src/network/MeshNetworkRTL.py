@@ -52,7 +52,7 @@ class MeshNetworkRTL( RTLComponent ):
 
     # Components
 
-    s.routers = [RouterRTL(i, s.RouteUnitType, s.PosType, 
+    s.routers = [RouterRTL(s.RouteUnitType, s.PosType, 
         QueueType=NormalQueueRTL) for i in range(s.num_routers)]
 
     num_channels = s.num_routers+s.rows*(s.cols-1)+s.cols*(s.rows-1)
@@ -72,32 +72,24 @@ class MeshNetworkRTL( RTLComponent ):
 
     for i in range (s.num_routers):
       # Connect s.routers together in Mesh
-      if s.routers[i].router_id / s.cols > 0:
-        s.connect( s.routers[i].send[NORTH],
-                s.channels[channel_index].recv )
-        s.connect( s.channels[channel_index].send,
-                s.routers[s.routers[i].router_id-s.cols].recv[SOUTH] )
+      if i / s.cols > 0:
+        s.connect( s.routers[i].send[NORTH], s.channels[channel_index].recv )
+        s.connect( s.channels[channel_index].send, s.routers[i-s.cols].recv[SOUTH] )
         channel_index += 1
 
-      if s.routers[i].router_id / s.cols < s.rows - 1:
-        s.connect( s.routers[i].send[SOUTH],
-                s.channels[channel_index].recv )
-        s.connect( s.channels[channel_index].send,
-                s.routers[s.routers[i].router_id+s.cols].recv[NORTH] )
+      if i / s.cols < s.rows - 1:
+        s.connect( s.routers[i].send[SOUTH], s.channels[channel_index].recv )
+        s.connect( s.channels[channel_index].send, s.routers[i+s.cols].recv[NORTH] )
         channel_index += 1
 
-      if s.routers[i].router_id % s.cols > 0:
-        s.connect( s.routers[i].send[WEST],
-                s.channels[channel_index].recv )
-        s.connect( s.channels[channel_index].send,
-                s.routers[s.routers[i].router_id-1].recv[EAST] )
+      if i % s.cols > 0:
+        s.connect( s.routers[i].send[WEST], s.channels[channel_index].recv )
+        s.connect( s.channels[channel_index].send, s.routers[i-1].recv[EAST] )
         channel_index += 1
 
-      if s.routers[i].router_id % s.cols < s.cols - 1:
-        s.connect( s.routers[i].send[EAST],
-                s.channels[channel_index].recv )
-        s.connect( s.channels[channel_index].send,
-                s.routers[s.routers[i].router_id+1].recv[WEST] )
+      if i % s.cols < s.cols - 1:
+        s.connect( s.routers[i].send[EAST], s.channels[channel_index].recv )
+        s.connect( s.channels[channel_index].send, s.routers[i+1].recv[WEST] )
         channel_index += 1
 
       # Connect the self port (with Network Interface)
@@ -105,22 +97,22 @@ class MeshNetworkRTL( RTLComponent ):
       s.connect(s.send_noc_ifc[i], s.routers[i].send[SELF])
 
       # Connect the unused ports
-      if s.routers[i].router_id / s.cols == 0:
+      if i / s.cols == 0:
         s.connect( s.routers[i].send[NORTH], s.send[rs_i] )
         s.connect( s.routers[i].recv[NORTH], s.recv[rs_i] )
         rs_i += 1
 
-      if s.routers[i].router_id / s.cols == s.rows - 1:
+      if i / s.cols == s.rows - 1:
         s.connect( s.routers[i].send[SOUTH], s.send[rs_i] )
         s.connect( s.routers[i].recv[SOUTH], s.recv[rs_i] )
         rs_i += 1
 
-      if s.routers[i].router_id % s.cols == 0:
+      if i % s.cols == 0:
         s.connect( s.routers[i].send[WEST], s.send[rs_i] )
         s.connect( s.routers[i].recv[WEST], s.recv[rs_i] )
         rs_i += 1
 
-      if s.routers[i].router_id % s.cols == s.cols - 1:
+      if i % s.cols == s.cols - 1:
         s.connect( s.routers[i].send[EAST], s.send[rs_i] )
         s.connect( s.routers[i].recv[EAST], s.recv[rs_i] )
         rs_i += 1

@@ -52,7 +52,7 @@ class TorusNetworkRTL( RTLComponent ):
 
     # Components
 
-    s.routers = [RouterRTL(i, s.RouteUnitType, s.PosType, 
+    s.routers = [RouterRTL( s.RouteUnitType, s.PosType, 
         QueueType=NormalQueueRTL) for i in range(s.num_routers)]
 
     num_channels = 4*s.rows*s.cols
@@ -73,23 +73,23 @@ class TorusNetworkRTL( RTLComponent ):
     for i in range (s.num_routers):
       # Connect s.routers together in Mesh
       s.connect(s.routers[i].send[NORTH], s.channels[channel_index].recv)
-      s.connect(s.channels[channel_index].send, s.routers[(s.routers[i].
-           router_id-s.rows+s.num_routers)%s.num_routers].recv[SOUTH])
+      s.connect(s.channels[channel_index].send, s.routers[(i-s.rows+
+          s.num_routers)%s.num_routers].recv[SOUTH])
       channel_index += 1
  
       s.connect(s.routers[i].send[SOUTH], s.channels[channel_index].recv)
-      s.connect(s.channels[channel_index].send, s.routers[(s.routers[i].
-           router_id+s.rows+s.num_routers)%s.num_routers].recv[NORTH])
+      s.connect(s.channels[channel_index].send, s.routers[(i+s.rows+
+          s.num_routers)%s.num_routers].recv[NORTH])
       channel_index += 1
  
       s.connect(s.routers[i].send[WEST],  s.channels[channel_index].recv)
-      s.connect(s.channels[channel_index].send, s.routers[(s.routers[i].
-           router_id-1+s.num_routers)%s.num_routers].recv[EAST])
+      s.connect(s.channels[channel_index].send, s.routers[(i-1+
+           s.num_routers)%s.num_routers].recv[EAST])
       channel_index += 1
  
       s.connect(s.routers[i].send[EAST],  s.channels[channel_index].recv)
-      s.connect(s.channels[channel_index].send, s.routers[(s.routers[i].
-           router_id+1+s.num_routers)%s.num_routers].recv[WEST])
+      s.connect(s.channels[channel_index].send, s.routers[(i+1+
+          s.num_routers)%s.num_routers].recv[WEST])
       channel_index += 1
 
       # Connect the self port (with Network Interface)

@@ -12,6 +12,7 @@ from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 from ocn_pclib.Packet    import Packet
 from ocn_pclib.Position  import *
 
+# TODO: This needs much more effort to manage the table and design the routes.
 class SRRouteUnitRTL( RTLComponent ):
   def construct( s, PositionType, num_outports=5 ):
 

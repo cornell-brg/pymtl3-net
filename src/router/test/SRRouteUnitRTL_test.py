@@ -16,6 +16,7 @@ from ocn_pclib.Position import *
 
 from Configs import configure_network
 
+# TODO: This needs much more effort to manage the table and design the routes.
 def run_test( model, test_vectors ):
  
   def tv_in( model, test_vector ):

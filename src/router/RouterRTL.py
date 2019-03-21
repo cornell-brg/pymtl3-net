@@ -24,10 +24,9 @@ class RouterRTL( RTLComponent ):
   # TODO:
   # packettype, positiontype, in, out
   # and also unit types
-  def construct( s, router_id, RouteUnitType, PositionType, 
-QueueType=None, num_inports=5, num_outports=5 ):
+  def construct( s, RouteUnitType, PositionType, QueueType=None, 
+          num_inports=5, num_outports=5 ):
 
-    s.router_id    = router_id
     s.num_inports  = num_inports
     s.num_outports = num_outports
 

@@ -86,7 +86,7 @@ def test_Router( dump_vcd, test_verilog ):
 #  model = RouterRTL( 0, RoutingStrategyType, MeshPosition, NormalQueueRTL )
 #  run_test(model, inputs_1_buffer)
 
-  model = RouterRTL( 0, RouteUnitType, MeshPosition )
+  model = RouterRTL( RouteUnitType, MeshPosition )
   run_test(model, inputs_0_buffer)
 
 
