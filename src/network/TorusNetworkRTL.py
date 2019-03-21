@@ -6,15 +6,18 @@
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
 
-from pymtl                        import *
-from pclib.ifcs.EnRdyIfc          import InEnRdyIfc, OutEnRdyIfc
-from pclib.rtl  import NormalQueueRTL
+from pymtl                       import *
+from pclib.ifcs.EnRdyIfc         import InEnRdyIfc, OutEnRdyIfc
+from ocn_pclib.Packet            import Packet
+from ocn_pclib.Position          import *
 
-from src.router.DORYRouteUnitRTL  import DORYRouteUnitRTL
-from src.router.RouterRTL     import RouterRTL
+from src.router.RouterRTL        import RouterRTL
+from src.router.InputUnitRTL     import InputUnitRTL
+from src.router.DORXRouteUnitRTL import DORXRouteUnitRTL
+from src.router.DORYRouteUnitRTL import DORYRouteUnitRTL
+from src.router.SwitchUnitRTL    import SwitchUnitRTL
+from src.router.OutputUnitRTL    import OutputUnitRTL
 from src.ChannelUnitRTL          import ChannelUnitRTL
-from ocn_pclib.Packet             import Packet
-from ocn_pclib.Position           import *
 
 from Configs import configure_network
 
@@ -31,39 +34,45 @@ class TorusNetworkRTL( RTLComponent ):
     EAST  = 3
     SELF  = 4
 
-    s.num_outports = configs.router_outports
-    s.num_inports  = configs.router_inports
-    s.num_routers  = configs.routers
-    s.RouteUnitType = DORYRouteUnitRTL
-
-    s.PosType = MeshPosition
+    s.num_inports     = configs.router_inports
+    s.num_outports    = configs.router_outports
+    s.num_routers     = configs.routers
+    s.channel_latency = 0
     s.rows     = configs.rows
     s.cols     = s.num_routers/s.rows
 
+    # Type for Mesh Network RTL
+    s.PacketType     = Packet
+    s.PositionType   = MeshPosition
+    s.InputUnitType  = InputUnitRTL
+    s.RouteUnitType  = DORYRouteUnitRTL
+    s.SwitchUnitType = SwitchUnitRTL
+    s.OutputUnitType = OutputUnitRTL
+
     # Interface
-    s.recv = [InEnRdyIfc(Packet)  for _ in range(s.num_routers*4)]
-    s.send = [OutEnRdyIfc(Packet) for _ in range(s.num_routers*4)]
-    s.recv_noc_ifc = [InEnRdyIfc(Packet)  for _ in range(s.num_routers)]
-    s.send_noc_ifc = [OutEnRdyIfc(Packet) for _ in range(s.num_routers)]
+    s.recv = [InEnRdyIfc(s.PacketType)  for _ in range(s.num_routers*4)]
+    s.send = [OutEnRdyIfc(s.PacketType) for _ in range(s.num_routers*4)]
+    s.recv_noc_ifc = [InEnRdyIfc(s.PacketType)  for _ in range(s.num_routers)]
+    s.send_noc_ifc = [OutEnRdyIfc(s.PacketType) for _ in range(s.num_routers)]
 
     # This outputs used to print the direction of the routing
     s.outputs = [ Wire( Bits3 )  for _ in range(s.num_routers*s.num_inports)]
-    s.pos_ports = [ InVPort( s.PosType ) for _ in range(s.num_routers)]
+    s.pos_ports = [ InVPort( s.PositionType ) for _ in range(s.num_routers)]
 
     # Components
 
-    s.routers = [RouterRTL( s.RouteUnitType, s.PosType, 
-        QueueType=NormalQueueRTL) for i in range(s.num_routers)]
+    s.routers = [RouterRTL(s.PacketType, s.PositionType, s.num_inports,
+        s.num_outports, s.InputUnitType, s.RouteUnitType, s.SwitchUnitType,
+        s.OutputUnitType) for i in range(s.num_routers)]
 
     num_channels = 4*s.rows*s.cols
 
-    s.channels   = [ChannelUnitRTL(Packet, NormalQueueRTL, num_stages=0)
-#            for _ in range(s.num_routers*s.cols*s.rows)]
+    s.channels   = [ChannelUnitRTL(PacketType=s.PacketType, latency=s.channel_latency)
             for _ in range(num_channels) ]
 
     for i in range( s.num_routers ):
       for j in range( s.num_inports):
-        s.connect( s.outputs[i*s.num_inports+j],  s.routers[i].outs[j]   )
+        s.connect( s.outputs[i*s.num_inports+j],  s.routers[i].outs[j] )
       s.connect( s.pos_ports[i], s.routers[i].pos )
 
     channel_index  = 0

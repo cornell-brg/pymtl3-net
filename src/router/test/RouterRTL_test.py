@@ -10,9 +10,12 @@ import tempfile
 from pymtl                         import *
 from ocn_pclib.TestVectorSimulator import TestVectorSimulator
 from ocn_pclib.Packet              import Packet, mk_pkt
-from src.router.RouterRTL      import RouterRTL
+from src.router.RouterRTL          import RouterRTL
+from src.router.InputUnitRTL       import InputUnitRTL
 from src.router.DORXRouteUnitRTL   import DORXRouteUnitRTL
 from src.router.DORYRouteUnitRTL   import DORYRouteUnitRTL
+from src.router.SwitchUnitRTL      import SwitchUnitRTL
+from src.router.OutputUnitRTL      import OutputUnitRTL
 
 from ocn_pclib.Position import *
 
@@ -85,9 +88,14 @@ def test_Router( dump_vcd, test_verilog ):
 
 #  model = RouterRTL( 0, RoutingStrategyType, MeshPosition, NormalQueueRTL )
 #  run_test(model, inputs_1_buffer)
+  num_inports  = 5
+  num_outports = 5
 
-  model = RouterRTL( RouteUnitType, MeshPosition )
-  run_test(model, inputs_0_buffer)
+  model = RouterRTL( Packet, MeshPosition, num_inports, num_outports, 
+          InputUnitRTL, RouteUnitType, SwitchUnitRTL, OutputUnitRTL)
+  for i in range (num_inports):
+    path = "top.input_units[" + str(i) + "].elaborate.QueueType"
+    model.set_parameter(path, NormalQueueRTL)
 
-
+  run_test(model, inputs_1_buffer)
 

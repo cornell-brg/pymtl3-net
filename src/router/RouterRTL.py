@@ -9,47 +9,37 @@
 from pymtl import *
 from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 
-from ocn_pclib.Packet    import Packet
-from ocn_pclib.Position  import *
-
-from src.router.InputUnitRTL  import InputUnitRTL
-from src.router.DORYRouteUnitRTL  import DORYRouteUnitRTL
-from src.router.SwitchUnitRTL import SwitchUnitRTL
-from src.router.OutputUnitRTL import OutputUnitRTL
-
-from pclib.rtl  import NormalQueueRTL
-
 class RouterRTL( RTLComponent ):
 
   # TODO:
   # packettype, positiontype, in, out
   # and also unit types
-  def construct( s, RouteUnitType, PositionType, QueueType=None, 
-          num_inports=5, num_outports=5 ):
+  def construct( s, PacketType, PositionType, num_inports, num_outports, 
+          InputUnitType, RouteUnitType, SwitchUnitType, OutputUnitType, test=9 ):
 
     s.num_inports  = num_inports
     s.num_outports = num_outports
 
     # Interface
-    s.recv  = [  InEnRdyIfc( Packet ) for _ in range( s.num_inports  ) ]
-    s.send  = [ OutEnRdyIfc( Packet ) for _ in range( s.num_outports ) ]
+    s.recv  = [  InEnRdyIfc( PacketType ) for _ in range( s.num_inports  ) ]
+    s.send  = [ OutEnRdyIfc( PacketType ) for _ in range( s.num_outports ) ]
 
     # delete outs...
     s.outs  = [ OutVPort    ( Bits3 ) for _ in range( s.num_inports  ) ]
     s.pos   = InVPort( PositionType )
 
     # Components
-    # TODO: modify InputUnit to adapt Packet
-    s.input_units  = [ InputUnitRTL( Packet, QueueType ) for _ in range( s.num_inports ) ]
+    s.input_units  = [ InputUnitType( PacketType ) 
+            for _ in range( s.num_inports ) ]
 
-    s.route_units  = [ RouteUnitType( PositionType ) for i in range( s.num_inports ) ]
+    s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports ) 
+            for i in range( s.num_inports ) ]
 
-    s.switch_units = [ SwitchUnitRTL( Packet, s.num_inports )
-                     for _ in range( s.num_outports ) ]
+    s.switch_units = [ SwitchUnitType( PacketType, s.num_inports )
+            for _ in range( s.num_outports ) ]
     
-    # TODO: modify OutputUnit to adapt Packet
-    s.output_units = [ OutputUnitRTL( Packet )
-                     for _ in range( s.num_outports ) ]
+    s.output_units = [ OutputUnitType( PacketType )
+            for _ in range( s.num_outports ) ]
 
     # Connections
     for i in range( s.num_inports ):
@@ -68,7 +58,7 @@ class RouterRTL( RTLComponent ):
 
   # TODO: Implement line trace.
   def line_trace( s ):
-    tmp_str =  "({},{}):".format( s.pos.pos_x, s.pos.pos_y )
+    tmp_str = "({},{}):".format( s.pos.pos_x, s.pos.pos_y )
     out_str = [ "" for _ in range( s.num_inports ) ]
     for i in range (s.num_inports):
       out_str[i] = " {}->({},{})".format( i, s.recv[i].msg.dst_x, s.recv[i].msg.dst_y )

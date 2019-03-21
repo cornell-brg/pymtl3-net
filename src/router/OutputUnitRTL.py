@@ -12,18 +12,18 @@ from pymtl import *
 from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 
 class OutputUnitRTL( RTLComponent ):
-  def construct( s, pkt_type, QueueType=None ):
+  def construct( s, PacketType, QueueType=None ):
     
     # Interface
-    s.recv =  InEnRdyIfc( pkt_type )
-    s.send = OutEnRdyIfc( pkt_type )
+    s.recv =  InEnRdyIfc( PacketType )
+    s.send = OutEnRdyIfc( PacketType )
     s.QueueType = QueueType
 
     # If no queue type is assigned
     if s.QueueType != None:
 
       # Component
-      s.queue = s.QueueType( Type=pkt_type ) 
+      s.queue = s.QueueType( Type=PacketType ) 
   
       # Connections
       s.connect( s.recv.rdy, s.queue.enq.rdy )

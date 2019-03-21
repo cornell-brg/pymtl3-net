@@ -1,5 +1,5 @@
 #=========================================================================
-# LinkUnitRTL.py
+# ChannelUnitRTL.py
 #=========================================================================
 # A Link unit for connecting routers to form network.
 #
@@ -11,21 +11,21 @@ from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 from pclib.rtl  import NormalQueueRTL
 
 class ChannelUnitRTL( RTLComponent ):
-  def construct(s, PktType, QueueType=None, num_stages=2, num_entries=2):
+  def construct(s, PacketType, QueueType=None, latency=2, num_entries=2):
 
     # Constant
     s.QueueType   = QueueType
-    s.num_stages  = num_stages 
+    s.latency     = latency
     s.num_entries = num_entries
 
     # Interface
-    s.recv  =  InEnRdyIfc( PktType )
-    s.send  = OutEnRdyIfc( PktType )
+    s.recv  =  InEnRdyIfc( PacketType )
+    s.send  = OutEnRdyIfc( PacketType )
 
-    if s.QueueType != None and s.num_stages != 0:
+    if s.QueueType != None and s.latency != 0:
       # Component
-      s.queues = [s.QueueType(s.num_entries, Type = PktType) 
-                   for _ in range (s.num_stages)]
+      s.queues = [s.QueueType(s.num_entries, Type = PacketType) 
+                   for _ in range (s.latency)]
 
       # Connections
       s.connect( s.recv.rdy, s.queues[0].enq.rdy )
@@ -34,8 +34,8 @@ class ChannelUnitRTL( RTLComponent ):
 
       @s.update
       def process():
-        last = s.num_stages - 1
-        for i in range(s.num_stages - 1):
+        last = s.latency - 1
+        for i in range(s.latency - 1):
           s.queues[i+1].enq.msg = s.queues[i].deq.msg
           if s.queues[i].deq.val == 1:
             s.queues[i].deq.rdy = s.queues[i+1].enq.rdy
@@ -53,8 +53,8 @@ class ChannelUnitRTL( RTLComponent ):
       s.connect(s.recv, s.send)
 
   def line_trace( s ):
-    if s.QueueType != None and s.num_stages != 0:
-      return "{}({}){}".format(s.recv.msg, s.num_stages, s.send.msg)
+    if s.QueueType != None and s.latency != 0:
+      return "{}({}){}".format(s.recv.msg, s.latency, s.send.msg)
     else:
       return "{}(0){}".format( s.recv.msg, s.send.msg)
 

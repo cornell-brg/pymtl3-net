@@ -17,21 +17,21 @@ from ocn_pclib.Encoder   import Encoder
 from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 
 class SwitchUnitRTL( RTLComponent ):
-  def construct(s, PktType, num_inports=5):
+  def construct(s, PacketType, num_inports=5):
 
     # Constants
     s.num_inports = num_inports
     s.sel_width   = clog2( num_inports )
 
     # Interface
-    s.recv = [ InEnRdyIfc( PktType ) for _ in range( s.num_inports ) ]
-    s.send = OutEnRdyIfc ( PktType )
+    s.recv = [ InEnRdyIfc( PacketType ) for _ in range( s.num_inports ) ]
+    s.send = OutEnRdyIfc ( PacketType )
 
     # Components
-    s.bypass_queue = [BypassQueue1RTL(PktType) for _ in range(s.num_inports)]
+    s.bypass_queue = [BypassQueue1RTL(PacketType) for _ in range(s.num_inports)]
     s.arbiter = RoundRobinArbiterEn( num_inports )
     s.encoder = Encoder( num_inports, s.sel_width )
-    s.mux = Mux( PktType, num_inports )
+    s.mux = Mux( PacketType, num_inports )
 
     # Connections
     s.connect( s.arbiter.grants, s.encoder.in_ )
@@ -49,6 +49,9 @@ class SwitchUnitRTL( RTLComponent ):
     @s.update
     def enableArbiter():
       s.arbiter.en = s.arbiter.grants > 0 and s.send.rdy
+
+    @s.update
+    def enableSend():
       s.send.en = s.arbiter.grants > 0 and s.send.rdy
  
     @s.update

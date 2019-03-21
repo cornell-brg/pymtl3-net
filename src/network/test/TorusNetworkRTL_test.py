@@ -1,16 +1,18 @@
 #=========================================================================
-# RouteUnitRTL_test.py
+# TorusNetworkRTL_test.py
 #=========================================================================
-# Test for RouteUnitRTL
+# Test for TorusNetworkRTL
 #
 # Author : Cheng Tan, Yanghui Ou
-#   Date : Mar 3, 2019
+#   Date : Mar 20, 2019
 
 import tempfile
 from pymtl                import *
 from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
 from ocn_pclib.Packet import Packet, mk_pkt
 from src.network.TorusNetworkRTL import TorusNetworkRTL
+
+from pclib.rtl  import NormalQueueRTL
 
 from ocn_pclib.Position import *
 
@@ -50,9 +52,16 @@ def run_test( model, test_vectors ):
 
 def test_Network( dump_vcd, test_verilog ):
 
+
+  configs = configure_network()
   model = TorusNetworkRTL()
 
-#  model.set_parameter("top.elaborate.num_outports", 5)
+  num_routers = configs.routers
+  num_inports = configs.router_inports
+  for r in range (num_routers):
+    for i in range (num_inports):
+      path = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+      model.set_parameter(path, NormalQueueRTL)
 
   x = 'x'
 

@@ -9,11 +9,8 @@
 from pymtl import *
 from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 
-from ocn_pclib.Packet    import Packet
-from ocn_pclib.Position  import *
-
 class DORYRouteUnitRTL( RTLComponent ):
-  def construct( s, PositionType, num_outports=5 ):
+  def construct( s, PacketType, PositionType, num_outports=5 ):
 
     # Constants 
     s.num_outports = num_outports
@@ -24,8 +21,8 @@ class DORYRouteUnitRTL( RTLComponent ):
     SELF  = 4
 
     # Interface
-    s.recv  = InEnRdyIfc( Packet )
-    s.send  = [ OutEnRdyIfc (Packet) for _ in range ( s.num_outports ) ]
+    s.recv  = InEnRdyIfc( PacketType )
+    s.send  = [ OutEnRdyIfc (PacketType) for _ in range ( s.num_outports ) ]
     s.pos   = InVPort( PositionType )
 
     # Componets
@@ -40,16 +37,6 @@ class DORYRouteUnitRTL( RTLComponent ):
     # Routing logic
     @s.update
     def up_ru_recv_rdy():
-      s.recv.rdy =  s.send[s.out_dir].rdy
-
-    @s.update
-    def up_ru_send_en():
-      for i in range( s.num_outports ):
-        s.send[i].en = 0
-      s.send[s.out_dir].en = s.recv.en and s.send[s.out_dir].rdy 
-
-    @s.update
-    def routing():
       s.out_dir = 0
       if s.pos.pos_x == s.recv.msg.dst_x and s.pos.pos_y == s.recv.msg.dst_y:
         s.out_dir = SELF
@@ -61,6 +48,16 @@ class DORYRouteUnitRTL( RTLComponent ):
         s.out_dir = WEST
       else:
         s.out_dir = EAST
+      s.recv.rdy =  s.send[s.out_dir].rdy
+
+    @s.update
+    def up_ru_send_en():
+      for i in range( s.num_outports ):
+        s.send[i].en = 0
+      s.send[s.out_dir].en = s.recv.en and s.send[s.out_dir].rdy 
+
+#    @s.update
+#    def routing():
 
   def line_trace( s ):
     out_str = [ "" for _ in range( s.num_outports ) ]

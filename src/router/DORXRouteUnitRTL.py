@@ -13,7 +13,7 @@ from ocn_pclib.Packet    import Packet
 from ocn_pclib.Position  import *
 
 class DORXRouteUnitRTL( RTLComponent ):
-  def construct( s, PositionType, num_outports=5 ):
+  def construct( s, PacketType, PositionType, num_outports=5 ):
 
     # Constants 
     s.num_outports = num_outports
@@ -24,8 +24,8 @@ class DORXRouteUnitRTL( RTLComponent ):
     SELF  = 4
 
     # Interface
-    s.recv  = InEnRdyIfc( Packet )
-    s.send  = [ OutEnRdyIfc (Packet) for _ in range ( s.num_outports ) ]
+    s.recv  = InEnRdyIfc( PacketType )
+    s.send  = [ OutEnRdyIfc (PacketType) for _ in range ( s.num_outports ) ]
     s.pos   = InVPort( PositionType )
 
     # Componets
