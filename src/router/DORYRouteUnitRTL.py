@@ -56,9 +56,6 @@ class DORYRouteUnitRTL( RTLComponent ):
         s.send[i].en = 0
       s.send[s.out_dir].en = s.recv.en and s.send[s.out_dir].rdy 
 
-#    @s.update
-#    def routing():
-
   def line_trace( s ):
     out_str = [ "" for _ in range( s.num_outports ) ]
     for i in range (s.num_outports):

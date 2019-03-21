@@ -29,7 +29,6 @@ class DORXRouteUnitRTL( RTLComponent ):
     s.pos   = InVPort( PositionType )
 
     # Componets
-#    s.routing_logic = routing_logic
     s.out_rdys = Wire( mk_bits( s.num_outports ) )
     s.out_dir  = OutVPort( Bits3  ) 
 
@@ -38,23 +37,9 @@ class DORXRouteUnitRTL( RTLComponent ):
       s.connect( s.recv.msg,    s.send[i].msg )
       s.connect( s.out_rdys[i], s.send[i].rdy )
     
-#    s.connect( s.pos,      s.routing_logic.pos     )  
-#    s.connect( s.recv.msg, s.routing_logic.pkt_in  )
-#    s.connect( s.out_dir,  s.routing_logic.out_dir )
-
     # Routing logic
     @s.update
     def up_ru_recv_rdy():
-      s.recv.rdy =  s.send[s.out_dir].rdy
-
-    @s.update
-    def up_ru_send_en():
-      for i in range( s.num_outports ):
-        s.send[i].en = 0
-      s.send[s.out_dir].en = s.recv.en and s.send[s.out_dir].rdy 
-
-    @s.update
-    def routing():
       s.out_dir = 0
       if s.pos.pos_x == s.recv.msg.dst_x and s.pos.pos_y == s.recv.msg.dst_y:
         s.out_dir = SELF
@@ -66,6 +51,13 @@ class DORXRouteUnitRTL( RTLComponent ):
         s.out_dir = NORTH
       else:
         s.out_dir = SOUTH
+      s.recv.rdy =  s.send[s.out_dir].rdy
+
+    @s.update
+    def up_ru_send_en():
+      for i in range( s.num_outports ):
+        s.send[i].en = 0
+      s.send[s.out_dir].en = s.recv.en and s.send[s.out_dir].rdy 
 
   def line_trace( s ):
     out_str = [ "" for _ in range( s.num_outports ) ]

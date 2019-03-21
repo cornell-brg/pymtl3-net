@@ -47,7 +47,7 @@ def test_DORXRouteUnit( dump_vcd, test_verilog ):
 
   configs = configure_network()
 
-  model = DORXRouteUnitRTL( MeshPosition )
+  model = DORXRouteUnitRTL( Packet, MeshPosition )
 
   model.set_parameter("top.elaborate.num_outports", 5)
 

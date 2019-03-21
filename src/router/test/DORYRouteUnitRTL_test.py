@@ -47,7 +47,7 @@ def test_RouteUnit( dump_vcd, test_verilog ):
 
   configs = configure_network()
 
-  model = DORYRouteUnitRTL( MeshPosition )
+  model = DORYRouteUnitRTL( Packet, MeshPosition )
 
   model.set_parameter("top.elaborate.num_outports", 5)
 
