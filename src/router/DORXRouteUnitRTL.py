@@ -1,7 +1,7 @@
 #=========================================================================
-# RouteUnitRTL.py
+# DORXRouteUnitRTL.py
 #=========================================================================
-# A route unit with configurable routing strategies.
+# A route unit with DOR-X routing.
 #
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 3, 2019
