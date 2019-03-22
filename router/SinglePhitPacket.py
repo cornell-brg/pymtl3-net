@@ -1,10 +1,15 @@
+#=========================================================================
+# SinglePhitPacket.py
+#=========================================================================
+# A single phit packet that may or may not have source/destination fields.
+#
+# Author : Yanghui Ou, Cheng Tan
+#   Date : Mar 3, 2019
+
 from pymtl import *
 
 class SinglePhitPacket( BitStructDefinition ):
-  """
-  A single phit packet that may or may not have source/destination fields.
-  """
-  def __init__( s, src_x_nbits, src_y_nbits, dst_x_nbits, dst_y_nbits, 
+  def construct( s, src_x_nbits, src_y_nbits, dst_x_nbits, dst_y_nbits, 
                 opaque_nbits, payload_nbits ):
     # Source field 
     if not ( src_x_nbits <= 0 and src_y_nbits <= 0 ):
