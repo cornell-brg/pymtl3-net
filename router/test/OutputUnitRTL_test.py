@@ -13,7 +13,7 @@ from pclib.rtl.valrdy_queues import PipeQueue1RTL, BypassQueue1RTL
 from pclib.rtl.TestSource import TestSourceValRdy
 from pclib.rtl.TestSink   import TestSinkValRdy
 from pclib.ifcs import InValRdyIfc, OutValRdyIfc 
-from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pclib.ifcs.SendRecvIfc import *
 from pclib.test import mk_test_case_table
 from pymtl.passes.PassGroups import SimpleSim
 

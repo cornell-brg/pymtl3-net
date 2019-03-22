@@ -7,7 +7,7 @@
 #   Date : Mar 3, 2019
 
 from pymtl import *
-from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pclib.ifcs.SendRecvIfc import *
 
 from ocn_pclib.ifcs.Packet    import Packet
 from ocn_pclib.ifcs.Position  import *
@@ -24,8 +24,8 @@ class DORXRouteUnitRTL( RTLComponent ):
     SELF  = 4
 
     # Interface
-    s.recv  = InEnRdyIfc( PacketType )
-    s.send  = [ OutEnRdyIfc (PacketType) for _ in range ( s.num_outports ) ]
+    s.recv  = RecvIfcRTL( PacketType )
+    s.send  = [ SendIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
     s.pos   = InVPort( PositionType )
 
     # Componets

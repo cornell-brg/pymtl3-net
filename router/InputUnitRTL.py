@@ -9,7 +9,8 @@
 #   Date : Feb 23, 2019
 
 from pymtl import *
-from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
+#from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
+from pclib.ifcs.SendRecvIfc import *
 from pclib.rtl  import NormalQueueRTL
 
 class InputUnitRTL( RTLComponent ):
@@ -19,8 +20,8 @@ class InputUnitRTL( RTLComponent ):
     s.QueueType = QueueType
 
     # Interface
-    s.recv =  InEnRdyIfc( PacketType )
-    s.send = OutEnRdyIfc( PacketType )
+    s.recv = RecvIfcRTL( PacketType )
+    s.send = SendIfcRTL( PacketType )
 
     if s.QueueType != None:
       # Component

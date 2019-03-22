@@ -8,7 +8,8 @@
 
 from pymtl import *
 from pclib.ifcs import InValRdyIfc, OutValRdyIfc
-from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+#from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pclib.ifcs.SendRecvIfc import *
 
 #-------------------------------------------------------------------------
 # ValRdy2EnRdy
@@ -18,8 +19,8 @@ class ValRdy2EnRdy( RTLComponent ):
 
   def construct( s, MsgType ):
 
-    s.in_ = InValRdyIfc( MsgType )
-    s.out = OutEnRdyIfc( MsgType ) 
+    s.in_ = RecvIfcRTL( MsgType )
+    s.out = SendIfcRTL( MsgType ) 
 
     @s.update
     def comb_logic0():
@@ -45,8 +46,8 @@ class EnRdy2ValRdy( RTLComponent ):
 
   def construct( s, MsgType ):
 
-    s.in_ = InEnRdyIfc  ( MsgType )
-    s.out = OutValRdyIfc( MsgType ) 
+    s.in_ = RecvIfcRTL( MsgType )
+    s.out = SendIfcRTL ( MsgType ) 
 
     @s.update
     def comb_logic0():

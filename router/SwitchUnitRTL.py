@@ -12,9 +12,10 @@ from pymtl      import *
 from pclib.ifcs import InValRdyIfc, OutValRdyIfc
 from pclib.rtl  import Mux, BypassQueue1RTL
 
-from ocn_pclib.Arbiters  import RoundRobinArbiterEn
-from ocn_pclib.Encoder   import Encoder
-from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pclib.rtl.arbiters  import RoundRobinArbiterEn
+from ocn_pclib.rtl.Encoder   import Encoder
+#from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pclib.ifcs.SendRecvIfc import *
 
 class SwitchUnitRTL( RTLComponent ):
   def construct(s, PacketType, num_inports=5):
@@ -24,8 +25,9 @@ class SwitchUnitRTL( RTLComponent ):
     s.sel_width   = clog2( num_inports )
 
     # Interface
-    s.recv = [ InEnRdyIfc( PacketType ) for _ in range( s.num_inports ) ]
-    s.send = OutEnRdyIfc ( PacketType )
+#    s.recv = [ InEnRdyIfc( PacketType ) for _ in range( s.num_inports ) ]
+    s.recv = [ RecvIfcRTL( PacketType ) for _ in range( s.num_inports ) ]
+    s.send = SendIfcRTL ( PacketType )
 
     # Components
     s.bypass_queue = [BypassQueue1RTL(PacketType) for _ in range(s.num_inports)]

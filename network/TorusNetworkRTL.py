@@ -7,7 +7,7 @@
 #   Date : Mar 10, 2019
 
 from pymtl                   import *
-from pclib.ifcs.EnRdyIfc     import InEnRdyIfc, OutEnRdyIfc
+from pclib.ifcs.SendRecvIfc  import *
 from ocn_pclib.ifcs.Packet   import Packet
 from ocn_pclib.ifcs.Position import *
 
@@ -50,13 +50,12 @@ class TorusNetworkRTL( RTLComponent ):
     s.OutputUnitType = OutputUnitRTL
 
     # Interface
-    s.recv = [InEnRdyIfc(s.PacketType)  for _ in range(s.num_routers*4)]
-    s.send = [OutEnRdyIfc(s.PacketType) for _ in range(s.num_routers*4)]
-    s.recv_noc_ifc = [InEnRdyIfc(s.PacketType)  for _ in range(s.num_routers)]
-    s.send_noc_ifc = [OutEnRdyIfc(s.PacketType) for _ in range(s.num_routers)]
+    s.recv = [RecvIfcRTL(s.PacketType)  for _ in range(s.num_routers*4)]
+    s.send = [SendIfcRTL(s.PacketType) for _ in range(s.num_routers*4)]
+    s.recv_noc_ifc = [RecvIfcRTL(s.PacketType)  for _ in range(s.num_routers)]
+    s.send_noc_ifc = [SendIfcRTL(s.PacketType) for _ in range(s.num_routers)]
 
     # This outputs used to print the direction of the routing
-    s.outputs = [ Wire( Bits3 )  for _ in range(s.num_routers*s.num_inports)]
     s.pos_ports = [ InVPort( s.PositionType ) for _ in range(s.num_routers)]
 
     # Components
@@ -71,8 +70,6 @@ class TorusNetworkRTL( RTLComponent ):
             for _ in range(num_channels) ]
 
     for i in range( s.num_routers ):
-      for j in range( s.num_inports):
-        s.connect( s.outputs[i*s.num_inports+j],  s.routers[i].outs[j] )
       s.connect( s.pos_ports[i], s.routers[i].pos )
 
     channel_index  = 0

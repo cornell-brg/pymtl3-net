@@ -11,7 +11,7 @@ from pymtl                import *
 from ocn_pclib.test.TestVectorSimulator            import TestVectorSimulator
 from router.SwitchUnitRTL import SwitchUnitRTL
 
-from ocn_pclib.Packet import Packet, mk_pkt
+from ocn_pclib.ifcs.Packet import Packet, mk_pkt
 
 def run_test( model, test_vectors ):
  

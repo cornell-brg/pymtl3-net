@@ -7,7 +7,8 @@
 #   Date : Mar 3, 2019
 
 from pymtl import *
-from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+#from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pclib.ifcs.SendRecvIfc import *
 
 class DORYRouteUnitRTL( RTLComponent ):
   def construct( s, PacketType, PositionType, num_outports=5 ):
@@ -21,8 +22,9 @@ class DORYRouteUnitRTL( RTLComponent ):
     SELF  = 4
 
     # Interface
-    s.recv  = InEnRdyIfc( PacketType )
-    s.send  = [ OutEnRdyIfc (PacketType) for _ in range ( s.num_outports ) ]
+#    s.recv  = InEnRdyIfc( PacketType )
+    s.recv  = RecvIfcRTL( PacketType )
+    s.send  = [ SendIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
     s.pos   = InVPort( PositionType )
 
     # Componets

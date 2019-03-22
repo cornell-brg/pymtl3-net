@@ -9,14 +9,14 @@
 #   Date : Feb 28, 2019
 
 from pymtl import *
-from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
+from pclib.ifcs.SendRecvIfc import *
 
 class OutputUnitRTL( RTLComponent ):
   def construct( s, PacketType, QueueType=None ):
     
     # Interface
-    s.recv =  InEnRdyIfc( PacketType )
-    s.send = OutEnRdyIfc( PacketType )
+    s.recv = RecvIfcRTL ( PacketType )
+    s.send = SendIfcRTL ( PacketType )
     s.QueueType = QueueType
 
     # If no queue type is assigned

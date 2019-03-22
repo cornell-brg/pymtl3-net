@@ -7,7 +7,8 @@
 #   Date : Mar 8, 2019
 
 from pymtl import *
-from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+#from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pclib.ifcs.SendRecvIfc import *
 from router.Router   import Router
 
 class RouterRTL( RTLComponent, Router ):
@@ -18,8 +19,9 @@ class RouterRTL( RTLComponent, Router ):
 num_outports, InputUnitType, RouteUnitType, SwitchUnitType, OutputUnitType )
 
     # Interface
-    s.recv  = [  InEnRdyIfc( PacketType ) for _ in range( s.num_inports  ) ]
-    s.send  = [ OutEnRdyIfc( PacketType ) for _ in range( s.num_outports ) ]
+    s.recv  = [ RecvIfcRTL( PacketType ) for _ in range( s.num_inports  ) ]
+    s.recv  = [ RecvIfcRTL( PacketType ) for _ in range( s.num_inports  ) ]
+    s.send  = [ SendIfcRTL( PacketType ) for _ in range( s.num_outports ) ]
 
     s.pos   = InVPort( PositionType )
 

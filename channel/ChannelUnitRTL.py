@@ -7,8 +7,8 @@
 #   Date : Mar 16, 2019
 
 from pymtl import *
-from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 from pclib.rtl  import NormalQueueRTL
+from pclib.ifcs.SendRecvIfc import *
 
 class ChannelUnitRTL( RTLComponent ):
   def construct(s, PacketType, QueueType=None, latency=2, num_entries=2):
@@ -19,8 +19,8 @@ class ChannelUnitRTL( RTLComponent ):
     s.num_entries = num_entries
 
     # Interface
-    s.recv  =  InEnRdyIfc( PacketType )
-    s.send  = OutEnRdyIfc( PacketType )
+    s.recv  = RecvIfcRTL( PacketType )
+    s.send  = SendIfcRTL( PacketType )
 
     if s.QueueType != None and s.latency != 0:
       # Component

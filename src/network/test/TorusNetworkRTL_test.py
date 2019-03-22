@@ -8,13 +8,13 @@
 
 import tempfile
 from pymtl                import *
-from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
-from ocn_pclib.Packet import Packet, mk_pkt
-from src.network.TorusNetworkRTL import TorusNetworkRTL
+from ocn_pclib.test.TestVectorSimulator            import TestVectorSimulator
+from ocn_pclib.ifcs.Packet import Packet, mk_pkt
+from network.TorusNetworkRTL import TorusNetworkRTL
 
 from pclib.rtl  import NormalQueueRTL
 
-from ocn_pclib.Position import *
+from ocn_pclib.ifcs.Position import *
 
 from Configs import configure_network
 
