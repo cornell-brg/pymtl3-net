@@ -71,8 +71,6 @@ class TorusNetworkRTL( RTLComponent ):
             for _ in range(num_channels) ]
 
     for i in range( s.num_routers ):
-      for j in range( s.num_inports):
-        s.connect( s.outputs[i*s.num_inports+j],  s.routers[i].outs[j] )
       s.connect( s.pos_ports[i], s.routers[i].pos )
 
     channel_index  = 0

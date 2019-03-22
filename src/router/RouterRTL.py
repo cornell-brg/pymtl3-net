@@ -8,45 +8,26 @@
 
 from pymtl import *
 from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from src.router.Router   import Router
 
-class RouterRTL( RTLComponent ):
-
-  # TODO:
-  # packettype, positiontype, in, out
-  # and also unit types
+class RouterRTL( RTLComponent, Router ):
   def construct( s, PacketType, PositionType, num_inports, num_outports, 
-          InputUnitType, RouteUnitType, SwitchUnitType, OutputUnitType, test=9 ):
-
-    s.num_inports  = num_inports
-    s.num_outports = num_outports
+          InputUnitType, RouteUnitType, SwitchUnitType, OutputUnitType ):
+    
+    super(RouterRTL, s).__construct__( PacketType, PositionType, num_inports, 
+num_outports, InputUnitType, RouteUnitType, SwitchUnitType, OutputUnitType )
 
     # Interface
     s.recv  = [  InEnRdyIfc( PacketType ) for _ in range( s.num_inports  ) ]
     s.send  = [ OutEnRdyIfc( PacketType ) for _ in range( s.num_outports ) ]
 
-    # delete outs...
-    s.outs  = [ OutVPort    ( Bits3 ) for _ in range( s.num_inports  ) ]
     s.pos   = InVPort( PositionType )
-
-    # Components
-    s.input_units  = [ InputUnitType( PacketType ) 
-            for _ in range( s.num_inports ) ]
-
-    s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports ) 
-            for i in range( s.num_inports ) ]
-
-    s.switch_units = [ SwitchUnitType( PacketType, s.num_inports )
-            for _ in range( s.num_outports ) ]
-    
-    s.output_units = [ OutputUnitType( PacketType )
-            for _ in range( s.num_outports ) ]
 
     # Connections
     for i in range( s.num_inports ):
       s.connect( s.recv[i],             s.input_units[i].recv    )
       s.connect( s.input_units[i].send, s.route_units[i].recv    )
       s.connect( s.pos,                 s.route_units[i].pos     )
-      s.connect( s.outs[i],             s.route_units[i].out_dir )
 
     for i in range( s.num_inports ):
       for j in range( s.num_outports ):
@@ -56,7 +37,6 @@ class RouterRTL( RTLComponent ):
       s.connect( s.switch_units[j].send, s.output_units[j].recv )
       s.connect( s.output_units[j].send, s.send[j]        )
 
-  # TODO: Implement line trace.
   def line_trace( s ):
     tmp_str = "({},{}):".format( s.pos.pos_x, s.pos.pos_y )
     out_str = [ "" for _ in range( s.num_inports ) ]

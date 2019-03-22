@@ -93,6 +93,7 @@ def test_Router( dump_vcd, test_verilog ):
 
   model = RouterRTL( Packet, MeshPosition, num_inports, num_outports, 
           InputUnitRTL, RouteUnitType, SwitchUnitRTL, OutputUnitRTL)
+#  model = RouterRTL()
   for i in range (num_inports):
     path = "top.input_units[" + str(i) + "].elaborate.QueueType"
     model.set_parameter(path, NormalQueueRTL)
