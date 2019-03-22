@@ -7,20 +7,20 @@
 #   Date : Mar 10, 2019
 
 import tempfile
-from pymtl                         import *
-from ocn_pclib.TestVectorSimulator import TestVectorSimulator
-from ocn_pclib.Packet              import Packet, mk_pkt
-from src.router.RouterRTL          import RouterRTL
-from src.router.InputUnitRTL       import InputUnitRTL
-from src.router.DORXRouteUnitRTL   import DORXRouteUnitRTL
-from src.router.DORYRouteUnitRTL   import DORYRouteUnitRTL
-from src.router.SwitchUnitRTL      import SwitchUnitRTL
-from src.router.OutputUnitRTL      import OutputUnitRTL
-
-from ocn_pclib.Position import *
+from pymtl                   import *
+from router.RouterRTL        import RouterRTL
+from router.InputUnitRTL     import InputUnitRTL
+from router.DORXRouteUnitRTL import DORXRouteUnitRTL
+from router.DORYRouteUnitRTL import DORYRouteUnitRTL
+from router.SwitchUnitRTL    import SwitchUnitRTL
+from router.OutputUnitRTL    import OutputUnitRTL
 
 from pclib.rtl  import NormalQueueRTL
 from pclib.rtl  import BypassQueue1RTL
+
+from ocn_pclib.ifcs.Position            import *
+from ocn_pclib.ifcs.Packet              import Packet, mk_pkt
+from ocn_pclib.test.TestVectorSimulator import TestVectorSimulator
 
 from Configs import configure_network
 

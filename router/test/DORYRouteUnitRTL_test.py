@@ -8,11 +8,11 @@
 
 import tempfile
 from pymtl                import *
-from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
-from ocn_pclib.Packet import Packet, mk_pkt
-from src.router.DORYRouteUnitRTL  import DORYRouteUnitRTL
+from ocn_pclib.test.TestVectorSimulator            import TestVectorSimulator
+from ocn_pclib.ifcs.Packet import Packet, mk_pkt
+from router.DORYRouteUnitRTL  import DORYRouteUnitRTL
 
-from ocn_pclib.Position import *
+from ocn_pclib.ifcs.Position import *
 
 from Configs import configure_network
 

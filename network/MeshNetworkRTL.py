@@ -6,20 +6,20 @@
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
 
-from pymtl                       import *
-from pclib.ifcs.EnRdyIfc         import InEnRdyIfc, OutEnRdyIfc
-from ocn_pclib.Packet            import Packet
-from ocn_pclib.Position          import *
+from pymtl                   import *
+from pclib.ifcs.EnRdyIfc     import InEnRdyIfc, OutEnRdyIfc
+from ocn_pclib.ifcs.Packet   import Packet
+from ocn_pclib.ifcs.Position import *
 
-from src.router.RouterRTL        import RouterRTL
-from src.router.InputUnitRTL     import InputUnitRTL
-from src.router.DORXRouteUnitRTL import DORXRouteUnitRTL
-from src.router.DORYRouteUnitRTL import DORYRouteUnitRTL
-from src.router.SwitchUnitRTL    import SwitchUnitRTL
-from src.router.OutputUnitRTL    import OutputUnitRTL
-from src.ChannelUnitRTL          import ChannelUnitRTL
+from router.RouterRTL        import RouterRTL
+from router.InputUnitRTL     import InputUnitRTL
+from router.DORXRouteUnitRTL import DORXRouteUnitRTL
+from router.DORYRouteUnitRTL import DORYRouteUnitRTL
+from router.SwitchUnitRTL    import SwitchUnitRTL
+from router.OutputUnitRTL    import OutputUnitRTL
+from channel.ChannelUnitRTL  import ChannelUnitRTL
 
-from Configs                     import configure_network
+from Configs                 import configure_network
 
 class MeshNetworkRTL( RTLComponent ):
   def construct( s ):

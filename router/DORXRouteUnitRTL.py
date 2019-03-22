@@ -9,8 +9,8 @@
 from pymtl import *
 from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 
-from ocn_pclib.Packet    import Packet
-from ocn_pclib.Position  import *
+from ocn_pclib.ifcs.Packet    import Packet
+from ocn_pclib.ifcs.Position  import *
 
 class DORXRouteUnitRTL( RTLComponent ):
   def construct( s, PacketType, PositionType, num_outports=5 ):

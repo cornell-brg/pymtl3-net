@@ -17,13 +17,14 @@ from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 from pclib.test import mk_test_case_table
 from pymtl.passes.PassGroups import SimpleSim
 
-from src.router.InputUnitRTL import InputUnitRTL
-from ocn_pclib.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
+from router.InputUnitRTL import InputUnitRTL
+#from ocn_pclib.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
+from ocn_pclib.ifcs.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
 
 from pclib.rtl  import NormalQueueRTL
 from pclib.rtl  import BypassQueue1RTL
 
-from ocn_pclib.Packet import *
+from ocn_pclib.ifcs.Packet import *
 
 #-------------------------------------------------------------------------
 # TestHarness

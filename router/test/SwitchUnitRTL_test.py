@@ -8,8 +8,8 @@
 
 import tempfile
 from pymtl                import *
-from ocn_pclib.TestVectorSimulator            import TestVectorSimulator
-from src.router.SwitchUnitRTL import SwitchUnitRTL
+from ocn_pclib.test.TestVectorSimulator            import TestVectorSimulator
+from router.SwitchUnitRTL import SwitchUnitRTL
 
 from ocn_pclib.Packet import Packet, mk_pkt
 
