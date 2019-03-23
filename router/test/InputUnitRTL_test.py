@@ -10,16 +10,14 @@ import pytest
 
 from pymtl import *
 from pclib.rtl.valrdy_queues import PipeQueue1RTL, BypassQueue1RTL
-from pclib.rtl.TestSource import TestSourceValRdy
-from pclib.rtl.TestSink   import TestSinkValRdy
+from pclib.rtl.TestSource import TestSourceEnRdy
+from pclib.rtl.TestSink   import TestSinkEnRdy
 from pclib.ifcs import InValRdyIfc, OutValRdyIfc 
 from pclib.ifcs.SendRecvIfc import *
 from pclib.test import mk_test_case_table
 from pymtl.passes.PassGroups import SimpleSim
 
 from router.InputUnitRTL import InputUnitRTL
-#from ocn_pclib.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
-from ocn_pclib.ifcs.enrdy_adapters import ValRdy2EnRdy, EnRdy2ValRdy
 
 from pclib.rtl  import NormalQueueRTL
 from pclib.rtl  import BypassQueue1RTL
@@ -35,17 +33,13 @@ class TestHarness( RTLComponent ):
   def construct( s, MsgType, src_msgs, sink_msgs, stall_prob,
                  src_delay, sink_delay ):
 
-    s.src      = TestSourceValRdy( MsgType, src_msgs  )
-    s.vr_to_er = ValRdy2EnRdy    ( MsgType            )
-    s.er_to_vr = EnRdy2ValRdy    ( MsgType            )
-    s.sink     = TestSinkValRdy  ( MsgType, sink_msgs )
+    s.src      = TestSourceEnRdy( MsgType, src_msgs  )
+    s.sink     = TestSinkEnRdy  ( MsgType, sink_msgs )
     s.input_unit   = InputUnitRTL    ( MsgType  )
 
     # Connections
-    s.connect( s.src.out,      s.vr_to_er.in_ )
-    s.connect( s.vr_to_er.out, s.input_unit.recv  )
-    s.connect( s.input_unit.send,  s.er_to_vr.in_ )
-    s.connect( s.er_to_vr.out, s.sink.in_     )
+    s.connect( s.src.out,             s.input_unit.recv)
+    s.connect( s.input_unit.send, s.sink.in_ )
   
   def done( s ):
     return s.src.done() and s.sink.done()
