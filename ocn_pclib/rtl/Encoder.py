@@ -12,8 +12,8 @@ class Encoder( RTLComponent ):
   def construct( s, in_width, out_width ):
 
     # Interface
-    s.in_ =  InVPort( mk_bits(in_width)  )
-    s.out = OutVPort( mk_bits(out_width) )
+    s.in_ =  InVPort( mk_bits( in_width  ) )
+    s.out = OutVPort( mk_bits( out_width ) )
     
     # Constants
     s.din_wid  = in_width
