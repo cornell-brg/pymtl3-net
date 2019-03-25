@@ -12,6 +12,7 @@ from pymtl.dsl.test.sim_utils import simple_sim_pass
 from pclib.test.test_srcs     import TestSrcRTL
 from pclib.test.test_sinks    import TestSinkRTL
 from pclib.test               import TestVectorSimulator
+from pymtl.passes.PassGroups  import SimpleCLSim
 from queues import NormalQueueRTL
 
 #-------------------------------------------------------------------------
@@ -68,7 +69,7 @@ class TestHarness( ComponentLevel6 ):
     s.src  = TestSrcRTL ( MsgType, src_msgs,  src_initial,  src_interval )
     s.dut  = NormalQueueRTL( MsgType, qsize )
     s.sink = TestSinkRTL( MsgType, sink_msgs, sink_initial, sink_interval, 
-                             arrival_time )
+                          arrival_time )
     
     s.connect( s.src.send,    s.dut.enq       )
     s.connect( s.dut.deq.msg, s.sink.recv.msg )
@@ -96,12 +97,10 @@ class TestHarness( ComponentLevel6 ):
 def run_sim( th, max_cycles=100 ):
 
   # Create a simulator
-  print th
-  th.elaborate()
-  th.apply( simple_sim_pass )
-  # th.apply( SimpleSim )
-  # th.sim_reset()
-  # Run simulation
+  # th.elaborate()
+  # th.apply( simple_sim_pass )
+  th.apply( SimpleCLSim )
+  th.sim_reset()
 
   print ""
   ncycles = 0
@@ -123,11 +122,11 @@ def run_sim( th, max_cycles=100 ):
 # Test cases
 #-------------------------------------------------------------------------
 
-test_msgs = [ Bits16( 0 ), Bits16( 1 ), Bits16( 2 ), Bits16( 3 ) ]
+test_msgs = [ Bits16( 4 ), Bits16( 1 ), Bits16( 2 ), Bits16( 3 ) ]
 
 arrival_pipe   = [ 2, 3, 4, 5 ]
 
-# def test_normal2_simple():
-#   th = TestHarness( Bits16, 2, test_msgs, test_msgs, 0, 0, 0, 0,
-#                     arrival_pipe )
-#   run_sim( th )
+def test_normal2_simple():
+  th = TestHarness( Bits16, 2, test_msgs, test_msgs, 0, 0, 0, 0,
+                    arrival_pipe )
+  run_sim( th )

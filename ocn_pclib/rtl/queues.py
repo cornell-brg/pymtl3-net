@@ -13,7 +13,7 @@ from pclib.rtl import Mux, Reg, RegEn, RegisterFile
 # Dpath and Ctrl for NormalQueueRTL
 #-------------------------------------------------------------------------
 
-class NormalQueueDpathRTL( RTLComponent ):
+class NormalQueueDpathRTL( ComponentLevel6 ):
 
   def construct( s, MsgType, num_entries=2 ):
     
@@ -29,14 +29,14 @@ class NormalQueueDpathRTL( RTLComponent ):
     # Component
 
     s.queue = RegisterFile( MsgType, num_entries )(
-      raddr = { 0: s.raddr },
+      raddr = { 0: s.raddr   },
       rdata = { 0: s.deq_msg },
-      wen   = { 0: s.wen },
-      waddr = { 0: s.waddr },
+      wen   = { 0: s.wen     },
+      waddr = { 0: s.waddr   },
       wdata = { 0: s.enq_msg }
     )
 
-class NormalQueueCtrlRTL( RTLComponent ):
+class NormalQueueCtrlRTL( ComponentLevel6 ):
 
   def construct( s, num_entries=2 ):
     
@@ -89,7 +89,6 @@ class NormalQueueCtrlRTL( RTLComponent ):
     def up_rdy_signals():
       s.enq_rdy = s.credit > 0
       s.deq_rdy = s.credit < s.num_entries
-      # s.credit  = s.count
 
     @s.update_on_edge
     def up_reg():
@@ -97,7 +96,6 @@ class NormalQueueCtrlRTL( RTLComponent ):
       if s.reset:
         s.head  = 0
         s.tail  = 0
-        #s.count = s.num_entries
         s.credit = s.num_entries
 
       else:
@@ -111,7 +109,7 @@ class NormalQueueCtrlRTL( RTLComponent ):
 # NormalQueueRTL
 #-------------------------------------------------------------------------
 
-class NormalQueueRTL( RTLComponent ):
+class NormalQueueRTL( ComponentLevel6 ):
 
   def construct( s, MsgType, num_entries=2 ):
     
