@@ -65,9 +65,9 @@ class TestHarness( ComponentLevel6 ):
                  src_interval, sink_initial, sink_interval, 
                  arrival_time=None ):
 
-    s.src     = TestSrcRTL ( MsgType, src_msgs,  src_initial,  src_interval  )
-    s.dut     = NormalQueueRTL( MsgType, qsize )
-    s.sink    = TestSinkRTL( MsgType, sink_msgs, sink_initial, sink_interval, 
+    s.src  = TestSrcRTL ( MsgType, src_msgs,  src_initial,  src_interval )
+    s.dut  = NormalQueueRTL( MsgType, qsize )
+    s.sink = TestSinkRTL( MsgType, sink_msgs, sink_initial, sink_interval, 
                              arrival_time )
     
     s.connect( s.src.send,    s.dut.enq       )
