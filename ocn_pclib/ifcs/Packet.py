@@ -3,13 +3,14 @@
 #=========================================================================
 # A simple Packet format for testing
 #
-# Author : Cheng Tan
+# Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 3, 2019
 
 from pymtl import *
 
 class Packet( object ):
-  def __init__(s):
+
+  def __init__( s ):
     
     s.src_x   = Bits4 ( 0 )
     s.src_y   = Bits4 ( 0 ) 
@@ -17,6 +18,9 @@ class Packet( object ):
     s.dst_y   = Bits4 ( 0 ) 
     s.opaque  = Bits4 ( 0 ) 
     s.payload = Bits16( 0 )
+
+  def __str__( s ):
+    return "({},{})>({},{})".format( s.src_x, s.src_y, s.dst_x, s.dst_y ) 
 
 def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
   pkt = Packet()
