@@ -123,4 +123,3 @@ def mk_mesh_pos_list( mesh_wid=2, mesh_ht=2 ):
       pos_list.append( mk_mesh_pos( c, r, mesh_wid, mesh_ht ) ) 
 
   return pos_list
-
