@@ -52,12 +52,33 @@ def run_test( model, router_pos, test_vectors ):
 
 def test_route_unit( dump_vcd, test_verilog ):
   mesh_wid = 2
-  mesh_ht  = 2 
-  # FIXME: can only test 2x2 mesh. need parametrized bit struct
-  model = DORRouteUnitGetGiveRTL( Packet, MeshPosition )
+  mesh_ht  = 2
 
-  # specific for DOR Y routing algorithm
-  run_test( model, mk_mesh_pos( 0, 0, 2, 2 ), [
+  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+  model = DORRouteUnitGetGiveRTL( Packet, MeshPos )
+
+  # Test for Y-DOR routing algorithm
+
+  run_test( model, MeshPos( 0, 0 ), [
+   # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en 
+   [   1,     1,     1,       9,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
+   [   0,     1,     1,       7,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
+   [   1,     0,     1,       3,      0,     1,    [0,0,0,1,0],  [0,0,0,0,0] ],
+   [   0,     0,     1,       6,      0,     1,    [0,0,0,0,1],  [0,0,0,0,0] ],
+   [   0,     0,     1,       4,      0,     0,    [0,0,0,0,0],  [0,0,0,0,0] ],
+   [   0,     0,     1,       4,      1,     1,    [0,0,0,0,1],  [0,0,0,0,1] ],
+  ] )
+
+def test_route_unit3x3( dump_vcd, test_verilog ):
+  mesh_wid = 3
+  mesh_ht  = 3
+
+  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+  model = DORRouteUnitGetGiveRTL( Packet, MeshPos )
+
+  # Test for Y-DOR routing algorithm
+
+  run_test( model, MeshPos( 0, 0 ), [
    # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en 
    [   1,     1,     1,       9,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
    [   0,     1,     1,       7,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
