@@ -74,6 +74,35 @@ class RingPosition( object ):
     return "{}".format( s.pos )
 
 #-------------------------------------------------------------------------
+# Dynamically generated RingPosition
+#-------------------------------------------------------------------------
+
+_ring_pos_dict = dict()
+_ring_pos_template = """
+class RingPosition_{num_nodes}( object ):
+  
+  def __init__( s, pos ):
+
+    Type = mk_bits( clog2( {num_nodes} ) )
+
+    s.pos = Type( pos )
+
+  def __str__( s ):
+    return "{}".format( int( s.pos ) )
+
+_ring_pos_dict[ {num_nodes} ]
+"""
+
+def mk_ring_pos( num_nodes ):
+  if num_nodes in _ring_pos_dict:
+    return _ring_pos_dict[ num_nodes ]
+  else:
+    exec py.code.Source( 
+      _ring_pos_template.format( num_nodes = num_nodes ) 
+    ).compile() in globals()
+    return _ring_pos_dict[ num_nodes ]
+
+#-------------------------------------------------------------------------
 # Utility functions
 #-------------------------------------------------------------------------
 
