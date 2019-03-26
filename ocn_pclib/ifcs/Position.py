@@ -3,13 +3,15 @@
 #=========================================================================
 # Position formats for different network topologies
 #
-# Author : Cheng Tan, Yanghui Ou
-#   Date : Mar 6, 2019
+# Author : Yanghui Ou, Cheng Tan
+#   Date : Mar 25, 2019
 
 from pymtl import *
 
+import py
+
 #-------------------------------------------------------------------------
-# MeshPosition
+# Static MeshPosition
 #-------------------------------------------------------------------------
 
 class MeshPosition( object ): 
@@ -26,7 +28,38 @@ class MeshPosition( object ):
     return "({},{})".format( s.pos_x, s.pos_y )
 
 #-------------------------------------------------------------------------
-# RingPosition
+# Dynamically generated MeshPosition
+#-------------------------------------------------------------------------
+
+_mesh_pos_dict = dict()
+_mesh_pos_template = """
+class MeshPosition_{mesh_wid}_by_{mesh_ht}( object ):
+
+  def __init__( s, pos_x=0, pos_y=0 ):
+
+    XType = mk_bits( clog2( {mesh_wid} ) )
+    YType = mk_bits( clog2( {mesh_ht}  ) )
+
+    s.pos_x = XType( pos_x )
+    s.pos_y = YType( pos_y )
+
+  def __str__( s ):
+    return "({{}},{{}})".format( s.pos_x, s.pos_y )
+
+_mesh_pos_dict[ ( {mesh_wid}, {mesh_ht} ) ] = MeshPosition_{mesh_wid}_by_{mesh_ht}
+"""
+
+def mk_mesh_pos( wid, ht ):
+  if ( wid, ht ) in _mesh_pos_dict:
+    return _mesh_pos_dict[ ( wid, ht ) ]
+  else:
+    exec py.code.Source( 
+      _mesh_pos_template.format( mesh_wid=wid, mesh_ht=ht )
+    ).compile() in globals()
+    return _mesh_pos_dict[ ( wid, ht ) ]
+
+#-------------------------------------------------------------------------
+# Static RingPosition
 #-------------------------------------------------------------------------
 
 class RingPosition( object ):
@@ -44,7 +77,7 @@ class RingPosition( object ):
 # Utility functions
 #-------------------------------------------------------------------------
 
-def mk_mesh_pos( pos_x=0, pos_y=0, mesh_wid=2, mesh_ht=2 ):
+def mk_mesh_pos_inst( pos_x=0, pos_y=0, mesh_wid=2, mesh_ht=2 ):
 
   pos = MeshPosition( mesh_wid, mesh_ht )
   pos.pos_x = pos_x
