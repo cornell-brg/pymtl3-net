@@ -17,7 +17,7 @@ from ocn_pclib.rtl.Encoder   import Encoder
 #from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 from pclib.ifcs.SendRecvIfc import *
 
-class SwitchUnitRTL( RTLComponent ):
+class SwitchUnitRTL( ComponentLevel6 ):
   def construct(s, PacketType, num_inports=5):
 
     # Constants
