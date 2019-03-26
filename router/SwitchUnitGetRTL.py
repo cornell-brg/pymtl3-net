@@ -13,7 +13,7 @@ from ocn_pclib.rtl.Encoder import Encoder
 from ocn_pclib.ifcs        import GetIfcRTL
 from pclib.ifcs            import SendIfcRTL
 
-class SwitchUnitGetRTL( RTLComponent ):
+class SwitchUnitGetRTL( ComponentLevel6 ):
 
   def construct( s, PacketType, num_inports=5 ):
 
@@ -57,14 +57,9 @@ class SwitchUnitGetRTL( RTLComponent ):
         s.recv[i].en = 1 if s.send.rdy and s.mux.sel==i else 0
 
   def line_trace( s ):
-    recv_str = '[ '
-    recv_rdy_str = '[ '
-    bypass_queue_str = '['
+
+    in_trace = [ "" for _ in range( s.num_inports ) ]
     for i in range( s.num_inports ):
-      recv_str = recv_str + str(s.recv[i].msg.payload) + ','
-      recv_rdy_str = recv_rdy_str + str(s.recv[i].rdy) + ','
-      bypass_queue_str += str(s.bypass_queue[i].deq.msg.payload) + ','
-    recv_str = recv_str + ']'
-    recv_rdy_str = recv_rdy_str + ']'
-    bypass_queue_str += ']'
-    return "{} (recv.rdy:{}; send.en:{}; send.rdy:{}, bq:{}) -> {}".format( recv_str, recv_rdy_str, s.send.en, s.send.rdy, bypass_queue_str, s.send.msg.payload )
+      in_trace[i] = "{}".format( s.recv[i] )
+
+    return "{}(){}".format( "|".join( in_trace ), s.send )
