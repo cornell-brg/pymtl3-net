@@ -3,10 +3,16 @@
 #=========================================================================
 # A simple Packet format for testing
 #
-# Author : Cheng Tan, Yanghui Ou
-#   Date : Mar 3, 2019
+# Author : Yanghui Ou, Cheng Tan
+#   Date : Mar 26, 2019
 
 from pymtl import *
+
+import py
+
+#-------------------------------------------------------------------------
+# Static Packet type
+#-------------------------------------------------------------------------
 
 class Packet( object ):
 
@@ -20,7 +26,8 @@ class Packet( object ):
     s.payload = Bits16( 0 )
 
   def __str__( s ):
-    return "({},{})>({},{})".format( s.src_x, s.src_y, s.dst_x, s.dst_y ) 
+    return "({},{})>({},{}):{}:{}".format(
+      s.src_x, s.src_y, s.dst_x, s.dst_y, s.opaque, s.payload ) 
 
 def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
   pkt = Packet()
@@ -31,3 +38,18 @@ def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
   pkt.opaque  = opaque
   pkt.payload = payload
   return pkt
+
+#-------------------------------------------------------------------------
+# Dynamically generated Packet type
+#-------------------------------------------------------------------------
+
+_packet_dic = dict()
+_packet_template = """
+class Packet_{src_pos}_{dst_pos}_{opaque_nbits}_{payload_nbits}( object ):
+
+  def __init__( s, src=0, dst=0, opaque=0, payload=0 ):
+    pass
+
+  def __str__( s ):
+    pass
+"""
