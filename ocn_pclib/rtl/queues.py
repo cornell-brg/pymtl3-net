@@ -90,7 +90,13 @@ class NormalQueueCtrlRTL( ComponentLevel6 ):
     @s.update
     def up_ctrl_out():
       s.wen     = s.enq_xfer
+
+    @s.update
+    def up_ctrl_waddr():
       s.waddr   = s.tail
+
+    @s.update
+    def up_ctrl_raddr():
       s.raddr   = s.head
 
     @s.update_on_edge
