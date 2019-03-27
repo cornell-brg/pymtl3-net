@@ -60,9 +60,10 @@ class NormalQueueCtrlRTL( ComponentLevel6 ):
     
     # Registers
 
-    s.head  = Wire( mk_bits( addr_nbits ) )
-    s.tail  = Wire( mk_bits( addr_nbits ) )
-    # s.count = Wire( mk_bits( addr_nbits ) )
+    s.head       = Wire( mk_bits( addr_nbits ) )
+    s.tail       = Wire( mk_bits( addr_nbits ) )
+    s.credit_reg = Wire( mk_bits( addr_nbits ) )
+    s.connect( s.credit, s.credit_reg )
 
     # Wires
 
@@ -72,23 +73,25 @@ class NormalQueueCtrlRTL( ComponentLevel6 ):
     s.tail_next = Wire( mk_bits( addr_nbits ) )
 
     @s.update
-    def up_xfer_signals():
-
-      s.enq_xfer  = s.enq_en and s.enq_rdy
-      s.deq_xfer  = s.deq_en and s.deq_rdy
-      s.head_next = s.head - 1 if s.head > 0 else s.last_idx
-      s.tail_next = s.tail + 1 if s.tail < s.last_idx else 0
-
-
-      s.wen     = s.enq_xfer
-      s.waddr   = s.tail
-      s.raddr   = s.head
-
-
-    @s.update
     def up_rdy_signals():
       s.enq_rdy = s.credit > 0
       s.deq_rdy = s.credit < s.num_entries
+
+    @s.update
+    def up_xfer_signals():
+      s.enq_xfer  = s.enq_en and s.enq_rdy
+      s.deq_xfer  = s.deq_en and s.deq_rdy
+
+    @s.update
+    def up_next():
+      s.head_next = s.head - 1 if s.head > 0 else s.last_idx
+      s.tail_next = s.tail + 1 if s.tail < s.last_idx else 0
+
+    @s.update
+    def up_ctrl_out():
+      s.wen     = s.enq_xfer
+      s.waddr   = s.tail
+      s.raddr   = s.head
 
     @s.update_on_edge
     def up_reg():
@@ -96,14 +99,14 @@ class NormalQueueCtrlRTL( ComponentLevel6 ):
       if s.reset:
         s.head  = 0
         s.tail  = 0
-        s.credit = s.num_entries
+        s.credit_reg = s.num_entries
 
       else:
         s.head   = s.head_next if s.deq_xfer else s.head
         s.tail   = s.tail_next if s.enq_xfer else s.tail
-        s.credit = s.credit - 1 if s.enq_xfer and not s.deq_xfer else \
-                   s.credit + 1 if s.deq_xfer and not s.enq_xfer else \
-                   s.credit
+        s.credit_reg = s.credit_reg - 1 if s.enq_xfer and not s.deq_xfer else \
+                       s.credit_reg + 1 if s.deq_xfer and not s.enq_xfer else \
+                       s.credit_reg
 
 #-------------------------------------------------------------------------
 # NormalQueueRTL

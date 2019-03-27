@@ -8,7 +8,7 @@
 
 import tempfile
 from pymtl                   import *
-from router.RouterRTL        import RouterRTL
+from router.RouterRTL        import MeshRouterRTL
 from router.InputUnitRTL     import InputUnitRTL
 from router.DORXRouteUnitRTL import DORXRouteUnitRTL
 from router.DORYRouteUnitRTL import DORYRouteUnitRTL
@@ -16,9 +16,9 @@ from router.SwitchUnitRTL    import SwitchUnitRTL
 from router.OutputUnitRTL    import OutputUnitRTL
 from ocn_pclib.rtl.queues    import NormalQueueRTL
 
-from ocn_pclib.ifcs.Position            import *
-from ocn_pclib.ifcs.Packet              import Packet, mk_pkt
-from ocn_pclib.test.TestVectorSimulator import TestVectorSimulator
+from ocn_pclib.ifcs.Position import *
+from ocn_pclib.ifcs.Packet   import Packet, mk_pkt
+from pclib.test import TestVectorSimulator
 
 from Configs import configure_network
 
@@ -32,31 +32,32 @@ def run_test( model, test_vectors ):
 
     model.pos = MeshPos( 1, 1 )
 
-    for i in range (model.num_inports):
+    for i in range ( model.num_inports ):
       pkt = mk_pkt(0, 0, test_vector[0][i]/4, test_vector[0][i]%4, 
                    1, test_vector[3][i])
       model.recv[i].msg = pkt
-      if model.recv[i].rdy == 1:
-        model.recv[i].en = test_vector[1][i]
+      model.recv[i].en = test_vector[1][i]
+      if model.recv[i].en:
+        assert model.recv[i].rdy
 
     for i in range( model.num_outports ):
       model.send[i].rdy = test_vector[2][i]
 
   def tv_out( model, test_vector ):
     for i in range( model.num_inports ):
-      print 'model.recv[',i,'].rdy:',model.recv[i].rdy,' == test_vector[4][',i,']:',test_vector[4][i]
-#      assert model.recv[i].rdy == test_vector[4][i]
+      # print 'model.recv[',i,'].rdy:',model.recv[i].rdy,' == test_vector[4][',i,']:',test_vector[4][i]
+      assert model.recv[i].rdy == test_vector[4][i]
 
     for i in range (model.num_outports):
-      print 'model.send[',i,'].en:',model.send[i].en,' == (test_vector[5][',i,']:',test_vector[5][i]
+      # print 'model.send[',i,'].en:',model.send[i].en,' == (test_vector[5][',i,']:',test_vector[5][i]
+#      print 'model.switch_units[',i,'].send.en:',model.send[i].en,' == (test_vector[5][',i,']:',test_vector[5][i]
 #      assert model.send[i].en == (test_vector[5][i] != 'x')
       if model.send[i].en == 1:
-        print '  model.send[',i,'].msg.payload:',model.send[i].msg.payload,' == test_vector[5][',i,']:',test_vector[5][i]
-#        assert model.send[i].msg.payload == test_vector[5][i]
+        # print '  model.send[',i,'].msg.payload:',model.send[i].msg.payload,' == test_vector[5][',i,']:',test_vector[5][i]
+        assert model.send[i].msg.payload == test_vector[5][i]
   
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
-  model.sim_reset()
 
 def test_Router( dump_vcd, test_verilog ):
 
@@ -82,23 +83,16 @@ def test_Router( dump_vcd, test_verilog ):
   inputs_1_buffer= [
 # [dst_x,dst_y]  recv_en    send_rdy       payload       recv_rdy      send_msg
   [[4,4,7,4,5],[1,1,0,1,1],[0,0,0,0,0],[11,12,13,14,15],[1,1,1,1,1],[xx,xx,xx,xx,xx]],
-  [[4,4,7,8,9],[1,1,1,0,0],[0,0,0,0,0],[21,22,23,24,25],[0,0,1,0,0],[xx,xx,xx,xx,xx]],
-  [[4,4,7,8,9],[1,1,1,1,1],[1,1,1,1,1],[31,32,33,34,35],[1,1,0,1,1],[11,23,xx,xx,15]],
-  [[4,6,7,8,9],[1,1,1,1,1],[1,1,1,1,1],[41,42,43,44,45],[0,0,1,1,1],[12,xx,xx,xx,xx]],
-  [[9,0,0,4,6],[1,1,1,1,1],[1,1,0,1,1],[51,52,53,54,55],[1,0,0,0,0],[14,43,xx,45,xx]],
+  [[4,4,7,8,9],[1,1,1,0,0],[0,0,0,0,0],[21,22,23,24,25],[1,1,1,1,1],[xx,xx,xx,xx,xx]],
+  [[4,4,7,8,9],[1,1,1,1,1],[1,1,1,1,1],[31,32,33,34,35],[1,1,1,1,1],[11,23,xx,xx,15]],
+  [[4,6,7,8,9],[1,1,1,1,1],[1,1,1,1,1],[41,42,43,44,45],[1,1,1,1,1],[12,xx,xx,xx,xx]],
+  [[9,0,0,4,6],[1,1,1,1,1],[1,1,0,1,1],[51,52,53,54,55],[1,1,1,1,1],[14,43,xx,45,xx]],
   ]
 
-
-#  model = RouterRTL( 0, RoutingStrategyType, MeshPosition, NormalQueueRTL )
-#  run_test(model, inputs_1_buffer)
-  num_inports  = 5
-  num_outports = 5
-
-  model = RouterRTL( Packet, MeshPosition, num_inports, num_outports, 
-          InputUnitRTL, RouteUnitType, SwitchUnitRTL, OutputUnitRTL)
-  for i in range (num_inports):
+  model = MeshRouterRTL( Packet, MeshPosition, RouteUnitType )
+  for i in range ( 5 ):
     path = "top.input_units[" + str(i) + "].elaborate.QueueType"
-    model.set_parameter(path, NormalQueueRTL)
+    model.set_parameter( path, NormalQueueRTL )
 
   run_test(model, inputs_1_buffer)
 
