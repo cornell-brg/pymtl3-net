@@ -11,7 +11,7 @@
 from pymtl import *
 from pclib.ifcs.SendRecvIfc import *
 
-class OutputUnitRTL( ComponentLevel6 ):
+class OutputUnitRTL( RTLComponent ):
   def construct( s, PacketType, QueueType=None ):
     
     # Interface

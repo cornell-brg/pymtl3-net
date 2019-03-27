@@ -26,7 +26,7 @@ from pclib.rtl  import BypassQueue1RTL
 # TestHarness
 #-------------------------------------------------------------------------
 
-class TestHarness( ComponentLevel6 ):
+class TestHarness( RTLComponent ):
 
   def construct( s, MsgType, src_msgs, sink_msgs, stall_prob,
                  src_delay, sink_delay ):

@@ -1,30 +1,32 @@
 #=========================================================================
-# OutputUnitRTL.py
+# InputUnitRTL.py
 #=========================================================================
-# An Output unit of the router. Just one normal queue, no credit.
+# An input unit for the router that supports single-phit packet.
 # Note that the interface is send/recv-based.
 # Enabling parameter passing.
 #
-# Author : Cheng Tan, Yanghui Ou
-#   Date : Feb 28, 2019
+# Author : Yanghui Ou, Cheng Tan
+#   Date : Feb 23, 2019
 
 from pymtl import *
+#from pclib.ifcs.EnRdyIfc  import InEnRdyIfc, OutEnRdyIfc
 from pclib.ifcs.SendRecvIfc import *
+from pclib.rtl  import NormalQueueRTL
 
-class OutputUnitRTL( ComponentLevel6 ):
-  def construct( s, PacketType, QueueType=None ):
-    
-    # Interface
-    s.recv = RecvIfcRTL ( PacketType )
-    s.send = SendIfcRTL ( PacketType )
+class InputUnitRTL( RTLComponent ):
+  def construct( s, PacketType, QueueType=None, num_entries=1 ):
+
+    # Constant
     s.QueueType = QueueType
 
-    # If no queue type is assigned
-    if s.QueueType != None:
+    # Interface
+    s.recv = RecvIfcRTL( PacketType )
+    s.send = SendIfcRTL( PacketType )
 
+    if s.QueueType != None:
       # Component
-      s.queue = s.QueueType( Type=PacketType ) 
-  
+      s.queue = s.QueueType(num_entries, Type=PacketType)
+      
       # Connections
       s.connect( s.recv.rdy, s.queue.enq.rdy )
       s.connect( s.recv.en,  s.queue.enq.val )
@@ -37,13 +39,12 @@ class OutputUnitRTL( ComponentLevel6 ):
         s.send.en   = s.send.rdy and s.queue.deq.val
         s.queue.deq.rdy = s.send.rdy
 
-    # No ouput queue
     else:
-      s.connect( s.recv, s.send ) 
-
+      s.connect( s.recv, s.send )
+  
   def line_trace( s ):
     if s.QueueType != None:
-      return "{}({}){}".format( s.recv.msg, s.queue.ctrl.num_entries,
+      return "{}({}){}".format( s.recv.msg, s.queue.ctrl.num_entries, 
             s.send.msg )
     else:
       return "{}(0){}".format( s.recv.msg, s.send.msg)

@@ -1,20 +1,22 @@
 #=========================================================================
-# DORYRouteUnitRTL.py
+# DORYRouteUnitGetGiveRTL.py
 #=========================================================================
-# A route unit with DOR-Y routing.
+# A DOR route unit with get/give interface.
 #
-# Author : Cheng Tan, Yanghui Ou
-#   Date : Mar 3, 2019
+# Author : Yanghui Ou, Cheng Tan
+#   Date : Mar 25, 2019
 
 from pymtl import *
-#from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
-from pclib.ifcs.SendRecvIfc import *
+from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
-class DORYRouteUnitRTL( RTLComponent ):
-  def construct( s, PacketType, PositionType, num_outports=5 ):
+class DORYRouteUnitRTL( ComponentLevel6 ):
+
+  def construct( s, PacketType, PositionType ):
 
     # Constants 
-    s.num_outports = num_outports
+
+    s.num_outports = 5
+    # TODO: define thses constants else where?
     NORTH = 0
     SOUTH = 1
     WEST  = 2
@@ -22,45 +24,52 @@ class DORYRouteUnitRTL( RTLComponent ):
     SELF  = 4
 
     # Interface
-#    s.recv  = InEnRdyIfc( PacketType )
-    s.recv  = RecvIfcRTL( PacketType )
-    s.send  = [ SendIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
-    s.pos   = InVPort( PositionType )
+
+    s.get  = GetIfcRTL( PacketType )
+    s.give = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
+    s.pos  = InVPort( PositionType )
 
     # Componets
-    s.out_rdys = Wire( mk_bits( s.num_outports ) )
-    s.out_dir  = OutVPort( Bits3  ) 
+
+    s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
+    s.give_ens = Wire( mk_bits( s.num_outports ) ) 
 
     # Connections
+
     for i in range( s.num_outports ):
-      s.connect( s.recv.msg,    s.send[i].msg )
-      s.connect( s.out_rdys[i], s.send[i].rdy )
+      s.connect( s.get.msg,    s.give[i].msg )
+      s.connect( s.give_ens[i], s.give[i].en  )
     
     # Routing logic
     @s.update
-    def up_ru_recv_rdy():
+    def up_ru_routing():
+
       s.out_dir = 0
-      if s.pos.pos_x == s.recv.msg.dst_x and s.pos.pos_y == s.recv.msg.dst_y:
-        s.out_dir = SELF
-      elif s.recv.msg.dst_y < s.pos.pos_y:
-        s.out_dir = NORTH
-      elif s.recv.msg.dst_y > s.pos.pos_y:
-        s.out_dir = SOUTH
-      elif s.recv.msg.dst_x < s.pos.pos_x:
-        s.out_dir = WEST
-      else:
-        s.out_dir = EAST
-      s.recv.rdy =  s.send[s.out_dir].rdy
+      for i in range( s.num_outports ):
+        s.give[i].rdy = 0
+
+      if s.get.rdy:
+        if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
+          s.out_dir = SELF
+        elif s.get.msg.dst_y < s.pos.pos_y:
+          s.out_dir = NORTH
+        elif s.get.msg.dst_y > s.pos.pos_y:
+          s.out_dir = SOUTH
+        elif s.get.msg.dst_x < s.pos.pos_x:
+          s.out_dir = WEST
+        else:
+          s.out_dir = EAST
+        s.give[ s.out_dir ].rdy = 1
 
     @s.update
-    def up_ru_send_en():
-      for i in range( s.num_outports ):
-        s.send[i].en = 0
-      s.send[s.out_dir].en = s.recv.en and s.send[s.out_dir].rdy 
+    def up_ru_give_en():
+      s.get.en = s.give_ens > 0 
 
+  # Line trace
   def line_trace( s ):
+
     out_str = [ "" for _ in range( s.num_outports ) ]
     for i in range (s.num_outports):
-      out_str[i] = "<{}>".format( s.send[i].en ) 
+      out_str[i] = "{}".format( s.give[i] ) 
 
-    return "({},{})->({},{}); dir:({}); ({}|{}|{}|{}|{}); recv.rdy({}); send.rdy({})".format(s.recv.msg.src_x, s.recv.msg.src_y, s.recv.msg.dst_x, s.recv.msg.dst_y, s.out_dir, out_str[0], out_str[1], out_str[2], out_str[3], out_str[4], s.recv.rdy, s.send[s.out_dir].rdy )
+    return "{}({}){}".format( s.get, s.out_dir, "|".join( out_str ) )

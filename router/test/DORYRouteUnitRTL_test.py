@@ -3,60 +3,87 @@
 #=========================================================================
 # Test for DORYRouteUnitRTL
 #
-# Author : Cheng Tan, Yanghui Ou
-#   Date : Mar 3, 2019
+# Author : Yanghui Ou, Cheng Tan
+#   Date : Mar 25, 2019
 
-import tempfile
-from pymtl                import *
-from ocn_pclib.test.TestVectorSimulator            import TestVectorSimulator
-from ocn_pclib.ifcs.Packet import Packet, mk_pkt
-from router.DORYRouteUnitRTL  import DORYRouteUnitRTL
+from pymtl                          import *
+from pclib.test                     import TestVectorSimulator
+from ocn_pclib.ifcs.Packet          import Packet, mk_pkt
+from ocn_pclib.ifcs.Position        import MeshPosition, mk_mesh_pos
+from router.DORYRouteUnitRTL        import DORYRouteUnitRTL 
 
-from ocn_pclib.ifcs.Position import *
+#-------------------------------------------------------------------------
+# Driver function for TestVectorSimulator
+#-------------------------------------------------------------------------
 
-from Configs import configure_network
-
-def run_test( model, test_vectors ):
+def run_test( model, router_pos, test_vectors ):
  
   def tv_in( model, test_vector ):
 
-    # assume a 2x2 Mesh network
-    pos = MeshPosition( 3, 1, 1)
-    model.pos = pos
+    dst_x   = test_vector[0]
+    dst_y   = test_vector[1]
+    opaque  = test_vector[2]
+    payload = test_vector[3]
 
-    pkt = mk_pkt(0, 0, test_vector[0], test_vector[1], test_vector[2], test_vector[3])
-    model.recv.msg = pkt
+    pkt = mk_pkt( 0, 0, dst_x, dst_y, opaque, payload )
+
+    model.pos = router_pos
+    model.get.msg = pkt
+    model.get.rdy = test_vector[5]
 
     for i in range( model.num_outports ):
-      model.send[i].rdy = test_vector[4][i]
-      if test_vector[4][test_vector[5]] == 1:
-        model.recv.en = 1
-
+      model.give[i].en = test_vector[7][i]
 
   def tv_out( model, test_vector ):
-    assert model.recv.rdy == test_vector[4][test_vector[5]]
-    if test_vector[4][test_vector[5]] == 1:
-      assert model.send[test_vector[5]].en == 1
-      assert model.send[test_vector[5]].msg.payload == test_vector[3]
+
+    assert model.get.en == test_vector[4]
+    for i in range( 5 ):
+      assert model.give[i].rdy == test_vector[6][i]
+      if test_vector[6][i]:
+        assert model.give[i].msg.opaque  == test_vector[2]
+        assert model.give[i].msg.payload == test_vector[3]
   
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
-  model.sim_reset()
 
-def test_RouteUnit( dump_vcd, test_verilog ):
+#-------------------------------------------------------------------------
+# Test cases
+#-------------------------------------------------------------------------
 
-  configs = configure_network()
+def test_route_unit( dump_vcd, test_verilog ):
+  mesh_wid = 2
+  mesh_ht  = 2
 
-  model = DORYRouteUnitRTL( Packet, MeshPosition )
+  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+  model = DORYRouteUnitRTL( Packet, MeshPos )
 
-  model.set_parameter("top.elaborate.num_outports", 5)
+  # Test for Y-DOR routing algorithm
 
-  # specific for DOR Y routing algorithm
-  run_test( model, [
-    #  dst_x  dst_y  opaque  payload      rdy       dir
-   [     1,     1,     1,       9,    [0,0,0,0,1],   4  ],
-   [     2,     2,     1,       7,    [1,0,0,0,0],   1  ],
-   [     2,     1,     1,       3,    [0,0,1,0,0],   3  ],
-   [     1,     2,     1,       6,    [0,1,0,1,0],   1  ],
-   [     0,     0,     1,       4,    [1,0,0,0,0],   0  ],
-  ])
+  run_test( model, MeshPos( 0, 0 ), [
+   # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en 
+   [   1,     1,     1,       9,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
+   [   0,     1,     1,       7,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
+   [   1,     0,     1,       3,      0,     1,    [0,0,0,1,0],  [0,0,0,0,0] ],
+   [   0,     0,     1,       6,      0,     1,    [0,0,0,0,1],  [0,0,0,0,0] ],
+   [   0,     0,     1,       4,      0,     0,    [0,0,0,0,0],  [0,0,0,0,0] ],
+   [   0,     0,     1,       4,      1,     1,    [0,0,0,0,1],  [0,0,0,0,1] ],
+  ] )
+
+def test_route_unit3x3( dump_vcd, test_verilog ):
+  mesh_wid = 3
+  mesh_ht  = 3
+
+  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+  model = DORYRouteUnitRTL( Packet, MeshPos )
+
+  # Test for Y-DOR routing algorithm
+
+  run_test( model, MeshPos( 1, 1 ), [
+   # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en 
+   [   1,     1,     1,       9,      0,     1,    [0,0,0,0,1],  [0,0,0,0,0] ],
+   [   0,     1,     1,       7,      0,     1,    [0,0,1,0,0],  [0,0,0,0,0] ],
+   [   1,     0,     1,       3,      0,     1,    [1,0,0,0,0],  [0,0,0,0,0] ],
+   [   0,     0,     1,       6,      0,     1,    [1,0,0,0,0],  [0,0,0,0,0] ],
+   [   1,     1,     1,       4,      0,     0,    [0,0,0,0,0],  [0,0,0,0,0] ],
+   [   1,     1,     1,       4,      1,     1,    [0,0,0,0,1],  [0,0,0,0,1] ],
+  ] )
