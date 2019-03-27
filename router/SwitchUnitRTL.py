@@ -50,9 +50,9 @@ class SwitchUnitRTL( ComponentLevel6 ):
     def up_arb_send_en():
       s.arbiter.en = s.arbiter.grants > 0 and s.send.rdy
       s.send.en = s.arbiter.grants > 0 and s.send.rdy
- 
+
     @s.update
-    def up_recv_en():
+    def up_get_en():
       for i in range( num_inports ):
         s.get[i].en = 1 if s.send.rdy and s.mux.sel==i else 0
 

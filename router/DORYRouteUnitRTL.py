@@ -37,13 +37,13 @@ class DORYRouteUnitRTL( ComponentLevel6 ):
     # Connections
 
     for i in range( s.num_outports ):
-      s.connect( s.get.msg,    s.give[i].msg )
+      s.connect( s.get.msg,     s.give[i].msg )
       s.connect( s.give_ens[i], s.give[i].en  )
     
     # Routing logic
     @s.update
     def up_ru_routing():
-
+ 
       s.out_dir = 0
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
@@ -62,7 +62,7 @@ class DORYRouteUnitRTL( ComponentLevel6 ):
         s.give[ s.out_dir ].rdy = 1
 
     @s.update
-    def up_ru_give_en():
+    def up_ru_get_en():
       s.get.en = s.give_ens > 0 
 
   # Line trace

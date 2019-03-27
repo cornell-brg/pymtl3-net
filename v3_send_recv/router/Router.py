@@ -8,6 +8,7 @@
 
 from pymtl      import *
 from pclib.ifcs import SendIfcRTL, RecvIfcRTL 
+from ocn_pclib.rtl.queues import NormalQueueRTL
 
 class Router( ComponentLevel6 ):
 
@@ -26,7 +27,7 @@ class Router( ComponentLevel6 ):
     
     # Components
 
-    s.input_units  = [ InputUnitType( PacketType ) 
+    s.input_units  = [ InputUnitType( PacketType, NormalQueueRTL ) 
                       for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PacketType, PositionType ) 

@@ -9,7 +9,7 @@
 from pymtl import *
 from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
-class DORXRouteUnitGetGiveRTL( ComponentLevel6 ):
+class DORXRouteUnitRTL( ComponentLevel6 ):
 
   def construct( s, PacketType, PositionType ):
 
