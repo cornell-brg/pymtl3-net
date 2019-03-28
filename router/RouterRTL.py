@@ -17,5 +17,5 @@ class MeshRouterRTL( Router ):
   def construct( s, PacketType, PositionType, RouteUnitType ):
     
     super( MeshRouterRTL, s ).construct(
-      PacketType, PositionType, 5, 5, 
-      InputUnitRTL, RouteUnitType, SwitchUnitRTL, OutputUnitRTL )
+      PacketType, PositionType, 5, 5, InputUnitRTL, RouteUnitType, 
+      SwitchUnitRTL, OutputUnitRTL )
