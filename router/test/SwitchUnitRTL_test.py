@@ -91,8 +91,10 @@ class TestHarness( ComponentLevel6 ):
     def up_dut_rdy():
       for i in range (s.dut.num_inports):
 #        if s.sink.recv.rdy:
-        s.srcs[i].send.rdy = s.sink.recv.rdy
-        s.dut.get[i].rdy   = s.sink.recv.rdy
+#        s.srcs[i].send.rdy = s.sink.recv.rdy
+#        s.dut.get[i].rdy   = s.sink.recv.rdy
+        s.srcs[i].send.rdy = 1
+        s.dut.get[i].rdy   = 1
 
 
   def done( s ):
