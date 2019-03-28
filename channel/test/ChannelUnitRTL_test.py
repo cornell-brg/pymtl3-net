@@ -8,136 +8,73 @@
 
 import pytest
 
-from pymtl import *
-from pclib.rtl.valrdy_queues import PipeQueue1RTL, BypassQueue1RTL
-from pclib.rtl.TestSource import TestSourceEnRdy
-from pclib.rtl.TestSink   import TestSinkEnRdy
-from pclib.ifcs import InValRdyIfc, OutValRdyIfc 
-from pclib.ifcs.SendRecvIfc import *
-from pclib.test import mk_test_case_table
-from pymtl.passes.PassGroups import SimpleSim
+from pymtl                    import *
+from pymtl.dsl.test.sim_utils import simple_sim_pass
+from pclib.test.test_srcs     import TestSrcRTL
+from pclib.test.test_sinks    import TestSinkRTL
+
+from ocn_pclib.rtl.queues     import NormalQueueRTL
 
 from channel.ChannelUnitRTL import ChannelUnitRTL
 
-from pclib.rtl  import NormalQueueRTL
-from pclib.rtl  import BypassQueue1RTL
-
-from ocn_pclib.ifcs.Packet import *
+from pclib.test import TestVectorSimulator
 
 #-------------------------------------------------------------------------
-# TestHarness
+# TestVectorSimulator test
 #-------------------------------------------------------------------------
 
-class TestHarness( RTLComponent ):
+def run_tv_test( dut, test_vectors ):
 
-  def construct( s, MsgType, src_msgs, sink_msgs, stall_prob,
-                 src_delay, sink_delay ):
+  # Define input/output functions
 
-    s.src      = TestSourceEnRdy( MsgType, src_msgs  )
-    s.sink     = TestSinkEnRdy  ( MsgType, sink_msgs )
-    s.channel_unit   = ChannelUnitRTL    ( MsgType, latency=3 )
+  def tv_in( dut, tv ):
+    dut.recv.en  = tv[0]
+    dut.recv.msg = tv[2]
+    dut.send.rdy = tv[3]
 
-    # Connections
-    s.connect( s.src.out,           s.channel_unit.recv )
-    s.connect( s.channel_unit.send, s.sink.in_          )
-  
-  def done( s ):
-    return s.src.done() and s.sink.done()
+  def tv_out( dut, tv ):
+    if tv[1] != '?': assert dut.recv.rdy == tv[1]
+    if tv[4] != '?': assert dut.send.en  == tv[4]
+    if tv[5] != '?': assert dut.send.msg == tv[5]
 
-  def line_trace( s ):
-    return s.src.line_trace() + "-> | " + s.channel_unit.line_trace() + \
-                               " | -> " + s.sink.line_trace()
+  # Run the test
+  sim = TestVectorSimulator( dut, test_vectors, tv_in, tv_out )
+  sim.run_test()
 
-#-------------------------------------------------------------------------
-# run_rtl_sim
-#-------------------------------------------------------------------------
+def test_pipe_Bits():
 
-def run_rtl_sim( test_harness, max_cycles=100 ):
+  B1  = mk_bits(1)
+  B32 = mk_bits(32)
 
-  # Set parameters
-
-#  test_harness.set_parameter("top.channel_unit.queue.elaborate.num_entries", 2)
-  test_harness.set_parameter("top.channel_unit.elaborate.QueueType", NormalQueueRTL)
-
-  # Create a simulator
-
-  test_harness.apply( SimpleSim )
-
-
-  # Run simulation
-
-  ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
-  while not test_harness.done() and ncycles < max_cycles:
-    test_harness.tick()
-    ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
-
-  # Check timeout
-
-  assert ncycles < max_cycles
-
-  test_harness.tick()
-  test_harness.tick()
-  test_harness.tick()
-
-#-------------------------------------------------------------------------
-# directed tests
-#-------------------------------------------------------------------------
-
-def basic_msgs():
-  return [
-    # src, sink
-    [ Bits16( 1  ),  Bits16( 1  )  ],
-    [ Bits16( 4  ),  Bits16( 4  )  ],
-    [ Bits16( 6  ),  Bits16( 6  )  ],
-    [ Bits16( 9  ),  Bits16( 9  )  ],
-    [ Bits16( 11  ), Bits16( 11  )  ],
-    [ Bits16( 15 ),  Bits16( 15 )  ],
-    [ Bits16( 10 ),  Bits16( 10 )  ],
+  test_vector_0 = [
+    # recv.en recv.rdy recv.msg send.rdy send.en send.msg
+    [  B1(0),  B1(0),  B32(123), B1(0),  B1(0),  B32(123) ],
+    [  B1(1),  B1(1),  B32(345), B1(1),  B1(1),  B32(345) ],
+    [  B1(0),  B1(0),  B32(567), B1(0),  B1(0),  B32(567) ],
   ]
 
-#-------------------------------------------------------------------------
-# directed tests
-#-------------------------------------------------------------------------
+  test_vector_1 = [
+    # recv.en recv.rdy recv.msg send.rdy send.en send.msg
+    [  B1(1),  B1(1),  B32(123), B1(0),  B1(0),    '?'    ],
+    [  B1(1),  B1(1),  B32(345), B1(1),  B1(1),  B32(123) ],
+    [  B1(1),  B1(1),  B32(456), B1(1),  B1(1),  B32(345) ],
+    [  B1(0),  B1(1),  B32(567), B1(0),  B1(0),  B32(456) ],
+  ]
+   
+  test_vector_2 = [
+    # recv.en recv.rdy recv.msg send.rdy send.en send.msg
+    [  B1(1),  B1(1),  B32(123), B1(0),  B1(0),    '?'    ],
+    [  B1(1),  B1(1),  B32(345), B1(1),  B1(0),    '?'    ],
+    [  B1(1),  B1(1),  B32(456), B1(1),  B1(1),  B32(123) ],
+    [  B1(0),  B1(1),  B32(567), B1(0),  B1(0),  B32(345) ],
+    [  B1(0),  B1(1),  B32(567), B1(1),  B1(1),  B32(345) ],
+    [  B1(1),  B1(1),  B32(567), B1(0),  B1(0),    '?'    ],
+    [  B1(1),  B1(1),  B32(0  ), B1(1),  B1(1),  B32(456) ],
+    [  B1(1),  B1(1),  B32(1  ), B1(1),  B1(1),  B32(567) ],
+    [  B1(1),  B1(1),  B32(2  ), B1(1),  B1(1),  B32(0  ) ],
+    [  B1(0),  B1(1),  B32(2  ), B1(1),  B1(1),  B32(1  ) ],
+  ]
 
-test_case_table = mk_test_case_table([
-  ( "          msg_func    stall src_delay sink_delay" ),
-  [ "basic",  basic_msgs,   0.0,     0,        0        ]
-])
-
-#-------------------------------------------------------------------------
-# mk_test_msgs
-#-------------------------------------------------------------------------
-
-def mk_test_msgs( msg_list ):
-
-  src_msgs  = []
-  sink_msgs = []
-
-  for m in msg_list:
-    src_msgs.append ( m[0] )
-    sink_msgs.append( m[1] )
-#    src_msgs.append(  mk_pkt(m[0], m[0], m[0], m[0], m[0], Bits16( 9 )))
-#    sink_msgs.append( mk_pkt(m[1], m[1], m[1], m[1], m[1], Bits16( 9 )))
-#  print src_msgs[0].src_x
-#  print src_msgs[1].src_x
-#  print src_msgs[2].src_x
-
-  return ( src_msgs, sink_msgs )
-
-@pytest.mark.parametrize( **test_case_table )
-def test( test_params ):
- 
-  msgs = test_params.msg_func()
-  src_msgs, sink_msgs = mk_test_msgs( msgs )
-  
-  print ""
-  run_rtl_sim( 
-#    TestHarness( Packet, src_msgs, sink_msgs, test_params.stall, 
-    TestHarness( Bits16, src_msgs, sink_msgs, test_params.stall, 
-                 test_params.src_delay, test_params.sink_delay )
-  )
-
-
+#  run_tv_test( ChannelUnitRTL( Bits32, latency=0 ), test_vector_0 )
+#  run_tv_test( ChannelUnitRTL( Bits32, NormalQueueRTL, latency=1 ), test_vector_1 )
+  run_tv_test( ChannelUnitRTL( Bits32, NormalQueueRTL, latency=2 ), test_vector_2 )
