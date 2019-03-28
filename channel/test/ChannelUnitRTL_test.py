@@ -10,8 +10,6 @@ import pytest
 
 from pymtl                    import *
 from pymtl.dsl.test.sim_utils import simple_sim_pass
-from pclib.test.test_srcs     import TestSrcRTL
-from pclib.test.test_sinks    import TestSinkRTL
 
 from ocn_pclib.rtl.queues     import NormalQueueRTL
 
