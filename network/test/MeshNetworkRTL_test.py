@@ -10,9 +10,9 @@ import tempfile
 from pymtl                import *
 from network.MeshNetworkRTL import MeshNetworkRTL
 
-from pclib.rtl  import NormalQueueRTL
+from ocn_pclib.rtl.queues  import NormalQueueRTL
 
-from ocn_pclib.test.TestVectorSimulator import TestVectorSimulator
+from pclib.test import TestVectorSimulator
 from ocn_pclib.ifcs.Packet              import Packet, mk_pkt
 from ocn_pclib.ifcs.Position            import *
 
@@ -23,9 +23,12 @@ def run_test( model, test_vectors ):
   configs = configure_network()
   def tv_in( model, test_vector ):
 
+    mesh_wid = 4
+    mesh_ht  = 4
+    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+
     for i in range (configs.routers):
-      model.pos_ports[i] = MeshPosition(i, i%(configs.routers/configs.rows),
-              i/(configs.routers/configs.rows))
+      model.pos_ports[i] = MeshPos( i%(configs.routers/configs.rows), i/(configs.routers/configs.rows) )
     if test_vector[0] != 'x':
       router_id = test_vector[0]
       pkt = mk_pkt( router_id%(configs.routers/configs.rows),

@@ -11,7 +11,7 @@ from pclib.ifcs.SendRecvIfc  import *
 from ocn_pclib.ifcs.Packet   import Packet
 from ocn_pclib.ifcs.Position import *
 
-from router.RouterRTL        import RouterRTL
+from router.MeshRouterRTL    import MeshRouterRTL
 from router.InputUnitRTL     import InputUnitRTL
 from router.DORXRouteUnitRTL import DORXRouteUnitRTL
 from router.DORYRouteUnitRTL import DORYRouteUnitRTL
@@ -21,7 +21,7 @@ from channel.ChannelUnitRTL  import ChannelUnitRTL
 
 from Configs                 import configure_network
 
-class MeshNetworkRTL( RTLComponent ):
+class MeshNetworkRTL( ComponentLevel6 ):
   def construct( s ):
 
     # Constants
@@ -54,24 +54,18 @@ class MeshNetworkRTL( RTLComponent ):
     s.recv_noc_ifc = [RecvIfcRTL(s.PacketType)  for _ in range(s.num_routers)]
     s.send_noc_ifc = [SendIfcRTL(s.PacketType) for _ in range(s.num_routers)]
 
-    # This outputs used to print the direction of the routing
-#    s.outputs   = [ Wire( Bits3 )  for _ in range(s.num_routers*s.num_inports)]
     s.pos_ports = [ InVPort( s.PositionType ) for _ in range(s.num_routers)]
 
     # Components
-
-    s.routers = [RouterRTL(s.PacketType, s.PositionType, s.num_inports,
-        s.num_outports, s.InputUnitType, s.RouteUnitType, s.SwitchUnitType,
-        s.OutputUnitType) for i in range(s.num_routers)]
+    s.routers = [ MeshRouterRTL( s.PacketType, s.PositionType, s.RouteUnitType ) 
+                  for i in range(s.num_routers)]
 
     num_channels = s.num_routers+s.rows*(s.cols-1)+s.cols*(s.rows-1)
 
-    s.channels   = [ChannelUnitRTL(PacketType=s.PacketType, latency=s.channel_latency)
+    s.channels   = [ChannelUnitRTL(s.PacketType, latency=s.channel_latency)
             for _ in range(num_channels) ]
 
     for i in range( s.num_routers ):
-#      for j in range( s.num_inports):
-#        s.connect( s.outputs[i*s.num_inports+j],  s.routers[i].outs[j] )
       s.connect( s.pos_ports[i], s.routers[i].pos )
 
     channel_index  = 0

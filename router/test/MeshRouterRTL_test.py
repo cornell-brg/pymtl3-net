@@ -8,7 +8,7 @@
 
 import tempfile
 from pymtl                   import *
-from router.RouterRTL        import MeshRouterRTL
+from router.MeshRouterRTL    import MeshRouterRTL
 from router.InputUnitRTL     import InputUnitRTL
 from router.DORXRouteUnitRTL import DORXRouteUnitRTL
 from router.DORYRouteUnitRTL import DORYRouteUnitRTL
@@ -18,9 +18,9 @@ from ocn_pclib.rtl.queues    import NormalQueueRTL
 
 from ocn_pclib.ifcs.Position import *
 from ocn_pclib.ifcs.Packet   import Packet, mk_pkt
-from pclib.test import TestVectorSimulator
 
-from Configs import configure_network
+from pclib.test              import TestVectorSimulator
+from Configs                 import configure_network
 
 def run_test( model, test_vectors ):
  
