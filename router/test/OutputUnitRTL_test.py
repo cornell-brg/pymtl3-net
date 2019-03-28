@@ -78,9 +78,9 @@ class TestHarness( ComponentLevel6 ):
                  src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    s.src  = TestSrcRTL( MsgType, src_msgs, src_initial, src_interval )
-    s.sink = TestSinkRTL  ( MsgType, sink_msgs, sink_initial, sink_interval )
-    s.dut  = OutputUnitRTL    ( MsgType  )
+    s.src  = TestSrcRTL    ( MsgType, src_msgs,  src_initial,  src_interval  )
+    s.sink = TestSinkRTL   ( MsgType, sink_msgs, sink_initial, sink_interval )
+    s.dut  = OutputUnitRTL ( MsgType )
 
     # Connections
     s.connect( s.src.send, s.dut.recv  )
