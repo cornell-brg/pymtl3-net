@@ -1,7 +1,7 @@
 #=========================================================================
-# NetworkRTL.py
+# MeshNetworkRTL.py
 #=========================================================================
-# Simple network implementation.
+# Mesh network implementation.
 #
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
@@ -41,20 +41,22 @@ class MeshNetworkRTL( ComponentLevel6 ):
     s.cols            = s.num_routers/s.rows
 
     # Type for Mesh Network RTL
-    s.PacketType     = Packet
-    s.PositionType   = MeshPosition
-    s.InputUnitType  = InputUnitRTL
-    s.RouteUnitType  = DORYRouteUnitRTL
-    s.SwitchUnitType = SwitchUnitRTL
-    s.OutputUnitType = OutputUnitRTL
+    s.PacketType      = Packet
+    s.PositionType    = MeshPosition
+    s.InputUnitType   = InputUnitRTL
+    s.RouteUnitType   = DORYRouteUnitRTL
+    s.SwitchUnitType  = SwitchUnitRTL
+    s.OutputUnitType  = OutputUnitRTL
+
+    # number of interfaces that will not be used
+    s.num_idleIfc = 4 * ((s.rows-2) * (s.cols-2) + 4)
 
     # Interface
-    s.recv = [RecvIfcRTL(s.PacketType) for _ in range(4 * ((s.rows-2) * (s.cols-2) + 4))]
-    s.send = [SendIfcRTL(s.PacketType) for _ in range(4 * ((s.rows-2) * (s.cols-2) + 4))]
-    s.recv_noc_ifc = [RecvIfcRTL(s.PacketType)  for _ in range(s.num_routers)]
-    s.send_noc_ifc = [SendIfcRTL(s.PacketType) for _ in range(s.num_routers)]
-
-    s.pos_ports = [ InVPort( s.PositionType ) for _ in range(s.num_routers)]
+    s.recv         = [RecvIfcRTL(s.PacketType)  for _ in range(s.num_idleIfc)]
+    s.send         = [SendIfcRTL(s.PacketType)  for _ in range(s.num_idleIfc)] 
+    s.recv_noc_ifc = [ RecvIfcRTL(s.PacketType) for _ in range(s.num_routers)]
+    s.send_noc_ifc = [ SendIfcRTL(s.PacketType) for _ in range(s.num_routers)]
+    s.pos_ports    = [ InVPort(s.PositionType)  for _ in range(s.num_routers)]
 
     # Components
     s.routers = [ MeshRouterRTL( s.PacketType, s.PositionType, s.RouteUnitType ) 
@@ -125,7 +127,7 @@ class MeshNetworkRTL( ComponentLevel6 ):
       trace += '\n({},{})|'.format(s.pos_ports[r].pos_x, s.pos_ports[r].pos_y)
       for i in range(s.num_inports):
         if isinstance(s.routers[r].recv[i].msg, int):
-          trace += '|xxx'
+          trace += '|{}'.format(s.routers[r].recv[i].msg)
         else:
           trace += '|{}:{}->({},{})'.format( i, 
                 s.routers[r].recv[i].msg.payload, 
@@ -134,7 +136,7 @@ class MeshNetworkRTL( ComponentLevel6 ):
       trace += '\n out: '
       for i in range(s.num_outports):
         if isinstance(s.routers[r].send[i].msg, int):
-          trace += 'xxx'
+          trace += '|{}'.format(s.routers[r].send[i].msg)
         else:
           trace += '|{}:{}->({},{})'.format( i, 
                 s.routers[r].send[i].msg.payload, 

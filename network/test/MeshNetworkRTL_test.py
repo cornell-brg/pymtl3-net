@@ -144,10 +144,10 @@ class TestHarness( ComponentLevel6 ):
   def done( s ):
     srcs_done = 1
     sinks_done = 1
-    for i in range( s.dut.num_inports ):
+    for i in range( s.dut.num_routers ):
       if s.srcs[i].done() == 0:
         srcs_done = 0
-    for i in range( s.dut.num_outports ):
+    for i in range( s.dut.num_routers ):
       if s.sinks[i].done() == 0:
         sinks_done = 0
     return srcs_done and sinks_done
@@ -164,7 +164,6 @@ def run_sim( test_harness, max_cycles=100 ):
 
   test_harness.apply( SimpleSim )
   test_harness.sim_reset()
-
 
   # Run simulation
 

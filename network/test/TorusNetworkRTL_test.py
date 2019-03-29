@@ -7,18 +7,21 @@
 #   Date : Mar 20, 2019
 
 import tempfile
-from pymtl                import *
+from pymtl                   import *
 from network.TorusNetworkRTL import TorusNetworkRTL
+from ocn_pclib.rtl.queues    import NormalQueueRTL
+from pclib.test.test_srcs    import TestSrcRTL
+from pclib.test.test_sinks   import TestSinkRTL
+from pclib.test              import TestVectorSimulator
+from ocn_pclib.ifcs.Packet   import Packet, mk_pkt
+from ocn_pclib.ifcs.Position import *
+from Configs                 import configure_network
 
-from ocn_pclib.rtl.queues  import NormalQueueRTL
+#-------------------------------------------------------------------------
+# Test Vector
+#-------------------------------------------------------------------------
 
-from pclib.test import TestVectorSimulator
-from ocn_pclib.ifcs.Packet              import Packet, mk_pkt
-from ocn_pclib.ifcs.Position            import *
-
-from Configs import configure_network
-
-def run_test( model, test_vectors ):
+def run_vector_test( model, test_vectors ):
  
   configs = configure_network()
   def tv_in( model, test_vector ):
@@ -45,15 +48,15 @@ def run_test( model, test_vectors ):
       model.send_noc_ifc[i].rdy = 1
 
   def tv_out( model, test_vector ):
-#    if test_vector[2] != 'x':
-#      assert model.send_noc_ifc[test_vector[2]].msg.payload == test_vector[3]
-      assert 1 == 1
+    if test_vector[2] != 'x':
+      assert model.send_noc_ifc[test_vector[2]].msg.payload == test_vector[3]
+#      assert 1 == 1
      
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
   model.sim_reset()
 
-def test_Network( dump_vcd, test_verilog ):
+def test_vector_TorusNetwork( dump_vcd, test_verilog ):
 
 
   configs = configure_network()
@@ -69,7 +72,7 @@ def test_Network( dump_vcd, test_verilog ):
   x = 'x'
 
   # Specific for wire connection (link delay = 0) in Mesh topology
-  simple_test = [
+  simple_2_2_test = [
 #  router   [packet]   arr_router  msg 
   [  0,    [1,0,1001],     x,       x  ],
   [  0,    [1,1,1002],     x,       x  ],
@@ -89,4 +92,131 @@ def test_Network( dump_vcd, test_verilog ):
   [  x,    [0,0,0000],     x,       x  ],
   ]
 
-  run_test( model, simple_test)
+  # Specific for wire connection (link delay = 0) in 2x2 Mesh topology
+  simple_4_4_test = [
+#  router   [packet]   arr_router  msg
+  [  0,    [1,0,1001],     x,       x  ],
+  [  0,    [1,1,1002],     x,       x  ],
+  [  0,    [0,1,1003],     1,     1001 ],
+  [  0,    [0,1,1004],     x,       x  ],
+  [  0,    [1,0,1005],     4,     1003 ],
+  ]
+  run_vector_test( model, simple_4_4_test)
+
+#-------------------------------------------------------------------------
+# TestHarness
+#-------------------------------------------------------------------------
+class TestHarness( ComponentLevel6 ):
+
+  def construct( s, MsgType, src_msgs, sink_msgs, src_initial,
+                 src_interval, sink_initial, sink_interval,
+                 arrival_time=None ):
+
+    mesh_wid = 4
+    mesh_ht  = 4
+
+    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    s.dut = TorusNetworkRTL()
+
+    s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
+              for i in range ( s.dut.num_routers ) ]
+    s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
+              sink_interval, arrival_time[i]) for i in range ( s.dut.num_routers ) ]
+
+    # Connections
+    for i in range ( s.dut.num_routers ):
+      s.connect( s.srcs[i].send,        s.dut.recv_noc_ifc[i] )
+      s.connect( s.dut.send_noc_ifc[i], s.sinks[i].recv       )
+
+    #TODO: provide pos for router...
+    @s.update
+    def up_pos():
+      for x in range( s.dut.cols ):
+        for y in range( s.dut.rows ):
+          s.dut.pos_ports[y*s.dut.cols+x] = MeshPos( x, y )
+
+  def done( s ):
+    srcs_done = 1
+    sinks_done = 1
+    for i in range( s.dut.num_routers ):
+      if s.srcs[i].done() == 0:
+        srcs_done = 0
+        break
+      if s.sinks[i].done() == 0:
+        sinks_done = 0
+        break
+    return srcs_done and sinks_done
+
+  def line_trace( s ):
+    return s.dut.line_trace()
+
+#-------------------------------------------------------------------------
+# run_rtl_sim
+#-------------------------------------------------------------------------
+
+def run_sim( test_harness, max_cycles=100 ):
+
+  # Create a simulator
+
+  test_harness.apply( SimpleSim )
+  test_harness.sim_reset()
+
+  # Run simulation
+
+  ncycles = 0
+  print ""
+  print "{}:{}".format( ncycles, test_harness.line_trace() )
+  while not test_harness.done() and ncycles < max_cycles:
+    test_harness.tick()
+    ncycles += 1
+    print "{}:{}".format( ncycles, test_harness.line_trace() )
+
+  # Check timeout
+
+  assert ncycles < max_cycles
+
+  test_harness.tick()
+  test_harness.tick()
+  test_harness.tick()
+
+
+#-------------------------------------------------------------------------
+# Test cases (specific for 4x4 mesh)
+#-------------------------------------------------------------------------
+
+#           src, dst, payload
+test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
+              (4, 11, 105), (5, 10, 106), (6,  9, 107), (7,  8, 108),
+              (8,  7, 109), (9,  6, 110), (10, 5, 111), (11, 4, 112),
+              (12, 3, 113), (13, 2, 114), (14, 1, 115), (15, 0, 116) ]
+
+src_packets  =  [ [],[],[],[],
+                  [],[],[],[],
+                  [],[],[],[],
+                  [],[],[],[] ]
+
+sink_packets =  [ [],[],[],[],
+                  [],[],[],[],
+                  [],[],[],[],
+                  [],[],[],[] ]
+
+# note that need to yield one/two cycle for reset
+arrival_pipes = [[4], [4], [4], [4],
+                 [4], [4], [4], [3],
+                 [4], [4], [4], [4],
+                 [4], [4], [4], [4]]
+
+def test_normal_simple():
+
+  configs = configure_network()
+  cols = configs.routers/configs.rows
+  for (src, dst, payload) in test_msgs:
+    pkt = mk_pkt( src%cols, src/cols, dst%cols, dst/cols, 1, payload )
+    src_packets [src].append( pkt )
+    sink_packets[dst].append( pkt )
+
+  th = TestHarness( Packet, src_packets, sink_packets, 0, 0, 0, 0,
+                    arrival_pipes )
+  print "------------ test with source/sink --------------"
+  run_sim( th )
+
