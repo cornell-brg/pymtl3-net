@@ -25,7 +25,10 @@ from ocn_pclib.ifcs.Packet   import Packet, mk_pkt
 from pclib.test              import TestVectorSimulator
 from Configs                 import configure_network
 
-def run_test( model, test_vectors ):
+#-------------------------------------------------------------------------
+# Test Vector
+#-------------------------------------------------------------------------
+def run_vector_test( model, test_vectors ):
  
   def tv_in( model, test_vector ):
 
@@ -92,7 +95,7 @@ def test_vector_Router( dump_vcd, test_verilog ):
 #    queue_path = "top.input_units[" + str(i) + "].elaborate.QueueType"
 #    model.set_parameter( queue_path, NormalQueueRTL )
 
-  run_test(model, inputs_buffer)
+  run_vector_test(model, inputs_buffer)
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -118,31 +121,16 @@ class TestHarness( ComponentLevel6 ):
               sink_interval, arrival_time[i]) for i in range ( s.dut.num_outports ) ]
 
     # Connections
-#    s.connect( s.pos, s.dut.pos )
 
     for i in range ( s.dut.num_outports ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
+    #TODO: provide pos for router... 
     @s.update
     def up_pos():
       s.dut.pos = MeshPos(1,1)
 
-#    @s.update
-#    def up_give_en():
-#      for i in range (s.dut.num_outports):
-#        if s.dut.give[i].rdy and s.sinks[i].recv.rdy:
-#          s.dut.give[i].en  = 1
-#          s.sinks[i].recv.en = 1
-#        else:
-#          s.dut.give[i].en  = 0
-#          s.sinks[i].recv.en = 0
-#
-#    @s.update
-#    def up_dut_rdy():
-#      s.src.send.rdy = 1
-#      s.dut.get.rdy = s.src.send.en
-#
   def done( s ):
     srcs_done = 1
     sinks_done = 1

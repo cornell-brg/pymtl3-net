@@ -49,8 +49,8 @@ class MeshNetworkRTL( ComponentLevel6 ):
     s.OutputUnitType = OutputUnitRTL
 
     # Interface
-    s.recv = [RecvIfcRTL(s.PacketType)  for _ in range(s.num_routers*4)]
-    s.send = [SendIfcRTL(s.PacketType) for _ in range(s.num_routers*4)]
+    s.recv = [RecvIfcRTL(s.PacketType) for _ in range(4 * ((s.rows-2) * (s.cols-2) + 4))]
+    s.send = [SendIfcRTL(s.PacketType) for _ in range(4 * ((s.rows-2) * (s.cols-2) + 4))]
     s.recv_noc_ifc = [RecvIfcRTL(s.PacketType)  for _ in range(s.num_routers)]
     s.send_noc_ifc = [SendIfcRTL(s.PacketType) for _ in range(s.num_routers)]
 
@@ -60,7 +60,7 @@ class MeshNetworkRTL( ComponentLevel6 ):
     s.routers = [ MeshRouterRTL( s.PacketType, s.PositionType, s.RouteUnitType ) 
                   for i in range(s.num_routers)]
 
-    num_channels = s.num_routers+s.rows*(s.cols-1)+s.cols*(s.rows-1)
+    num_channels = 2 * (s.rows*(s.cols-1)+s.cols*(s.rows-1))
 
     s.channels   = [ChannelUnitRTL(s.PacketType, latency=s.channel_latency)
             for _ in range(num_channels) ]
@@ -119,19 +119,24 @@ class MeshNetworkRTL( ComponentLevel6 ):
         s.connect( s.routers[i].recv[EAST], s.recv[rs_i] )
         rs_i += 1
 
-
   def line_trace( s ):
     trace = ''
     for r in range(s.num_routers):
       trace += '\n({},{})|'.format(s.pos_ports[r].pos_x, s.pos_ports[r].pos_y)
       for i in range(s.num_inports):
-        trace += '|{}:{}->({},{})'.format( i, 
+        if isinstance(s.routers[r].recv[i].msg, int):
+          trace += '|xxx'
+        else:
+          trace += '|{}:{}->({},{})'.format( i, 
                 s.routers[r].recv[i].msg.payload, 
                 s.routers[r].recv[i].msg.dst_x,
                 s.routers[r].recv[i].msg.dst_y)
       trace += '\n out: '
       for i in range(s.num_outports):
-        trace += '|{}:{}->({},{})'.format( i, 
+        if isinstance(s.routers[r].send[i].msg, int):
+          trace += 'xxx'
+        else:
+          trace += '|{}:{}->({},{})'.format( i, 
                 s.routers[r].send[i].msg.payload, 
                 s.routers[r].send[i].msg.dst_x,
                 s.routers[r].send[i].msg.dst_y)

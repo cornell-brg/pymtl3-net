@@ -19,9 +19,6 @@ def configure_network():
                     choices=['Crossbar', 'Ring', 'Mesh', 'Torus'],
                     help="topology can be applied in the network.")
 
-  parser.add_argument("--mesh-rows",        type=int, default=0,
-                    help="the number of rows in the mesh topology.")
-
   parser.add_argument("--router-latency",   type=int, default=1,
                     action="store",
                     help="number of pipeline stages in router.")
@@ -42,11 +39,11 @@ def configure_network():
                     action="store", choices=['DORX', 'DORY', 'WFR', 'NLR'],
                     help="routing algorithm applied in network.")
 
-  parser.add_argument("--routers",          type=int, default=4, 
+  parser.add_argument("--routers",          type=int, default=16, 
                     action="store",
                     help="""number of routers in network.""")
 
-  parser.add_argument("--rows",             type=int, default=2, 
+  parser.add_argument("--rows",             type=int, default=4, 
                     action="store",
                     help="""number of rows of routers in network.""")
 
