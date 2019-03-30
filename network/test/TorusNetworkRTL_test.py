@@ -21,49 +21,44 @@ from Configs                 import configure_network
 # Test Vector
 #-------------------------------------------------------------------------
 
-def run_vector_test( model, test_vectors ):
+def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
  
-  configs = configure_network()
   def tv_in( model, test_vector ):
 
-    mesh_wid = 4
-    mesh_ht  = 4
+    num_routers = mesh_wid * mesh_ht
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
 
-    for i in range (configs.routers):
-      model.pos_ports[i] = MeshPos( i%(configs.routers/configs.rows), i/(configs.routers/configs.rows) )
     if test_vector[0] != 'x':
       router_id = test_vector[0]
-      pkt = mk_pkt( router_id%(configs.routers/configs.rows),
-                  router_id/(configs.routers/configs.rows),
+      pkt = mk_pkt( router_id % mesh_wid, router_id / mesh_wid,
                   test_vector[1][0], test_vector[1][1], 1, test_vector[1][2])
     
       # Enable the network interface on specific router
-      for i in range (configs.routers):
-        model.recv_noc_ifc[i].en  = 0
-      model.recv_noc_ifc[router_id].msg = pkt
-      model.recv_noc_ifc[router_id].en  = 1
+      for i in range (num_routers):
+        model.recv[i].en  = 0
+      model.recv[router_id].msg = pkt
+      model.recv[router_id].en  = 1
 
-    for i in range (configs.routers):
-      model.send_noc_ifc[i].rdy = 1
+    for i in range (num_routers):
+      model.send[i].rdy = 1
 
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
-      assert model.send_noc_ifc[test_vector[2]].msg.payload == test_vector[3]
-#      assert 1 == 1
+      assert model.send[test_vector[2]].msg.payload == test_vector[3]
      
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
   model.sim_reset()
 
-def test_vector_TorusNetwork( dump_vcd, test_verilog ):
+def test_vector_Torus2x2( dump_vcd, test_verilog ):
 
+  mesh_wid = 2
+  mesh_ht  = 2
+  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+  model = TorusNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
 
-  configs = configure_network()
-  model = TorusNetworkRTL()
-
-  num_routers = configs.routers
-  num_inports = configs.router_inports
+  num_routers = mesh_wid * mesh_ht
+  num_inports = 5
   for r in range (num_routers):
     for i in range (num_inports):
       path = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
@@ -71,7 +66,7 @@ def test_vector_TorusNetwork( dump_vcd, test_verilog ):
 
   x = 'x'
 
-  # Specific for wire connection (link delay = 0) in Mesh topology
+  # Specific for wire connection (link delay = 0) in 2x2 Torus topology
   simple_2_2_test = [
 #  router   [packet]   arr_router  msg 
   [  0,    [1,0,1001],     x,       x  ],
@@ -92,7 +87,25 @@ def test_vector_TorusNetwork( dump_vcd, test_verilog ):
   [  x,    [0,0,0000],     x,       x  ],
   ]
 
-  # Specific for wire connection (link delay = 0) in 2x2 Mesh topology
+  print "------------ test with test vector for torus 2x2 --------------"
+  run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
+
+def test_vector_Torus4x4( dump_vcd, test_verilog ):
+
+  mesh_wid = 4
+  mesh_ht  = 4
+  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+  model = TorusNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0)
+
+  num_routers = mesh_wid * mesh_ht
+  num_inports = 5
+  for r in range (num_routers):
+    for i in range (num_inports):
+      path = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+      model.set_parameter(path, NormalQueueRTL)
+
+  x = 'x'
+  # Specific for wire connection (link delay = 0) in 4x4 Torus topology
   simple_4_4_test = [
 #  router   [packet]   arr_router  msg
   [  0,    [1,0,1001],     x,       x  ],
@@ -101,22 +114,21 @@ def test_vector_TorusNetwork( dump_vcd, test_verilog ):
   [  0,    [0,1,1004],     x,       x  ],
   [  0,    [1,0,1005],     4,     1003 ],
   ]
-  run_vector_test( model, simple_4_4_test)
+
+  print "------------ test with test vector for torus 4x4 --------------"
+  run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
 
 #-------------------------------------------------------------------------
 # TestHarness
 #-------------------------------------------------------------------------
 class TestHarness( ComponentLevel6 ):
 
-  def construct( s, MsgType, src_msgs, sink_msgs, src_initial,
-                 src_interval, sink_initial, sink_interval,
+  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs,
+                 src_initial, src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    mesh_wid = 4
-    mesh_ht  = 4
-
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = TorusNetworkRTL()
+    s.dut = TorusNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 0)
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_routers ) ]
@@ -125,15 +137,8 @@ class TestHarness( ComponentLevel6 ):
 
     # Connections
     for i in range ( s.dut.num_routers ):
-      s.connect( s.srcs[i].send,        s.dut.recv_noc_ifc[i] )
-      s.connect( s.dut.send_noc_ifc[i], s.sinks[i].recv       )
-
-    #TODO: provide pos for router...
-    @s.update
-    def up_pos():
-      for x in range( s.dut.cols ):
-        for y in range( s.dut.rows ):
-          s.dut.pos_ports[y*s.dut.cols+x] = MeshPos( x, y )
+      s.connect( s.srcs[i].send, s.dut.recv[i]   )
+      s.connect( s.dut.send[i],  s.sinks[i].recv )
 
   def done( s ):
     srcs_done = 1
@@ -184,39 +189,39 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases (specific for 4x4 mesh)
 #-------------------------------------------------------------------------
 
-#           src, dst, payload
-test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
-              (4, 11, 105), (5, 10, 106), (6,  9, 107), (7,  8, 108),
-              (8,  7, 109), (9,  6, 110), (10, 5, 111), (11, 4, 112),
-              (12, 3, 113), (13, 2, 114), (14, 1, 115), (15, 0, 116) ]
+def test_srcsink_torus4x4():
 
-src_packets  =  [ [],[],[],[],
-                  [],[],[],[],
-                  [],[],[],[],
-                  [],[],[],[] ]
-
-sink_packets =  [ [],[],[],[],
-                  [],[],[],[],
-                  [],[],[],[],
-                  [],[],[],[] ]
-
-# note that need to yield one/two cycle for reset
-arrival_pipes = [[4], [4], [4], [4],
-                 [4], [4], [4], [3],
-                 [4], [4], [4], [4],
-                 [4], [4], [4], [4]]
-
-def test_normal_simple():
-
-  configs = configure_network()
-  cols = configs.routers/configs.rows
+  #           src, dst, payload
+  test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
+                (4, 11, 105), (5, 10, 106), (6,  9, 107), (7,  8, 108),
+                (8,  7, 109), (9,  6, 110), (10, 5, 111), (11, 4, 112),
+                (12, 3, 113), (13, 2, 114), (14, 1, 115), (15, 0, 116) ]
+  
+  src_packets  =  [ [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[] ]
+  
+  sink_packets =  [ [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[] ]
+  
+  # note that need to yield one/two cycle for reset
+  arrival_pipes = [[4], [4], [4], [4],
+                   [4], [4], [4], [4],
+                   [4], [4], [4], [4],
+                   [4], [4], [4], [4]]
+  
+  mesh_wid = 4
+  mesh_ht  = 4
   for (src, dst, payload) in test_msgs:
-    pkt = mk_pkt( src%cols, src/cols, dst%cols, dst/cols, 1, payload )
+    pkt = mk_pkt( src%mesh_wid, src/mesh_wid, dst%mesh_wid, dst/mesh_wid, 1, payload )
     src_packets [src].append( pkt )
     sink_packets[dst].append( pkt )
 
-  th = TestHarness( Packet, src_packets, sink_packets, 0, 0, 0, 0,
-                    arrival_pipes )
-  print "------------ test with source/sink --------------"
+  th = TestHarness( Packet, mesh_wid, mesh_ht, src_packets, sink_packets, 
+                    0, 0, 0, 0, arrival_pipes )
+  print "------------ test with source/sink for torus 4x4 --------------"
   run_sim( th )
 

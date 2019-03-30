@@ -1,5 +1,5 @@
 #=========================================================================
-# ChannelUnitRTL.py
+# ChannelRTL.py
 #=========================================================================
 # A Link unit for connecting routers to form network.
 #
@@ -11,7 +11,7 @@ from pclib.ifcs           import RecvIfcRTL
 from pclib.ifcs           import SendIfcRTL
 from ocn_pclib.rtl.queues import NormalQueueRTL
 
-class ChannelUnitRTL( ComponentLevel6 ):
+class ChannelRTL( ComponentLevel6 ):
   def construct(s, PacketType, QueueType=None, latency=2, num_entries=2):
 
     # Constant

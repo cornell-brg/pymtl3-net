@@ -15,7 +15,7 @@ from pymtl.passes.PassGroups import SimpleSim
 
 from ocn_pclib.rtl.queues     import NormalQueueRTL
 
-from channel.ChannelUnitRTL import ChannelUnitRTL
+from channel.ChannelRTL import ChannelRTL
 
 from pclib.test import TestVectorSimulator
 
@@ -75,9 +75,9 @@ def test_pipe_Bits():
     [  B1(0),  B1(1),  B32(2  ), B1(1),  B1(1),  B32(1  ) ],
   ]
 
-#  run_tv_test( ChannelUnitRTL( Bits32, latency=0 ), test_vector_0 )
-#  run_tv_test( ChannelUnitRTL( Bits32, NormalQueueRTL, latency=1 ), test_vector_1 )
-  run_tv_test( ChannelUnitRTL( Bits32, NormalQueueRTL, latency=2 ), test_vector_2 )
+#  run_tv_test( ChannelRTL( Bits32, latency=0 ), test_vector_0 )
+#  run_tv_test( ChannelRTL( Bits32, NormalQueueRTL, latency=1 ), test_vector_1 )
+  run_tv_test( ChannelRTL( Bits32, NormalQueueRTL, latency=2 ), test_vector_2 )
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -91,7 +91,7 @@ class TestHarness( ComponentLevel6 ):
 
     s.src  = TestSrcRTL  ( MsgType, src_msgs,  src_initial,  src_interval  )
     s.sink = TestSinkRTL ( MsgType, sink_msgs, sink_initial, sink_interval )
-    s.dut  = ChannelUnitRTL ( MsgType )
+    s.dut  = ChannelRTL ( MsgType )
 
     # Connections
     s.connect( s.src.send, s.dut.recv  )
