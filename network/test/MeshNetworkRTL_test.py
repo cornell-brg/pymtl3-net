@@ -27,8 +27,6 @@ def run_vector_test( model, test_vectors ):
     mesh_wid = 4
     mesh_ht  = 4
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-#    for i in range (configs.routers):
-#      model.pos_ports[i] = MeshPos( i%(configs.routers/configs.rows), i/(configs.routers/configs.rows) )
     if test_vector[0] != 'x':
       router_id = test_vector[0]
       pkt = mk_pkt( router_id%(configs.routers/configs.rows),
@@ -47,7 +45,6 @@ def run_vector_test( model, test_vectors ):
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
       assert model.send[test_vector[2]].msg.payload == test_vector[3]
-#      assert 1 == 1
      
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
@@ -108,29 +105,27 @@ def test_vector_MeshNetwork( dump_vcd, test_verilog ):
 
 class TestHarness( ComponentLevel6 ):
 
-  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs, 
+  def construct( s, MsgType, mesh_wid, mesh_ht, routing, src_msgs, sink_msgs, 
                  src_initial, src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = MeshNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 0)
+    s.dut = MeshNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 0, routing)
 
+    print s.dut.num_routers
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_routers ) ]
-    s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-              sink_interval, arrival_time[i]) for i in range ( s.dut.num_routers ) ]
+    if arrival_time != None:
+      s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
+                sink_interval, arrival_time[i]) for i in range ( s.dut.num_routers ) ]
+    else:
+      s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
+                sink_interval) for i in range ( s.dut.num_routers ) ]
 
     # Connections
     for i in range ( s.dut.num_routers ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
-
-    #TODO: provide pos for router...
-#    @s.update
-#    def up_pos():
-#      for x in range( s.dut.cols ):
-#        for y in range( s.dut.rows ):
-#          s.dut.pos_ports[y*s.dut.cols+x] = MeshPos( x, y )
 
     @s.update
     def up_idle_src_sink():
@@ -185,7 +180,7 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases (specific for 4x4 mesh)
 #-------------------------------------------------------------------------
 
-def test_normal_simple_4x4():
+def test_mesh4x4_simple():
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
@@ -216,7 +211,18 @@ def test_normal_simple_4x4():
     src_packets [src].append( pkt )
     sink_packets[dst].append( pkt )
 
-  th = TestHarness( Packet, 4, 4, src_packets, sink_packets, 0, 0, 0, 0,
+  th = TestHarness( Packet, 4, 4, 'y', src_packets, sink_packets, 0, 0, 0, 0,
                     arrival_pipes )
-  print "------------ test with source/sink --------------"
+  print "------------ test with source/sink for mesh 4x4 --------------"
+  run_sim( th )
+
+def test_mesh2x2_simple():
+
+  pkt = mk_pkt( 0, 0, 1, 1, 0, 0xfaceb00c )
+
+  src_packets  = [ [ pkt ], [], [], [] ]
+  sink_packets = [ [], [], [], [ pkt ] ]
+
+  th = TestHarness( Packet, 2, 2, 'y', src_packets, sink_packets, 0, 0, 0, 0 )
+  print "------------ test with source/sink for mesh 2x2 --------------"
   run_sim( th )
