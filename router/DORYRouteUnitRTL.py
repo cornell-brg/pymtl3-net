@@ -59,6 +59,17 @@ class DORYRouteUnitRTL( ComponentLevel6 ):
           s.out_dir = WEST
         else:
           s.out_dir = EAST
+# TODO: need to support mod in Bits
+#        if s.pos.pos_x == s.get.msg.dst%s.pos.cols and s.pos.pos_y == s.get.msg.dst/s.pos.cols:
+#          s.out_dir = SELF
+#        elif s.get.msg.dst/s.pos.cols < s.pos.pos_y:
+#          s.out_dir = NORTH
+#        elif s.get.msg.dst/s.pos.cols > s.pos.pos_y:
+#          s.out_dir = SOUTH
+#        elif s.get.msg.dst%s.pos.cols < s.pos.pos_x:
+#          s.out_dir = WEST
+#        else:
+#          s.out_dir = EAST
         s.give[ s.out_dir ].rdy = 1
 
     @s.update

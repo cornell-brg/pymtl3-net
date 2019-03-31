@@ -39,6 +39,10 @@ def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
   pkt.payload = payload
   return pkt
 
+# TODO: flitisize packet into multiple flits 
+#def flitisize():
+#  pass
+
 #-------------------------------------------------------------------------
 # Dynamically generated Packet type
 #-------------------------------------------------------------------------

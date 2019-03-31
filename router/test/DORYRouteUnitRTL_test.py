@@ -9,6 +9,7 @@
 from pymtl                   import *
 from pclib.test              import TestVectorSimulator
 from ocn_pclib.ifcs.Packet   import Packet, mk_pkt
+from ocn_pclib.ifcs.Flit     import Flit, mk_flit
 from ocn_pclib.ifcs.Position import MeshPosition, mk_mesh_pos
 from router.DORYRouteUnitRTL import DORYRouteUnitRTL 
 
@@ -20,7 +21,7 @@ from pclib.test.test_sinks   import TestSinkRTL
 # Driver function for TestVectorSimulator
 #-------------------------------------------------------------------------
 
-def run_test( model, router_pos, test_vectors ):
+def run_test( model, mesh_wid, mesh_ht, router_pos, test_vectors ):
  
   def tv_in( model, test_vector ):
 
@@ -30,6 +31,7 @@ def run_test( model, router_pos, test_vectors ):
     payload = test_vector[3]
 
     pkt = mk_pkt( 0, 0, dst_x, dst_y, opaque, payload )
+#    pkt = mk_flit( 0, 0, dst_y*mesh_wid+dst_x, opaque, payload )
 
     model.pos = router_pos
     model.get.msg = pkt
@@ -59,11 +61,12 @@ def test_route_unit( dump_vcd, test_verilog ):
   mesh_ht  = 2
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+#  model = DORYRouteUnitRTL( Flit, MeshPos )
   model = DORYRouteUnitRTL( Packet, MeshPos )
 
   # Test for Y-DOR routing algorithm
 
-  run_test( model, MeshPos( 0, 0 ), [
+  run_test( model, mesh_wid, mesh_ht, MeshPos( 0, 0 ), [
    # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en 
    [   1,     1,     1,       9,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
    [   0,     1,     1,       7,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
@@ -78,11 +81,12 @@ def test_route_unit3x3( dump_vcd, test_verilog ):
   mesh_ht  = 3
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+#  model = DORYRouteUnitRTL( Flit, MeshPos )
   model = DORYRouteUnitRTL( Packet, MeshPos )
 
   # Test for Y-DOR routing algorithm
 
-  run_test( model, MeshPos( 1, 1 ), [
+  run_test( model, mesh_wid, mesh_ht, MeshPos( 1, 1 ), [
    # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en 
    [   1,     1,     1,       9,      0,     1,    [0,0,0,0,1],  [0,0,0,0,0] ],
    [   0,     1,     1,       7,      0,     1,    [0,0,1,0,0],  [0,0,0,0,0] ],
@@ -190,9 +194,11 @@ def test_normal_simple():
   src_packets = []
   for (dst_x,dst_y,payload,dir_out) in test_msgs:
     pkt = mk_pkt (0, 0, dst_x, dst_y, 1, payload)
+#    pkt = mk_flit( 0, 0, dst_y*4+dst_x, 1, payload )
     src_packets.append( pkt )
     result_msgs[dir_out].append ( pkt )
 
+#  th = TestHarness( Flit, src_packets, result_msgs, 0, 0, 0, 0,
   th = TestHarness( Packet, src_packets, result_msgs, 0, 0, 0, 0,
                     arrival_pipe )
   run_sim( th )
