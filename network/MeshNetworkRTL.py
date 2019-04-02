@@ -39,8 +39,6 @@ class MeshNetworkRTL( ComponentLevel6 ):
     s.num_idleIfc = 4 * ((mesh_ht-2) * (mesh_wid-2) + 4)
 
     # Interface
-    s.recv_idle  = [RecvIfcRTL(PacketType)  for _ in range(s.num_idleIfc)]
-    s.send_idle  = [SendIfcRTL(PacketType)  for _ in range(s.num_idleIfc)] 
     s.recv       = [ RecvIfcRTL(PacketType) for _ in range(s.num_routers)]
     s.send       = [ SendIfcRTL(PacketType) for _ in range(s.num_routers)]
 
@@ -85,24 +83,24 @@ class MeshNetworkRTL( ComponentLevel6 ):
 
       # Connect the unused ports
       if i / mesh_wid == 0:
-        s.connect( s.routers[i].send[NORTH], s.send_idle[rs_i] )
-        s.connect( s.routers[i].recv[NORTH], s.recv_idle[rs_i] )
-        rs_i += 1
+        s.connect( s.routers[i].send[NORTH].rdy,         0 )
+        s.connect( s.routers[i].recv[NORTH].en,          0 )
+        s.connect( s.routers[i].recv[NORTH].msg.payload, 0 )
 
       if i / mesh_wid == mesh_ht - 1:
-        s.connect( s.routers[i].send[SOUTH], s.send_idle[rs_i] )
-        s.connect( s.routers[i].recv[SOUTH], s.recv_idle[rs_i] )
-        rs_i += 1
+        s.connect( s.routers[i].send[SOUTH].rdy,         0 )
+        s.connect( s.routers[i].recv[SOUTH].en,          0 )
+        s.connect( s.routers[i].recv[SOUTH].msg.payload, 0 )
 
       if i % mesh_wid == 0:
-        s.connect( s.routers[i].send[WEST],  s.send_idle[rs_i] )
-        s.connect( s.routers[i].recv[WEST],  s.recv_idle[rs_i] )
-        rs_i += 1
+        s.connect( s.routers[i].send[WEST].rdy,          0 )
+        s.connect( s.routers[i].recv[WEST].en,           0 )
+        s.connect( s.routers[i].recv[WEST].msg.payload,  0 )
 
       if i % mesh_wid == mesh_wid - 1:
-        s.connect( s.routers[i].send[EAST],  s.send_idle[rs_i] )
-        s.connect( s.routers[i].recv[EAST],  s.recv_idle[rs_i] )
-        rs_i += 1
+        s.connect( s.routers[i].send[EAST].rdy,          0 )
+        s.connect( s.routers[i].recv[EAST].en,           0 )
+        s.connect( s.routers[i].recv[EAST].msg.payload,  0 )
 
     @s.update
     def up_pos():

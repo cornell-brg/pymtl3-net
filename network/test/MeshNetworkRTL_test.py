@@ -143,13 +143,6 @@ class TestHarness( ComponentLevel6 ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
-    @s.update
-    def up_idle_src_sink():
-      for i in range ( 4 * ((mesh_ht-2) * (mesh_wid-2) + 4) ):
-        s.dut.send_idle[i].rdy = 0
-        s.dut.recv_idle[i].en  = 0
-        s.dut.recv_idle[i].msg = mk_pkt(0, 0, 0, 0, 0, 0)
-
   def done( s ):
     srcs_done = 1
     sinks_done = 1
