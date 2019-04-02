@@ -1,5 +1,5 @@
 #=========================================================================
-# DORXRouteUnitGetGiveRTL.py
+# DORXMeshRouteUnitRTL.py
 #=========================================================================
 # A DOR route unit with get/give interface.
 #
@@ -9,7 +9,7 @@
 from pymtl import *
 from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
-class DORXRouteUnitRTL( ComponentLevel6 ):
+class DORXMeshRouteUnitRTL( ComponentLevel6 ):
 
   def construct( s, PacketType, PositionType ):
 

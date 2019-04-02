@@ -10,12 +10,12 @@ from pymtl                        import *
 from pclib.ifcs.SendRecvIfc       import *
 from router.MeshRouterRTL         import MeshRouterRTL
 from router.InputUnitRTL          import InputUnitRTL
-from router.DORXRouteUnitRTL      import DORXRouteUnitRTL
-from router.DORYRouteUnitRTL      import DORYRouteUnitRTL
+from router.DORXMeshRouteUnitRTL  import DORXMeshRouteUnitRTL
+from router.DORYMeshRouteUnitRTL  import DORYMeshRouteUnitRTL
 from router.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
 from router.SwitchUnitRTL         import SwitchUnitRTL
 from router.OutputUnitRTL         import OutputUnitRTL
-from channel.ChannelRTL       import ChannelRTL
+from channel.ChannelRTL           import ChannelRTL
 
 class TorusNetworkRTL( ComponentLevel6 ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4,

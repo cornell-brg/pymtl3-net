@@ -101,8 +101,8 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Set parameters
 
-  test_harness.set_parameter("top.output_unit.queue.elaborate.num_entries", 4)
-  test_harness.set_parameter("top.output_unit.elaborate.QueueType", NormalQueueRTL)
+#  test_harness.set_parameter("top.dut.queue.elaborate.num_entries", 4)
+#  test_harness.set_parameter("top.dut.elaborate.QueueType", NormalQueueRTL)
 
   # Create a simulator
 

@@ -7,23 +7,23 @@
 #   Date : Mar 10, 2019
 
 import tempfile
-from pymtl                   import *
-from router.MeshRouterRTL    import MeshRouterRTL
-from router.InputUnitRTL     import InputUnitRTL
-from router.DORXRouteUnitRTL import DORXRouteUnitRTL
-from router.DORYRouteUnitRTL import DORYRouteUnitRTL
-from router.SwitchUnitRTL    import SwitchUnitRTL
-from router.OutputUnitRTL    import OutputUnitRTL
-from ocn_pclib.rtl.queues    import NormalQueueRTL
+from pymtl                       import *
+from router.MeshRouterRTL        import MeshRouterRTL
+from router.InputUnitRTL         import InputUnitRTL
+from router.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from router.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from router.SwitchUnitRTL        import SwitchUnitRTL
+from router.OutputUnitRTL        import OutputUnitRTL
+from ocn_pclib.rtl.queues        import NormalQueueRTL
 
-from pclib.test.test_srcs     import TestSrcRTL
-from pclib.test.test_sinks    import TestSinkRTL
+from pclib.test.test_srcs         import TestSrcRTL
+from pclib.test.test_sinks        import TestSinkRTL
 
-from ocn_pclib.ifcs.Position import *
-from ocn_pclib.ifcs.Packet   import Packet, mk_pkt
+from ocn_pclib.ifcs.Position     import *
+from ocn_pclib.ifcs.Packet       import Packet, mk_pkt
 
-from pclib.test              import TestVectorSimulator
-from Configs                 import configure_network
+from pclib.test                  import TestVectorSimulator
+from Configs                     import configure_network
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -69,9 +69,9 @@ def test_vector_Router( dump_vcd, test_verilog ):
   configs = configure_network()
 
   if configs.routing_strategy == 'DORX':
-    RouteUnitType = DORXRouteUnitRTL
+    RouteUnitType = DORXMeshRouteUnitRTL
   elif configs.routing_strategy == 'DORY':
-    RouteUnitType = DORYRouteUnitRTL
+    RouteUnitType = DORYMeshRouteUnitRTL
   else:
     print 'Please specific a valid Routing strategy!'
 
@@ -111,7 +111,7 @@ class TestHarness( ComponentLevel6 ):
     mesh_ht  = 4
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = MeshRouterRTL( MsgType, MeshPos, DORYRouteUnitRTL )
+    s.dut = MeshRouterRTL( MsgType, MeshPos, DORYMeshRouteUnitRTL )
 #    s.pos = MeshPos(1,1)
 #    s.dut.pos = MeshPos( 1, 1 )
 

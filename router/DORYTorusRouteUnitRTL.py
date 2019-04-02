@@ -13,13 +13,13 @@ from Configs        import configure_network
 
 class DORYTorusRouteUnitRTL( ComponentLevel6 ):
 
-  def construct( s, PacketType, PositionType ):
+  def construct( s, PacketType, PositionType, cols=2, rows=2 ):
 
     # Constants 
     configs = configure_network()
     s.num_outports = configs.router_outports
-    rows = configs.rows
-    cols = configs.routers/rows
+    s.cols = cols
+    s.rows = rows
 
     # TODO: define thses constants else where?
     NORTH = 0
@@ -57,22 +57,22 @@ class DORYTorusRouteUnitRTL( ComponentLevel6 ):
         if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
           s.out_dir = SELF
         elif s.get.msg.dst_y < s.pos.pos_y:
-          if s.pos.pos_y - s.get.msg.dst_y <= rows - s.pos.pos_y + s.get.msg.dst_y:
+          if s.pos.pos_y - s.get.msg.dst_y <= s.rows - s.pos.pos_y + s.get.msg.dst_y:
             s.out_dir = NORTH
           else:
             s.out_dir = SOUTH
         elif s.get.msg.dst_y > s.pos.pos_y:
-          if s.get.msg.dst_y - s.pos.pos_y <= rows - s.get.msg.dst_y + s.pos.pos_y:
+          if s.get.msg.dst_y - s.pos.pos_y <= s.rows - s.get.msg.dst_y + s.pos.pos_y:
             s.out_dir = SOUTH
           else:
             s.out_dir = NORTH
         elif s.get.msg.dst_x < s.pos.pos_x:
-          if s.pos.pos_x - s.get.msg.dst_x <= cols - s.pos.pos_x + s.get.msg.dst_x:
+          if s.pos.pos_x - s.get.msg.dst_x <= s.cols - s.pos.pos_x + s.get.msg.dst_x:
             s.out_dir = WEST
           else:
             s.out_dir = EAST
         else:
-          if s.get.msg.dst_x - s.pos.pos_x <= rows - s.get.msg.dst_x + s.pos.pos_x:
+          if s.get.msg.dst_x - s.pos.pos_x <= s.rows - s.get.msg.dst_x + s.pos.pos_x:
             s.out_dir = EAST
           else:
             s.out_dir = WEST

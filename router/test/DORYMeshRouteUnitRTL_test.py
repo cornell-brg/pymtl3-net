@@ -1,21 +1,21 @@
 #=========================================================================
-# DORYRouteUnitRTL_test.py
+# DORYMeshRouteUnitRTL_test.py
 #=========================================================================
-# Test for DORYRouteUnitRTL
+# Test for DORYMeshRouteUnitRTL
 #
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 25, 2019
 
-from pymtl                   import *
-from pclib.test              import TestVectorSimulator
-from ocn_pclib.ifcs.Packet   import Packet, mk_pkt
-from ocn_pclib.ifcs.Flit     import Flit, mk_flit
-from ocn_pclib.ifcs.Position import MeshPosition, mk_mesh_pos
-from router.DORYRouteUnitRTL import DORYRouteUnitRTL 
+from pymtl                       import *
+from pclib.test                  import TestVectorSimulator
+from ocn_pclib.ifcs.Packet       import Packet, mk_pkt
+from ocn_pclib.ifcs.Flit         import Flit, mk_flit
+from ocn_pclib.ifcs.Position     import MeshPosition, mk_mesh_pos
+from router.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL 
 
-from pymtl.passes.PassGroups import SimpleSim
-from pclib.test.test_srcs    import TestSrcRTL
-from pclib.test.test_sinks   import TestSinkRTL
+from pymtl.passes.PassGroups     import SimpleSim
+from pclib.test.test_srcs        import TestSrcRTL
+from pclib.test.test_sinks       import TestSinkRTL
 
 #-------------------------------------------------------------------------
 # Driver function for TestVectorSimulator
@@ -61,8 +61,8 @@ def test_route_unit( dump_vcd, test_verilog ):
   mesh_ht  = 2
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-#  model = DORYRouteUnitRTL( Flit, MeshPos )
-  model = DORYRouteUnitRTL( Packet, MeshPos )
+#  model = DORYMeshRouteUnitRTL( Flit, MeshPos )
+  model = DORYMeshRouteUnitRTL( Packet, MeshPos )
 
   # Test for Y-DOR routing algorithm
 
@@ -81,8 +81,8 @@ def test_route_unit3x3( dump_vcd, test_verilog ):
   mesh_ht  = 3
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-#  model = DORYRouteUnitRTL( Flit, MeshPos )
-  model = DORYRouteUnitRTL( Packet, MeshPos )
+#  model = DORYMeshRouteUnitRTL( Flit, MeshPos )
+  model = DORYMeshRouteUnitRTL( Packet, MeshPos )
 
   # Test for Y-DOR routing algorithm
 
@@ -110,7 +110,7 @@ class TestHarness( ComponentLevel6 ):
     mesh_ht  = 4
   
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = DORYRouteUnitRTL( MsgType, MeshPos )
+    s.dut = DORYMeshRouteUnitRTL( MsgType, MeshPos )
     s.dut.pos = MeshPos( 1, 1 )
 
     s.src   = TestSrcRTL   ( MsgType, src_msgs,  src_initial,  src_interval  )

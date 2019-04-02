@@ -60,9 +60,14 @@ def test_vector_Torus2x2( dump_vcd, test_verilog ):
   num_routers = mesh_wid * mesh_ht
   num_inports = 5
   for r in range (num_routers):
+
     for i in range (num_inports):
-      path = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      model.set_parameter(path, NormalQueueRTL)
+      path_ru_cols = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.cols"
+      path_ru_rows = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.rows"
+      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+      model.set_parameter(path_qt,      NormalQueueRTL)
+      model.set_parameter(path_ru_cols, mesh_wid)
+      model.set_parameter(path_ru_rows, mesh_ht )
 
   x = 'x'
 
@@ -101,8 +106,12 @@ def test_vector_Torus4x4( dump_vcd, test_verilog ):
   num_inports = 5
   for r in range (num_routers):
     for i in range (num_inports):
-      path = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      model.set_parameter(path, NormalQueueRTL)
+      path_ru_cols = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.cols"
+      path_ru_rows = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.rows"
+      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+      model.set_parameter(path_qt,      NormalQueueRTL)
+      model.set_parameter(path_ru_cols, mesh_wid)
+      model.set_parameter(path_ru_rows, mesh_ht )
 
   x = 'x'
   # Specific for wire connection (link delay = 0) in 4x4 Torus topology
@@ -222,6 +231,18 @@ def test_srcsink_torus4x4():
 
   th = TestHarness( Packet, mesh_wid, mesh_ht, src_packets, sink_packets, 
                     0, 0, 0, 0, arrival_pipes )
+
+  num_inports = 5
+  for r in range (mesh_wid * mesh_ht):
+    for i in range (num_inports):
+      path_ru_cols = "top.dut.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.cols"
+      path_ru_rows = "top.dut.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.rows"
+      path_qt      = "top.dut.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+      th.set_parameter(path_qt,      NormalQueueRTL)
+      th.set_parameter(path_ru_cols, mesh_wid)
+      th.set_parameter(path_ru_rows, mesh_ht )
+
+
   print "------------ test with source/sink for torus 4x4 --------------"
   run_sim( th )
 

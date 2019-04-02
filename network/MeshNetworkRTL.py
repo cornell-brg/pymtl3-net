@@ -6,15 +6,15 @@
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
 
-from pymtl                   import *
-from pclib.ifcs.SendRecvIfc  import *
-from router.MeshRouterRTL    import MeshRouterRTL
-from router.InputUnitRTL     import InputUnitRTL
-from router.DORXRouteUnitRTL import DORXRouteUnitRTL
-from router.DORYRouteUnitRTL import DORYRouteUnitRTL
-from router.SwitchUnitRTL    import SwitchUnitRTL
-from router.OutputUnitRTL    import OutputUnitRTL
-from channel.ChannelRTL      import ChannelRTL
+from pymtl                       import *
+from pclib.ifcs.SendRecvIfc      import *
+from router.MeshRouterRTL        import MeshRouterRTL
+from router.InputUnitRTL         import InputUnitRTL
+from router.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from router.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from router.SwitchUnitRTL        import SwitchUnitRTL
+from router.OutputUnitRTL        import OutputUnitRTL
+from channel.ChannelRTL          import ChannelRTL
 
 class MeshNetworkRTL( ComponentLevel6 ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4,
@@ -32,8 +32,8 @@ class MeshNetworkRTL( ComponentLevel6 ):
     mesh_ht            = mesh_ht
     mesh_wid            = mesh_wid
 
-    RouteUnitType = DORYRouteUnitRTL if routing_dimension=='y' else \
-                    DORXRouteUnitRTL
+    RouteUnitType = DORYMeshRouteUnitRTL if routing_dimension=='y' else \
+                    DORXMeshRouteUnitRTL
 
     # number of interfaces that will not be used
     s.num_idleIfc = 4 * ((mesh_ht-2) * (mesh_wid-2) + 4)

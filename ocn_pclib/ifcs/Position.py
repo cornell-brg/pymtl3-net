@@ -24,13 +24,6 @@ class MeshPosition( object ):
     s.pos_x = XType( 0 )
     s.pos_y = YType( 0 ) 
 
-#    WidType = mk_bits( clog2( mesh_wid + 1 ) )
-#    HtType  = mk_bits( clog2( mesh_ht  + 1 ) )
-#    s.cols  = WidType( mesh_wid )
-#    s.rows  = HtType ( mesh_ht  )
-    s.cols = mesh_wid
-    s.rows = mesh_ht
-
   def __str__( s ):
     return "({},{})".format( s.pos_x, s.pos_y )
 
@@ -49,13 +42,6 @@ class MeshPosition_{mesh_wid}_by_{mesh_ht}( object ):
 
     s.pos_x = XType( pos_x )
     s.pos_y = YType( pos_y )
-
-#    WidType = mk_bits( clog2( {mesh_wid} + 1 ) )
-#    HtType  = mk_bits( clog2( {mesh_ht}  + 1 ) )
-#    s.cols  = WidType( {mesh_wid} )
-#    s.rows  = HtType ( {mesh_ht}  )
-    s.cols = {mesh_wid}
-    s.rows = {mesh_ht}
 
   def __str__( s ):
     return "({{}},{{}})".format( s.pos_x, s.pos_y )
