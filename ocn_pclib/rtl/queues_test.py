@@ -60,7 +60,7 @@ def test_pipe_Bits():
 # TestHarness
 #-------------------------------------------------------------------------
 
-class TestHarness( ComponentLevel6 ):
+class TestHarness( Component ):
 
   def construct( s, MsgType, qsize, src_msgs, sink_msgs, src_initial, 
                  src_interval, sink_initial, sink_interval, 

@@ -13,7 +13,7 @@ from ocn_pclib.rtl.Encoder import Encoder
 from ocn_pclib.ifcs        import GetIfcRTL
 from pclib.ifcs            import SendIfcRTL
 
-class SwitchUnitRTL( ComponentLevel6 ):
+class SwitchUnitRTL( Component ):
 
   def construct( s, PacketType, num_inports=5 ):
 

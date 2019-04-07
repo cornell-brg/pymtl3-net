@@ -120,7 +120,7 @@ def test_vector_mesh4x4( dump_vcd, test_verilog ):
 # TestHarness
 #-------------------------------------------------------------------------
 
-class TestHarness( ComponentLevel6 ):
+class TestHarness( Component ):
 
   def construct( s, MsgType, mesh_wid, mesh_ht, routing, src_msgs, sink_msgs, 
                  src_initial, src_interval, sink_initial, sink_interval,

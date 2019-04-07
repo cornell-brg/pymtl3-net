@@ -12,7 +12,7 @@ from pclib.ifcs           import RecvIfcRTL
 from ocn_pclib.ifcs       import GiveIfcRTL
 from ocn_pclib.rtl.queues import NormalQueueRTL
 
-class InputUnitRTL( ComponentLevel6 ):
+class InputUnitRTL( Component ):
 
   def construct( s, PacketType, QueueType=NormalQueueRTL ):
 

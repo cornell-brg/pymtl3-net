@@ -9,7 +9,7 @@
 from pymtl      import *
 from pclib.ifcs import SendIfcRTL, RecvIfcRTL 
 
-class Router( ComponentLevel6 ):
+class Router( Component ):
 
   def construct( s, PacketType, PositionType, num_inports, num_outports, 
                  InputUnitType, RouteUnitType, SwitchUnitType, 
@@ -20,7 +20,7 @@ class Router( ComponentLevel6 ):
 
     # Interface
 
-    s.pos  = InVPort( PositionType ) 
+    s.pos  = InPort( PositionType ) 
     s.recv = [ RecvIfcRTL( PacketType ) for _ in range( s.num_inports  ) ]
     s.send = [ SendIfcRTL( PacketType ) for _ in range( s.num_outports ) ]
     

@@ -11,7 +11,7 @@ from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
 from Configs        import configure_network
 
-class DORYTorusRouteUnitRTL( ComponentLevel6 ):
+class DORYTorusRouteUnitRTL( Component ):
 
   def construct( s, PacketType, PositionType, cols=2, rows=2 ):
 
@@ -32,7 +32,7 @@ class DORYTorusRouteUnitRTL( ComponentLevel6 ):
 
     s.get  = GetIfcRTL( PacketType )
     s.give = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
-    s.pos  = InVPort( PositionType )
+    s.pos  = InPort( PositionType )
 
     # Componets
 

@@ -9,7 +9,7 @@
 from pymtl import *
 from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
-class DORXMeshRouteUnitRTL( ComponentLevel6 ):
+class DORXMeshRouteUnitRTL( Component ):
 
   def construct( s, PacketType, PositionType ):
 
@@ -27,7 +27,7 @@ class DORXMeshRouteUnitRTL( ComponentLevel6 ):
 
     s.get  = GetIfcRTL( PacketType )
     s.give  = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
-    s.pos   = InVPort( PositionType )
+    s.pos   = InPort( PositionType )
 
     # Componets
 

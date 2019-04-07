@@ -68,7 +68,7 @@ def test_get_send( dump_vcd, test_verilog ):
 # TestHarness
 #-------------------------------------------------------------------------
 
-class TestHarness( ComponentLevel6 ):
+class TestHarness( Component ):
 
   def construct( s, MsgType, src_msgs, sink_msgs, src_initial,
                  src_interval, sink_initial, sink_interval,

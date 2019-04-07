@@ -13,18 +13,18 @@ from pclib.rtl import Mux, Reg, RegEn, RegisterFile
 # Dpath and Ctrl for NormalQueueRTL
 #-------------------------------------------------------------------------
 
-class NormalQueueDpathRTL( ComponentLevel6 ):
+class NormalQueueDpathRTL( Component ):
 
   def construct( s, MsgType, num_entries=2 ):
     
     # Interface
 
-    s.enq_msg =  InVPort( MsgType )
-    s.deq_msg = OutVPort( MsgType )
+    s.enq_msg =  InPort( MsgType )
+    s.deq_msg = OutPort( MsgType )
 
-    s.wen   = InVPort( Bits1 )
-    s.waddr = InVPort( mk_bits( clog2( num_entries ) ) )
-    s.raddr = InVPort( mk_bits( clog2( num_entries ) ) )
+    s.wen   = InPort( Bits1 )
+    s.waddr = InPort( mk_bits( clog2( num_entries ) ) )
+    s.raddr = InPort( mk_bits( clog2( num_entries ) ) )
 
     # Component
 
@@ -36,7 +36,7 @@ class NormalQueueDpathRTL( ComponentLevel6 ):
       wdata = { 0: s.enq_msg }
     )
 
-class NormalQueueCtrlRTL( ComponentLevel6 ):
+class NormalQueueCtrlRTL( Component ):
 
   def construct( s, num_entries=2 ):
     
@@ -48,15 +48,15 @@ class NormalQueueCtrlRTL( ComponentLevel6 ):
 
     # Interface
     
-    s.enq_en  = InVPort ( Bits1 )
-    s.enq_rdy = OutVPort( Bits1 )
-    s.deq_en  = InVPort ( Bits1 )
-    s.deq_rdy = OutVPort( Bits1 )
-    s.credit  = OutVPort( mk_bits( addr_nbits ) )
+    s.enq_en  = InPort ( Bits1 )
+    s.enq_rdy = OutPort( Bits1 )
+    s.deq_en  = InPort ( Bits1 )
+    s.deq_rdy = OutPort( Bits1 )
+    s.credit  = OutPort( mk_bits( addr_nbits ) )
 
-    s.wen     = OutVPort( Bits1 )
-    s.waddr   = OutVPort( mk_bits( addr_nbits ) )
-    s.raddr   = OutVPort( mk_bits( addr_nbits ) )
+    s.wen     = OutPort( Bits1 )
+    s.waddr   = OutPort( mk_bits( addr_nbits ) )
+    s.raddr   = OutPort( mk_bits( addr_nbits ) )
     
     # Registers
 
@@ -118,7 +118,7 @@ class NormalQueueCtrlRTL( ComponentLevel6 ):
 # NormalQueueRTL
 #-------------------------------------------------------------------------
 
-class NormalQueueRTL( ComponentLevel6 ):
+class NormalQueueRTL( Component ):
 
   def construct( s, MsgType, num_entries=2 ):
     
@@ -126,7 +126,7 @@ class NormalQueueRTL( ComponentLevel6 ):
 
     s.enq    = EnqIfcRTL( MsgType )
     s.deq    = DeqIfcRTL( MsgType )
-    s.credit = OutVPort( mk_bits( clog2( num_entries ) ) )
+    s.credit = OutPort( mk_bits( clog2( num_entries ) ) )
     
     # Components
 

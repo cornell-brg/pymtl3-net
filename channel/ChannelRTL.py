@@ -11,7 +11,7 @@ from pclib.ifcs           import RecvIfcRTL
 from pclib.ifcs           import SendIfcRTL
 from ocn_pclib.rtl.queues import NormalQueueRTL
 
-class ChannelRTL( ComponentLevel6 ):
+class ChannelRTL( Component ):
   def construct(s, PacketType, QueueType=None, latency=2, num_entries=2):
 
     # Constant
