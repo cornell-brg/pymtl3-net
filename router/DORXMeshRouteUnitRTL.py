@@ -6,8 +6,9 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 25, 2019
 
-from pymtl import *
-from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
+from pymtl        import *
+from pclib.ifcs   import GetIfcRTL, GiveIfcRTL
+from router_utils import *
 
 class DORXMeshRouteUnitRTL( Component ):
 
@@ -16,12 +17,6 @@ class DORXMeshRouteUnitRTL( Component ):
     # Constants 
 
     s.num_outports = 5
-    # TODO: define thses constants else where?
-    NORTH = 0
-    SOUTH = 1
-    WEST  = 2
-    EAST  = 3
-    SELF  = 4
 
     # Interface
 

@@ -8,6 +8,7 @@
 
 from pymtl                       import *
 from pclib.ifcs.SendRecvIfc      import *
+from router.router_utils         import *
 from router.MeshRouterRTL        import MeshRouterRTL
 from router.InputUnitRTL         import InputUnitRTL
 from router.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
@@ -18,13 +19,6 @@ from channel.ChannelRTL          import ChannelRTL
 class MeshNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4,
                  channel_latency=0, routing_dimension='y' ):
-    # Constants
-
-    NORTH = 0
-    SOUTH = 1
-    WEST  = 2
-    EAST  = 3
-    SELF  = 4
 
     s.num_routers     = mesh_wid * mesh_ht
     s.channel_latency = 0

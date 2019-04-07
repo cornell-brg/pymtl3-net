@@ -7,7 +7,8 @@
 #   Date : Mar 25, 2019
 
 from pymtl import *
-from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
+from pclib.ifcs import GetIfcRTL, GiveIfcRTL
+from router_utils import *
 
 class DORYMeshRouteUnitRTL( Component ):
 
@@ -16,12 +17,6 @@ class DORYMeshRouteUnitRTL( Component ):
     # Constants 
 
     s.num_outports = 5
-    # TODO: define thses constants else where?
-    NORTH = 0
-    SOUTH = 1
-    WEST  = 2
-    EAST  = 3
-    SELF  = 4
 
     # Interface
 
