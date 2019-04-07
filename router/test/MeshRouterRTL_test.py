@@ -6,15 +6,10 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 10, 2019
 
-import tempfile
 from pymtl                       import *
 from router.MeshRouterRTL        import MeshRouterRTL
-from router.InputUnitRTL         import InputUnitRTL
 from router.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 from router.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
-from router.SwitchUnitRTL        import SwitchUnitRTL
-from router.OutputUnitRTL        import OutputUnitRTL
-from ocn_pclib.rtl.queues        import NormalQueueRTL
 
 from pclib.test.test_srcs         import TestSrcRTL
 from pclib.test.test_sinks        import TestSinkRTL
@@ -23,24 +18,22 @@ from ocn_pclib.ifcs.Position     import *
 from ocn_pclib.ifcs.Packet       import Packet, mk_pkt
 
 from pclib.test                  import TestVectorSimulator
-from Configs                     import configure_network
 
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
-def run_vector_test( model, test_vectors ):
+
+def run_vector_test( model, test_vectors, mesh_wid=4, mesh_ht=4, 
+                     pos_x=1, pos_y=1 ):
  
   def tv_in( model, test_vector ):
 
-    mesh_wid = 4
-    mesh_ht  = 4
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    MeshPos   = mk_mesh_pos( mesh_wid, mesh_ht )
+    model.pos = MeshPos( pos_x, pos_y )
 
-    model.pos = MeshPos( 1, 1 )
-
-    for i in range ( model.num_inports ):
-      pkt = mk_pkt(0, 0, test_vector[0][i]/4, test_vector[0][i]%4, 
-                   1, test_vector[2][i])
+    for i in range( model.num_inports ):
+      pkt = mk_pkt( 0, 0, test_vector[0][i]/4, test_vector[0][i]%4, 
+                    1, test_vector[2][i] )
       model.recv[i].msg = pkt
       if model.recv[i].rdy:
         model.recv[i].en = 1
@@ -50,31 +43,24 @@ def run_vector_test( model, test_vectors ):
 
   def tv_out( model, test_vector ):
     for i in range( model.num_inports ):
-#      print 'model.recv[',i,'].rdy:',model.recv[i].rdy,' == test_vector[4][',i,']:',test_vector[3][i]
       assert model.recv[i].rdy == test_vector[3][i]
 
-    for i in range (model.num_outports):
-#      print 'model.send[',i,'].en:',model.send[i].en,' == (test_vector[5][',i,']:',test_vector[4][i]
-#      print 'model.switch_units[',i,'].send.en:',model.send[i].en,' == (test_vector[5][',i,']:',test_vector[5][i]
+    for i in range( model.num_outports ):
       assert model.send[i].en == (test_vector[4][i] != 'x')
       if model.send[i].en == 1:
-#        print '  model.send[',i,'].msg.payload:',model.send[i].msg.payload,' == test_vector[4][',i,']:',test_vector[4][i]
         assert model.send[i].msg.payload == test_vector[4][i]
   
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
 
-def test_vector_Router( dump_vcd, test_verilog ):
+def test_vector_Router_4_4X():
 
-  configs = configure_network()
-
-  if configs.routing_strategy == 'DORX':
-    RouteUnitType = DORXMeshRouteUnitRTL
-  elif configs.routing_strategy == 'DORY':
-    RouteUnitType = DORYMeshRouteUnitRTL
-  else:
-    print 'Please specific a valid Routing strategy!'
-
+  mesh_wid = 4
+  mesh_ht  = 4
+  pos_x    = 1
+  pos_y    = 1
+  RouteUnitType = DORXMeshRouteUnitRTL
+  
   xx = 'x'
   inputs_buffer= [
 # [dst_x,dst_y] send_rdy       payload       recv_rdy      send_msg
@@ -85,17 +71,10 @@ def test_vector_Router( dump_vcd, test_verilog ):
   [[9,0,0,4,6],[1,1,0,1,1],[51,52,53,54,55],[1,1,1,0,1],[14,43,xx,45,xx]],
   ]
 
-  mesh_wid = 4
-  mesh_ht  = 4
-
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-
   model = MeshRouterRTL( Packet, MeshPos, RouteUnitType )
-#  for i in range ( 5 ):
-#    queue_path = "top.input_units[" + str(i) + "].elaborate.QueueType"
-#    model.set_parameter( queue_path, NormalQueueRTL )
 
-  run_vector_test(model, inputs_buffer)
+  run_vector_test( model, inputs_buffer, mesh_wid, mesh_ht, pos_x, pos_y )
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -103,17 +82,12 @@ def test_vector_Router( dump_vcd, test_verilog ):
 
 class TestHarness( Component ):
 
-  def construct( s, MsgType, src_msgs, sink_msgs, src_initial,
-                 src_interval, sink_initial, sink_interval,
+  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs, 
+                 src_initial, src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
-
-    mesh_wid = 4
-    mesh_ht  = 4
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.dut = MeshRouterRTL( MsgType, MeshPos, DORYMeshRouteUnitRTL )
-#    s.pos = MeshPos(1,1)
-#    s.dut.pos = MeshPos( 1, 1 )
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_inports ) ]
@@ -178,6 +152,7 @@ def run_sim( test_harness, max_cycles=100 ):
 #-------------------------------------------------------------------------
 # Test cases
 #-------------------------------------------------------------------------
+
 #              x,y,pl,dir
 test_msgs = [[(0,0,11,0),(0,0,12,0),(0,1,13,2),(2,1,14,3),(0,0,15,0)],
              [(0,0,21,0),(0,2,22,1),(0,1,23,2),(2,1,24,3),(2,1,25,3)],
@@ -192,13 +167,12 @@ def test_normal_simple():
 
   src_packets = [[],[],[],[],[]]
   for item in test_msgs:
-#    for (dst_x,dst_y,payload,dir_out) in item:
     for i in range( len( item ) ):
       (dst_x,dst_y,payload,dir_out) = item[i]
       pkt = mk_pkt (0, 0, dst_x, dst_y, 1, payload)
       src_packets[dir_out].append( pkt )
       result_msgs[dir_out].append ( pkt )
 
-  th = TestHarness( Packet, src_packets, result_msgs, 0, 0, 0, 0,
+  th = TestHarness( Packet, 4, 4, src_packets, result_msgs, 0, 0, 0, 0,
                     arrival_pipes )
   run_sim( th )
