@@ -10,6 +10,7 @@ from pymtl                       import *
 from pclib.ifcs.SendRecvIfc      import *
 from router.MeshRouterRTL        import MeshRouterRTL
 from router.InputUnitRTL         import InputUnitRTL
+from router.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from router.SwitchUnitRTL        import SwitchUnitRTL
 from router.OutputUnitRTL        import OutputUnitRTL
 from channel.ChannelRTL          import ChannelRTL
@@ -104,7 +105,7 @@ class MeshNetworkRTL( Component ):
           s.routers[idx].pos = PositionType( x, y )
 
   def line_trace( s ):
-    in_trace = [ "" for _ in range( s.num_routers ) ]
+    trace = [ "" for _ in range( s.num_routers ) ]
     for i in range( s.num_routers ):
-      in_trace[i] = "{}".format( s.routers[i].recv )
+      trace[i] = "{}".format( s.routers[i].recv )
     return "|".join( trace )
