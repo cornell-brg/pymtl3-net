@@ -12,9 +12,8 @@ from pymtl.passes.PassGroups  import SimpleSim
 from pclib.test.test_srcs     import TestSrcRTL
 from pclib.test.test_sinks    import TestSinkRTL
 from pclib.test               import TestVectorSimulator
+from pclib.rtl.queues         import NormalQueueRTL
 from router.InputUnitRTL      import InputUnitRTL 
-
-from ocn_pclib.rtl.queues     import NormalQueueRTL
 
 #-------------------------------------------------------------------------
 # TestVectorSimulator test
