@@ -9,15 +9,12 @@
 from pymtl import *
 from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
-from Configs        import configure_network
-
 class DORYTorusRouteUnitRTL( Component ):
 
   def construct( s, PacketType, PositionType, cols=2, rows=2 ):
 
     # Constants 
-    configs = configure_network()
-    s.num_outports = configs.router_outports
+    s.num_outports = 5
     s.cols = cols
     s.rows = rows
 

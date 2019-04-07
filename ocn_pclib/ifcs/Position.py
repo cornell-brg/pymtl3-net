@@ -68,10 +68,10 @@ class RingPosition( object ):
     
     Type = mk_bits( clog2( num_nodes ) )
 
-    s.pos = Type( 0 )
+    s.pos_x = Type( 0 )
 
   def __str__( s ):
-    return "{}".format( s.pos )
+    return "{}".format( s.pos_x )
 
 #-------------------------------------------------------------------------
 # Dynamically generated RingPosition
@@ -81,21 +81,21 @@ _ring_pos_dict = dict()
 _ring_pos_template = """
 class RingPosition_{num_nodes}( object ):
   
-  def __init__( s, pos ):
+  def __init__( s, pos=0 ):
 
     Type = mk_bits( clog2( {num_nodes} ) )
 
-    s.pos = Type( pos )
+    s.pos_x = Type( pos )
 
   def __str__( s ):
-    return "{}".format( int( s.pos ) )
+    return "{{}}".format( int( s.pos_x ) )
 
-_ring_pos_dict[ {num_nodes} ]
+_ring_pos_dict[ {num_nodes} ] = RingPosition_{num_nodes}
 """
 
 def mk_ring_pos( num_nodes ):
-  if num_nodes in _ring_pos_dict:
-    return _ring_pos_dict[ num_nodes ]
+  if (num_nodes) in _ring_pos_dict:
+    return _ring_pos_dict[ (num_nodes) ]
   else:
     exec py.code.Source( 
       _ring_pos_template.format( num_nodes = num_nodes ) 
