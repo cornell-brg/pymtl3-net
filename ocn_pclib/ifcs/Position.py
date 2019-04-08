@@ -11,12 +11,12 @@ from pymtl import *
 import py
 
 #-------------------------------------------------------------------------
-# Static MeshPosition
+# Base MeshPosition
 #-------------------------------------------------------------------------
 
-class MeshPosition( object ): 
-  
-  def __init__( s, mesh_wid=2, mesh_ht=2 ):
+class BaseMeshPosition( object ): 
+
+  def __init__( s, pox_x=0, pos_y=0, mesh_wid=2, mesh_ht=2 ):
     
     XType = mk_bits( clog2( mesh_wid ) )
     YType = mk_bits( clog2( mesh_ht  ) )
@@ -32,31 +32,49 @@ class MeshPosition( object ):
 #-------------------------------------------------------------------------
 
 _mesh_pos_dict = dict()
-_mesh_pos_template = """
-class MeshPosition_{mesh_wid}_by_{mesh_ht}( object ):
+# _mesh_pos_template = """
+# class MeshPosition_{mesh_wid}_by_{mesh_ht}( object ):
+# 
+#   def __init__( s, pos_x=0, pos_y=0 ):
+# 
+#     XType = mk_bits( clog2( {mesh_wid} ) )
+#     YType = mk_bits( clog2( {mesh_ht}  ) )
+# 
+#     s.pos_x = XType( pos_x )
+#     s.pos_y = YType( pos_y )
+# 
+#   def __str__( s ):
+#     return "({{}},{{}})".format( s.pos_x, s.pos_y )
+# 
+# _mesh_pos_dict[ ( {mesh_wid}, {mesh_ht} ) ] = MeshPosition_{mesh_wid}_by_{mesh_ht}
+# """
+# 
+# def mk_mesh_pos( wid, ht ):
+#   if ( wid, ht ) in _mesh_pos_dict:
+#     return _mesh_pos_dict[ ( wid, ht ) ]
+#   else:
+#     exec py.code.Source( 
+#       _mesh_pos_template.format( mesh_wid=wid, mesh_ht=ht )
+#     ).compile() in globals()
+#     return _mesh_pos_dict[ ( wid, ht ) ]
 
-  def __init__( s, pos_x=0, pos_y=0 ):
+def mk_mesh_pos( mesh_wid, mesh_ht ):
 
-    XType = mk_bits( clog2( {mesh_wid} ) )
-    YType = mk_bits( clog2( {mesh_ht}  ) )
+  if ( mesh_wid, mesh_ht ) in _mesh_pos_dict:
+    return _mesh_pos_dict[ ( mesh_wid, mesh_ht ) ]
 
-    s.pos_x = XType( pos_x )
-    s.pos_y = YType( pos_y )
-
-  def __str__( s ):
-    return "({{}},{{}})".format( s.pos_x, s.pos_y )
-
-_mesh_pos_dict[ ( {mesh_wid}, {mesh_ht} ) ] = MeshPosition_{mesh_wid}_by_{mesh_ht}
-"""
-
-def mk_mesh_pos( wid, ht ):
-  if ( wid, ht ) in _mesh_pos_dict:
-    return _mesh_pos_dict[ ( wid, ht ) ]
   else:
-    exec py.code.Source( 
-      _mesh_pos_template.format( mesh_wid=wid, mesh_ht=ht )
-    ).compile() in globals()
-    return _mesh_pos_dict[ ( wid, ht ) ]
+    XType = mk_bits( clog2( mesh_wid ) )
+    YType = mk_bits( clog2( mesh_ht  ) )
+    cls_name = "MeshPosition_" + str( mesh_wid ) + "_by_" + str( mesh_ht )
+
+    def __init__( s, pos_x=0, pos_y=0 ):
+      s.pos_x = XType( pos_x )
+      s.pos_y = YType( pos_y )
+
+    new_class = type( cls_name, ( BaseMeshPosition, ), {"__init__":__init__} )
+    _mesh_pos_dict[ ( mesh_wid, mesh_ht ) ] = new_class
+    return new_class
 
 #-------------------------------------------------------------------------
 # Static RingPosition

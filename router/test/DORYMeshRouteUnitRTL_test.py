@@ -10,7 +10,7 @@ from pymtl                       import *
 from pclib.test                  import TestVectorSimulator
 from ocn_pclib.ifcs.Packet       import Packet, mk_pkt
 from ocn_pclib.ifcs.Flit         import Flit, mk_flit
-from ocn_pclib.ifcs.Position     import MeshPosition, mk_mesh_pos
+from ocn_pclib.ifcs.Position     import mk_mesh_pos
 from router.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL 
 
 from pymtl.passes.PassGroups     import SimpleSim
@@ -55,12 +55,12 @@ def run_test( model, mesh_wid, mesh_ht, router_pos, test_vectors ):
 # Test cases
 #-------------------------------------------------------------------------
 
-def test_route_unit( dump_vcd, test_verilog ):
+def test_route_unit():
   mesh_wid = 2
   mesh_ht  = 2
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-#  model = DORYMeshRouteUnitRTL( Flit, MeshPos )
+  print MeshPos
   model = DORYMeshRouteUnitRTL( Packet, MeshPos )
 
   # Test for Y-DOR routing algorithm
@@ -75,11 +75,12 @@ def test_route_unit( dump_vcd, test_verilog ):
    [   0,     0,     1,       4,      1,     1,    [0,0,0,0,1],  [0,0,0,0,1] ],
   ] )
 
-def test_route_unit3x3( dump_vcd, test_verilog ):
+def test_route_unit3x3():
   mesh_wid = 3
   mesh_ht  = 3
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+  print MeshPos
   model = DORYMeshRouteUnitRTL( Packet, MeshPos )
 
   # Test for Y-DOR routing algorithm
