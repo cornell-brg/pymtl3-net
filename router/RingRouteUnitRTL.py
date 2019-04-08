@@ -11,10 +11,10 @@ from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
 class RingRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType, num_routers=4 ):
+  def construct( s, PacketType, PositionType, num_outports, num_routers=4 ):
 
     # Constants 
-    s.num_outports = 3
+    s.num_outports = num_outports 
     s.num_routers  = num_routers
 
     # TODO: define thses constants else where?
@@ -48,13 +48,13 @@ class RingRouteUnitRTL( Component ):
         s.give[i].rdy = 0
 
       if s.get.rdy:
-        if s.pos.pos_x == s.get.msg.dst_x: 
+        if s.pos.pos == s.get.msg.dst_x: 
           s.out_dir = SELF
-        elif s.get.msg.dst_x < s.pos.pos_x and \
-             s.pos.pos_x - s.get.msg.dst_x <= num_routers/2:
+        elif s.get.msg.dst_x < s.pos.pos and \
+             s.pos.pos - s.get.msg.dst_x <= num_routers/2:
           s.out_dir = LEFT
-        elif s.get.msg.dst_x > s.pos.pos_x and \
-             s.get.msg.dst_x - s.pos.pos_x > num_routers/2:
+        elif s.get.msg.dst_x > s.pos.pos and \
+             s.get.msg.dst_x - s.pos.pos > num_routers/2:
           s.out_dir = LEFT
         else:
           s.out_dir = RIGHT

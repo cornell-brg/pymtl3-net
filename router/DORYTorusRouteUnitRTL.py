@@ -11,10 +11,10 @@ from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
 class DORYTorusRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType, cols=2, rows=2 ):
+  def construct( s, PacketType, PositionType, num_outports, cols=2, rows=2 ):
 
     # Constants 
-    s.num_outports = 5
+    s.num_outports = num_outports
     s.cols = cols
     s.rows = rows
 

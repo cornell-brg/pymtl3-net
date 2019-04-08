@@ -12,11 +12,11 @@ from router_utils import *
 
 class DORYMeshRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType ):
+  def construct( s, PacketType, PositionType, num_outports ):
 
     # Constants 
 
-    s.num_outports = 5
+    s.num_outports = num_outports
 
     # Interface
 

@@ -29,7 +29,7 @@ class Router( Component ):
     s.input_units  = [ InputUnitType( PacketType ) 
                       for _ in range( s.num_inports ) ]
 
-    s.route_units  = [ RouteUnitType( PacketType, PositionType ) 
+    s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports ) 
                       for i in range( s.num_inports ) ]
 
     s.switch_units = [ SwitchUnitType( PacketType, s.num_inports )

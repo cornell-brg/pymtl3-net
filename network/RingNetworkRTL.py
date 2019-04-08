@@ -1,7 +1,7 @@
 #=========================================================================
-# MeshNetworkRTL.py
+# RingNetworkRTL.py
 #=========================================================================
-# Mesh network implementation.
+# Ring network implementation.
 #
 # Author : Cheng Tan
 #   Date : April 6, 2019

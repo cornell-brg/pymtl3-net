@@ -86,10 +86,10 @@ class RingPosition( object ):
     
     Type = mk_bits( clog2( num_nodes ) )
 
-    s.pos_x = Type( 0 )
+    s.pos = Type( 0 )
 
   def __str__( s ):
-    return "{}".format( s.pos_x )
+    return "{}".format( s.pos )
 
 #-------------------------------------------------------------------------
 # Dynamically generated RingPosition
@@ -103,10 +103,10 @@ class RingPosition_{num_nodes}( object ):
 
     Type = mk_bits( clog2( {num_nodes} ) )
 
-    s.pos_x = Type( pos )
+    s.pos = Type( pos )
 
   def __str__( s ):
-    return "{{}}".format( int( s.pos_x ) )
+    return "{{}}".format( int( s.pos ) )
 
 _ring_pos_dict[ {num_nodes} ] = RingPosition_{num_nodes}
 """
@@ -119,6 +119,51 @@ def mk_ring_pos( num_nodes ):
       _ring_pos_template.format( num_nodes = num_nodes ) 
     ).compile() in globals()
     return _ring_pos_dict[ num_nodes ]
+
+#-------------------------------------------------------------------------
+# Static ButterflyPosition
+#-------------------------------------------------------------------------
+
+class ButterflyPosition( object ):
+
+  def __init__( s, num_nodes=2 ):
+    
+    Type = mk_bits( clog2( num_nodes ) )
+
+    s.pos = Type( 0 )
+
+  def __str__( s ):
+    return "{}".format( s.pos )
+
+#-------------------------------------------------------------------------
+# Dynamically generated ButterflyPosition
+#-------------------------------------------------------------------------
+
+_butterfly_pos_dict = dict()
+_butterfly_pos_template = """
+class ButterflyPosition_{num_nodes}( object ):
+  
+  def __init__( s, pos=0 ):
+
+    Type = mk_bits( clog2( {num_nodes} ) )
+
+    s.pos = Type( pos )
+
+  def __str__( s ):
+    return "{{}}".format( int( s.pos ) )
+
+_butterfly_pos_dict[ {num_nodes} ] = ButterflyPosition_{num_nodes}
+"""
+
+def mk_butterfly_pos( num_nodes ):
+  if (num_nodes) in _butterfly_pos_dict:
+    return _butterfly_pos_dict[ (num_nodes) ]
+  else:
+    exec py.code.Source( 
+      _butterfly_pos_template.format( num_nodes = num_nodes ) 
+    ).compile() in globals()
+    return _butterfly_pos_dict[ num_nodes ]
+
 
 #-------------------------------------------------------------------------
 # Utility functions
