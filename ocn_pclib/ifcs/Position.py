@@ -124,14 +124,6 @@ def mk_ring_pos( num_nodes ):
 # Utility functions
 #-------------------------------------------------------------------------
 
-def mk_mesh_pos_inst( pos_x=0, pos_y=0, mesh_wid=2, mesh_ht=2 ):
-
-  pos = MeshPosition( mesh_wid, mesh_ht )
-  pos.pos_x = pos_x
-  pos.pos_y = pos_y
-
-  return pos
-
 def mk_mesh_pos_list( mesh_wid=2, mesh_ht=2 ):
 
   pos_list = []
