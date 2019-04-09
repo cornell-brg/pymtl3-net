@@ -11,42 +11,112 @@ from pymtl import *
 import py
 
 #-------------------------------------------------------------------------
-# Static Flit type
+# Dynamically generated MeshFlit
 #-------------------------------------------------------------------------
 
-class Flit( object ):
+_mesh_flit_dict = dict()
+_mesh_flit_template = """
+class MeshFlit{packet_size}_{mesh_wid}_by_{mesh_ht}( object ):
+  def __init__( s, id, pkt ):
+    IDType = mk_bits( clog2( {packet_size} ) )
+    XType  = mk_bits( clog2( {mesh_wid}    ) )
+    YType  = mk_bits( clog2( {mesh_ht}     ) )
+    TpType = mk_bits( clog2( 4             ) )
 
-  def __init__( s ):
-    
-    s.id    = Bits4 ( 0 )
-    s.src   = Bits4 ( 0 )
-    s.dst   = Bits4 ( 0 ) 
-    s.type  = Bits4 ( 0 )
-    s.opaque  = Bits4 ( 0 ) 
-    s.payload = Bits16( 0 )
+    s.id      = IDType ( id )
+    s.src_x   = XType  ( pkt.src/{mesh_wid} )
+    s.src_y   = YType  ( pkt.src%{mesh_wid} )
+    s.dst_x   = XType  ( pkt.dst/{mesh_wid} )
+    s.dst_y   = YType  ( pkt.dst%{mesh_wid} )
+
+    HEAD = 0
+    BODY = 1
+    TAIL = 2
+    if id == 0:
+      s.type = TpType( HEAD )
+    elif id == {packet_size} - 1:
+      s.type = TpType( TAIL )
+    else:
+      s.type = TpType( BODY )
+
+    s.opaque  = Bits1  ( pkt.opaque  )
+    s.payload = Bits16 ( pkt.payload )
 
   def __str__( s ):
-    return "{}:({})>({}):{}:{}:{}".format(
-      s.id, s.src, s.dst, s.type, s.opaque, s.payload ) 
+    return "{{}}:({{}},{{}})>({{}},{{}}):{{}}:{{}}:{{}}".format(
+      s.id, s.src_x, s.src_y, s.dst_x, s.dst_y, s.type, s.opaque, s.payload )
 
-def mk_flit( id, src, dst, opaque=1, payload=0, size=4 ):
-  flit = Flit()
-  flit.id      = id
-  flit.src     = src
-  flit.dst     = dst
-  flit.opaque  = opaque
-  flit.payload = payload
-  
-  HEAD = 0
-  BODY = 1
-  TAIL = 2
+_mesh_flit_dict[ ({packet_size}, {mesh_wid}, {mesh_ht}) ] = \
+                MeshFlit{packet_size}_{mesh_wid}_by_{mesh_ht}
+"""
 
-  if id == 0:
-    flit.type = HEAD;
-  elif id == size - 1:
-    flit.type = TAIL;
+def mk_mesh_flit( size, wid, ht ):
+  if ( size, wid, ht ) in _mesh_flit_dict:
+    return _mesh_flit_dict[ ( size, wid, ht ) ]
   else:
-    flit.type = BODY;
+    print ( size, wid, ht )
+    exec py.code.Source(
+      _mesh_flit_template.format( packet_size = size, mesh_wid = wid, mesh_ht = ht )
+    ).compile() in globals()
+    return _mesh_flit_dict[ ( size, wid, ht ) ]
 
-  return flit
+def flitisize_mesh_flit( pkt, size, wid, ht ):
+  FlitType = mk_mesh_flit( size, wid, ht )
+  flits = []
+  for i in range( size ):
+    flits.append( FlitType( i, pkt ) )
+  return flits
+
+#-------------------------------------------------------------------------
+# Dynamically generated RingFlit
+#-------------------------------------------------------------------------
+
+_ring_flit_dict = dict()
+_ring_flit_template = """
+class RingFlit{packet_size}_{num_nodes}( object ):
+  def __init__( s, id, pkt ):
+    IDType = mk_bits( clog2( {packet_size} ) )
+    NType  = mk_bits( clog2( {num_nodes}   ) )
+    TpType = mk_bits( clog2( 4             ) )
+
+    s.id   = IDType ( id      )
+    s.src  = NType  ( pkt.src )
+    s.dst  = NType  ( pkt.dst )
+
+    HEAD = 0
+    BODY = 1
+    TAIL = 2
+    if id == 0:
+      s.type = TpType( HEAD )
+    elif id == {packet_size} - 1:
+      s.type = TpType( TAIL )
+    else:
+      s.type = TpType( BODY )
+
+    s.opaque  = Bits1  ( pkt.opaque  )
+    s.payload = Bits16 ( pkt.payload )
+
+  def __str__( s ):
+    return "{{}}:({{}})>({{}}):{{}}:{{}}:{{}}".format(
+      s.id, s.src, s.dst, s.type, s.opaque, s.payload )
+
+_ring_flit_dict[ ({packet_size}, {num_nodes}) ] = \
+                RingFlit{packet_size}_{num_nodes}
+"""
+
+def mk_ring_flit( size, num_nodes ):
+  if ( size, num_nodes ) in _ring_flit_dict:
+    return _ring_flit_dict[ ( size, num_nodes ) ]
+  else:
+    exec py.code.Source(
+      _ring_flit_template.format( packet_size = size, num_nodes = num_nodes )
+    ).compile() in globals()
+    return _ring_flit_dict[ ( size, num_nodes ) ]
+
+def flitisize_ring_flit( pkt, size, num_nodes ):
+  FlitType = mk_ring_flit( size, num_nodes )
+  flits = []
+  for i in range( size ):
+    flits.append( FlitType( i, pkt ) )
+  return flits
 

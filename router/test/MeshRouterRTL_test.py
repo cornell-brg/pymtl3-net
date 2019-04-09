@@ -15,7 +15,8 @@ from pclib.test.test_srcs         import TestSrcRTL
 from pclib.test.test_sinks        import TestSinkRTL
 
 from ocn_pclib.ifcs.Position     import *
-from ocn_pclib.ifcs.Packet       import Packet, mk_pkt
+from ocn_pclib.ifcs.Packet       import * 
+from ocn_pclib.ifcs.Flit         import *
 
 from pclib.test                  import TestVectorSimulator
 
@@ -32,9 +33,13 @@ def run_vector_test( model, test_vectors, mesh_wid=4, mesh_ht=4,
     model.pos = MeshPos( pos_x, pos_y )
 
     for i in range( model.num_inports ):
-      pkt = mk_pkt( 0, 0, test_vector[0][i]/4, test_vector[0][i]%4, 
-                    1, test_vector[2][i] )
-      model.recv[i].msg = pkt
+#      pkt = mk_pkt( 0, 0, test_vector[0][i]/4, test_vector[0][i]%4, 
+#                    1, test_vector[2][i] )
+      pkt = mk_base_pkt( 0, test_vector[0][i], 1, test_vector[2][i] )
+      flits = flitisize_mesh_flit( pkt, 1, mesh_wid, mesh_ht )
+
+#      model.recv[i].msg = pkt
+      model.recv[i].msg = flits[0]
       if model.recv[i].rdy:
         model.recv[i].en = 1
 

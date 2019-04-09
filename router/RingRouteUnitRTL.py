@@ -48,13 +48,13 @@ class RingRouteUnitRTL( Component ):
         s.give[i].rdy = 0
 
       if s.get.rdy:
-        if s.pos.pos == s.get.msg.dst_x: 
+        if s.pos.pos == s.get.msg.dst: 
           s.out_dir = SELF
-        elif s.get.msg.dst_x < s.pos.pos and \
-             s.pos.pos - s.get.msg.dst_x <= num_routers/2:
+        elif s.get.msg.dst < s.pos.pos and \
+             s.pos.pos - s.get.msg.dst <= num_routers/2:
           s.out_dir = LEFT
-        elif s.get.msg.dst_x > s.pos.pos and \
-             s.get.msg.dst_x - s.pos.pos > num_routers/2:
+        elif s.get.msg.dst > s.pos.pos and \
+             s.get.msg.dst - s.pos.pos > num_routers/2:
           s.out_dir = LEFT
         else:
           s.out_dir = RIGHT

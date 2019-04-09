@@ -39,21 +39,25 @@ def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
   pkt.payload = payload
   return pkt
 
-# TODO: flitisize packet into multiple flits 
-#def flitisize():
-#  pass
+class BasePacket( object ):
 
-#-------------------------------------------------------------------------
-# Dynamically generated Packet type
-#-------------------------------------------------------------------------
-
-_packet_dic = dict()
-_packet_template = """
-class Packet_{src_pos}_{dst_pos}_{opaque_nbits}_{payload_nbits}( object ):
-
-  def __init__( s, src=0, dst=0, opaque=0, payload=0 ):
-    pass
+  def __init__( s ):
+    
+    s.src     = Bits4 ( 0 )
+    s.dst     = Bits4 ( 0 ) 
+    s.opaque  = Bits4 ( 0 ) 
+    s.payload = Bits16( 0 )
 
   def __str__( s ):
-    pass
-"""
+    return "({},{})>({},{}):{}:{}".format(
+      s.src, s.dst, s.opaque, s.payload ) 
+
+def mk_base_pkt( src, dst, opaque, payload ):
+  pkt = BasePacket()
+  pkt.src     = src
+  pkt.dst     = dst
+  pkt.opaque  = opaque
+  pkt.payload = payload
+  return pkt
+
+
