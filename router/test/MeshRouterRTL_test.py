@@ -53,7 +53,8 @@ def run_vector_test( model, test_vectors, mesh_wid=4, mesh_ht=4,
     for i in range( model.num_outports ):
       assert model.send[i].en == (test_vector[4][i] != 'x')
       if model.send[i].en == 1:
-        assert model.send[i].msg.payload == test_vector[4][i]
+        pkt = model.send[i].msg.payload
+        assert pkt.payload == test_vector[4][i]
   
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
@@ -77,7 +78,8 @@ def test_vector_Router_4_4X():
   ]
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = MeshRouterRTL( Packet, MeshPos, RouteUnitType )
+  MeshFlit = mk_mesh_flit( 1, mesh_wid, mesh_ht )
+  model = MeshRouterRTL( MeshFlit, MeshPos, RouteUnitType )
 
   run_vector_test( model, inputs_buffer, mesh_wid, mesh_ht, pos_x, pos_y )
 

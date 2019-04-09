@@ -45,7 +45,8 @@ def run_vector_test( model, test_vectors, num_routers ):
 
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
-      assert model.send[test_vector[2]].msg.payload == test_vector[3]
+      pkt = model.send[test_vector[2]].msg.payload
+      assert pkt.payload == test_vector[3]
      
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()

@@ -8,8 +8,8 @@
 
 from pymtl                       import *
 from pclib.test                  import TestVectorSimulator
-from ocn_pclib.ifcs.Packet       import Packet, mk_pkt
-from ocn_pclib.ifcs.Flit         import Flit, mk_flit
+from ocn_pclib.ifcs.Packet       import *
+from ocn_pclib.ifcs.Flit         import *
 from ocn_pclib.ifcs.Position     import mk_mesh_pos
 from router.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL 
 
@@ -61,7 +61,7 @@ def test_route_unit():
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
   print MeshPos
-  model = DORYMeshRouteUnitRTL( Packet, MeshPos )
+  model = DORYMeshRouteUnitRTL( Packet, MeshPos, 5 )
 
   # Test for Y-DOR routing algorithm
 

@@ -12,7 +12,7 @@ from router_utils import *
 
 class DORYMeshRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType, num_outports ):
+  def construct( s, PacketType, PositionType, num_outports = 5 ):
 
     # Constants 
 
