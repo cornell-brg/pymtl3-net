@@ -17,25 +17,16 @@ class BfNetworkRTL( Network ):
 
     # Constants
 
-    n_rows            = k_ary ** ( n_fly - 1 )
-    s.num_routers     = n_fly * ( n_rows )
-    num_terminals   = k_ary * n_rows
-    num_channels      = ( n_fly - 1 ) * ( n_rows ) * k_ary
+    n_rows        = k_ary ** ( n_fly - 1 )
+    s.num_routers = n_fly * ( n_rows )
+    num_terminals = k_ary * n_rows
+    num_channels  = ( n_fly - 1 ) * ( n_rows ) * k_ary
 
-    # Interface
+    super( BfNetworkRTL, s ).construct( PacketType, PositionType,
+      BfRouterRTL, ChannelRTL, SendIfcRTL, RecvIfcRTL, s.num_routers,
+      num_terminals, num_channels, chl_lat )
 
-    s.recv = [ RecvIfcRTL(PacketType) for _ in range(num_terminals)]
-    s.send = [ SendIfcRTL(PacketType) for _ in range(num_terminals)]
-
-    # Components
-
-    s.routers  = [ BfRouterRTL( PacketType, PositionType, k_ary = k_ary )
-                     for i in range( s.num_routers ) ]
-    s.channels = [ ChannelRTL( PacketType, latency = chl_lat)
-                     for _ in range( num_channels ) ]
-
-
-    # Connect s.routers together in Mesh
+    # Connect s.routers together in Butterfly
 
     chl_id = 0
     terminal_id_recv = 0

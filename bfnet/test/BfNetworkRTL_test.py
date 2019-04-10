@@ -59,6 +59,8 @@ def test_vector_Bf2( dump_vcd, test_verilog ):
   model = BfNetworkRTL( Packet, BfPos, k_ary, n_fly, 0 )
 
   for r in range (num_routers):
+    path_k = "top.routers[" + str(r) + "].elaborate.k_ary"
+    model.set_parameter(path_k, k_ary)
     for i in range (k_ary):
       path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
       path_nf = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.n_fly"
@@ -98,6 +100,8 @@ def test_vector_Bf4( dump_vcd, test_verilog ):
   model = BfNetworkRTL( Packet, BfPos, k_ary, n_fly, 0 )
 
   for r in range (num_routers):
+    path_k = "top.routers[" + str(r) + "].elaborate.k_ary"
+    model.set_parameter(path_k, k_ary)
     for i in range (k_ary):
       path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
       path_nf = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.n_fly"
