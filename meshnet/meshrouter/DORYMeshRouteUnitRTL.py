@@ -1,21 +1,22 @@
 #=========================================================================
-# DTRButterflyRouteUnitRTL.py
+# DORYRouteUnitRTL.py
 #=========================================================================
-# A butterfly route unit with get/give interface.
+# A DOR route unit with get/give interface.
 #
 # Author : Yanghui Ou, Cheng Tan
-#   Date : April 6, 2019
+#   Date : Mar 25, 2019
 
-from pymtl import *
-from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
+from pymtl               import *
+from pclib.ifcs          import GetIfcRTL, GiveIfcRTL
+from router.router_utils import *
 
-class DTRButterflyRouteUnitRTL( Component ):
+class DORYMeshRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType, num_outports, n_fly = 3 ):
+  def construct( s, PacketType, PositionType, num_outports = 5 ):
 
     # Constants 
+
     s.num_outports = num_outports
-    k_ary = num_outports
 
     # Interface
 
@@ -43,11 +44,16 @@ class DTRButterflyRouteUnitRTL( Component ):
         s.give[i].rdy = 0
 
       if s.get.rdy:
-        # TODO: or embed this into the pos
-        mod = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1)))
-        div = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1))-1)
-
-        s.out_dir = ((int)(s.get.msg.dst_x) % mod) / div
+        if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
+          s.out_dir = SELF
+        elif s.get.msg.dst_y < s.pos.pos_y:
+          s.out_dir = NORTH
+        elif s.get.msg.dst_y > s.pos.pos_y:
+          s.out_dir = SOUTH
+        elif s.get.msg.dst_x < s.pos.pos_x:
+          s.out_dir = WEST
+        else:
+          s.out_dir = EAST
         s.give[ s.out_dir ].rdy = 1
 
     @s.update

@@ -1,14 +1,14 @@
 #=========================================================================
-# DORXMeshRouteUnitRTL.py
+# DORXRouteUnitRTL.py
 #=========================================================================
 # A DOR route unit with get/give interface.
 #
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 25, 2019
 
-from pymtl        import *
-from pclib.ifcs   import GetIfcRTL, GiveIfcRTL
-from router_utils import *
+from pymtl               import *
+from pclib.ifcs          import GetIfcRTL, GiveIfcRTL
+from router.router_utils import *
 
 class DORXMeshRouteUnitRTL( Component ):
 

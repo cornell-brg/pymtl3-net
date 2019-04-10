@@ -124,7 +124,7 @@ def mk_ring_pos( num_nodes ):
 # Static ButterflyPosition
 #-------------------------------------------------------------------------
 
-class ButterflyPosition( object ):
+class BfPosition( object ):
 
   def __init__( s, num_nodes=2 ):
     
@@ -139,9 +139,9 @@ class ButterflyPosition( object ):
 # Dynamically generated ButterflyPosition
 #-------------------------------------------------------------------------
 
-_butterfly_pos_dict = dict()
-_butterfly_pos_template = """
-class ButterflyPosition_{num_nodes}( object ):
+_bf_pos_dict = dict()
+_bf_pos_template = """
+class BfPosition_{num_nodes}( object ):
   
   def __init__( s, pos=0 ):
 
@@ -152,17 +152,17 @@ class ButterflyPosition_{num_nodes}( object ):
   def __str__( s ):
     return "{{}}".format( int( s.pos ) )
 
-_butterfly_pos_dict[ {num_nodes} ] = ButterflyPosition_{num_nodes}
+_bf_pos_dict[ {num_nodes} ] = BfPosition_{num_nodes}
 """
 
-def mk_butterfly_pos( num_nodes ):
-  if (num_nodes) in _butterfly_pos_dict:
-    return _butterfly_pos_dict[ (num_nodes) ]
+def mk_bf_pos( num_nodes ):
+  if (num_nodes) in _bf_pos_dict:
+    return _bf_pos_dict[ (num_nodes) ]
   else:
     exec py.code.Source( 
-      _butterfly_pos_template.format( num_nodes = num_nodes ) 
+      _bf_pos_template.format( num_nodes = num_nodes ) 
     ).compile() in globals()
-    return _butterfly_pos_dict[ num_nodes ]
+    return _bf_pos_dict[ num_nodes ]
 
 
 #-------------------------------------------------------------------------

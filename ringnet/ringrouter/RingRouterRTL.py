@@ -12,9 +12,11 @@ from router.InputUnitRTL  import InputUnitRTL
 from router.SwitchUnitRTL import SwitchUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 
+from RingRouteUnitRTL     import RingRouteUnitRTL
+
 class RingRouterRTL( Router ):
 
-  def construct( s, PacketType, PositionType, RouteUnitType ):
+  def construct( s, PacketType, PositionType, RouteUnitType = RingRouteUnitRTL ):
     
     super( RingRouterRTL, s ).construct(
       PacketType, PositionType, 3, 3, InputUnitRTL, RouteUnitType, 

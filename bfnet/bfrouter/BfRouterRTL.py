@@ -1,5 +1,5 @@
 #=========================================================================
-# ButterflyRouteRTL.py
+# BfRouteRTL.py
 #=========================================================================
 # Butterfly network-on-chip router
 #
@@ -11,11 +11,13 @@ from router.Router        import Router
 from router.InputUnitRTL  import InputUnitRTL
 from router.SwitchUnitRTL import SwitchUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
+from DTRBfRouteUnitRTL    import DTRBfRouteUnitRTL
 
-class ButterflyRouterRTL( Router ):
+class BfRouterRTL( Router ):
 
-  def construct( s, PacketType, PositionType, RouteUnitType, k_ary ):
+  def construct( s, PacketType, PositionType, RouteUnitType = DTRBfRouteUnitRTL,\
+                 k_ary = 2 ):
     
-    super( ButterflyRouterRTL, s ).construct(
+    super( BfRouterRTL, s ).construct(
       PacketType, PositionType, k_ary, k_ary, InputUnitRTL, RouteUnitType, 
       SwitchUnitRTL, OutputUnitRTL )
