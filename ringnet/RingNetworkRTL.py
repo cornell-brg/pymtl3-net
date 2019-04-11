@@ -9,6 +9,7 @@
 from pymtl                            import *
 from network.Network                  import Network
 from pclib.ifcs.SendRecvIfc           import *
+from ringnet.Direction                import *
 from ringnet.ringrouter.RingRouterRTL import RingRouterRTL
 from channel.ChannelRTL               import ChannelRTL
 
@@ -16,10 +17,6 @@ class RingNetworkRTL( Network ):
   def construct( s, PacketType, PositionType, num_routers=4, chl_lat=0 ):
 
     # Constants
-
-    LEFT  = 0
-    RIGHT = 1
-    SELF  = 2
 
     s.num_routers = num_routers
     num_channels  = num_routers * 2

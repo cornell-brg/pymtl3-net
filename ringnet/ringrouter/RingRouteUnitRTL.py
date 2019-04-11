@@ -6,8 +6,9 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : April 6, 2019
 
-from pymtl import *
-from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
+from pymtl             import *
+from ringnet.Direction import *
+from ocn_pclib.ifcs    import GetIfcRTL, GiveIfcRTL
 
 class RingRouteUnitRTL( Component ):
 

@@ -14,6 +14,7 @@ class DTRBfRouteUnitRTL( Component ):
   def construct( s, PacketType, PositionType, num_outports, n_fly = 3 ):
 
     # Constants 
+
     s.num_outports = num_outports
     k_ary = num_outports
 

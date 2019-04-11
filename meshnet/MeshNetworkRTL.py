@@ -9,7 +9,7 @@
 from pymtl                            import *
 from network.Network                  import Network
 from pclib.ifcs.SendRecvIfc           import *
-from router.router_utils              import *
+from Direction                        import *
 from channel.ChannelRTL               import ChannelRTL
 from meshnet.meshrouter.MeshRouterRTL import MeshRouterRTL
 
