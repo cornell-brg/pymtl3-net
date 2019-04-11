@@ -60,4 +60,31 @@ def mk_base_pkt( src, dst, opaque, payload ):
   pkt.payload = payload
   return pkt
 
+class BfPacket( object ):
+
+#  def __init__( s, k_ary, n_fly ):
+  def __init__( s ):
+    
+    s.src     = Bits4 ( 0 )
+    s.dst     = [ Bits4 ( 0 ) for i in range( 4 ) ]
+    s.opaque  = Bits4 ( 0 ) 
+    s.payload = Bits16( 0 )
+
+  def __str__( s ):
+    return "({})>({}):{}:{}".format(
+      s.src, s.dst, s.opaque, s.payload ) 
+
+def mk_bf_pkt( src, dst, k_ary, n_fly, opaque, payload ):
+#  pkt = BfPacket( k_ary, n_fly )
+  pkt = BfPacket()
+  pkt.src = src
+  for i in range( n_fly ):
+    if i != n_fly - 1:
+      pkt.dst[i] = dst / k_ary
+    else:
+      pkt.dst[i] = dst % k_ary
+  pkt.opaque  = opaque
+  pkt.payload = payload
+  return pkt
+
 

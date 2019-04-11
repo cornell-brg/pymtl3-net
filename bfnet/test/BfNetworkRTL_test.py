@@ -13,7 +13,7 @@ from ocn_pclib.rtl.queues    import NormalQueueRTL
 from pclib.test.test_srcs    import TestSrcRTL
 from pclib.test.test_sinks   import TestSinkRTL
 from pclib.test              import TestVectorSimulator
-from ocn_pclib.ifcs.Packet   import Packet, mk_pkt
+from ocn_pclib.ifcs.Packet   import *
 from ocn_pclib.ifcs.Position import *
 from Configs                 import configure_network
 
@@ -27,11 +27,12 @@ def run_vector_test( model, test_vectors, k_ary, n_fly ):
 
     num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
     num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
-    BfPos  = mk_bf_pos( num_routers )
+    r_rows        = k_ary ** ( n_fly - 1 )
+    BfPos         = mk_bf_pos( r_rows, n_fly )
 
     if test_vector[0] != 'x':
       terminal_id = test_vector[0]
-      pkt = mk_pkt( terminal_id, 0, test_vector[1][0], 0, 1, test_vector[1][1])
+      pkt = mk_bf_pkt( terminal_id, test_vector[1][0], k_ary, n_fly, 1, test_vector[1][1])
     
       # Enable the network interface on specific router
       for i in range (num_terminals):
@@ -54,9 +55,10 @@ def test_vector_Bf2( dump_vcd, test_verilog ):
 
   k_ary = 2
   n_fly = 1
-  num_routers  = n_fly * ( k_ary ** ( n_fly - 1 ) )
-  BfPos = mk_bf_pos( num_routers )
-  model = BfNetworkRTL( Packet, BfPos, k_ary, n_fly, 0 )
+  num_routers = n_fly * ( k_ary ** ( n_fly - 1 ) )
+  r_rows      = k_ary ** ( n_fly - 1 )
+  BfPos = mk_bf_pos( r_rows, n_fly )
+  model = BfNetworkRTL( BfPacket, BfPos, k_ary, n_fly, 0 )
 
   for r in range (num_routers):
     path_k = "top.routers[" + str(r) + "].elaborate.k_ary"
@@ -94,10 +96,10 @@ def test_vector_Bf4( dump_vcd, test_verilog ):
   k_ary = 2
   n_fly = 2
   num_routers  = n_fly * ( k_ary ** ( n_fly - 1 ) )
-  print 'num_routers: ', num_routers
-  BfPos = mk_bf_pos( num_routers )
+  r_rows = k_ary ** ( n_fly - 1 )
+  BfPos = mk_bf_pos( r_rows, n_fly )
 
-  model = BfNetworkRTL( Packet, BfPos, k_ary, n_fly, 0 )
+  model = BfNetworkRTL( BfPacket, BfPos, k_ary, n_fly, 0 )
 
   for r in range (num_routers):
     path_k = "top.routers[" + str(r) + "].elaborate.k_ary"
@@ -134,8 +136,9 @@ class TestHarness( Component ):
                  src_initial, src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    BfPos = mk_bf_pos( num_routers )
-    s.dut = BfNetworkRTL( MsgType, BfPos, num_routers, 0)
+    r_rows = k_ary ** ( n_fly - 1 )
+    BfPos  = mk_bf_pos( r_rows, n_fly )
+    s.dut  = BfNetworkRTL( MsgType, BfPos, num_routers, 0)
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_routers ) ]
@@ -193,10 +196,10 @@ def run_sim( test_harness, max_cycles=100 ):
 
 
 #-------------------------------------------------------------------------
-# Test cases (specific for 4x4 mesh)
+# Test cases (specific for 4x4 butterfly)
 #-------------------------------------------------------------------------
 
-def test_srcsink_torus4x4():
+def test_srcsink_bf4x4():
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
@@ -222,11 +225,11 @@ def test_srcsink_torus4x4():
   num_routers = 16
   
   for (src, dst, payload) in test_msgs:
-    pkt = mk_pkt( src, 0, dst, 0, 1, payload )
+    pkt = mk_bf_pkt( src, dst, 4, 4, 1, payload )
     src_packets [src].append( pkt )
     sink_packets[dst].append( pkt )
 
-  th = TestHarness( Packet, num_routers, src_packets, sink_packets, 
+  th = TestHarness( BfPacket, num_routers, src_packets, sink_packets, 
                     0, 0, 0, 0, arrival_pipes )
 
   num_inports = 3 

@@ -44,11 +44,12 @@ class DTRBfRouteUnitRTL( Component ):
         s.give[i].rdy = 0
 
       if s.get.rdy:
-        # TODO: or embed this into the pos
-        mod = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1)))
-        div = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1))-1)
-
-        s.out_dir = ((int)(s.get.msg.dst_x) % mod) / div
+        # TODO: or embed this into the pos/packet
+#        mod = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1)))
+#        div = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1))-1)
+#        s.out_dir = ((int)(s.get.msg.dst_x) % mod) / div
+        print s.get.msg
+        s.out_dir = s.get.msg.dst[ s.pos.stage ]
         s.give[ s.out_dir ].rdy = 1
 
     @s.update

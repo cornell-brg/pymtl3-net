@@ -141,28 +141,30 @@ class BfPosition( object ):
 
 _bf_pos_dict = dict()
 _bf_pos_template = """
-class BfPosition_{num_nodes}( object ):
+class BfPosition_R{row}_N{fly}( object ):
   
-  def __init__( s, pos=0 ):
+  def __init__( s, r = 0, n = 0 ):
 
-    Type = mk_bits( clog2( {num_nodes} ) )
+    RType = mk_bits( clog2( {row} ) )
+    NType = mk_bits( clog2( {fly} ) )
 
-    s.pos = Type( pos )
+    s.row   = RType( r )
+    s.stage = NType( n )
 
   def __str__( s ):
-    return "{{}}".format( int( s.pos ) )
+    return "{{}},{{}}".format( int( s.row ), int( s.stage ) )
 
-_bf_pos_dict[ {num_nodes} ] = BfPosition_{num_nodes}
+_bf_pos_dict[ ( {row}, {fly} ) ] = BfPosition_R{row}_N{fly}
 """
 
-def mk_bf_pos( num_nodes ):
-  if (num_nodes) in _bf_pos_dict:
-    return _bf_pos_dict[ (num_nodes) ]
+def mk_bf_pos( row, fly ):
+  if (row, fly) in _bf_pos_dict:
+    return _bf_pos_dict[ ( row, fly ) ]
   else:
     exec py.code.Source( 
-      _bf_pos_template.format( num_nodes = num_nodes ) 
+      _bf_pos_template.format( row = row, fly = fly ) 
     ).compile() in globals()
-    return _bf_pos_dict[ num_nodes ]
+    return _bf_pos_dict[ ( row, fly ) ]
 
 
 #-------------------------------------------------------------------------

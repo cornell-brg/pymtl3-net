@@ -17,10 +17,10 @@ class BfNetworkRTL( Network ):
 
     # Constants
 
-    n_rows        = k_ary ** ( n_fly - 1 )
-    s.num_routers = n_fly * ( n_rows )
-    num_terminals = k_ary * n_rows
-    num_channels  = ( n_fly - 1 ) * ( n_rows ) * k_ary
+    r_rows        = k_ary ** ( n_fly - 1 )
+    s.num_routers = n_fly * ( r_rows )
+    num_terminals = k_ary ** n_fly
+    num_channels  = ( n_fly - 1 ) * ( r_rows ) * k_ary
 
     super( BfNetworkRTL, s ).construct( PacketType, PositionType,
       BfRouterRTL, ChannelRTL, SendIfcRTL, RecvIfcRTL, s.num_routers,
@@ -32,23 +32,23 @@ class BfNetworkRTL( Network ):
     terminal_id_recv = 0
     terminal_id_send = 0
     for i in range( s.num_routers ):
-      if i < s.num_routers - n_rows:
+      if i < s.num_routers - r_rows:
         for j in range( k_ary ):
           s.connect( s.routers[i].send[j],    s.channels[chl_id].recv       )
 
           # FIXME: Utilize bit to index the specific router.
           s.connect( s.channels[chl_id].send, 
-                     s.routers[(i/n_rows+1)*n_rows+(i%k_ary+j
-                         *(n_rows/k_ary))%n_rows].recv[i%k_ary] )
+                     s.routers[(i/r_rows+1)*r_rows+(i%k_ary+j
+                         *(r_rows/k_ary))%r_rows].recv[i%k_ary] )
           chl_id += 1
 
       # Connect the ports with Network Interfaces
-      if i < n_rows:
+      if i < r_rows:
         for j in range( k_ary ):
           s.connect(s.recv[terminal_id_recv], s.routers[i].recv[j])
           terminal_id_recv += 1
 
-      if i >= s.num_routers - n_rows:
+      if i >= s.num_routers - r_rows:
         for j in range( k_ary ):
           s.connect(s.send[terminal_id_send], s.routers[i].send[j])
           terminal_id_send += 1
@@ -56,5 +56,6 @@ class BfNetworkRTL( Network ):
     # FIXME: unable to connect a struct to a port.
     @s.update
     def up_pos():
-      for r in range( s.num_routers ):
-        s.routers[r].pos = PositionType( r )
+      for n in range( n_fly ):
+        for r in range( r_rows ):
+          s.routers[r_rows * n + r].pos = PositionType( r, n )
