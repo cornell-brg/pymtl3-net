@@ -76,7 +76,7 @@ def test_vector_Router_4_4X():
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
   MeshFlit = mk_mesh_flit( 1, mesh_wid, mesh_ht )
-  model = MeshRouterRTL( MeshFlit, MeshPos, RouteUnitType )
+  model = MeshRouterRTL( MeshFlit, MeshPos, RouteUnitType = RouteUnitType )
 
   run_vector_test( model, inputs_buffer, mesh_wid, mesh_ht, pos_x, pos_y )
 
@@ -91,7 +91,7 @@ class TestHarness( Component ):
                  arrival_time=None ):
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = MeshRouterRTL( MsgType, MeshPos, DORYMeshRouteUnitRTL )
+    s.dut = MeshRouterRTL( MsgType, MeshPos, RouteUnitType = DORYMeshRouteUnitRTL )
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_inports ) ]

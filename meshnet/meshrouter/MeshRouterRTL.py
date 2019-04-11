@@ -16,9 +16,10 @@ from DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 
 class MeshRouterRTL( Router ):
 
-  def construct( s, PacketType, PositionType, 
-                 RouteUnitType = DORYMeshRouteUnitRTL ):
+  def construct( s, PacketType, PositionType, InputUnitType = InputUnitRTL,
+                 RouteUnitType = DORYMeshRouteUnitRTL, 
+                 SwitchUnitType = SwitchUnitRTL ):
 
     super( MeshRouterRTL, s ).construct(
-      PacketType, PositionType, 5, 5, InputUnitRTL, RouteUnitType, 
-      SwitchUnitRTL, OutputUnitRTL )
+      PacketType, PositionType, 5, 5, InputUnitType, RouteUnitType, 
+      SwitchUnitType, OutputUnitRTL )

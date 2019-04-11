@@ -15,9 +15,11 @@ from DTRBfRouteUnitRTL    import DTRBfRouteUnitRTL
 
 class BfRouterRTL( Router ):
 
-  def construct( s, PacketType, PositionType, RouteUnitType = DTRBfRouteUnitRTL,\
-                 k_ary = 2 ):
+  def construct( s, PacketType, PositionType, 
+                 k_ary = 2, InputUnitType = InputUnitRTL, 
+                 RouteUnitType = DTRBfRouteUnitRTL,
+                 SwitchUnitType = SwitchUnitRTL ):
     
     super( BfRouterRTL, s ).construct(
-      PacketType, PositionType, k_ary, k_ary, InputUnitRTL, RouteUnitType, 
-      SwitchUnitRTL, OutputUnitRTL )
+      PacketType, PositionType, k_ary, k_ary, InputUnitType, RouteUnitType,
+      SwitchUnitType, OutputUnitRTL )

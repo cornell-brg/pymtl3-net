@@ -16,8 +16,10 @@ from RingRouteUnitRTL     import RingRouteUnitRTL
 
 class RingRouterRTL( Router ):
 
-  def construct( s, PacketType, PositionType, RouteUnitType = RingRouteUnitRTL ):
+  def construct( s, PacketType, PositionType, InputUnitType = InputUnitRTL,
+                 RouteUnitType = RingRouteUnitRTL,
+                 SwitchUnitType = SwitchUnitRTL ):
     
     super( RingRouterRTL, s ).construct(
-      PacketType, PositionType, 3, 3, InputUnitRTL, RouteUnitType, 
-      SwitchUnitRTL, OutputUnitRTL )
+      PacketType, PositionType, 3, 3, InputUnitType, RouteUnitType, 
+      SwitchUnitType, OutputUnitRTL )
