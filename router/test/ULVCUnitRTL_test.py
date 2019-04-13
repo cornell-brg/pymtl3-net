@@ -1,19 +1,21 @@
 #=========================================================================
-# Tests for VCUnitRTL 
+# Tests for ULVCUnitGiveRTL 
 #=========================================================================
 #
-# Author: Cheng Tan
-#   Date: April 10, 2019
+# Author: Yanghui Ou
+#   Date: Mar 24, 2019
 
 import pytest
 
-from pymtl                   import *
-from pymtl.passes.PassGroups import SimpleSim
-from pclib.test.test_srcs    import TestSrcRTL
-from pclib.test.test_sinks   import TestSinkRTL
-from pclib.test              import TestVectorSimulator
-from pclib.rtl.queues        import NormalQueueRTL
-from router.VCUnitRTL        import VCUnitRTL 
+from pymtl                    import *
+from pymtl.passes.PassGroups  import SimpleSim
+from pclib.test.test_srcs     import TestSrcRTL
+from pclib.test.test_sinks    import TestSinkRTL
+from pclib.test               import TestVectorSimulator
+from pclib.rtl.queues         import NormalQueueRTL
+from router.InputUnitRTL      import InputUnitRTL 
+from router.ULVCUnitRTL       import ULVCUnitRTL 
+from ocn_pclib.ifcs.Packet    import *
 
 #-------------------------------------------------------------------------
 # TestVectorSimulator test
@@ -24,14 +26,15 @@ def run_tv_test( dut, test_vectors ):
   # Define input/output functions
 
   def tv_in( dut, tv ):
+    pkt = mk_pkt( 0, 0, 1, 1, tv[3], tv[2] )
     dut.recv.en  = tv[0]
-    dut.recv.msg = tv[2]
-    dut.give.en  = tv[3]
+    dut.recv.msg = pkt
+    dut.give.en  = tv[4]
 
   def tv_out( dut, tv ):
     if tv[1] != '?': assert dut.recv.rdy == tv[1]
-    if tv[4] != '?': assert dut.give.rdy == tv[4]
-    if tv[5] != '?': assert dut.give.msg == tv[5]
+    if tv[5] != '?': assert dut.give.rdy == tv[5]
+    if tv[6] != '?': assert dut.give.msg.payload == tv[6]
 
   # Run the test
 
@@ -42,18 +45,21 @@ def test_pipe_Bits():
 
   B1  = mk_bits(1)
   B32 = mk_bits(32)
-  run_tv_test( VCUnitRTL( Bits32 ), [
-    #  enq.en  enq.rdy enq.msg   deq.en  deq.rdy deq.msg
-    [  B1(1),  B1(1),  B32(123), B1(0),  B1(0),    '?'    ],
-    [  B1(1),  B1(1),  B32(345), B1(0),  B1(1),  B32(123) ],
-    [  B1(0),  B1(0),  B32(567), B1(0),  B1(1),  B32(123) ],
-    [  B1(0),  B1(0),  B32(567), B1(1),  B1(1),  B32(123) ],
-    [  B1(0),  B1(1),  B32(567), B1(1),  B1(1),  B32(345) ],
-    [  B1(1),  B1(1),  B32(567), B1(0),  B1(0),    '?'    ],
-    [  B1(1),  B1(1),  B32(0  ), B1(1),  B1(1),  B32(567) ],
-    [  B1(1),  B1(1),  B32(1  ), B1(1),  B1(1),  B32(0  ) ],
-    [  B1(1),  B1(1),  B32(2  ), B1(1),  B1(1),  B32(1  ) ],
-    [  B1(0),  B1(1),  B32(2  ), B1(1),  B1(1),  B32(2  ) ],
+  dut = ULVCUnitRTL( Packet )
+  dut.set_parameter("top.upper.elaborate.num_entries", 2)
+  dut.set_parameter("top.lower.elaborate.num_entries", 2)
+  run_tv_test( dut , [
+    # recv.en recv.rdy recv.msg opaque give.en give.rdy give.msg
+    [  B1(1),  B1(1),  B32(1), B1(0), B1(0),  B1(0),    '?'    ],
+    [  B1(1),  B1(1),  B32(2), B1(1), B1(0),  B1(1),    '?'    ],
+    [  B1(1),  B1(1),  B32(3), B1(0), B1(0),  B1(1),    '?'    ],
+    [  B1(1),  B1(1),  B32(4), B1(1), B1(1),  B1(1),  B32( 1 ) ],
+    [  B1(0),  B1(1),  B32(5), B1(0), B1(1),  B1(1),  B32( 2 ) ],
+    [  B1(1),  B1(1),  B32(6), B1(1), B1(1),  B1(1),  B32( 3 ) ],
+    [  B1(1),  B1(1),  B32(7), B1(0), B1(1),  B1(1),  B32( 4 ) ],
+    [  B1(1),  B1(1),  B32(8), B1(1), B1(1),  B1(1),  B32( 7 ) ],
+    [  B1(1),  B1(1),  B32(9), B1(0), B1(1),  B1(1),  B32( 6 ) ],
+    [  B1(0),  B1(1),  B32(0), B1(1), B1(1),  B1(1),  B32( 9 ) ],
 ] )
 
 #-------------------------------------------------------------------------
@@ -68,7 +74,7 @@ class TestHarness( Component ):
 
     s.src  = TestSrcRTL   ( MsgType, src_msgs,  src_initial,  src_interval  )
     s.sink = TestSinkRTL  ( MsgType, sink_msgs, sink_initial, sink_interval )
-    s.dut  = VCUnitRTL ( MsgType  )
+    s.dut  = InputUnitRTL ( MsgType  )
 
     # Connections
     s.connect( s.src.send,     s.dut.recv  )
@@ -136,4 +142,4 @@ arrival_pipe   = [ 2, 3, 4, 5 ]
 def test_normal2_simple():
   th = TestHarness( Bits16, test_msgs, test_msgs, 0, 0, 0, 0,
                     arrival_pipe )
-  run_sim( th )
+  #run_sim( th )
