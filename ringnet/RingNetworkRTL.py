@@ -6,12 +6,12 @@
 # Author : Cheng Tan
 #   Date : April 6, 2019
 
-from pymtl                            import *
-from network.Network                  import Network
-from pclib.ifcs.SendRecvIfc           import *
-from ringnet.Direction                import *
-from ringnet.ringrouter.RingRouterRTL import RingRouterRTL
-from channel.ChannelRTL               import ChannelRTL
+from pymtl                  import *
+from network.Network        import Network
+from pclib.ifcs.SendRecvIfc import *
+from Direction              import *
+from RingRouterRTL          import RingRouterRTL
+from channel.ChannelRTL     import ChannelRTL
 
 class RingNetworkRTL( Network ):
   def construct( s, PacketType, PositionType, num_routers=4, chl_lat=0 ):

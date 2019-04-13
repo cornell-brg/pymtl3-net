@@ -6,16 +6,16 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 10, 2019
 
-from pymtl                                   import *
-from pclib.test.test_srcs                    import TestSrcRTL
-from pclib.test.test_sinks                   import TestSinkRTL
-from ocn_pclib.ifcs.Position                 import *
-from ocn_pclib.ifcs.Packet                   import * 
-from ocn_pclib.ifcs.Flit                     import *
-from pclib.test                              import TestVectorSimulator
-from meshnet.meshrouter.MeshRouterRTL        import MeshRouterRTL
-from meshnet.meshrouter.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
-from meshnet.meshrouter.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from pymtl                        import *
+from pclib.test.test_srcs         import TestSrcRTL
+from pclib.test.test_sinks        import TestSinkRTL
+from ocn_pclib.ifcs.Position      import *
+from ocn_pclib.ifcs.Packet        import * 
+from ocn_pclib.ifcs.Flit          import *
+from pclib.test                   import TestVectorSimulator
+from meshnet.MeshRouterRTL        import MeshRouterRTL
+from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector

@@ -7,16 +7,16 @@
 #   Date : Mar 20, 2019
 
 import tempfile
-from pymtl                    import *
-from torusnet.TorusNetworkRTL import TorusNetworkRTL
-from ocn_pclib.rtl.queues     import NormalQueueRTL
-from pclib.test.test_srcs     import TestSrcRTL
-from pclib.test.test_sinks    import TestSinkRTL
-from pclib.test               import TestVectorSimulator
-from ocn_pclib.ifcs.Packet    import Packet, mk_pkt
-from ocn_pclib.ifcs.Position  import *
-from Configs                  import configure_network
-from torusnet.torusrouter.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
+from pymtl                          import *
+from torusnet.TorusNetworkRTL       import TorusNetworkRTL
+from ocn_pclib.rtl.queues           import NormalQueueRTL
+from pclib.test.test_srcs           import TestSrcRTL
+from pclib.test.test_sinks          import TestSinkRTL
+from pclib.test                     import TestVectorSimulator
+from ocn_pclib.ifcs.Packet          import Packet, mk_pkt
+from ocn_pclib.ifcs.Position        import *
+from Configs                        import configure_network
+from torusnet.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector

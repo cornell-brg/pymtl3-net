@@ -7,16 +7,16 @@
 #   Date : Mar 20, 2019
 
 import tempfile
-from pymtl                                   import *
-from meshnet.MeshNetworkRTL                  import MeshNetworkRTL
-from ocn_pclib.rtl.queues                    import NormalQueueRTL
-from pclib.test.test_srcs                    import TestSrcRTL
-from pclib.test.test_sinks                   import TestSinkRTL
-from pclib.test                              import TestVectorSimulator
-from ocn_pclib.ifcs.Packet                   import Packet, mk_pkt
-from ocn_pclib.ifcs.Position                 import *
-from meshnet.meshrouter.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
-from meshnet.meshrouter.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from pymtl                        import *
+from meshnet.MeshNetworkRTL       import MeshNetworkRTL
+from ocn_pclib.rtl.queues         import NormalQueueRTL
+from pclib.test.test_srcs         import TestSrcRTL
+from pclib.test.test_sinks        import TestSinkRTL
+from pclib.test                   import TestVectorSimulator
+from ocn_pclib.ifcs.Packet        import Packet, mk_pkt
+from ocn_pclib.ifcs.Position      import *
+from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector

@@ -1,27 +1,22 @@
 #=========================================================================
-# RingRouteUnitRTL.py
+# DORYRouteUnitRTL.py
 #=========================================================================
-# A ring route unit with get/give interface.
+# A DOR route unit with get/give interface.
 #
 # Author : Yanghui Ou, Cheng Tan
-#   Date : April 6, 2019
+#   Date : Mar 25, 2019
 
-from pymtl             import *
-from ringnet.Direction import *
-from ocn_pclib.ifcs    import GetIfcRTL, GiveIfcRTL
+from pymtl      import *
+from pclib.ifcs import GetIfcRTL, GiveIfcRTL
+from Direction  import *
 
-class RingRouteUnitRTL( Component ):
+class DORYMeshRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType, num_outports, num_routers=4 ):
+  def construct( s, PacketType, PositionType, num_outports = 5 ):
 
     # Constants 
-    s.num_outports = num_outports 
-    s.num_routers  = num_routers
 
-    # TODO: define thses constants else where?
-    LEFT  = 0
-    RIGHT = 1
-    SELF  = 2
+    s.num_outports = num_outports
 
     # Interface
 
@@ -49,16 +44,16 @@ class RingRouteUnitRTL( Component ):
         s.give[i].rdy = 0
 
       if s.get.rdy:
-        if s.pos.pos == s.get.msg.dst: 
+        if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
           s.out_dir = SELF
-        elif s.get.msg.dst < s.pos.pos and \
-             s.pos.pos - s.get.msg.dst <= num_routers/2:
-          s.out_dir = LEFT
-        elif s.get.msg.dst > s.pos.pos and \
-             s.get.msg.dst - s.pos.pos > num_routers/2:
-          s.out_dir = LEFT
+        elif s.get.msg.dst_y < s.pos.pos_y:
+          s.out_dir = NORTH
+        elif s.get.msg.dst_y > s.pos.pos_y:
+          s.out_dir = SOUTH
+        elif s.get.msg.dst_x < s.pos.pos_x:
+          s.out_dir = WEST
         else:
-          s.out_dir = RIGHT
+          s.out_dir = EAST
         s.give[ s.out_dir ].rdy = 1
 
     @s.update

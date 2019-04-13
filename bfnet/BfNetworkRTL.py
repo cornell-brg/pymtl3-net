@@ -6,11 +6,11 @@
 # Author : Cheng Tan
 #   Date : April 6, 2019
 
-from pymtl                      import *
-from network.Network            import Network
-from pclib.ifcs.SendRecvIfc     import *
-from channel.ChannelRTL         import ChannelRTL
-from bfnet.bfrouter.BfRouterRTL import BfRouterRTL
+from pymtl                  import *
+from network.Network        import Network
+from pclib.ifcs.SendRecvIfc import *
+from channel.ChannelRTL     import ChannelRTL
+from BfRouterRTL            import BfRouterRTL
 
 class BfNetworkRTL( Network ):
   def construct( s, PacketType, PositionType, k_ary, n_fly, chl_lat=0 ):

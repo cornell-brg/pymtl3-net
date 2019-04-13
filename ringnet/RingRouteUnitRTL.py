@@ -1,28 +1,33 @@
 #=========================================================================
-# DORXRouteUnitRTL.py
+# RingRouteUnitRTL.py
 #=========================================================================
-# A DOR route unit with get/give interface.
+# A ring route unit with get/give interface.
 #
 # Author : Yanghui Ou, Cheng Tan
-#   Date : Mar 25, 2019
+#   Date : April 6, 2019
 
-from pymtl             import *
-from pclib.ifcs        import GetIfcRTL, GiveIfcRTL
-from meshnet.Direction import *
+from pymtl          import *
+from Direction      import *
+from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
-class DORXMeshRouteUnitRTL( Component ):
+class RingRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType, num_outports ):
+  def construct( s, PacketType, PositionType, num_outports, num_routers=4 ):
 
     # Constants 
+    s.num_outports = num_outports 
+    s.num_routers  = num_routers
 
-    s.num_outports = num_outports
+    # TODO: define thses constants else where?
+    LEFT  = 0
+    RIGHT = 1
+    SELF  = 2
 
     # Interface
 
     s.get  = GetIfcRTL( PacketType )
-    s.give  = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
-    s.pos   = InPort( PositionType )
+    s.give = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
+    s.pos  = InPort( PositionType )
 
     # Componets
 
@@ -32,32 +37,32 @@ class DORXMeshRouteUnitRTL( Component ):
     # Connections
 
     for i in range( s.num_outports ):
-      s.connect( s.get.msg,    s.give[i].msg )
+      s.connect( s.get.msg,     s.give[i].msg )
       s.connect( s.give_ens[i], s.give[i].en  )
     
     # Routing logic
     @s.update
     def up_ru_routing():
-
+ 
       s.out_dir = 0
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
 
       if s.get.rdy:
-        if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
+        if s.pos.pos == s.get.msg.dst: 
           s.out_dir = SELF
-        elif s.get.msg.dst_x < s.pos.pos_x:
-          s.out_dir = WEST
-        elif s.get.msg.dst_x > s.pos.pos_x:
-          s.out_dir = EAST
-        elif s.get.msg.dst_y < s.pos.pos_y:
-          s.out_dir = NORTH
+        elif s.get.msg.dst < s.pos.pos and \
+             s.pos.pos - s.get.msg.dst <= num_routers/2:
+          s.out_dir = LEFT
+        elif s.get.msg.dst > s.pos.pos and \
+             s.get.msg.dst - s.pos.pos > num_routers/2:
+          s.out_dir = LEFT
         else:
-          s.out_dir = SOUTH
+          s.out_dir = RIGHT
         s.give[ s.out_dir ].rdy = 1
 
     @s.update
-    def up_ru_give_en():
+    def up_ru_get_en():
       s.get.en = s.give_ens > 0 
 
   # Line trace

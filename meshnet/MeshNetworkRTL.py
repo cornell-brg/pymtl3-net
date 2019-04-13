@@ -6,12 +6,12 @@
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
 
-from pymtl                            import *
-from network.Network                  import Network
-from pclib.ifcs.SendRecvIfc           import *
-from Direction                        import *
-from channel.ChannelRTL               import ChannelRTL
-from meshnet.meshrouter.MeshRouterRTL import MeshRouterRTL
+from pymtl                  import *
+from network.Network        import Network
+from pclib.ifcs.SendRecvIfc import *
+from Direction              import *
+from channel.ChannelRTL     import ChannelRTL
+from MeshRouterRTL          import MeshRouterRTL
 
 class MeshNetworkRTL( Network ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4, chl_lat=0 ):

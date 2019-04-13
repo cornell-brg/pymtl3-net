@@ -6,15 +6,15 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 25, 2019
 
-from pymtl                                   import *
-from pclib.test                              import TestVectorSimulator
-from ocn_pclib.ifcs.Packet                   import *
-from ocn_pclib.ifcs.Flit                     import *
-from ocn_pclib.ifcs.Position                 import mk_mesh_pos
-from pymtl.passes.PassGroups                 import SimpleSim
-from pclib.test.test_srcs                    import TestSrcRTL
-from pclib.test.test_sinks                   import TestSinkRTL
-from meshnet.meshrouter.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL 
+from pymtl                        import *
+from pclib.test                   import TestVectorSimulator
+from ocn_pclib.ifcs.Packet        import *
+from ocn_pclib.ifcs.Flit          import *
+from ocn_pclib.ifcs.Position      import mk_mesh_pos
+from pymtl.passes.PassGroups      import SimpleSim
+from pclib.test.test_srcs         import TestSrcRTL
+from pclib.test.test_sinks        import TestSinkRTL
+from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL 
 
 #-------------------------------------------------------------------------
 # Driver function for TestVectorSimulator
