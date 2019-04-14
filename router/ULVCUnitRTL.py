@@ -16,6 +16,10 @@ class ULVCUnitRTL( Component ):
 
   def construct( s, PacketType, QueueType=NormalQueueRTL ):
 
+    # Constants
+    UPPER = 0
+    LOWER = 1
+
     # Interface
 
     s.recv = RecvIfcRTL( PacketType )
@@ -28,39 +32,41 @@ class ULVCUnitRTL( Component ):
     
     # Connections
 
-    s.connect( s.arbiter.reqs[0], s.upper.deq.rdy )
-    s.connect( s.arbiter.reqs[1], s.lower.deq.rdy )
+    s.connect( s.arbiter.reqs[ UPPER ], s.upper.deq.rdy )
+    s.connect( s.arbiter.reqs[ LOWER ], s.lower.deq.rdy )
+    s.connect( s.upper.enq.msg,   s.recv.msg      )
+    s.connect( s.lower.enq.msg,   s.recv.msg      )
 
     @s.update
-    def vcIn():
-      if s.recv.msg.opaque == 0:
-        s.upper.enq.en  = s.recv.en 
-        s.recv.rdy = s.upper.enq.rdy
-        s.upper.enq.msg = s.recv.msg
-        s.lower.enq.en  = 0
-      else:
-        s.lower.enq.en = s.recv.en 
-        s.recv.rdy = s.lower.enq.rdy
-        s.lower.enq.msg = s.recv.msg
-        s.upper.enq.en  = 0
+    def set_recv_rdy():
+      s.recv.rdy = ( s.upper.enq.rdy and ( s.upper.enq.msg.opaque == UPPER ) ) or\
+                   ( s.lower.enq.rdy and ( s.lower.enq.msg.opaque == LOWER ) )
 
     @s.update
-    def vcOut():
-      if s.arbiter.grants[0]:
-        s.upper.deq.en = s.give.en
-        s.give.rdy = s.upper.deq.rdy
+    def set_enq_en():
+      s.upper.enq.en = s.recv.en and ( s.upper.enq.msg.opaque == UPPER )
+      s.lower.enq.en = s.recv.en and ( s.lower.enq.msg.opaque == LOWER )
+
+    @s.update
+    def set_give_rdy():
+      s.give.rdy = ( ( s.upper.deq.rdy and s.arbiter.grants[ UPPER ] ) ) or\
+                   ( ( s.lower.deq.rdy and s.arbiter.grants[ LOWER ] ) )
+
+    @s.update
+    def set_give_msg():
+      if s.arbiter.grants[ UPPER ]:
         s.give.msg = s.upper.deq.msg
-        s.lower.deq.en = 0
-
-      elif s.arbiter.grants[1]:
-        s.lower.deq.en = s.give.en
-        s.give.rdy = s.lower.deq.rdy
+      elif s.arbiter.grants[ LOWER ]:
         s.give.msg = s.lower.deq.msg
-        s.upper.deq.en = 0
+
+    @s.update
+    def set_deq_en():
+      s.upper.deq.en = s.give.en and s.arbiter.grants[ UPPER ]
+      s.lower.deq.en = s.give.en and s.arbiter.grants[ LOWER ]
 
     @s.update
     def up_arb_en():
-      s.arbiter.en = s.arbiter.grants > 0 and s.give.rdy
+      s.arbiter.en = s.arbiter.grants > 0 and s.give.en
 
   def line_trace( s ):
     return "{}({},{}->{},{}){}".format( s.recv, s.upper.enq.msg.payload, 

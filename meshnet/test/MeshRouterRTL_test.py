@@ -1,5 +1,5 @@
 #=========================================================================
-# RouterRTL_test.py
+# MeshRouterRTL_test.py
 #=========================================================================
 # Test for RouterRTL
 #
@@ -16,6 +16,8 @@ from pclib.test                   import TestVectorSimulator
 from meshnet.MeshRouterRTL        import MeshRouterRTL
 from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from router.ULVCUnitRTL           import ULVCUnitRTL
+from router.InputUnitRTL          import InputUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -62,7 +64,7 @@ def test_vector_Router_4_4X():
   mesh_ht  = 4
   pos_x    = 1
   pos_y    = 1
-  RouteUnitType = DORXMeshRouteUnitRTL
+  
   
   xx = 'x'
   inputs_buffer= [
@@ -76,7 +78,7 @@ def test_vector_Router_4_4X():
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
   MeshFlit = mk_mesh_flit( 1, mesh_wid, mesh_ht )
-  model = MeshRouterRTL( MeshFlit, MeshPos, RouteUnitType = RouteUnitType )
+  model = MeshRouterRTL( MeshFlit, MeshPos, InputUnitType = ULVCUnitRTL, RouteUnitType = DORXMeshRouteUnitRTL )
 
   run_vector_test( model, inputs_buffer, mesh_wid, mesh_ht, pos_x, pos_y )
 

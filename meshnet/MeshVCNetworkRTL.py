@@ -1,10 +1,10 @@
 #=========================================================================
-# MeshNetworkRTL.py
+# MeshVCNetworkRTL.py
 #=========================================================================
 # Mesh network implementation.
 #
 # Author : Cheng Tan
-#   Date : Mar 10, 2019
+#   Date : April 13, 2019
 
 from pymtl                  import *
 from network.Network        import Network
@@ -12,8 +12,9 @@ from pclib.ifcs.SendRecvIfc import *
 from Direction              import *
 from channel.ChannelRTL     import ChannelRTL
 from MeshRouterRTL          import MeshRouterRTL
+from router.ULVCUnitRTL     import ULVCUnitRTL
 
-class MeshNetworkRTL( Network ):
+class MeshVCNetworkRTL( Network ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4, chl_lat=0 ):
 
     # Constants
@@ -25,15 +26,16 @@ class MeshNetworkRTL( Network ):
 
     # Interface
 
-    s.recv = [ RecvIfcRTL(PacketType) for _ in range(num_terminals)]
-    s.send = [ SendIfcRTL(PacketType) for _ in range(num_terminals)]
+    s.recv = [ RecvIfcRTL( PacketType ) for _ in range( num_terminals )]
+    s.send = [ SendIfcRTL( PacketType ) for _ in range( num_terminals )]
 
     # Components
 
-    s.routers  = [ MeshRouterRTL( PacketType, PositionType )
+    s.routers  = [ MeshRouterRTL( PacketType, PositionType, 
+                 InputUnitType = ULVCUnitRTL ) 
                  for i in range( s.num_routers ) ]
 
-    s.channels = [ ChannelRTL( PacketType, latency = chl_lat)
+    s.channels = [ ChannelRTL( PacketType, latency = chl_lat )
                  for _ in range( num_channels ) ]
 
     # Connect s.routers together in Mesh
