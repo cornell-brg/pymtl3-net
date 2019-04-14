@@ -118,7 +118,6 @@ def test_vector_mesh4x4( dump_vcd, test_verilog ):
   [  0,    [1,0,1005],     4,     1003 ],
   ]
 
-  print "------------ test with test vector for mesh 4x4 --------------"
   run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
 
 
@@ -228,7 +227,6 @@ def test_srcsink_mesh4x4_():
 
   th = TestHarness( Packet, mesh_wid, mesh_ht, src_packets, sink_packets, 
                     0, 0, 0, 0, arrival_pipes )
-  print "------------ test with source/sink for mesh 4x4 --------------"
   run_sim( th )
 
 def test_srcsink_mesh2x2():
@@ -239,5 +237,4 @@ def test_srcsink_mesh2x2():
   sink_packets = [ [], [], [], [ pkt ] ]
 
   th = TestHarness( Packet, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
-  print "------------ test with source/sink for mesh 2x2 --------------"
   run_sim( th )

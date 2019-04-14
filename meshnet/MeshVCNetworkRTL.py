@@ -20,14 +20,14 @@ class MeshVCNetworkRTL( Network ):
     # Constants
 
     s.num_routers = mesh_wid * mesh_ht
-    num_terminals = s.num_routers
+    s.num_terminals = s.num_routers
     num_channels  = (mesh_ht*(mesh_wid-1)+mesh_wid*(mesh_ht-1)) * 2
     chl_lat       =  0
 
     # Interface
 
-    s.recv = [ RecvIfcRTL( PacketType ) for _ in range( num_terminals )]
-    s.send = [ SendIfcRTL( PacketType ) for _ in range( num_terminals )]
+    s.recv = [ RecvIfcRTL( PacketType ) for _ in range( s.num_terminals )]
+    s.send = [ SendIfcRTL( PacketType ) for _ in range( s.num_terminals )]
 
     # Components
 

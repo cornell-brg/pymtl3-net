@@ -87,7 +87,6 @@ def test_vector_Ring2( dump_vcd, test_verilog ):
   [  x,    [0,0000],     x,       x  ],
   ]
 
-  print "------------ test with test vector for ring 2 --------------"
   run_vector_test( model, simple_2_test, num_routers)
 
 def test_vector_Ring4( dump_vcd, test_verilog ):
@@ -117,7 +116,6 @@ def test_vector_Ring4( dump_vcd, test_verilog ):
   [  x,    [0,0000],     1,     1004 ],
   ]
 
-  print "------------ test with test vector for ring 4 --------------"
   run_vector_test( model, simple_4_test, num_routers )
 
 #-------------------------------------------------------------------------
@@ -237,6 +235,5 @@ def test_srcsink_torus4x4():
       th.set_parameter(path_ru_nr, num_routers )
 
 
-  print "------------ test with source/sink for ring 16 --------------"
   run_sim( th )
 

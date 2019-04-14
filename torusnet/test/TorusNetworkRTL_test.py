@@ -95,7 +95,6 @@ def test_vector_Torus2x2( dump_vcd, test_verilog ):
   [  x,    [0,0,0000],     x,       x  ],
   ]
 
-  print "------------ test with test vector for torus 2x2 --------------"
   run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
 
 def test_vector_Torus4x4( dump_vcd, test_verilog ):
@@ -129,7 +128,6 @@ def test_vector_Torus4x4( dump_vcd, test_verilog ):
   [  0,    [1,0,1005],     4,     1003 ],
   ]
 
-  print "------------ test with test vector for torus 4x4 --------------"
   run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
 
 #-------------------------------------------------------------------------
@@ -250,6 +248,5 @@ def test_srcsink_torus4x4():
       th.set_parameter(path_ru_rows, mesh_ht )
 
 
-  print "------------ test with source/sink for torus 4x4 --------------"
   run_sim( th )
 

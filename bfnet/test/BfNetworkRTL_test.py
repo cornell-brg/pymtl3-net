@@ -88,7 +88,6 @@ def test_vector_Bf2( dump_vcd, test_verilog ):
   [  x,    [0,0000],     x,       x  ],
   ]
 
-  print "------------ test with test vector for bf 2 --------------"
   run_vector_test( model, simple_2_test, k_ary, n_fly)
 
 def test_vector_Bf4( dump_vcd, test_verilog ):
@@ -124,7 +123,6 @@ def test_vector_Bf4( dump_vcd, test_verilog ):
   [  x,    [0,0000],     0,     1005 ],
   ]
 
-  print "------------ test with test vector for bf 4 --------------"
   run_vector_test( model, simple_4_test, k_ary, n_fly )
 
 #-------------------------------------------------------------------------
@@ -241,6 +239,5 @@ def test_srcsink_bf4x4():
       th.set_parameter(path_ru_nr, num_routers )
 
 
-#  print "------------ test with source/sink for bf 16 --------------"
 #  run_sim( th )
 

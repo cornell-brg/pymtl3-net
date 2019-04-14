@@ -61,26 +61,26 @@ class TorusNetworkRTL( Network ):
           idx = y * mesh_wid + x
           s.routers[idx].pos = PositionType( x, y )
 
-  def line_trace( s ):
-    trace = ''
-    for r in range(s.num_routers):
-      trace += '\n({},{})|'.format(s.routers[r].pos.pos_x, s.routers[r].pos.pos_y)
-      for i in range(s.routers[r].num_inports):
-        if isinstance(s.routers[r].recv[i].msg, int):
-          trace += '|{}'.format(s.routers[r].recv[i].msg)
-        else:
-          trace += '|{}:{}->({},{})'.format( i, 
-                s.routers[r].recv[i].msg.payload, 
-                s.routers[r].recv[i].msg.dst_x,
-                s.routers[r].recv[i].msg.dst_y)
-      trace += '\n out: '
-      for i in range(s.routers[r].num_outports):
-        if isinstance(s.routers[r].recv[i].msg, int):
-          trace += '|{}'.format(s.routers[r].recv[i].msg)
-        else:
-          trace += '|{}:{}->({},{})'.format( i, 
-                s.routers[r].send[i].msg.payload, 
-                s.routers[r].send[i].msg.dst_x,
-                s.routers[r].send[i].msg.dst_y)
-    return trace
+#  def line_trace( s ):
+#    trace = ''
+#    for r in range(s.num_routers):
+#      trace += '\n({},{})|'.format(s.routers[r].pos.pos_x, s.routers[r].pos.pos_y)
+#      for i in range(s.routers[r].num_inports):
+#        if isinstance(s.routers[r].recv[i].msg, int):
+#          trace += '|{}'.format(s.routers[r].recv[i].msg)
+#        else:
+#          trace += '|{}:{}->({},{})'.format( i, 
+#                s.routers[r].recv[i].msg.payload, 
+#                s.routers[r].recv[i].msg.dst_x,
+#                s.routers[r].recv[i].msg.dst_y)
+#      trace += '\n out: '
+#      for i in range(s.routers[r].num_outports):
+#        if isinstance(s.routers[r].recv[i].msg, int):
+#          trace += '|{}'.format(s.routers[r].recv[i].msg)
+#        else:
+#          trace += '|{}:{}->({},{})'.format( i, 
+#                s.routers[r].send[i].msg.payload, 
+#                s.routers[r].send[i].msg.dst_x,
+#                s.routers[r].send[i].msg.dst_y)
+#    return trace
     

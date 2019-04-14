@@ -15,7 +15,8 @@ class Network( Component ):
 
     # Constants
 
-    s.num_routers = num_routers
+    s.num_routers   = num_routers
+    s.num_terminals = num_terminals
 
     # Interface
 
@@ -31,7 +32,10 @@ class Network( Component ):
                      for _ in range( num_channels ) ]
 
   def line_trace( s ):
-    trace = [ "" for _ in range( s.num_routers ) ]
-    for i in range( s.num_routers ):
-      trace[i] = "{}".format( s.routers[i].recv )
+    trace = [ "" for _ in range( s.num_terminals ) ]
+    for i in range( s.num_terminals ):
+      if s.send[i].en:
+        trace[i] = "{}".format( s.send[i].msg )
+      else:
+        trace[i] = "{}".format( 'X' )
     return "|".join( trace )
