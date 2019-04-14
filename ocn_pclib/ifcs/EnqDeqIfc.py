@@ -6,7 +6,7 @@
 # Author: Yanghui Ou
 #   Date: Mar 21, 2019
 
-from pymtl import *
+from pymtl                  import *
 from pclib.ifcs.SendRecvIfc import enrdy_to_str
 
 #-------------------------------------------------------------------------
