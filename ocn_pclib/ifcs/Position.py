@@ -6,8 +6,8 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 25, 2019
 
-from pymtl import *
-
+from pymtl     import *
+from BitStruct import mk_bit_struct
 import py
 
 #-------------------------------------------------------------------------
@@ -16,22 +16,39 @@ import py
 
 class BaseMeshPosition( object ): 
 
-  def __init__( s, pox_x=0, pos_y=0, mesh_wid=2, mesh_ht=2 ):
-    
-    XType = mk_bits( clog2( mesh_wid ) )
-    YType = mk_bits( clog2( mesh_ht  ) )
-
-    s.pos_x = XType( 0 )
-    s.pos_y = YType( 0 ) 
-
   def __str__( s ):
     return "({},{})".format( s.pos_x, s.pos_y )
+
+# class MetaMeshPosition( type ):
+# 
+#   def __new__( meta, name, bases, attrs ):
+#     def __new__( cls, mesh_wid, mesh_ht ):
+#       XType = mk_bits( clog2( mesh_wid ) )
+#       YType = mk_bits( clog2( mesh_ht  ) )
+#     
+#       def __init__( s, pos_x=0, pos_y=0 ):
+#         s.pos_x = XType( pos_x )
+#         s.pos_y = YType( pos_y )
+#       new_name = "MeshPosition_"+str(mesh_wid)+"_by_"+str(mesh_ht)
+#       inst = type( new_name, (), {} )
+#       inst.__init__ = __init__
+#       return inst
+#     attrs['__new__' ] = __new__
+#     return type.__new__( meta, name, bases, attrs )
+# 
+# class mkMeshPosition( BaseMeshPosition ): 
+#   __metaclass__ = MetaMeshPosition
 
 #-------------------------------------------------------------------------
 # Dynamically generated MeshPosition
 #-------------------------------------------------------------------------
 
 _mesh_pos_dict = dict()
+
+#------------------------------------------------------------------------- 
+# exec template approach
+#------------------------------------------------------------------------- 
+
 # _mesh_pos_template = """
 # class MeshPosition_{mesh_wid}_by_{mesh_ht}( object ):
 # 
@@ -58,6 +75,63 @@ _mesh_pos_dict = dict()
 #     ).compile() in globals()
 #     return _mesh_pos_dict[ ( wid, ht ) ]
 
+#------------------------------------------------------------------------- 
+# Direct type approach
+#------------------------------------------------------------------------- 
+
+# def mk_mesh_pos( mesh_wid, mesh_ht ):
+# 
+#   if ( mesh_wid, mesh_ht ) in _mesh_pos_dict:
+#     return _mesh_pos_dict[ ( mesh_wid, mesh_ht ) ]
+# 
+#   else:
+#     XType = mk_bits( clog2( mesh_wid ) )
+#     YType = mk_bits( clog2( mesh_ht  ) )
+#     cls_name = "MeshPosition_" + str( mesh_wid ) + "_by_" + str( mesh_ht )
+# 
+#     def __init__( s, pos_x=0, pos_y=0 ):
+#       s.pos_x = XType( pos_x )
+#       s.pos_y = YType( pos_y )
+# 
+#     new_class = type( cls_name, ( BaseMeshPosition, ), {"__init__":__init__} )
+#     _mesh_pos_dict[ ( mesh_wid, mesh_ht ) ] = new_class
+#     return new_class
+
+#------------------------------------------------------------------------- 
+# Metaclass approach
+#------------------------------------------------------------------------- 
+
+# def mk_mesh_pos( mesh_wid, mesh_ht ):
+# 
+#   if ( mesh_wid, mesh_ht ) in _mesh_pos_dict:
+#     return _mesh_pos_dict[ ( mesh_wid, mesh_ht ) ]
+# 
+#   else:
+#     class MetaMeshPosition( type ):
+#       def __new__( cls, name, bases, attrs ):
+#         XType = mk_bits( clog2( mesh_wid ) )
+#         YType = mk_bits( clog2( mesh_ht  ) )
+#         new_name = "MeshPosition_" + str( mesh_wid ) + "_by_" + str( mesh_ht )
+#    
+#         def __init__( s, pos_x=0, pos_y=0 ):
+#           s.pos_x = XType( pos_x )
+#           s.pos_y = YType( pos_y )
+# 
+#         attrs['__init__'] = __init__
+#         return type.__new__( cls, new_name, bases, attrs )
+# 
+#     class mkMeshPostition( BaseMeshPosition ):
+#       __metaclass__ = MetaMeshPosition
+# 
+#     new_class = mkMeshPostition
+#     _mesh_pos_dict[ ( mesh_wid, mesh_ht ) ] = new_class
+#     return new_class
+
+#------------------------------------------------------------------------- 
+# mk_bistruct approach
+#------------------------------------------------------------------------- 
+# FIXME: customized __str__ for dynamically generated class?
+
 def mk_mesh_pos( mesh_wid, mesh_ht ):
 
   if ( mesh_wid, mesh_ht ) in _mesh_pos_dict:
@@ -66,13 +140,11 @@ def mk_mesh_pos( mesh_wid, mesh_ht ):
   else:
     XType = mk_bits( clog2( mesh_wid ) )
     YType = mk_bits( clog2( mesh_ht  ) )
-    cls_name = "MeshPosition_" + str( mesh_wid ) + "_by_" + str( mesh_ht )
-
-    def __init__( s, pos_x=0, pos_y=0 ):
-      s.pos_x = XType( pos_x )
-      s.pos_y = YType( pos_y )
-
-    new_class = type( cls_name, ( BaseMeshPosition, ), {"__init__":__init__} )
+    new_name  = "MeshPosition_" + str( mesh_wid ) + "x" + str( mesh_ht )
+    new_class = mk_bit_struct( new_name, {
+      'pos_x' : XType,
+      'pos_y' : YType
+    })
     _mesh_pos_dict[ ( mesh_wid, mesh_ht ) ] = new_class
     return new_class
 
