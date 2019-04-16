@@ -39,13 +39,13 @@ class ULVCUnitRTL( Component ):
 
     @s.update
     def set_recv_rdy():
-      s.recv.rdy = ( s.upper.enq.rdy and ( s.upper.enq.msg.opaque == UPPER ) ) or\
-                   ( s.lower.enq.rdy and ( s.lower.enq.msg.opaque == LOWER ) )
+      s.recv.rdy = ( s.upper.enq.rdy and ( s.upper.enq.msg > UPPER ) ) or\
+                   ( s.lower.enq.rdy and ( s.lower.enq.msg > LOWER ) )
 
     @s.update
     def set_enq_en():
-      s.upper.enq.en = s.recv.en and ( s.upper.enq.msg.opaque == UPPER )
-      s.lower.enq.en = s.recv.en and ( s.lower.enq.msg.opaque == LOWER )
+      s.upper.enq.en = s.recv.en and ( s.upper.enq.msg > UPPER )
+      s.lower.enq.en = s.recv.en and ( s.lower.enq.msg > LOWER )
 
     @s.update
     def set_give_rdy():
@@ -69,6 +69,6 @@ class ULVCUnitRTL( Component ):
       s.arbiter.en = s.arbiter.grants > 0 and s.give.en
 
   def line_trace( s ):
-    return "{}({},{}->{},{}){}".format( s.recv, s.upper.enq.msg.payload, 
-      s.lower.enq.msg.payload, s.upper.deq.msg.payload, 
-      s.lower.deq.msg.payload, s.give )
+    return "{}({},{}->{},{}){}".format( s.recv, s.upper.enq.msg, 
+      s.lower.enq.msg, s.upper.deq.msg, 
+      s.lower.deq.msg, s.give )

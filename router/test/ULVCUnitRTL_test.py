@@ -74,7 +74,7 @@ class TestHarness( Component ):
 
     s.src  = TestSrcRTL   ( MsgType, src_msgs,  src_initial,  src_interval  )
     s.sink = TestSinkRTL  ( MsgType, sink_msgs, sink_initial, sink_interval )
-    s.dut  = InputUnitRTL ( MsgType  )
+    s.dut  = ULVCUnitRTL ( MsgType  )
 
     # Connections
     s.connect( s.src.send,     s.dut.recv  )
@@ -142,4 +142,4 @@ arrival_pipe   = [ 2, 3, 4, 5 ]
 def test_normal2_simple():
   th = TestHarness( Bits16, test_msgs, test_msgs, 0, 0, 0, 0,
                     arrival_pipe )
-  #run_sim( th )
+  run_sim( th )

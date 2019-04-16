@@ -93,7 +93,7 @@ class TestHarness( Component ):
                  arrival_time=None ):
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = MeshRouterRTL( MsgType, MeshPos, RouteUnitType = DORYMeshRouteUnitRTL )
+    s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = ULVCUnitRTL, RouteUnitType = DORYMeshRouteUnitRTL )
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_inports ) ]
