@@ -29,6 +29,16 @@ class Packet( object ):
     return "({},{})>({},{}):{}:{}".format(
       s.src_x, s.src_y, s.dst_x, s.dst_y, s.opaque, s.payload ) 
 
+class PacketTimestamp( Packet ):
+
+  def __init__( s ):
+    Packet.__init__( s )
+    s.timestamp = 0
+    
+  def __str__( s ):
+    return "({},{})>({},{}):{}:{}:{}".format(
+      s.src_x, s.src_y, s.dst_x, s.dst_y, s.opaque, s.payload, s.timestamp ) 
+
 def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
   pkt = Packet()
   pkt.src_x   = src_x
@@ -38,6 +48,18 @@ def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
   pkt.opaque  = opaque
   pkt.payload = payload
   return pkt
+
+def mk_pkt_timestamp( src_x, src_y, dst_x, dst_y, opaque, payload, timestamp ):
+  pkt = PacketTimestamp()
+  pkt.src_x     = src_x
+  pkt.src_y     = src_y
+  pkt.dst_x     = dst_x
+  pkt.dst_y     = dst_y
+  pkt.opaque    = opaque
+  pkt.payload   = payload
+  pkt.timestamp = timestamp
+  return pkt
+  
 
 class BasePacket( object ):
 
