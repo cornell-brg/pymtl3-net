@@ -78,7 +78,7 @@ def test_vector_Router_4_4X():
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
   MeshFlit = mk_mesh_flit( 1, mesh_wid, mesh_ht )
-  model = MeshRouterRTL( MeshFlit, MeshPos, InputUnitType = ULVCUnitRTL, RouteUnitType = DORXMeshRouteUnitRTL )
+  model = MeshRouterRTL( MeshFlit, MeshPos, RouteUnitType = DORXMeshRouteUnitRTL )
 
   run_vector_test( model, inputs_buffer, mesh_wid, mesh_ht, pos_x, pos_y )
 

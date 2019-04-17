@@ -93,8 +93,9 @@ class TestHarness( Component ):
     return s.src.done() and s.sink.done()
 
   def line_trace( s ):
-    return s.src.line_trace() + "-> | " + s.dut.line_trace() + \
-                               " | -> " + s.sink.line_trace()
+    return s.dut.line_trace()
+#    return s.src.line_trace() + "-> | " + s.dut.line_trace() + \
+#                               " | -> " + s.sink.line_trace()
 
 #-------------------------------------------------------------------------
 # run_rtl_sim
@@ -104,8 +105,8 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Set parameters
 
-  test_harness.set_parameter("top.dut.queue.elaborate.num_entries", 2)
   test_harness.set_parameter("top.dut.elaborate.QueueType", NormalQueueRTL)
+  test_harness.set_parameter("top.dut.elaborate.PacketType", Packet)
 
   # Create a simulator
 
@@ -135,11 +136,15 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases
 #-------------------------------------------------------------------------
 
-test_msgs = [ Bits16( 4 ), Bits16( 1 ), Bits16( 2 ), Bits16( 3 ) ]
+test_msgs = [ 4, 1, 2, 3 ]
 
 arrival_pipe   = [ 2, 3, 4, 5 ]
 
 def test_normal2_simple():
-  th = TestHarness( Bits16, test_msgs, test_msgs, 0, 0, 0, 0,
+  test_pkts = []
+  for msg in test_msgs:
+    pkt = mk_pkt( 0, 0, 1, 1, msg % 2, msg )
+    test_pkts.append( pkt )
+  th = TestHarness( Packet, test_pkts, test_pkts, 0, 0, 0, 0,
                     arrival_pipe )
   run_sim( th )
