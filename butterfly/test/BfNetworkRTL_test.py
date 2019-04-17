@@ -1,84 +1,84 @@
 #=========================================================================
-# RingNetworkRTL_test.py
+# BfNetworkRTL_test.py
 #=========================================================================
-# Test for RingNetworkRTL
+# Test for BfNetworkRTL
 #
 # Author : Cheng Tan, Yanghui Ou
-#   Date : Mar 20, 2019
+#   Date : April 8, 2019
 
 import tempfile
 from pymtl                   import *
-from ringnet.RingNetworkRTL  import RingNetworkRTL
+from butterfly.BfNetworkRTL  import BfNetworkRTL
 from ocn_pclib.rtl.queues    import NormalQueueRTL
 from pclib.test.test_srcs    import TestSrcRTL
 from pclib.test.test_sinks   import TestSinkRTL
 from pclib.test              import TestVectorSimulator
-from ocn_pclib.ifcs.Packet   import * 
+from ocn_pclib.ifcs.Packet   import *
 from ocn_pclib.ifcs.Position import *
-from ocn_pclib.ifcs.Flit     import *
-from Configs                 import configure_network
 
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
 
-def run_vector_test( model, test_vectors, num_routers ):
+def run_vector_test( model, test_vectors, k_ary, n_fly ):
  
   def tv_in( model, test_vector ):
 
-#    RingPos = mk_ring_pos( num_routers )
+    num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
+    num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
+    r_rows        = k_ary ** ( n_fly - 1 )
+    BfPos         = mk_bf_pos( r_rows, n_fly )
 
     if test_vector[0] != 'x':
-      router_id = test_vector[0]
-#      pkt = mk_pkt( router_id, 0, test_vector[1][0], 0, 1, test_vector[1][1])
-      pkt = mk_base_pkt( router_id, test_vector[1][0], 1, test_vector[1][1])
-      flits = flitisize_ring_flit( pkt, 1, num_routers )
-
+      terminal_id = test_vector[0]
+      pkt = mk_bf_pkt( terminal_id, test_vector[1][0], k_ary, n_fly, 1, test_vector[1][1])
+    
       # Enable the network interface on specific router
-      for i in range (num_routers):
+      for i in range (num_terminals):
         model.recv[i].en  = 0
-      model.recv[router_id].msg = flits[0]
-      model.recv[router_id].en  = 1
+      model.recv[terminal_id].msg = pkt
+      model.recv[terminal_id].en  = 1
 
-    for i in range (num_routers):
+    for i in range (num_terminals):
       model.send[i].rdy = 1
 
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
-      pkt = model.send[test_vector[2]].msg.payload
-      assert pkt.payload == test_vector[3]
+      assert model.send[test_vector[2]].msg.payload == test_vector[3]
      
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
   model.sim_reset()
 
-def test_vector_Ring2( dump_vcd, test_verilog ):
+def test_vector_Bf2( dump_vcd, test_verilog ):
 
-  num_routers  = 2
-  RingPos  = mk_ring_pos( num_routers )
-  RingFlit = mk_ring_flit( 1, num_routers )
-  model = RingNetworkRTL( RingFlit, RingPos, num_routers, 0 )
+  k_ary = 2
+  n_fly = 1
+  num_routers = n_fly * ( k_ary ** ( n_fly - 1 ) )
+  r_rows      = k_ary ** ( n_fly - 1 )
+  BfPos = mk_bf_pos( r_rows, n_fly )
+  model = BfNetworkRTL( BfPacket, BfPos, k_ary, n_fly, 0 )
 
-  num_inports = 3
   for r in range (num_routers):
-    for i in range (num_inports):
-      path_ru_nr = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.num_routers"
+    path_k = "top.routers[" + str(r) + "].elaborate.k_ary"
+    model.set_parameter(path_k, k_ary)
+    for i in range (k_ary):
       path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      model.set_parameter( path_qt,    NormalQueueRTL )
-      model.set_parameter( path_ru_nr, num_routers    )
+      path_nf = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.n_fly"
+      model.set_parameter(path_qt, NormalQueueRTL)
+      model.set_parameter(path_nf, n_fly)
 
   x = 'x'
 
   # Specific for wire connection (link delay = 0) in 2x2 Torus topology
   simple_2_test = [
-#  router   [packet]   arr_router  msg 
+# terminal [packet]   arr_term   msg 
   [  0,    [0,1001],     x,       x  ],
   [  0,    [1,1002],     0,     1001 ],
-  [  0,    [1,1003],     x,       x  ],
-  [  0,    [1,1004],     1,     1002 ],
-  [  0,    [0,1005],     1,     1003 ],
-  [  x,    [0,0000],     1,     1004 ],
-  [  x,    [0,0000],     0,     1005 ],
+  [  0,    [1,1003],     1,     1002 ],
+  [  0,    [1,1004],     1,     1003 ],
+  [  0,    [0,1005],     1,     1004 ],
+  [  x,    [0,0000],     1,     1005 ],
   [  x,    [0,0000],     x,       x  ],
   [  x,    [0,0000],     x,       x  ],
   [  x,    [0,0000],     x,       x  ],
@@ -87,36 +87,42 @@ def test_vector_Ring2( dump_vcd, test_verilog ):
   [  x,    [0,0000],     x,       x  ],
   ]
 
-  run_vector_test( model, simple_2_test, num_routers)
+  run_vector_test( model, simple_2_test, k_ary, n_fly)
 
-def test_vector_Ring4( dump_vcd, test_verilog ):
+def test_vector_Bf4( dump_vcd, test_verilog ):
 
-  num_routers = 4
-  RingPos = mk_ring_pos( num_routers )
-  RingFlit = mk_ring_flit( 1, num_routers )
-  model = RingNetworkRTL( RingFlit, RingPos, num_routers, 0)
+  k_ary = 2
+  n_fly = 2
+  num_routers  = n_fly * ( k_ary ** ( n_fly - 1 ) )
+  r_rows = k_ary ** ( n_fly - 1 )
+  BfPos = mk_bf_pos( r_rows, n_fly )
 
-  num_inports = 3
+  model = BfNetworkRTL( BfPacket, BfPos, k_ary, n_fly, 0 )
+
   for r in range (num_routers):
-    for i in range (num_inports):
-      path_ru_nr = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.num_routers"
+    path_k = "top.routers[" + str(r) + "].elaborate.k_ary"
+    model.set_parameter(path_k, k_ary)
+    for i in range (k_ary):
       path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      model.set_parameter(path_qt,    NormalQueueRTL)
-      model.set_parameter(path_ru_nr, num_routers   )
+      path_nf = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.n_fly"
+      model.set_parameter(path_qt, NormalQueueRTL)
+      model.set_parameter(path_nf, n_fly)
 
   x = 'x'
   # Specific for wire connection (link delay = 0) in 4x4 Torus topology
   simple_4_test = [
-#  router   [packet]   arr_router  msg
+# terminal [packet]   arr_term   msg
   [  0,    [0,1001],     x,       x  ],
-  [  x,    [0,0000],     0,     1001 ],
-  [  0,    [3,1003],     x,       x  ],
-  [  0,    [1,1004],     x,       x  ],
-  [  0,    [0,1005],     3,     1003 ],
+  [  0,    [2,1002],     x,       x  ],
+  [  0,    [3,1003],     0,     1001 ],
+  [  x,    [0,0000],     2,     1002 ],
+  [  0,    [1,1004],     3,     1003 ],
+  [  0,    [0,1005],     x,       x  ],
   [  x,    [0,0000],     1,     1004 ],
+  [  x,    [0,0000],     0,     1005 ],
   ]
 
-  run_vector_test( model, simple_4_test, num_routers )
+  run_vector_test( model, simple_4_test, k_ary, n_fly )
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -127,8 +133,9 @@ class TestHarness( Component ):
                  src_initial, src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    RingPos = mk_ring_pos( num_routers )
-    s.dut = RingNetworkRTL( MsgType, RingPos, num_routers, 0)
+    r_rows = k_ary ** ( n_fly - 1 )
+    BfPos  = mk_bf_pos( r_rows, n_fly )
+    s.dut  = BfNetworkRTL( MsgType, BfPos, num_routers, 0)
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_routers ) ]
@@ -186,10 +193,10 @@ def run_sim( test_harness, max_cycles=100 ):
 
 
 #-------------------------------------------------------------------------
-# Test cases (specific for 4x4 mesh)
+# Test cases (specific for 4x4 butterfly)
 #-------------------------------------------------------------------------
 
-def test_srcsink_torus4x4():
+def test_srcsink_bf4x4():
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
@@ -215,15 +222,11 @@ def test_srcsink_torus4x4():
   num_routers = 16
   
   for (src, dst, payload) in test_msgs:
-#    pkt = mk_pkt( src, 0, dst, 0, 1, payload )
-    pkt = mk_base_pkt( src, dst, 1, payload )
-    flits = flitisize_ring_flit( pkt, 1, num_routers )
-    src_packets [src].append( flits[0] )
-    sink_packets[dst].append( flits[0] )
+    pkt = mk_bf_pkt( src, dst, 4, 4, 1, payload )
+    src_packets [src].append( pkt )
+    sink_packets[dst].append( pkt )
 
-  RingFlit = mk_ring_flit( 1, num_routers )
-
-  th = TestHarness( RingFlit, num_routers, src_packets, sink_packets, 
+  th = TestHarness( BfPacket, num_routers, src_packets, sink_packets, 
                     0, 0, 0, 0, arrival_pipes )
 
   num_inports = 3 
@@ -235,5 +238,5 @@ def test_srcsink_torus4x4():
       th.set_parameter(path_ru_nr, num_routers )
 
 
-  run_sim( th )
+#  run_sim( th )
 

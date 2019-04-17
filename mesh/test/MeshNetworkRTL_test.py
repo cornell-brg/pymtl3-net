@@ -1,22 +1,22 @@
 #=========================================================================
-# MeshVCNetworkRTL_test.py
+# MeshNetworkRTL_test.py
 #=========================================================================
 # Test for NetworkRTL
 #
 # Author : Cheng Tan, Yanghui Ou
-#   Date : April 13, 2019
+#   Date : Mar 20, 2019
 
 import tempfile
-from pymtl                        import *
-from meshnet.MeshVCNetworkRTL     import MeshVCNetworkRTL
-from ocn_pclib.rtl.queues         import NormalQueueRTL
-from pclib.test.test_srcs         import TestSrcRTL
-from pclib.test.test_sinks        import TestSinkRTL
-from pclib.test                   import TestVectorSimulator
-from ocn_pclib.ifcs.Packet        import Packet, mk_pkt
-from ocn_pclib.ifcs.Position      import *
-from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
-from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from pymtl                     import *
+from mesh.MeshNetworkRTL       import MeshNetworkRTL
+from ocn_pclib.rtl.queues      import NormalQueueRTL
+from pclib.test.test_srcs      import TestSrcRTL
+from pclib.test.test_sinks     import TestSinkRTL
+from pclib.test                import TestVectorSimulator
+from ocn_pclib.ifcs.Packet     import Packet, mk_pkt
+from ocn_pclib.ifcs.Position   import *
+from mesh.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from mesh.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -54,7 +54,7 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
   mesh_wid = 2
   mesh_ht  = 2
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = MeshVCNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
+  model = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
 
   num_routers = mesh_wid * mesh_ht 
   num_inports = 5
@@ -95,7 +95,7 @@ def test_vector_mesh4x4( dump_vcd, test_verilog ):
   mesh_wid = 4
   mesh_ht  = 4
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = MeshVCNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0)
+  model = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0)
 
   num_routers = mesh_wid * mesh_ht 
   num_inports = 5
@@ -132,7 +132,7 @@ class TestHarness( Component ):
                  arrival_time=None ):
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = MeshVCNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 0)
+    s.dut = MeshNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 0)
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_routers ) ]

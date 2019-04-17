@@ -34,8 +34,9 @@ class Network( Component ):
   def line_trace( s ):
     trace = [ "" for _ in range( s.num_terminals ) ]
     for i in range( s.num_terminals ):
-      if s.send[i].en:
-        trace[i] = "{}".format( s.send[i].msg )
-      else:
-        trace[i] = "{}".format( 'X' )
+      trace[i] += s.send[i].line_trace()
+#      if s.send[i].en:
+#        trace[i] = "{}".format( s.send[i].msg )
+#      else:
+#        trace[i] = "{}".format( 'X' )
     return "|".join( trace )

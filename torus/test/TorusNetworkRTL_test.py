@@ -1,29 +1,30 @@
 #=========================================================================
-# MeshNetworkRTL_test.py
+# TorusNetworkRTL_test.py
 #=========================================================================
-# Test for NetworkRTL
+# Test for TorusNetworkRTL
 #
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 20, 2019
 
 import tempfile
-from pymtl                        import *
-from meshnet.MeshNetworkRTL       import MeshNetworkRTL
-from ocn_pclib.rtl.queues         import NormalQueueRTL
-from pclib.test.test_srcs         import TestSrcRTL
-from pclib.test.test_sinks        import TestSinkRTL
-from pclib.test                   import TestVectorSimulator
-from ocn_pclib.ifcs.Packet        import Packet, mk_pkt
-from ocn_pclib.ifcs.Position      import *
-from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
-from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from pymtl                       import *
+from torus.TorusNetworkRTL       import TorusNetworkRTL
+from ocn_pclib.rtl.queues        import NormalQueueRTL
+from pclib.test.test_srcs        import TestSrcRTL
+from pclib.test.test_sinks       import TestSinkRTL
+from pclib.test                  import TestVectorSimulator
+from ocn_pclib.ifcs.Packet       import Packet, mk_pkt
+from ocn_pclib.ifcs.Position     import *
+from torus.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
+
 def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
  
   def tv_in( model, test_vector ):
+
     num_routers = mesh_wid * mesh_ht
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
 
@@ -49,25 +50,30 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
   sim.run_test()
   model.sim_reset()
 
-def test_vector_mesh2x2( dump_vcd, test_verilog ):
+def test_vector_Torus2x2( dump_vcd, test_verilog ):
 
   mesh_wid = 2
   mesh_ht  = 2
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
+  model = TorusNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
 
-  num_routers = mesh_wid * mesh_ht 
+  num_routers = mesh_wid * mesh_ht
   num_inports = 5
   for r in range (num_routers):
+
     for i in range (num_inports):
-      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
       path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
-      model.set_parameter(path_qt, NormalQueueRTL)
-#      model.set_parameter(path_ru, DORXMeshRouteUnitRTL)
+      path_ru_cols = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.cols"
+      path_ru_rows = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.rows"
+      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+      model.set_parameter(path_ru, DORYTorusRouteUnitRTL )
+      model.set_parameter(path_qt,      NormalQueueRTL)
+      model.set_parameter(path_ru_cols, mesh_wid)
+      model.set_parameter(path_ru_rows, mesh_ht )
 
   x = 'x'
 
-  # Specific for wire connection (link delay = 0) in 2x2 Mesh topology
+  # Specific for wire connection (link delay = 0) in 2x2 Torus topology
   simple_2_2_test = [
 #  router   [packet]   arr_router  msg 
   [  0,    [1,0,1001],     x,       x  ],
@@ -90,27 +96,30 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
 
   run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
 
-def test_vector_mesh4x4( dump_vcd, test_verilog ):
+def test_vector_Torus4x4( dump_vcd, test_verilog ):
 
   mesh_wid = 4
   mesh_ht  = 4
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0)
+  model = TorusNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0)
 
-  num_routers = mesh_wid * mesh_ht 
+  num_routers = mesh_wid * mesh_ht
   num_inports = 5
   for r in range (num_routers):
     for i in range (num_inports):
-      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
       path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
-      model.set_parameter(path_qt, NormalQueueRTL)
-      model.set_parameter(path_ru, DORYMeshRouteUnitRTL)
-
+      path_ru_cols = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.cols"
+      path_ru_rows = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.rows"
+      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+      model.set_parameter(path_ru, DORYTorusRouteUnitRTL )
+      model.set_parameter(path_qt,      NormalQueueRTL)
+      model.set_parameter(path_ru_cols, mesh_wid)
+      model.set_parameter(path_ru_rows, mesh_ht )
 
   x = 'x'
-  # Specific for wire connection (link delay = 0) in 4x4 Mesh topology
+  # Specific for wire connection (link delay = 0) in 4x4 Torus topology
   simple_4_4_test = [
-#  router   [packet]   arr_router  msg 
+#  router   [packet]   arr_router  msg
   [  0,    [1,0,1001],     x,       x  ],
   [  0,    [1,1,1002],     x,       x  ],
   [  0,    [0,1,1003],     1,     1001 ],
@@ -120,28 +129,22 @@ def test_vector_mesh4x4( dump_vcd, test_verilog ):
 
   run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
 
-
 #-------------------------------------------------------------------------
 # TestHarness
 #-------------------------------------------------------------------------
-
 class TestHarness( Component ):
 
-  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs, 
+  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs,
                  src_initial, src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = MeshNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 0)
+    s.dut = TorusNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 0)
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_routers ) ]
-    if arrival_time != None:
-      s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval, arrival_time[i]) for i in range ( s.dut.num_routers ) ]
-    else:
-      s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval) for i in range ( s.dut.num_routers ) ]
+    s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
+              sink_interval, arrival_time[i]) for i in range ( s.dut.num_routers ) ]
 
     # Connections
     for i in range ( s.dut.num_routers ):
@@ -154,10 +157,12 @@ class TestHarness( Component ):
     for i in range( s.dut.num_routers ):
       if s.srcs[i].done() == 0:
         srcs_done = 0
-    for i in range( s.dut.num_routers ):
+        break
       if s.sinks[i].done() == 0:
         sinks_done = 0
+        break
     return srcs_done and sinks_done
+
   def line_trace( s ):
     return s.dut.line_trace()
 
@@ -190,11 +195,12 @@ def run_sim( test_harness, max_cycles=100 ):
   test_harness.tick()
   test_harness.tick()
 
+
 #-------------------------------------------------------------------------
 # Test cases (specific for 4x4 mesh)
 #-------------------------------------------------------------------------
 
-def test_srcsink_mesh4x4_():
+def test_srcsink_torus4x4():
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
@@ -213,11 +219,11 @@ def test_srcsink_mesh4x4_():
                     [],[],[],[] ]
   
   # note that need to yield one/two cycle for reset
-  arrival_pipes = [[8], [6], [6], [8],
-                   [6], [4], [4], [6], 
-                   [6], [4], [4], [6], 
-                   [8], [6], [6], [8]]
-
+  arrival_pipes = [[4], [4], [4], [4],
+                   [4], [4], [4], [4],
+                   [4], [4], [4], [4],
+                   [4], [4], [4], [4]]
+  
   mesh_wid = 4
   mesh_ht  = 4
   for (src, dst, payload) in test_msgs:
@@ -227,14 +233,19 @@ def test_srcsink_mesh4x4_():
 
   th = TestHarness( Packet, mesh_wid, mesh_ht, src_packets, sink_packets, 
                     0, 0, 0, 0, arrival_pipes )
+
+  num_inports = 5
+  for r in range (mesh_wid * mesh_ht):
+    for i in range (num_inports):
+      path_ru = "top.dut.routers[" + str(r) + "].elaborate.RouteUnitType"
+      path_ru_cols = "top.dut.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.cols"
+      path_ru_rows = "top.dut.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.rows"
+      path_qt      = "top.dut.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+      th.set_parameter(path_ru, DORYTorusRouteUnitRTL )
+      th.set_parameter(path_qt,      NormalQueueRTL)
+      th.set_parameter(path_ru_cols, mesh_wid)
+      th.set_parameter(path_ru_rows, mesh_ht )
+
+
   run_sim( th )
 
-def test_srcsink_mesh2x2():
-
-  pkt = mk_pkt( 0, 0, 1, 1, 0, 0xfaceb00c )
-
-  src_packets  = [ [ pkt ], [], [], [] ]
-  sink_packets = [ [], [], [], [ pkt ] ]
-
-  th = TestHarness( Packet, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
-  run_sim( th )

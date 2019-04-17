@@ -62,9 +62,9 @@ class Router( Component ):
 
     for i in range( s.num_inports ):
 #      in_trace[i]  = "{}".format( s.input_units[i].line_trace() )
-      in_trace[i]  = "{}".format( s.recv[i] )
+      in_trace[i]  = "{}".format( s.recv[i].line_trace() )
     for i in range( s.num_outports ):
-      out_trace[i] = "{}".format( s.send[i] )
+      out_trace[i] = "{}".format( s.send[i].line_trace() )
       
     return "{}({}){}".format( 
       "|".join( in_trace ), s.pos, "|".join( out_trace )

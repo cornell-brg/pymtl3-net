@@ -11,7 +11,7 @@ from network.Network        import Network
 from channel.ChannelRTL     import ChannelRTL
 from Direction              import *
 from pclib.ifcs.SendRecvIfc import *
-from meshnet.MeshRouterRTL  import MeshRouterRTL
+from mesh.MeshRouterRTL     import MeshRouterRTL
 
 class TorusNetworkRTL( Network ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4, chl_lat=0 ):
