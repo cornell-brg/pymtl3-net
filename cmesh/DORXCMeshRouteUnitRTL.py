@@ -1,7 +1,7 @@
 #=========================================================================
-# DORYRouteUnitRTL.py
+# DORXRouteUnitRTL.py
 #=========================================================================
-# A DOR-Y route unit with get/give interface for CMesh.
+# A DOR-X route unit with get/give interface for CMesh.
 #
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 25, 2019
@@ -10,9 +10,9 @@ from pymtl      import *
 from pclib.ifcs import GetIfcRTL, GiveIfcRTL
 from Direction  import *
 
-class DORYCMeshRouteUnitRTL( Component ):
+class DORXCMeshRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType, num_outports = 5 ):
+  def construct( s, PacketType, PositionType, num_outports = 8 ):
 
     # Constants 
 
@@ -45,15 +45,15 @@ class DORYCMeshRouteUnitRTL( Component ):
 
       if s.get.rdy:
         if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
-          s.out_dir = Bits3(4) + s.get.msg.dst_terminal
-        elif s.get.msg.dst_y < s.pos.pos_y:
-          s.out_dir = NORTH
-        elif s.get.msg.dst_y > s.pos.pos_y:
-          s.out_dir = SOUTH
+          s.out_dir = Bits3( 4 ) + s.get.msg.dst_terminal
         elif s.get.msg.dst_x < s.pos.pos_x:
           s.out_dir = WEST
-        else:
+        elif s.get.msg.dst_x > s.pos.pos_x:
           s.out_dir = EAST
+        elif s.get.msg.dst_y < s.pos.pos_y:
+          s.out_dir = NORTH
+        else:
+          s.out_dir = SOUTH
         s.give[ s.out_dir ].rdy = 1
 
     @s.update

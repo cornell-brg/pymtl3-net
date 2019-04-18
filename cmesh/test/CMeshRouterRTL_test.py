@@ -92,9 +92,9 @@ class TestHarness( Component ):
     s.dut = CMeshRouterRTL( MsgType, MeshPos, 8, 8, RouteUnitType = DORYMeshRouteUnitRTL )
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
-              for i in range ( s.dut.num_inports ) ]
-    s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial, 
-              sink_interval, arrival_time[i]) for i in range ( s.dut.num_outports ) ]
+              for i in range ( 8 ) ]
+    s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial, sink_interval ) 
+              for i in range ( 8 ) ]
 
     # Connections
 
@@ -102,7 +102,6 @@ class TestHarness( Component ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
-    #TODO: provide pos for router... 
     @s.update
     def up_pos():
       s.dut.pos = MeshPos(1,1)
@@ -155,26 +154,22 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases
 #-------------------------------------------------------------------------
 
-#              x,y,pl,dir
-test_msgs = [[(0,0,11,0),(0,0,12,0),(0,1,13,2),(2,1,14,3),(0,0,15,0)],
-             [(0,0,21,0),(0,2,22,1),(0,1,23,2),(2,1,24,3),(2,1,25,3)],
-             [(0,2,31,1),(0,0,32,0),(0,1,33,2),(1,1,34,4),(1,1,35,4)]
+#             x,y,pl,dir,term
+test_msgs = [[(0,0,11,0,0),(0,0,12,0,0),(0,1,13,2,0),(2,1,14,3,0),(0,0,15,0,0)],
+             [(0,0,21,0,1),(0,2,22,1,1),(0,1,23,2,1),(2,1,24,3,1),(2,1,25,3,1)],
+             [(0,2,31,1,2),(0,0,32,0,2),(0,1,33,2,2),(1,1,34,4,2),(1,1,35,4,2)]
             ]
-result_msgs = [[],[],[],[],[]]
+result_msgs = [[],[],[],[],[],[],[],[]]
 
-# note that need to yield one cycle for reset
-arrival_pipes = [[2,3,4,5,6],[3,4],[2,3,4],[2,3,4],[4,5]]
+def test_normal_simple():
 
-#def test_normal_simple():
-#
-#  src_packets = [[],[],[],[],[]]
-#  for item in test_msgs:
-#    for i in range( len( item ) ):
-#      (dst_x,dst_y,payload,dir_out) = item[i]
-#      pkt = mk_pkt (0, 0, dst_x, dst_y, 1, payload)
-#      src_packets[dir_out].append( pkt )
-#      result_msgs[dir_out].append ( pkt )
-#
-#  th = TestHarness( Packet, 4, 4, src_packets, result_msgs, 0, 0, 0, 0,
-#                    arrival_pipes )
-#  run_sim( th )
+  src_packets = [[],[],[],[],[],[],[],[]]
+  for item in test_msgs:
+    for i in range( len( item ) ):
+      (dst_x,dst_y,payload,dir_out,terminal) = item[i]
+      pkt = mk_cmesh_pkt (0, 0, dst_x, dst_y, terminal, 1, payload)
+      src_packets[7-dir_out].append( pkt )
+      result_msgs[dir_out].append( pkt )
+
+  th = TestHarness( CMeshPacket, 4, 4, src_packets, result_msgs, 0, 0, 0, 0 )
+  run_sim( th )
