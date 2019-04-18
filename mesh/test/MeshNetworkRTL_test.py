@@ -10,6 +10,7 @@ import tempfile
 from pymtl                     import *
 from mesh.MeshNetworkRTL       import MeshNetworkRTL
 from ocn_pclib.rtl.queues      import NormalQueueRTL
+from pclib.rtl.enrdy_queues    import *
 from pclib.test.test_srcs      import TestSrcRTL
 from pclib.test.test_sinks     import TestSinkRTL
 from pclib.test                import TestVectorSimulator
@@ -17,6 +18,8 @@ from ocn_pclib.ifcs.Packet     import Packet, mk_pkt
 from ocn_pclib.ifcs.Position   import *
 from mesh.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from mesh.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from mesh.TestMeshRouteUnitRTL import TestMeshRouteUnitRTL
+from router.InputUnitRTL       import InputUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -58,12 +61,14 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
 
   num_routers = mesh_wid * mesh_ht 
   num_inports = 5
-  for r in range (num_routers):
-    for i in range (num_inports):
-      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
-      model.set_parameter(path_qt, NormalQueueRTL)
+#  for r in range (num_routers):
+#    for i in range (num_inports):
+#      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+#      path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
+#      model.set_parameter(path_qt, NormalQueueRTL)
 #      model.set_parameter(path_ru, DORXMeshRouteUnitRTL)
+  model.set_parameter("top.routers*.elaborate.RouteUnitType", DORYMeshRouteUnitRTL)
+  model.set_parameter("top.routers*.input_units*.elaborate.QueueType", NormalQueueRTL)
 
   x = 'x'
 

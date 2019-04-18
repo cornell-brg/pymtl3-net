@@ -6,11 +6,6 @@
 #  -h --help           Display this message
 #  -v --verbose        Verbose mode
 #
-#  --impl <impl>       Choose model implementation
-#                      fl   : functional level
-#                      bus  : 4-terminal bus
-#                      ring : 4-node ring
-#
 #  --pattern <pattern> Choose a network pattern
 #                      urandom             dest = random % 4
 #                      partition2          dest = (random & 2'b01) | (src & 2'b10)
@@ -24,7 +19,14 @@
 #  --stats             Print stats
 #  --trace             Display line-trace
 #
-#  --virtual-channel   Number of virtual channels
+#  --topology          Choose NoC topology
+#                      Ring     : ring network
+#                      Mesh     : mesh network
+#                      CMesh    : concentrated mesh network
+#                      Torus    : torus network
+#                      Butterfly: K-ary n-fly butterfly network
+#
+#  --virtual-channels  Number of virtual channels
 #
 #  --routing-strategy  Choose a routing algorithm
 #                      DORX : Dimension Order Routing - X
@@ -32,11 +34,15 @@
 #
 #  --routers           Number of routers in network
 #
+#  --terminals-each    Number of terminals attached to router (for CMesh)
+#
 #  --rows              Number of rows of routers in network
 #
 #  --router-inports    Number of inports in each router
 #
 #  --router-outports   Number of outports in each router
+#
+#  --channel-latency   Latency of the channel between routers
 #
 # The OCN generator simulator. Choose an implementation and an
 # access pattern to execute. Use --stats to display statistics about the
@@ -51,6 +57,11 @@
 
 import os
 import sys
+import argparse
+import re
+
+from collections             import deque
+from random                  import seed, randint
 
 sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
 os.system(sim_dir)
@@ -63,26 +74,18 @@ while sim_dir:
   sim_dir = os.path.dirname(sim_dir)
   os.system(sim_dir)
 
-import argparse
-import re
-
-from collections import deque
-from random      import seed, randint
+from pymtl                   import *
+from mesh.MeshNetworkRTL     import MeshNetworkRTL
+from cmesh.CMeshNetworkRTL   import CMeshNetworkRTL
+from ring.RingNetworkRTL     import RingNetworkRTL
+from torus.TorusNetworkRTL   import TorusNetworkRTL
+from butterfly.BfNetworkRTL  import BfNetworkRTL
+from ocn_pclib.ifcs.Packet   import *
+from ocn_pclib.ifcs.Position import *
+from pclib.test              import TestVectorSimulator
 
 seed(0xdeadbeef)
 
-from pymtl          import *
-
-from meshnet.MeshNetworkRTL   import MeshNetworkRTL
-from ringnet.RingNetworkRTL   import RingNetworkRTL
-from torusnet.TorusNetworkRTL import TorusNetworkRTL
-from bfnet    import BfNetworkRTL
-from ocn_pclib.ifcs.Packet   import *
-from ocn_pclib.ifcs.Position import *
-from pclib.test import TestVectorSimulator
-
-from pclib.test.test_srcs         import TestSrcRTL
-from pclib.test.test_sinks        import TestSinkRTL
 #-------------------------------------------------------------------------
 # Command line processing
 #-------------------------------------------------------------------------
@@ -135,7 +138,8 @@ def parse_cmdline():
   parser.add_argument( "--topology",         
                        type    = str, 
                        default = "Mesh",
-                       choices = [ 'Ring', 'Mesh', 'Torus', 'Bf' ],
+                       choices = [ 'Ring', 'Mesh', 'CMesh', 
+                                   'Torus', 'Butterfly' ],
                        help    = "topology can be applied in the network." )
 
   parser.add_argument( "--router-latency",   
@@ -144,7 +148,7 @@ def parse_cmdline():
                        action  = "store",
                        help    = "number of pipeline stages in router."    )
 
-  parser.add_argument( "--link-latency",     
+  parser.add_argument( "--channel-latency",     
                        type    = int, 
                        default = 1,
                        action  = "store",
@@ -156,7 +160,7 @@ def parse_cmdline():
                        action  = "store",
                        help    = "width in bits for all links."            )
 
-  parser.add_argument( "--virtual-channel",  
+  parser.add_argument( "--virtual-channels",  
                        type    = int, 
                        default = 4,
                        action  = "store",
@@ -193,50 +197,15 @@ def parse_cmdline():
                        action  = "store",
                        help    = "number of outports in each router."      )
 
+  parser.add_argument( "--terminals-each",  
+                       type    = int, 
+                       default = 1,
+                       action  = "store",
+                       help    = "number of terminals attached to router." )
+
   opts = parser.parse_args()
   if opts.help: parser.error()
   return opts
-
-#-------------------------------------------------------------------------
-# TestHarness
-#-------------------------------------------------------------------------
-
-class TestHarness( Component ):
-
-  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs,
-                 src_initial, src_interval, sink_initial, sink_interval,
-                 arrival_time=None ):
-
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = MeshNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 0)
-
-    s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
-              for i in range ( s.dut.num_routers ) ]
-    if arrival_time != None:
-      s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval, arrival_time[i]) for i in range ( s.dut.num_routers ) ]
-    else:
-      s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval) for i in range ( s.dut.num_routers ) ]
-
-    # Connections
-    for i in range ( s.dut.num_routers ):
-      s.connect( s.srcs[i].send, s.dut.recv[i]   )
-      s.connect( s.dut.send[i],  s.sinks[i].recv )
-
-  def done( s ):
-    srcs_done = 1
-    sinks_done = 1
-    for i in range( s.dut.num_routers ):
-      if s.srcs[i].done() == 0:
-        srcs_done = 0
-    for i in range( s.dut.num_routers ):
-      if s.sinks[i].done() == 0:
-        sinks_done = 0
-    return srcs_done and sinks_done
-  def line_trace( s ):
-    return s.dut.line_trace()
-
 
 #--------------------------------------------------------------------------
 # Global Constants
@@ -387,17 +356,17 @@ def simulate( NetModel, num_nodes, net_width, net_height,
 #-------------------------------------------------------------------------
 
 def main():
-  print 'Hello world'
 
   opts = parse_cmdline()
 
   # Determine which model to use in the simulator
 
   topology_dict = {
-    'Ring'  : RingNetworkRTL, 
-    'Mesh'  : MeshNetworkRTL, 
-    'Torus' : TorusNetworkRTL,
-    'Bf'    : BfNetworkRTL
+    'Ring'     : RingNetworkRTL, 
+    'Mesh'     : MeshNetworkRTL, 
+    'CMesh'    : CMeshNetworkRTL, 
+    'Torus'    : TorusNetworkRTL,
+    'Butterfly': BfNetworkRTL
   }
 
   dump_vcd = None
