@@ -39,6 +39,17 @@ class PacketTimestamp( Packet ):
     return "({},{})>({},{}):{}:{}:{}".format(
       s.src_x, s.src_y, s.dst_x, s.dst_y, s.opaque, s.payload, s.timestamp ) 
 
+class CMeshPacket( Packet ):
+
+  def __init__( s ):
+    Packet.__init__( s )
+    s.dst_terminal = Bits4 (0)
+    
+  def __str__( s ):
+    return "({},{})>({},{}({})):{}:{}".format(
+      s.src_x, s.src_y, s.dst_x, s.dst_y, s.dst_terminal, s.opaque, s.payload ) 
+
+
 def mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload ):
   pkt = Packet()
   pkt.src_x   = src_x
@@ -60,7 +71,17 @@ def mk_pkt_timestamp( src_x, src_y, dst_x, dst_y, opaque, payload, timestamp ):
   pkt.timestamp = timestamp
   return pkt
   
-
+def mk_cmesh_pkt( src_x, src_y, dst_x, dst_y, terminal, opaque, payload ):
+  pkt = CMeshPacket()
+  pkt.src_x         = src_x
+  pkt.src_y         = src_y
+  pkt.dst_x         = dst_x
+  pkt.dst_y         = dst_y
+  pkt.opaque        = opaque
+  pkt.payload       = payload
+  pkt.dst_terminal  = terminal
+  return pkt
+ 
 class BasePacket( object ):
 
   def __init__( s ):
