@@ -1,50 +1,57 @@
 #=========================================================================
-# Router.py
+# CrossbarRTL.py
 #=========================================================================
-# A generic router model. 
+# Crossbar implementation.
 #
-# Author : Yanghui Ou, Cheng Tan
-#   Date : Mar 26, 2019
+# Author : Cheng Tan
+#   Date : April 6, 2019
 
-from pymtl      import *
-from pclib.ifcs import SendIfcRTL, RecvIfcRTL 
+from pymtl                  import *
+from pclib.ifcs.SendRecvIfc import *
+from network.Network        import Network
+from router.InputUnitRTL    import InputUnitRTL
+from router.SwitchUnitRTL   import SwitchUnitRTL
+from router.OutputUnitRTL   import OutputUnitRTL
+from CrossbarRouteUnitRTL   import CrossbarRouteUnitRTL
 
-class Router( Component ):
+class CrossbarRTL( Network ):
+  def construct( s, PacketType, num_terminals=4, 
+                 InputUnitType  = InputUnitRTL, 
+                 RouteUnitType  = CrossbarRouteUnitRTL, 
+                 SwitchUnitType = SwitchUnitRTL, 
+                 OutputUnitType = OutputUnitRTL ):
 
-  def construct( s, PacketType, PositionType, num_inports, num_outports, 
-                 InputUnitType, RouteUnitType, SwitchUnitType, 
-                 OutputUnitType ):
+    # Constants
 
-    s.num_inports  = num_inports
-    s.num_outports = num_outports
+    s.num_terminals = num_terminals
+    s.num_inports   = num_terminals
+    s.num_outports  = num_terminals
 
     # Interface
 
-    s.pos  = InPort( PositionType ) 
     s.recv = [ RecvIfcRTL( PacketType ) for _ in range( s.num_inports  ) ]
     s.send = [ SendIfcRTL( PacketType ) for _ in range( s.num_outports ) ]
-    
+
     # Components
 
-    s.input_units  = [ InputUnitType( PacketType ) 
+    s.input_units  = [ InputUnitType( PacketType )
                       for _ in range( s.num_inports ) ]
 
-    s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports ) 
+    s.route_units  = [ RouteUnitType( PacketType, s.num_outports )
                       for i in range( s.num_inports ) ]
 
     s.switch_units = [ SwitchUnitType( PacketType, s.num_inports )
                       for _ in range( s.num_outports ) ]
-    
+
     s.output_units = [ OutputUnitType( PacketType )
                       for _ in range( s.num_outports ) ]
-    
+
     # Connection
-    
+
     for i in range( s.num_inports ):
       s.connect( s.recv[i],             s.input_units[i].recv )
       s.connect( s.input_units[i].give, s.route_units[i].get  )
-      s.connect( s.pos,                 s.route_units[i].pos  )
-    
+
     for i in range( s.num_inports ):
       for j in range( s.num_outports ):
         s.connect( s.route_units[i].give[j], s.switch_units[j].get[i] )
@@ -52,19 +59,3 @@ class Router( Component ):
     for j in range( s.num_outports ):
       s.connect( s.switch_units[j].send, s.output_units[j].recv )
       s.connect( s.output_units[j].send, s.send[j]              )
-
-  # Line trace
-
-  def line_trace( s ):
-
-    in_trace  = [ "" for _ in range( s.num_inports  ) ]
-    out_trace = [ "" for _ in range( s.num_outports ) ]
-
-    for i in range( s.num_inports ):
-      in_trace[i]  = "{}".format( s.recv[i].line_trace() )
-    for i in range( s.num_outports ):
-      out_trace[i] = "{}".format( s.send[i].line_trace() )
-      
-    return "{}({}){}".format( 
-      "|".join( in_trace ), s.pos, "|".join( out_trace )
-    )  
