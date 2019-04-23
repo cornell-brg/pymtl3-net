@@ -1,7 +1,6 @@
 **1. linetrace
 **2. routeunit parametrization
 3. testing compact
-4. hypothesis testing 
 **5. butterfly routeunit
 **6. reorganize the directory hierarchy
 **7. simple input unit/butterfly->bf
@@ -9,7 +8,7 @@
 
 **1. cmesh -- concentrated mesh
 **2. set_parameter for multiple levels *
-3. asic
+**3. asic
 4. hypothesis
 5. openpiton
 

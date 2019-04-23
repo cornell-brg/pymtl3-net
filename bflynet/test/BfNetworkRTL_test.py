@@ -1,14 +1,14 @@
 #=========================================================================
-# BfNetworkRTL_test.py
+# BflyNetworkRTL_test.py
 #=========================================================================
-# Test for BfNetworkRTL
+# Test for BflyNetworkRTL
 #
 # Author : Cheng Tan, Yanghui Ou
 #   Date : April 8, 2019
 
 import tempfile
 from pymtl                   import *
-from butterfly.BfNetworkRTL  import BfNetworkRTL
+from bflynet.BflyNetworkRTL  import BflyNetworkRTL
 from ocn_pclib.rtl.queues    import NormalQueueRTL
 from pclib.test.test_srcs    import TestSrcRTL
 from pclib.test.test_sinks   import TestSinkRTL
@@ -57,7 +57,7 @@ def test_vector_Bf2( dump_vcd, test_verilog ):
   num_routers = n_fly * ( k_ary ** ( n_fly - 1 ) )
   r_rows      = k_ary ** ( n_fly - 1 )
   BfPos = mk_bf_pos( r_rows, n_fly )
-  model = BfNetworkRTL( BfPacket, BfPos, k_ary, n_fly, 0 )
+  model = BflyNetworkRTL( BfPacket, BfPos, k_ary, n_fly, 0 )
 
   for r in range (num_routers):
     path_k = "top.routers[" + str(r) + "].elaborate.k_ary"
@@ -97,7 +97,7 @@ def test_vector_Bf4( dump_vcd, test_verilog ):
   r_rows = k_ary ** ( n_fly - 1 )
   BfPos = mk_bf_pos( r_rows, n_fly )
 
-  model = BfNetworkRTL( BfPacket, BfPos, k_ary, n_fly, 0 )
+  model = BflyNetworkRTL( BfPacket, BfPos, k_ary, n_fly, 0 )
 
   for r in range (num_routers):
     path_k = "top.routers[" + str(r) + "].elaborate.k_ary"
@@ -135,7 +135,7 @@ class TestHarness( Component ):
 
     r_rows = k_ary ** ( n_fly - 1 )
     BfPos  = mk_bf_pos( r_rows, n_fly )
-    s.dut  = BfNetworkRTL( MsgType, BfPos, num_routers, 0)
+    s.dut  = BflyNetworkRTL( MsgType, BfPos, num_routers, 0)
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_routers ) ]

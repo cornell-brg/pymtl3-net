@@ -11,15 +11,15 @@ from router.Router        import Router
 from router.InputUnitRTL  import InputUnitRTL
 from router.SwitchUnitRTL import SwitchUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
-from DTRBfRouteUnitRTL    import DTRBfRouteUnitRTL
+from DTRBflyRouteUnitRTL  import DTRBflyRouteUnitRTL
 
-class BfRouterRTL( Router ):
+class BflyRouterRTL( Router ):
 
   def construct( s, PacketType, PositionType, 
                  k_ary = 2, InputUnitType = InputUnitRTL, 
-                 RouteUnitType = DTRBfRouteUnitRTL,
+                 RouteUnitType = DTRBflyRouteUnitRTL,
                  SwitchUnitType = SwitchUnitRTL ):
     
-    super( BfRouterRTL, s ).construct(
+    super( BflyRouterRTL, s ).construct(
       PacketType, PositionType, k_ary, k_ary, InputUnitType, RouteUnitType,
       SwitchUnitType, OutputUnitRTL )

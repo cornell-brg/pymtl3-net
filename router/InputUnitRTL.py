@@ -14,7 +14,7 @@ from pclib.rtl.queues import NormalQueueRTL
 
 class InputUnitRTL( Component ):
 
-  def construct( s, PacketType, QueueType=NormalQueueRTL ):
+  def construct( s, PacketType, QueueType = NormalQueueRTL ):
 
     # Interface
 

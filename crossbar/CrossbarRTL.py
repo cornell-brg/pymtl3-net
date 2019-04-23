@@ -8,13 +8,12 @@
 
 from pymtl                  import *
 from pclib.ifcs.SendRecvIfc import *
-from network.Network        import Network
 from router.InputUnitRTL    import InputUnitRTL
 from router.SwitchUnitRTL   import SwitchUnitRTL
 from router.OutputUnitRTL   import OutputUnitRTL
 from CrossbarRouteUnitRTL   import CrossbarRouteUnitRTL
 
-class CrossbarRTL( Network ):
+class CrossbarRTL( Component ):
   def construct( s, PacketType, num_terminals=4, 
                  InputUnitType  = InputUnitRTL, 
                  RouteUnitType  = CrossbarRouteUnitRTL, 
@@ -59,3 +58,9 @@ class CrossbarRTL( Network ):
     for j in range( s.num_outports ):
       s.connect( s.switch_units[j].send, s.output_units[j].recv )
       s.connect( s.output_units[j].send, s.send[j]              )
+
+  def line_trace( s ):
+    trace = [ "" for _ in range( s.num_terminals ) ]
+    for i in range( s.num_terminals ):
+      trace[i] += s.send[i].line_trace()
+    return "|".join( trace )

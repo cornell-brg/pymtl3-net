@@ -7,19 +7,19 @@
 #   Date : April 16, 2019
 
 import tempfile
-from pymtl                       import *
-from mesh.MeshNetworkRTL         import MeshNetworkRTL
-from cmesh.CMeshNetworkRTL       import CMeshNetworkRTL
-from ocn_pclib.rtl.queues        import NormalQueueRTL
-from pclib.test.test_srcs        import TestSrcRTL
-from pclib.test.test_sinks       import TestSinkRTL
-from pclib.test                  import TestVectorSimulator
-from ocn_pclib.ifcs.Packet       import *
-from ocn_pclib.ifcs.Position     import *
-from mesh.DORYMeshRouteUnitRTL   import DORYMeshRouteUnitRTL
-from mesh.DORXMeshRouteUnitRTL   import DORXMeshRouteUnitRTL
-from cmesh.DORXCMeshRouteUnitRTL import DORXCMeshRouteUnitRTL
-from cmesh.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
+from pymtl                          import *
+from meshnet.MeshNetworkRTL         import MeshNetworkRTL
+from cmeshnet.CMeshNetworkRTL       import CMeshNetworkRTL
+from ocn_pclib.rtl.queues           import NormalQueueRTL
+from pclib.test.test_srcs           import TestSrcRTL
+from pclib.test.test_sinks          import TestSinkRTL
+from pclib.test                     import TestVectorSimulator
+from ocn_pclib.ifcs.Packet          import *
+from ocn_pclib.ifcs.Position        import *
+from meshnet.DORYMeshRouteUnitRTL   import DORYMeshRouteUnitRTL
+from meshnet.DORXMeshRouteUnitRTL   import DORXMeshRouteUnitRTL
+from cmeshnet.DORXCMeshRouteUnitRTL import DORXCMeshRouteUnitRTL
+from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector

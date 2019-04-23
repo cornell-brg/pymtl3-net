@@ -7,23 +7,32 @@
 #   Date : Mar 10, 2019
 
 from pymtl                  import *
-from network.Network        import Network
 from channel.ChannelRTL     import ChannelRTL
 from Direction              import *
 from pclib.ifcs.SendRecvIfc import *
-from mesh.MeshRouterRTL     import MeshRouterRTL
+from meshnet.MeshRouterRTL  import MeshRouterRTL
 
-class TorusNetworkRTL( Network ):
+class TorusNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4, chl_lat=0 ):
 
     # Constants
 
-    s.num_routers = mesh_wid * mesh_ht
-    num_channels  = mesh_ht * mesh_wid * 4
+    s.num_routers   = mesh_wid * mesh_ht
+    num_channels    = mesh_ht * mesh_wid * 4
+    s.num_terminals = s.num_routers
 
-    super( TorusNetworkRTL, s ).construct( PacketType, PositionType,
-      MeshRouterRTL, ChannelRTL, SendIfcRTL, RecvIfcRTL, s.num_routers,
-      s.num_routers, num_channels, chl_lat )
+    # Interface
+
+    s.recv       = [ RecvIfcRTL(PacketType) for _ in range(s.num_terminals)]
+    s.send       = [ SendIfcRTL(PacketType) for _ in range(s.num_terminals)]
+
+    # Components
+
+    s.routers    = [ MeshRouterRTL( PacketType, PositionType )
+                     for i in range( s.num_routers ) ]
+
+    s.channels   = [ ChannelRTL( PacketType, latency = chl_lat)
+                     for _ in range( num_channels ) ]
 
     # Connect s.routers together in Torus
 
@@ -60,6 +69,12 @@ class TorusNetworkRTL( Network ):
         for x in range( mesh_wid ):
           idx = y * mesh_wid + x
           s.routers[idx].pos = PositionType( x, y )
+
+  def line_trace( s ):
+    trace = [ "" for _ in range( s.num_terminals ) ]
+    for i in range( s.num_terminals ):
+      trace[i] += s.send[i].line_trace()
+    return "|".join( trace )
 
 #  def line_trace( s ):
 #    trace = ''

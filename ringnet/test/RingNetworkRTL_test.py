@@ -8,7 +8,7 @@
 
 import tempfile
 from pymtl                   import *
-from ring.RingNetworkRTL     import RingNetworkRTL
+from ringnet.RingNetworkRTL  import RingNetworkRTL
 from ocn_pclib.rtl.queues    import NormalQueueRTL
 from pclib.test.test_srcs    import TestSrcRTL
 from pclib.test.test_sinks   import TestSinkRTL

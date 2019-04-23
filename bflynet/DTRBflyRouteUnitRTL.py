@@ -9,7 +9,7 @@
 from pymtl import *
 from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
-class DTRBfRouteUnitRTL( Component ):
+class DTRBflyRouteUnitRTL( Component ):
 
   def construct( s, PacketType, PositionType, num_outports, n_fly = 3 ):
 

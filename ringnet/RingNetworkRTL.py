@@ -7,23 +7,32 @@
 #   Date : April 6, 2019
 
 from pymtl                  import *
-from network.Network        import Network
 from pclib.ifcs.SendRecvIfc import *
 from Direction              import *
 from RingRouterRTL          import RingRouterRTL
 from channel.ChannelRTL     import ChannelRTL
 
-class RingNetworkRTL( Network ):
+class RingNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, num_routers=4, chl_lat=0 ):
 
     # Constants
 
     s.num_routers = num_routers
     num_channels  = num_routers * 2
+    s.num_terminals = num_routers
 
-    super( RingNetworkRTL, s ).construct( PacketType, PositionType,
-      RingRouterRTL, ChannelRTL, SendIfcRTL, RecvIfcRTL, s.num_routers,
-      s.num_routers, num_channels, chl_lat )
+    # Interface
+
+    s.recv       = [ RecvIfcRTL(PacketType) for _ in range(s.num_terminals)]
+    s.send       = [ SendIfcRTL(PacketType) for _ in range(s.num_terminals)]
+
+    # Components
+
+    s.routers    = [ RingRouterRTL( PacketType, PositionType )
+                     for i in range( s.num_routers ) ]
+
+    s.channels   = [ ChannelRTL( PacketType, latency = chl_lat)
+                     for _ in range( num_channels ) ]
 
     # Connect s.routers together in Mesh
 
@@ -47,3 +56,9 @@ class RingNetworkRTL( Network ):
     def up_pos():
       for r in range( s.num_routers ):
         s.routers[r].pos = PositionType( r )
+
+  def line_trace( s ):
+    trace = [ "" for _ in range( s.num_terminals ) ]
+    for i in range( s.num_terminals ):
+      trace[i] += s.send[i].line_trace()
+    return "|".join( trace )

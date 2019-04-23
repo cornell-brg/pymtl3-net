@@ -7,19 +7,19 @@
 #   Date : Mar 20, 2019
 
 import tempfile
-from pymtl                     import *
-from mesh.MeshNetworkRTL       import MeshNetworkRTL
-from ocn_pclib.rtl.queues      import NormalQueueRTL
-from pclib.rtl.enrdy_queues    import *
-from pclib.test.test_srcs      import TestSrcRTL
-from pclib.test.test_sinks     import TestSinkRTL
-from pclib.test                import TestVectorSimulator
-from ocn_pclib.ifcs.Packet     import Packet, mk_pkt
-from ocn_pclib.ifcs.Position   import *
-from mesh.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
-from mesh.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
-from mesh.TestMeshRouteUnitRTL import TestMeshRouteUnitRTL
-from router.InputUnitRTL       import InputUnitRTL
+from pymtl                        import *
+from ocn_pclib.rtl.queues         import NormalQueueRTL
+from pclib.rtl.enrdy_queues       import *
+from pclib.test.test_srcs         import TestSrcRTL
+from pclib.test.test_sinks        import TestSinkRTL
+from pclib.test                   import TestVectorSimulator
+from ocn_pclib.ifcs.Packet        import Packet, mk_pkt
+from ocn_pclib.ifcs.Position      import *
+from meshnet.MeshNetworkRTL       import MeshNetworkRTL
+from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from meshnet.TestMeshRouteUnitRTL import TestMeshRouteUnitRTL
+from router.InputUnitRTL          import InputUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -67,8 +67,10 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
 #      path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
 #      model.set_parameter(path_qt, NormalQueueRTL)
 #      model.set_parameter(path_ru, DORXMeshRouteUnitRTL)
+
   model.set_parameter("top.routers*.elaborate.RouteUnitType", DORYMeshRouteUnitRTL)
-  model.set_parameter("top.routers*.input_units*.elaborate.QueueType", NormalQueueRTL)
+#  model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
+  model.set_param("top.routers*.input_units*.elaborate.QueueType", NormalQueueRTL)
 
   x = 'x'
 

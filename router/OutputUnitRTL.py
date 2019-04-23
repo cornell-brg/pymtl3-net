@@ -12,7 +12,7 @@ from pymtl import *
 from pclib.ifcs.SendRecvIfc import *
 
 class OutputUnitRTL( Component ):
-  def construct( s, PacketType, QueueType=None ):
+  def construct( s, PacketType, QueueType = None ):
     
     # Interface
     s.recv = RecvIfcRTL ( PacketType )

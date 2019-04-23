@@ -7,24 +7,32 @@
 #   Date : April 6, 2019
 
 from pymtl                  import *
-from network.Network        import Network
 from pclib.ifcs.SendRecvIfc import *
 from channel.ChannelRTL     import ChannelRTL
-from BfRouterRTL            import BfRouterRTL
+from BflyRouterRTL          import BflyRouterRTL
 
-class BfNetworkRTL( Network ):
+class BflyNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, k_ary, n_fly, chl_lat=0 ):
 
     # Constants
 
     r_rows        = k_ary ** ( n_fly - 1 )
     s.num_routers = n_fly * ( r_rows )
-    num_terminals = k_ary ** n_fly
+    s.num_terminals = k_ary ** n_fly
     num_channels  = ( n_fly - 1 ) * ( r_rows ) * k_ary
 
-    super( BfNetworkRTL, s ).construct( PacketType, PositionType,
-      BfRouterRTL, ChannelRTL, SendIfcRTL, RecvIfcRTL, s.num_routers,
-      num_terminals, num_channels, chl_lat )
+    # Interface
+
+    s.recv = [ RecvIfcRTL(PacketType) for _ in range(s.num_terminals)]
+    s.send = [ SendIfcRTL(PacketType) for _ in range(s.num_terminals)]
+
+    # Components
+
+    s.routers  = [ BflyRouterRTL( PacketType, PositionType )
+                   for i in range( s.num_routers ) ]
+
+    s.channels = [ ChannelRTL( PacketType, latency = chl_lat)
+                     for _ in range( num_channels ) ]
 
     # Connect s.routers together in Butterfly
 
@@ -59,3 +67,9 @@ class BfNetworkRTL( Network ):
       for n in range( n_fly ):
         for r in range( r_rows ):
           s.routers[r_rows * n + r].pos = PositionType( r, n )
+
+  def line_trace( s ):
+    trace = [ "" for _ in range( s.num_terminals ) ]
+    for i in range( s.num_terminals ):
+      trace[i] += s.send[i].line_trace()
+    return "|".join( trace )
