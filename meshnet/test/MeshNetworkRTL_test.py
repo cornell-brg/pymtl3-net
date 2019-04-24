@@ -68,9 +68,11 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
 #      model.set_parameter(path_qt, NormalQueueRTL)
 #      model.set_parameter(path_ru, DORXMeshRouteUnitRTL)
 
-  model.set_parameter("top.routers*.elaborate.RouteUnitType", DORYMeshRouteUnitRTL)
-#  model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
-  model.set_param("top.routers*.input_units*.elaborate.QueueType", NormalQueueRTL)
+#  model.set_parameter("top.routers*.elaborate.RouteUnitType", DORYMeshRouteUnitRTL)
+#  model.set_parameter("top.routers*.input_units*.elaborate.QueueType", NormalQueueRTL)
+#  model.set_parameter("top.routers*.elaborate.RouteUnitType", TestMeshRouteUnitRTL)
+  model.set_param("top.routers*.input_units*.construct", QueueType=NormalQueueRTL)
+  model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
 
   x = 'x'
 
