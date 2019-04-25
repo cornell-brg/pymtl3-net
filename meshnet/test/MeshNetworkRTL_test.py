@@ -15,6 +15,7 @@ from pclib.test.test_sinks        import TestSinkRTL
 from pclib.test                   import TestVectorSimulator
 from ocn_pclib.ifcs.Packet        import Packet, mk_pkt
 from ocn_pclib.ifcs.Position      import *
+from ocn_pclib.draw               import *
 from meshnet.MeshNetworkRTL       import MeshNetworkRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
@@ -97,7 +98,11 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
   [  x,    [0,0,0000],     x,       x  ],
   ]
 
+  dt = DrawGraph()
+  model.set_draw_graph( dt )
   run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
+
+  dt.draw_topology( model.routers, model.channels )
 
 def test_vector_mesh4x4( dump_vcd, test_verilog ):
 
@@ -127,8 +132,9 @@ def test_vector_mesh4x4( dump_vcd, test_verilog ):
   [  0,    [1,0,1005],     4,     1003 ],
   ]
 
+  dt = DrawGraph()
+  model.set_draw_graph( dt )
   run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
-
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -203,7 +209,7 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases (specific for 4x4 mesh)
 #-------------------------------------------------------------------------
 
-def test_srcsink_mesh4x4_():
+def ttest_srcsink_mesh4x4_():
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
@@ -238,7 +244,7 @@ def test_srcsink_mesh4x4_():
                     0, 0, 0, 0, arrival_pipes )
   run_sim( th )
 
-def test_srcsink_mesh2x2():
+def ttest_srcsink_mesh2x2():
 
   pkt = mk_pkt( 0, 0, 1, 1, 0, 0xfaceb00c )
 

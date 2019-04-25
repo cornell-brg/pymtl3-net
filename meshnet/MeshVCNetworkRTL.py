@@ -7,14 +7,13 @@
 #   Date : April 13, 2019
 
 from pymtl                  import *
-from network.Network        import Network
 from pclib.ifcs.SendRecvIfc import *
 from Direction              import *
 from channel.ChannelRTL     import ChannelRTL
 from MeshRouterRTL          import MeshRouterRTL
 from router.ULVCUnitRTL     import ULVCUnitRTL
 
-class MeshVCNetworkRTL( Network ):
+class MeshVCNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4, chl_lat=0 ):
 
     # Constants
@@ -96,3 +95,9 @@ class MeshVCNetworkRTL( Network ):
         for x in range( mesh_wid ):
           idx = y * mesh_wid + x
           s.routers[idx].pos = PositionType( x, y )
+
+  def line_trace( s ):
+    trace = [ "" for _ in range( s.num_terminals ) ]
+    for i in range( s.num_terminals ):
+      trace[i] += s.send[i].line_trace()
+    return "|".join( trace )

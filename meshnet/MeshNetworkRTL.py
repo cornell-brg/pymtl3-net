@@ -7,7 +7,6 @@
 #   Date : Mar 10, 2019
 
 from pymtl                   import *
-from network.Network         import Network
 from pclib.ifcs.SendRecvIfc  import *
 from Direction               import *
 from channel.ChannelRTL      import ChannelRTL
