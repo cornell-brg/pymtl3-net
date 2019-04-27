@@ -1,7 +1,11 @@
 import sys
 
 import networkx as nx
+from networkx.drawing.nx_agraph import graphviz_layout, to_agraph
 import matplotlib.pyplot as plt
+
+from graphviz import Digraph
+import pydot
 
 class DrawGraph( object ):
 
@@ -32,8 +36,9 @@ class DrawGraph( object ):
         color.append( 'y' )
         size.append( 50 )
 
-    nx.draw_spectral(G, node_color = color, node_size = size)
-    
+#    dot_pos = nx.nx_pydot.pydot_layout(G, prog='dot')
+    dot_pos = nx.nx_pydot.graphviz_layout(G)
+    nx.draw(G, node_color = color, node_size = size, pos=dot_pos)
     plt.show()
   
   def register_connection( s, node1, node2 ):
