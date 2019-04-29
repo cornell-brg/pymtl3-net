@@ -102,7 +102,6 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
   model.set_draw_graph( dt )
   run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
 
-  dt.draw_topology( model.routers, model.channels )
 
 def test_vector_mesh4x4( dump_vcd, test_verilog ):
 
@@ -135,6 +134,8 @@ def test_vector_mesh4x4( dump_vcd, test_verilog ):
   dt = DrawGraph()
   model.set_draw_graph( dt )
   run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
+
+  dt.draw_topology( model.routers, model.channels )
 
 #-------------------------------------------------------------------------
 # TestHarness

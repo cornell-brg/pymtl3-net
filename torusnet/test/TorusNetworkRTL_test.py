@@ -16,6 +16,7 @@ from pclib.test                     import TestVectorSimulator
 from ocn_pclib.ifcs.Packet          import Packet, mk_pkt
 from ocn_pclib.ifcs.Position        import *
 from torusnet.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
+from ocn_pclib.draw                 import *
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -127,7 +128,12 @@ def test_vector_Torus4x4( dump_vcd, test_verilog ):
   [  0,    [1,0,1005],     4,     1003 ],
   ]
 
+
+  dt = DrawGraph()
+  model.set_draw_graph( dt )
   run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
+
+  dt.draw_topology( model.routers, model.channels )
 
 #-------------------------------------------------------------------------
 # TestHarness
