@@ -1,7 +1,7 @@
 #=========================================================================
-# Direction.py
+# directions.py
 #=========================================================================
-# Utilities for router.
+# Direction definitions for meshnet.
 #
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 10, 2019

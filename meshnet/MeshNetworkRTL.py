@@ -8,7 +8,7 @@
 
 from pymtl                   import *
 from pclib.ifcs.SendRecvIfc  import *
-from Direction               import *
+from directions              import *
 from channel.ChannelRTL      import ChannelRTL
 from MeshRouterRTL           import MeshRouterRTL
 from ocn_pclib.ifcs.Packet   import *

@@ -8,7 +8,7 @@
 
 from pymtl      import *
 from pclib.ifcs import GetIfcRTL, GiveIfcRTL
-from Direction  import *
+from directions import *
 
 class DORXMeshRouteUnitRTL( Component ):
 
