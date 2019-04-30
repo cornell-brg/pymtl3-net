@@ -81,7 +81,7 @@ def mk_bit_struct( name, fields, str_func=None ):
     assert_str = ""
     assign_str = ""
     # FIXME: order is screwed
-    for field_name, FieldType in fields.items():
+    for field_name, FieldType in fields:
       # if not isinstance( FieldType(), BitStruct ):
       #   args_str   += "{}=0, ".format( field_name )
       #   assign_str += "    s.{} = {}( {} )\n".format( 

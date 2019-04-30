@@ -141,10 +141,10 @@ def mk_mesh_pos( mesh_wid, mesh_ht ):
     XType = mk_bits( clog2( mesh_wid ) )
     YType = mk_bits( clog2( mesh_ht  ) )
     new_name  = "MeshPosition_" + str( mesh_wid ) + "x" + str( mesh_ht )
-    new_class = mk_bit_struct( new_name, {
-      'pos_x' : XType,
-      'pos_y' : YType
-    })
+    new_class = mk_bit_struct( new_name, [
+      ( 'pos_x' , XType ),
+      ( 'pos_y' , YType )
+    ])
     _mesh_pos_dict[ ( mesh_wid, mesh_ht ) ] = new_class
     return new_class
 
