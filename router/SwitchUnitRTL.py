@@ -54,7 +54,10 @@ class SwitchUnitRTL( Component ):
     @s.update
     def up_get_en():
       for i in range( num_inports ):
-        s.get[i].en = 1 if s.send.rdy and s.mux.sel==i else 0
+        s.get[i].en = (
+          Bits1(1) if s.get[i].rdy and s.send.rdy and s.mux.sel==i else 
+          Bits1(0)
+        )
 
   def line_trace( s ):
 
