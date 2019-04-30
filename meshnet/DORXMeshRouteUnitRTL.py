@@ -50,7 +50,7 @@ class DORXMeshRouteUnitRTL( Component ):
           s.out_dir = WEST
         elif s.get.msg.dst_x > s.pos.pos_x:
           s.out_dir = EAST
-        elif s.get.msg.dst_y < s.pos.pos_y:
+        elif s.get.msg.dst_y > s.pos.pos_y:
           s.out_dir = NORTH
         else:
           s.out_dir = SOUTH
