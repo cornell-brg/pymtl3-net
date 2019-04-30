@@ -72,9 +72,9 @@ class TestHarness( Component ):
                  src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    s.src  = TestSrcRTL   ( MsgType, src_msgs,  src_initial,  src_interval  )
-    s.sink = TestSinkRTL  ( MsgType, sink_msgs, sink_initial, sink_interval )
-    s.dut  = ULVCUnitRTL ( MsgType  )
+    s.src  = TestSrcRTL ( MsgType, src_msgs,  src_initial,  src_interval  )
+    s.sink = TestSinkRTL( MsgType, sink_msgs, sink_initial, sink_interval )
+    s.dut  = ULVCUnitRTL( MsgType  )
 
     # Connections
     s.connect( s.src.send,     s.dut.recv  )
@@ -106,7 +106,7 @@ def run_sim( test_harness, max_cycles=100 ):
   # Set parameters
 
   test_harness.set_parameter("top.dut.elaborate.QueueType", NormalQueueRTL)
-  test_harness.set_parameter("top.dut.elaborate.PacketType", Packet)
+  # test_harness.set_parameter("top.dut.elaborate.PacketType", Packet)
 
   # Create a simulator
 
