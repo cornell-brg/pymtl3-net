@@ -8,7 +8,7 @@
 
 from pymtl import *
 
-class Encoder( RTLComponent ):
+class Encoder( Component ):
   def construct( s, in_width, out_width ):
 
     # Interface
