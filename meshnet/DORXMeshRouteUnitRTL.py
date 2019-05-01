@@ -39,7 +39,7 @@ class DORXMeshRouteUnitRTL( Component ):
     @s.update
     def up_ru_routing():
 
-      s.out_dir = Bits1(0)
+      s.out_dir = Bits3(0)
       for i in range( s.num_outports ):
         s.give[i].rdy = Bits1(0)
 
@@ -58,7 +58,7 @@ class DORXMeshRouteUnitRTL( Component ):
 
     @s.update
     def up_ru_give_en():
-      s.get.en = s.give_ens > 0 
+      s.get.en = s.give_ens > Bits5(0) 
 
   # Line trace
   def line_trace( s ):

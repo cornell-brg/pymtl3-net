@@ -39,26 +39,26 @@ class DORYMeshRouteUnitRTL( Component ):
     @s.update
     def up_ru_routing():
  
-      s.out_dir = 0
+      s.out_dir = Bits3(0)
       for i in range( s.num_outports ):
-        s.give[i].rdy = 0
+        s.give[i].rdy = Bits1(0)
 
       if s.get.rdy:
         if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
           s.out_dir = SELF
         elif s.get.msg.dst_y < s.pos.pos_y:
-          s.out_dir = NORTH
-        elif s.get.msg.dst_y > s.pos.pos_y:
           s.out_dir = SOUTH
+        elif s.get.msg.dst_y > s.pos.pos_y:
+          s.out_dir = NORTH
         elif s.get.msg.dst_x < s.pos.pos_x:
           s.out_dir = WEST
         else:
           s.out_dir = EAST
-        s.give[ s.out_dir ].rdy = 1
+        s.give[ s.out_dir ].rdy = Bits1(1)
 
     @s.update
     def up_ru_get_en():
-      s.get.en = s.give_ens > 0 
+      s.get.en = s.give_ens > Bits5(0) 
 
   # Line trace
   def line_trace( s ):
