@@ -327,7 +327,9 @@ def test_hypothesis( mesh_wid, mesh_ht, routing, pos_x, pos_y, pkts,
   # Configure the test harness
   # TODO: add delays
   th = TestHarness( Packet, mesh_wid, mesh_ht, pos_x, pos_y, 
-                    src_msgs, sink_msgs )
+                    src_msgs, sink_msgs,
+                    src_init, src_inter,
+                    sink_init, sink_inter )
   th.set_param( "top.dut.construct", 
     RouteUnitType = DORXMeshRouteUnitRTL if routing=='x' else DORYMeshRouteUnitRTL,
     InputUnitType = InputUnitRTL
