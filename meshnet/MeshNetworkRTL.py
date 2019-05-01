@@ -43,13 +43,13 @@ class MeshNetworkRTL( Component ):
     chl_id  = 0
     for i in range( s.num_routers ):
       if i / mesh_wid > 0:
-        s.connect( s.routers[i].send[NORTH], s.channels[chl_id].recv )
-        s.connect( s.channels[chl_id].send, s.routers[i-mesh_wid].recv[SOUTH] )
+        s.connect( s.routers[i].send[SOUTH], s.channels[chl_id].recv )
+        s.connect( s.channels[chl_id].send, s.routers[i-mesh_wid].recv[NORTH] )
         chl_id += 1
 
       if i / mesh_wid < mesh_ht - 1:
-        s.connect( s.routers[i].send[SOUTH], s.channels[chl_id].recv )
-        s.connect( s.channels[chl_id].send, s.routers[i+mesh_wid].recv[NORTH] )
+        s.connect( s.routers[i].send[NORTH], s.channels[chl_id].recv )
+        s.connect( s.channels[chl_id].send, s.routers[i+mesh_wid].recv[SOUTH] )
         chl_id += 1
 
       if i % mesh_wid > 0:
@@ -70,14 +70,14 @@ class MeshNetworkRTL( Component ):
       # Connect the unused ports
 
       if i / mesh_wid == 0:
-        s.connect( s.routers[i].send[NORTH].rdy,         0 )
-        s.connect( s.routers[i].recv[NORTH].en,          0 )
-        s.connect( s.routers[i].recv[NORTH].msg.payload, 0 )
-
-      if i / mesh_wid == mesh_ht - 1:
         s.connect( s.routers[i].send[SOUTH].rdy,         0 )
         s.connect( s.routers[i].recv[SOUTH].en,          0 )
         s.connect( s.routers[i].recv[SOUTH].msg.payload, 0 )
+
+      if i / mesh_wid == mesh_ht - 1:
+        s.connect( s.routers[i].send[NORTH].rdy,         0 )
+        s.connect( s.routers[i].recv[NORTH].en,          0 )
+        s.connect( s.routers[i].recv[NORTH].msg.payload, 0 )
 
       if i % mesh_wid == 0:
         s.connect( s.routers[i].send[WEST].rdy,          0 )
