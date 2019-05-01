@@ -29,6 +29,10 @@ class Packet( object ):
     return "({},{})>({},{}):{}:{}".format(
       s.src_x, s.src_y, s.dst_x, s.dst_y, s.opaque, s.payload ) 
 
+  def __repr__( s ):
+    return "({},{})>({},{}):{}:{}".format(
+      s.src_x, s.src_y, s.dst_x, s.dst_y, s.opaque, s.payload ) 
+
 class PacketTimestamp( Packet ):
 
   def __init__( s ):

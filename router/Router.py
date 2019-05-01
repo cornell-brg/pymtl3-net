@@ -66,5 +66,7 @@ class Router( Component ):
       out_trace[i] = "{}".format( s.send[i].line_trace() )
       
     return "{}({}){}".format( 
-      "|".join( in_trace ), s.pos, "|".join( out_trace )
+      "|".join( in_trace ), 
+      s.pos, 
+      "|".join( out_trace )
     )  
