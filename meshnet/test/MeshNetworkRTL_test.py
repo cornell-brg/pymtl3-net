@@ -15,7 +15,7 @@ from pclib.test.test_sinks        import TestSinkRTL
 from pclib.test                   import TestVectorSimulator
 from ocn_pclib.ifcs.Packet        import Packet, mk_pkt
 from ocn_pclib.ifcs.Position      import *
-from ocn_pclib.draw               import *
+# from ocn_pclib.draw               import *
 from meshnet.MeshNetworkRTL       import MeshNetworkRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
@@ -51,7 +51,6 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
      
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
-  model.sim_reset()
 
 def test_vector_mesh2x2( dump_vcd, test_verilog ):
 
@@ -98,8 +97,8 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
   [  x,    [0,0,0000],     x,       x  ],
   ]
 
-  dt = DrawGraph()
-  model.set_draw_graph( dt )
+  # dt = DrawGraph()
+  # model.set_draw_graph( dt )
   run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
 
 
@@ -131,8 +130,8 @@ def test_vector_mesh4x4( dump_vcd, test_verilog ):
   [  0,    [1,0,1005],     4,     1003 ],
   ]
 
-  dt = DrawGraph()
-  model.set_draw_graph( dt )
+  # dt = DrawGraph()
+  # model.set_draw_graph( dt )
   run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
 
   dt.draw_topology( model.routers, model.channels )
