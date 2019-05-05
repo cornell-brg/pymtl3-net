@@ -53,6 +53,7 @@ def run_vector_test( model, test_vectors, mesh_wid=4, mesh_ht=4,
 
   def tv_out( model, test_vector ):
     for i in range( model.num_inports ):
+      print 'i:', i, ';', model.recv[i].rdy, test_vector[3][i]
       assert model.recv[i].rdy == test_vector[3][i]
 
     for i in range( model.num_outports ):
@@ -71,15 +72,14 @@ def test_vector_Router_4_4X():
   pos_x    = 1
   pos_y    = 1
   
-  
   xx = 'x'
   inputs_buffer= [
-# [dst_x,dst_y] send_rdy       payload       recv_rdy      send_msg
+#     [dst]      send_rdy       payload       recv_rdy      send_msg
   [[4,4,7,4,5],[0,0,0,0,0],[11,12,13,14,15],[1,1,1,1,1],[xx,xx,xx,xx,xx]],
   [[4,4,7,8,9],[0,0,0,0,0],[21,22,23,24,25],[1,1,1,1,1],[xx,xx,xx,xx,xx]],
-  [[4,4,7,8,9],[1,1,1,1,1],[31,32,33,34,35],[0,0,0,0,0],[11,13,xx,xx,15]],
-  [[4,6,7,8,9],[1,1,1,1,1],[41,42,43,44,45],[1,0,1,0,1],[12,23,xx,25,xx]],
-  [[9,0,0,4,6],[1,1,0,1,1],[51,52,53,54,55],[1,1,1,0,1],[14,43,xx,45,xx]],
+  [[4,4,7,8,9],[1,1,1,1,1],[31,32,33,34,35],[0,0,0,0,0],[13,11,xx,xx,15]],
+  [[4,6,7,8,9],[1,1,1,1,1],[41,42,43,44,45],[1,0,1,0,1],[23,12,xx,25,xx]],
+  [[9,0,0,4,6],[1,1,0,1,1],[51,52,53,54,55],[0,1,1,0,1],[43,14,xx,45,xx]],
   ]
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
@@ -118,7 +118,7 @@ class TestHarness( Component ):
     s.srcs  = [ TestSrcRTL    ( MsgType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range  ( s.dut.num_inports ) ]
     s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial, 
-                sink_interval, arrival_time[i]) for i in range ( s.dut.num_outports ) ]
+                sink_interval ) for i in range ( s.dut.num_outports ) ]
 
     # Connections
 
@@ -182,14 +182,11 @@ def run_sim( test_harness, max_cycles=100 ):
 #-------------------------------------------------------------------------
 
 #              x,y,pl,dir
-test_msgs = [[(0,0,11,0),(0,0,12,0),(0,1,13,2),(2,1,14,3),(0,0,15,0)],
-             [(0,0,21,0),(0,2,22,1),(0,1,23,2),(2,1,24,3),(2,1,25,3)],
-             [(0,2,31,1),(0,0,32,0),(0,1,33,2),(1,1,34,4),(1,1,35,4)]
+test_msgs = [[(0,0,11,1),(0,0,12,1),(0,1,13,2),(2,1,14,3),(0,0,15,1)],
+             [(0,0,21,1),(0,2,22,0),(0,1,23,2),(2,1,24,3),(2,1,25,3)],
+             [(0,2,31,0),(0,0,32,1),(0,1,33,2),(1,1,34,4),(1,1,35,4)]
             ]
 result_msgs = [[],[],[],[],[]]
-
-# note that need to yield one cycle for reset
-arrival_pipes = [[2,3,4,5,6],[3,4],[2,3,4],[2,3,4],[4,5]]
 
 def test_normal_simple():
 
@@ -198,11 +195,10 @@ def test_normal_simple():
     for i in range( len( item ) ):
       (dst_x,dst_y,payload,dir_out) = item[i]
       pkt = mk_pkt (0, 0, dst_x, dst_y, 1, payload)
-      src_packets[dir_out].append( pkt )
+      src_packets[i].append( pkt )
       result_msgs[dir_out].append( pkt )
 
-  th = TestHarness( Packet, 4, 4, 1, 1, src_packets, result_msgs, 0, 0, 0, 0,
-                    arrival_pipes )
+  th = TestHarness( Packet, 4, 4, 1, 1, src_packets, result_msgs, 0, 0, 0, 0 )
   run_sim( th )
 
 def test_self_simple():
