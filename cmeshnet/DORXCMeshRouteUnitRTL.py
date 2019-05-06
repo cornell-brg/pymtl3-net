@@ -8,7 +8,7 @@
 
 from pymtl      import *
 from pclib.ifcs import GetIfcRTL, GiveIfcRTL
-from Direction  import *
+from directions import *
 
 class DORXCMeshRouteUnitRTL( Component ):
 
@@ -51,9 +51,9 @@ class DORXCMeshRouteUnitRTL( Component ):
         elif s.get.msg.dst_x > s.pos.pos_x:
           s.out_dir = EAST
         elif s.get.msg.dst_y < s.pos.pos_y:
-          s.out_dir = NORTH
-        else:
           s.out_dir = SOUTH
+        else:
+          s.out_dir = NORTH
         s.give[ s.out_dir ].rdy = 1
 
     @s.update

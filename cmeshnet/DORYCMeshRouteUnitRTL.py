@@ -8,7 +8,7 @@
 
 from pymtl      import *
 from pclib.ifcs import GetIfcRTL, GiveIfcRTL
-from Direction  import *
+from directions import *
 
 class DORYCMeshRouteUnitRTL( Component ):
 
@@ -47,9 +47,9 @@ class DORYCMeshRouteUnitRTL( Component ):
         if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
           s.out_dir = Bits3(4) + s.get.msg.dst_terminal
         elif s.get.msg.dst_y < s.pos.pos_y:
-          s.out_dir = NORTH
-        elif s.get.msg.dst_y > s.pos.pos_y:
           s.out_dir = SOUTH
+        elif s.get.msg.dst_y > s.pos.pos_y:
+          s.out_dir = NORTH
         elif s.get.msg.dst_x < s.pos.pos_x:
           s.out_dir = WEST
         else:
