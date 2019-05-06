@@ -6,8 +6,8 @@
 # Author : Cheng Tan
 #   Date : Mar 29, 2019
 
-from pymtl           import *
-from Direction      import *
+from pymtl          import *
+from directions     import *
 from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
 class DORYTorusRouteUnitRTL( Component ):
@@ -49,14 +49,14 @@ class DORYTorusRouteUnitRTL( Component ):
           s.out_dir = SELF
         elif s.get.msg.dst_y < s.pos.pos_y:
           if s.pos.pos_y - s.get.msg.dst_y <= s.rows - s.pos.pos_y + s.get.msg.dst_y:
-            s.out_dir = NORTH
-          else:
             s.out_dir = SOUTH
+          else:
+            s.out_dir = NORTH
         elif s.get.msg.dst_y > s.pos.pos_y:
           if s.get.msg.dst_y - s.pos.pos_y <= s.rows - s.get.msg.dst_y + s.pos.pos_y:
-            s.out_dir = SOUTH
-          else:
             s.out_dir = NORTH
+          else:
+            s.out_dir = SOUTH
         elif s.get.msg.dst_x < s.pos.pos_x:
           if s.pos.pos_x - s.get.msg.dst_x <= s.cols - s.pos.pos_x + s.get.msg.dst_x:
             s.out_dir = WEST

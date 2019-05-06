@@ -8,7 +8,7 @@
 
 from pymtl                  import *
 from channel.ChannelRTL     import ChannelRTL
-from Direction              import *
+from directions             import *
 from pclib.ifcs.SendRecvIfc import *
 from meshnet.MeshRouterRTL  import MeshRouterRTL
 
@@ -39,14 +39,14 @@ class TorusNetworkRTL( Component ):
     chl_id  = 0
     for i in range (s.num_routers):
       # Connect s.routers together in Torus
-      s.connect(s.routers[i].send[NORTH], s.channels[chl_id].recv)
+      s.connect(s.routers[i].send[SOUTH], s.channels[chl_id].recv)
       s.connect(s.channels[chl_id].send, s.routers[(i-mesh_ht+
-          s.num_routers)%s.num_routers].recv[SOUTH])
+          s.num_routers)%s.num_routers].recv[NORTH])
       chl_id += 1
  
-      s.connect(s.routers[i].send[SOUTH], s.channels[chl_id].recv)
+      s.connect(s.routers[i].send[NORTH], s.channels[chl_id].recv)
       s.connect(s.channels[chl_id].send, s.routers[
-          (i+mesh_ht+s.num_routers)%s.num_routers].recv[NORTH])
+          (i+mesh_ht+s.num_routers)%s.num_routers].recv[SOUTH])
       chl_id += 1
  
       s.connect(s.routers[i].send[WEST],  s.channels[chl_id].recv)
