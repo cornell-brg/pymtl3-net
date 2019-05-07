@@ -49,10 +49,38 @@ class DrawGraph( object ):
     G.add_nodes_from( routers  )
     G.add_edges_from( edges_bt_routers )
 #    dot_pos = nx.nx_pydot.graphviz_layout(G, prog='dot')
-    nx.draw_spring( G, node_color = color )
+#    nx.draw_spring( G, node_color = color )
+    G.graph['edge'] = {'arrowsize': '0', 'splines': 'curved'}
+    x = y = 0
+    router_pos = {}
+    for node in routers:
+      x = node.pos.pos_x
+      y = node.pos.pos_y
+      router_pos[node] = (x, y)
+      G.node[node]['pos'] = (x, y)
+#    A = to_agraph(G) 
+#    A.layout('dot')                                                                 
+#    A.draw('multi.png') 
+
+    nx.draw_networkx( G, pos=router_pos, node_color = color )
+    plt.axis('off')
     plt.savefig("Graph.png", format="PNG")
 #    plt.show()
   
+    g = Digraph('G', engine="neato", filename='hello.gv' )
+    i = 0
+    for r in routers:
+      g.node( 'router{}'.format(i), pos = '{},{}!'.format(r.pos.pos_x, r.pos.pos_y))
+      print 'pos: ', '{},{}'.format(r.pos.pos_x, r.pos.pos_y)
+      i += 1
+#      g.edge( 'router{}'.format(i-1), 'router{}'.format(i%16) )
+    g.attr(overlap='false')
+#    g.attr( splines = 'curved' )
+
+#    g.edge('Hello', 'World')
+
+    g.view()
+
   def register_connection( s, node1, node2 ):
     s.edge_pool.append( ( node1, node2 ) )
   

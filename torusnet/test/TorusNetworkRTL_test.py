@@ -51,7 +51,7 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
   sim.run_test()
   model.sim_reset()
 
-def test_vector_Torus2x2( dump_vcd, test_verilog ):
+def ttest_vector_Torus2x2( dump_vcd, test_verilog ):
 
   mesh_wid = 2
   mesh_ht  = 2
@@ -129,11 +129,11 @@ def test_vector_Torus4x4( dump_vcd, test_verilog ):
   ]
 
 
-#  dt = DrawGraph()
-#  model.set_draw_graph( dt )
+  dt = DrawGraph()
+  model.set_draw_graph( dt )
   run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
 
-#  dt.draw_topology( model.routers, model.channels )
+  dt.draw_topology( model.routers, model.channels )
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -206,7 +206,7 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases (specific for 4x4 mesh)
 #-------------------------------------------------------------------------
 
-def test_srcsink_torus4x4():
+def ttest_srcsink_torus4x4():
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
