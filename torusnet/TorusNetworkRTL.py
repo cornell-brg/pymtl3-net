@@ -6,17 +6,20 @@
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
 
-from pymtl                  import *
-from channel.ChannelRTL     import ChannelRTL
-from directions             import *
-from pclib.ifcs.SendRecvIfc import *
-from meshnet.MeshRouterRTL  import MeshRouterRTL
+from pymtl                    import *
+from channel.ChannelRTL       import ChannelRTL
+from directions               import *
+from pclib.ifcs.SendRecvIfc   import *
+from meshnet.MeshRouterRTL    import MeshRouterRTL
+from ocn_pclib.ifcs.Dimension import *
 
 class TorusNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4, chl_lat=0 ):
 
     # Constants
 
+    s.mesh_wid      = mesh_wid
+    s.mesh_ht       = mesh_ht
     s.num_routers   = mesh_wid * mesh_ht
     num_channels    = mesh_ht * mesh_wid * 4
     s.num_terminals = s.num_routers
@@ -99,3 +102,26 @@ class TorusNetworkRTL( Component ):
 #                s.routers[r].send[i].msg.dst_y)
 #    return trace
     
+  def elaborate_physical( s ):
+    # Initialize dimension for sub-modules.
+    s.dim = Dimension( s )
+    BOUNDARY    = 10
+    RESERVED    = 0
+    ROUTER_WID  = 50
+    ROUTER_HT   = 50
+    CHANNEL_LEN = 20
+
+    for r in s.routers:
+      if hasattr( r, 'dim' ):
+        r.dim.w = ROUTER_WID
+        r.dim.h = ROUTER_HT
+        r.dim.x = BOUNDARY + r.pos.pos_x * ( ROUTER_WID + CHANNEL_LEN )
+        r.dim.y = BOUNDARY + r.pos.pos_y * ( ROUTER_HT  + CHANNEL_LEN )
+      elif hasattr( r, 'elaborate_physical' ):
+        print 'yes~!'
+      else:
+        print 'no...'
+
+    s.dim.w = 2 * BOUNDARY + s.mesh_wid * (ROUTER_WID + CHANNEL_LEN)
+    s.dim.h = 2 * BOUNDARY + s.mesh_ht  * (ROUTER_WID + CHANNEL_LEN)
+

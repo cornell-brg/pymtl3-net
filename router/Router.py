@@ -70,3 +70,6 @@ class Router( Component ):
       s.pos, 
       "|".join( out_trace )
     )  
+
+  def elaborate_physical( s ):
+    print 'im inside router and callable...'
