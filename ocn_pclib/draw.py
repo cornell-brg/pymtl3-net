@@ -24,11 +24,14 @@ class DrawGraph( object ):
 
     nodes_routers = []
     nodes = routers + channels
-
+    
+    # Get all the edges between router and channel
 
     for (n1, n2) in s.edge_pool:
       if ( n1._dsl.parent_obj in nodes ) and ( n2._dsl.parent_obj in nodes ):
         edges_wt_channel.append( ( n1._dsl.parent_obj, n2._dsl.parent_obj) )
+
+    # Build edges between router without channels
 
     for (n1, n2) in edges_wt_channel:
       for (n3, n4) in edges_wt_channel:
@@ -45,22 +48,44 @@ class DrawGraph( object ):
           if (n1, n4) not in edges_bt_routers:
             edges_bt_routers.append(( n1, n4 )) 
 
+    # Elaborate physical for floorplanning
  
     top.elaborate_physical()
-    if hasattr(top, 'dim'):
-      print top.dim
-    else:
-      print 'no physical...'
 
+    # Generate the floorplanning script
+
+    if hasattr(top, 'dim'):
+      base_name = 'router__'
+      for i, r in enumerate( routers ):
+        print "createFence {} {} {} {} {}".format(
+          base_name + str(i), r.dim.x, r.dim.y, r.dim.w, r.dim.h ) 
+    else:
+      print 'No elaborate physical supported...'
+
+    # Draw the topology using graphviz
 
     g = Digraph('G', engine = "neato", filename = name + '.gv' )
     base_name  = 'router__'
     edges_name = []
     nodes_name = []
+    PAGE_SIZE = 10.0
+    
+    # Add nodes (type string)
 
     for i, r in enumerate( routers ):
-      g.node( base_name + str(i), pos = '{},{}!'.format(r.pos.pos_x, r.pos.pos_y))
+      if hasattr(top, 'dim'):
+        x = r.dim.x / float( top.dim.w ) * PAGE_SIZE
+        y = r.dim.y / float( top.dim.h ) * PAGE_SIZE
+        w = r.dim.w
+        h = r.dim.h
+      else:
+        x = r.pos.pos_x
+        y = r.pos.pos_y
+        w = 1
+        h = 1
+      g.node( base_name + str(i), pos = '{},{}!'.format( x, y ) )
 
+    # Add edges (type string)
     for p, q in edges_bt_routers:
       name_p = name_q = 'x'
       for i, r in enumerate( routers ):
@@ -77,3 +102,4 @@ class DrawGraph( object ):
   def register_connection( s, node1, node2 ):
     s.edge_pool.append( ( node1, node2 ) )
   
+

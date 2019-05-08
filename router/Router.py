@@ -8,6 +8,7 @@
 
 from pymtl      import *
 from pclib.ifcs import SendIfcRTL, RecvIfcRTL 
+from ocn_pclib.ifcs.Dimension import *
 
 class Router( Component ):
 
@@ -72,4 +73,5 @@ class Router( Component ):
     )  
 
   def elaborate_physical( s ):
-    print 'im inside router and callable...'
+    s.dim = Dimension( s )
+    

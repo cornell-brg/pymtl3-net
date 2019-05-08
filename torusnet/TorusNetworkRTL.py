@@ -112,16 +112,14 @@ class TorusNetworkRTL( Component ):
     CHANNEL_LEN = 20
 
     for r in s.routers:
-      if hasattr( r, 'dim' ):
+      if hasattr( r, 'elaborate_physical' ):
+        r.elaborate_physical()
         r.dim.w = ROUTER_WID
         r.dim.h = ROUTER_HT
         r.dim.x = BOUNDARY + r.pos.pos_x * ( ROUTER_WID + CHANNEL_LEN )
         r.dim.y = BOUNDARY + r.pos.pos_y * ( ROUTER_HT  + CHANNEL_LEN )
-      elif hasattr( r, 'elaborate_physical' ):
-        print 'yes~!'
       else:
-        print 'no...'
+        print 'No way to get dimension info, need implement first...'
 
     s.dim.w = 2 * BOUNDARY + s.mesh_wid * (ROUTER_WID + CHANNEL_LEN)
     s.dim.h = 2 * BOUNDARY + s.mesh_ht  * (ROUTER_WID + CHANNEL_LEN)
-
