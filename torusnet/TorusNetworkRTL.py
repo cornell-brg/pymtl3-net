@@ -104,22 +104,11 @@ class TorusNetworkRTL( Component ):
     
   def elaborate_physical( s ):
     # Initialize dimension for sub-modules.
-    s.dim = Dimension( s )
-    BOUNDARY    = 10
-    RESERVED    = 0
-    ROUTER_WID  = 50
-    ROUTER_HT   = 50
-    CHANNEL_LEN = 20
+    BOUNDARY = 10
 
-    for r in s.routers:
-      if hasattr( r, 'elaborate_physical' ):
-        r.elaborate_physical()
-        r.dim.w = ROUTER_WID
-        r.dim.h = ROUTER_HT
-        r.dim.x = BOUNDARY + r.pos.pos_x * ( ROUTER_WID + CHANNEL_LEN )
-        r.dim.y = BOUNDARY + r.pos.pos_y * ( ROUTER_HT  + CHANNEL_LEN )
-      else:
-        print 'No way to get dimension info, need implement first...'
+    for i, r in enumerate( s.routers ):
+      r.dim.x = BOUNDARY + i % s.mesh_wid * ( r.dim.w + s.channels[0].dim.w )
+      r.dim.y = BOUNDARY + i / s.mesh_wid * ( r.dim.h + s.channels[0].dim.w )
 
-    s.dim.w = 2 * BOUNDARY + s.mesh_wid * (ROUTER_WID + CHANNEL_LEN)
-    s.dim.h = 2 * BOUNDARY + s.mesh_ht  * (ROUTER_WID + CHANNEL_LEN)
+    s.dim.w = 2 * BOUNDARY + s.mesh_wid * ( r.dim.w + s.channels[0].dim.w )
+    s.dim.h = 2 * BOUNDARY + s.mesh_ht  * ( r.dim.h + s.channels[0].dim.w )

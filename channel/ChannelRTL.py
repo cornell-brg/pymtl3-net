@@ -57,3 +57,5 @@ class ChannelRTL( Component ):
     else:
       return "{}(0){}".format( s.recv.msg, s.send.msg)
 
+  def elaborate_physical( s ):
+    s.dim.w = 20

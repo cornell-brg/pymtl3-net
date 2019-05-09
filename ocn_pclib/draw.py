@@ -1,3 +1,13 @@
+#=========================================================================
+# draw.py
+#=========================================================================
+# Draw the topology for OCN.
+# (Comment out the placement information generation)
+#
+# Author : Cheng Tan
+# Date   : May 9, 2019
+
+
 import sys
 
 import networkx as nx
@@ -48,19 +58,19 @@ class DrawGraph( object ):
           if (n1, n4) not in edges_bt_routers:
             edges_bt_routers.append(( n1, n4 )) 
 
-    # Elaborate physical for floorplanning
- 
-    top.elaborate_physical()
-
-    # Generate the floorplanning script
-
-    if hasattr(top, 'dim'):
-      base_name = 'router__'
-      for i, r in enumerate( routers ):
-        print "createFence {} {} {} {} {}".format(
-          base_name + str(i), r.dim.x, r.dim.y, r.dim.w, r.dim.h ) 
-    else:
-      print 'No elaborate physical supported...'
+#    # Elaborate physical for floorplanning
+# 
+#    top.elaborate_physical()
+#
+#    # Generate the floorplanning script
+#
+#    if hasattr(top, 'dim'):
+#      base_name = 'router__'
+#      for i, r in enumerate( routers ):
+#        print "createFence {} {} {} {} {}".format(
+#          base_name + str(i), r.dim.x, r.dim.y, r.dim.w, r.dim.h ) 
+#    else:
+#      print 'No elaborate physical supported...'
 
     # Draw the topology using graphviz
 

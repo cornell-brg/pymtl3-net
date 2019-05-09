@@ -252,6 +252,5 @@ def ttest_srcsink_torus4x4():
       th.set_parameter(path_ru_cols, mesh_wid)
       th.set_parameter(path_ru_rows, mesh_ht )
 
-
   run_sim( th )
 
