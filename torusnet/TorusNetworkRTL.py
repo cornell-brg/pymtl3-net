@@ -6,12 +6,11 @@
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
 
-from pymtl                    import *
-from channel.ChannelRTL       import ChannelRTL
-from directions               import *
-from pclib.ifcs.SendRecvIfc   import *
-from meshnet.MeshRouterRTL    import MeshRouterRTL
-from ocn_pclib.ifcs.Dimension import *
+from pymtl                  import *
+from channel.ChannelRTL     import ChannelRTL
+from directions             import *
+from pclib.ifcs.SendRecvIfc import *
+from meshnet.MeshRouterRTL  import MeshRouterRTL
 
 class TorusNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4, chl_lat=0 ):
@@ -112,3 +111,4 @@ class TorusNetworkRTL( Component ):
 
     s.dim.w = 2 * BOUNDARY + s.mesh_wid * ( r.dim.w + s.channels[0].dim.w )
     s.dim.h = 2 * BOUNDARY + s.mesh_ht  * ( r.dim.h + s.channels[0].dim.w )
+
