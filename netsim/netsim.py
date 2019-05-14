@@ -74,15 +74,15 @@ while sim_dir:
   sim_dir = os.path.dirname(sim_dir)
   os.system(sim_dir)
 
-from pymtl                   import *
-from mesh.MeshNetworkRTL     import MeshNetworkRTL
-from cmesh.CMeshNetworkRTL   import CMeshNetworkRTL
-from ring.RingNetworkRTL     import RingNetworkRTL
-from torus.TorusNetworkRTL   import TorusNetworkRTL
-from butterfly.BfNetworkRTL  import BfNetworkRTL
-from ocn_pclib.ifcs.Packet   import *
-from ocn_pclib.ifcs.Position import *
-from pclib.test              import TestVectorSimulator
+from pymtl                    import *
+from meshnet.MeshNetworkRTL   import MeshNetworkRTL
+from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
+from ringnet.RingNetworkRTL   import RingNetworkRTL
+from torusnet.TorusNetworkRTL import TorusNetworkRTL
+from bflynet.BflyNetworkRTL   import BflyNetworkRTL
+from ocn_pclib.ifcs.Packet    import *
+from ocn_pclib.ifcs.Position  import *
+from pclib.test               import TestVectorSimulator
 
 seed(0xdeadbeef)
 
@@ -168,7 +168,7 @@ def parse_cmdline():
 
   parser.add_argument( "--routing-strategy", 
                        type    = str,
-                       default = 'DORY',
+                       default = "DORY",
                        action  = "store", 
                        choices = ['DORX', 'DORY', 'WFR', 'NLR'],
                        help    = "routing algorithm applied in network."   )

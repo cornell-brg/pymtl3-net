@@ -62,3 +62,18 @@ class RingNetworkRTL( Component ):
     for i in range( s.num_terminals ):
       trace[i] += s.send[i].line_trace()
     return "|".join( trace )
+
+  def elaborate_physical( s ):
+    # Initialize dimension for sub-modules.
+    BOUNDARY = 10
+    MAX = len( s.routers )
+
+    for i, r in enumerate( s.routers ):
+      if i < (MAX / 2):
+        r.dim.x = BOUNDARY + i * ( r.dim.w + s.channels[0].dim.w )
+        r.dim.y = BOUNDARY
+      else:
+        r.dim.x = BOUNDARY + (MAX - i - 1) * ( r.dim.w + s.channels[0].dim.w )
+        r.dim.y = BOUNDARY + r.dim.h + s.channels[0].dim.w
+    s.dim.w = MAX/2 * r.dim.w + (MAX/2 - 1) * s.channels[0].dim.w
+    s.dim.h = 2 * r.dim.h + s.channels[0].dim.w

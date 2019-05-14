@@ -16,6 +16,7 @@ from pclib.test              import TestVectorSimulator
 from ocn_pclib.ifcs.Packet   import * 
 from ocn_pclib.ifcs.Position import *
 from ocn_pclib.ifcs.Flit     import *
+from ocn_pclib.draw          import *
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -115,7 +116,12 @@ def test_vector_Ring4( dump_vcd, test_verilog ):
   [  x,    [0,0000],     1,     1004 ],
   ]
 
+  dt = DrawGraph()
+  model.set_draw_graph( dt )
+
   run_vector_test( model, simple_4_test, num_routers )
+
+  dt.draw_topology( 'Ring4', model, model.routers, model.channels )
 
 #-------------------------------------------------------------------------
 # TestHarness
