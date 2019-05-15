@@ -8,10 +8,11 @@
   ** cmesh -- concentrated mesh
   ** set_parameter for multiple levels *
   ** asic
+  ** create floor plan automatically...
+  ** hypothesis tests
 
 [TODO]
-  1. create floor plan automatically...
+  1. FL, CL implementation
   2. terminaladapter
-  3. hypothesis tests
+  3. openpiton
   4. testing compact
-  5. openpiton
