@@ -10,7 +10,7 @@ from pymtl import *
 from pclib.ifcs.GuardedIfc import (
   GuardedCallerIfc, 
   GuardedCalleeIfc, 
-  guarded_ifc 
+  guarded_ifc
 )
 
 class OutputUnitCL( Component ):
@@ -36,12 +36,7 @@ class OutputUnitCL( Component ):
 
     # No ouput queue
     else:
-      s.connect( s.recv.rdy,  s.send.rdy )
-      s.recv.method.method = s.bypass
-
-  def bypass( s, v ):
-    assert s.send.rdy()
-    s.send( v )
+      s.connect( s.recv, s.send )
 
   def line_trace( s ):
     return ""
