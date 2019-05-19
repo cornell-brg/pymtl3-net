@@ -7,7 +7,7 @@
 #   Date : April 6, 2019
 
 from pymtl          import *
-from Direction      import *
+from directions      import *
 from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
 class RingRouteUnitRTL( Component ):

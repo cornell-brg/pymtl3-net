@@ -8,7 +8,7 @@
 
 from pymtl                  import *
 from pclib.ifcs.SendRecvIfc import *
-from Direction              import *
+from directions              import *
 from RingRouterRTL          import RingRouterRTL
 from channel.ChannelRTL     import ChannelRTL
 
