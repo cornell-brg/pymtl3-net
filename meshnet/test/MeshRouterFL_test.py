@@ -39,26 +39,19 @@ def run_vector_test( model, test_vectors, mesh_wid=4, mesh_ht=4,
       pkt = mk_base_pkt( 0, test_vector[0][i], 1, test_vector[2][i] )
       flits = flitisize_mesh_flit( pkt, 1, mesh_wid, mesh_ht )
 
-#      model.recv[i].msg = pkt
-      model.recv[i].msg = flits[0]
+      model.recv[i].rdy = test_vector[3][i]
       if model.recv[i].rdy:
-        model.recv[i].en = 1
-
-    for i in range( model.num_outports ):
-      model.send[i].rdy = test_vector[1][i]
+        model.recv[i].msg = flits[0]
 
   def tv_out( model, test_vector ):
-    for i in range( model.num_inports ):
-      print 'i:', i, ';', model.recv[i].rdy, test_vector[3][i]
-      assert model.recv[i].rdy == test_vector[3][i]
 
     for i in range( model.num_outports ):
-      assert model.send[i].en == (test_vector[4][i] != 'x')
-      if model.send[i].en == 1:
+      if test_vector[4][i] != 'x':
         pkt = model.send[i].msg.payload
         assert pkt.payload == test_vector[4][i]
   
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
+
   sim.run_test()
 
 def test_vector_Router_4_4X():
@@ -71,16 +64,16 @@ def test_vector_Router_4_4X():
   xx = 'x'
   inputs_buffer= [
 #     [dst]      send_rdy       payload       recv_rdy      send_msg
-  [[4,4,7,4,5],[0,0,0,0,0],[11,12,13,14,15],[1,1,1,1,1],[xx,xx,xx,xx,xx]],
-  [[4,4,7,8,9],[0,0,0,0,0],[21,22,23,24,25],[1,1,1,1,1],[xx,xx,xx,xx,xx]],
-  [[4,4,7,8,9],[1,1,1,1,1],[31,32,33,34,35],[0,0,0,0,0],[13,11,xx,xx,15]],
-  [[4,6,7,8,9],[1,1,1,1,1],[41,42,43,44,45],[1,0,1,0,1],[23,12,xx,25,xx]],
-  [[9,0,0,4,6],[1,1,0,1,1],[51,52,53,54,55],[0,1,1,0,1],[43,14,xx,45,xx]],
+  [[4,4,7,4,5],[0,0,0,0,0],[11,12,13,14,15],[1,1,1,1,1],[xx,xx,11,13,15]],
+  [[4,4,7,8,9],[0,0,0,0,0],[21,22,23,24,25],[1,1,1,1,1],[25,xx,14,23,xx]],
+  [[4,4,7,8,9],[1,1,1,1,1],[31,32,33,34,35],[0,0,0,0,0],[xx,xx,12,xx,xx]],
+  [[4,6,7,8,9],[1,1,1,1,1],[41,42,43,44,45],[1,0,1,0,1],[45,xx,21,43,xx]],
+  [[9,0,0,4,6],[1,1,0,1,1],[51,52,53,54,55],[0,1,1,0,1],[xx,xx,24,55,xx]],
   ]
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
   MeshFlit = mk_mesh_flit( 1, mesh_wid, mesh_ht )
-  model = MeshRouterFL( MeshFlit, MeshPos, mesh_wid, mesh_ht, 'DORX' )
+  model = MeshRouterFL( MeshFlit, MeshPos, 5, 5, 'DORX' )
 
   run_vector_test( model, inputs_buffer, mesh_wid, mesh_ht, pos_x, pos_y )
 

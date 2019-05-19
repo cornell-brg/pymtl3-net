@@ -7,7 +7,8 @@
 #   Date : Mar 10, 2019
 
 from pymtl                   import *
-from pclib.ifcs.SendRecvIfc  import *
+from pclib.ifcs              import RecvIfcRTL
+from pclib.ifcs              import SendIfcRTL
 from directions              import *
 from MeshRouterFL            import MeshRouterFL
 from ocn_pclib.ifcs.Packet   import *
@@ -23,12 +24,12 @@ class MeshNetworkFL( Component ):
 
     # Interface
 
-    s.recv = [ RecvIfcFL(PacketType) for _ in range( s.num_terminals ) ]
-    s.send = [ SendIfcFL(PacketType) for _ in range( s.num_terminals ) ]
+    s.recv = [ RecvIfcRTL(PacketType) for _ in range( s.num_terminals ) ]
+    s.send = [ SendIfcRTL(PacketType) for _ in range( s.num_terminals ) ]
 
     # Components
 
-    s.routers  = [ MeshRouterFL( PacketType, PositionType )
+    s.routers  = [ MeshRouterFL( PacketType, PositionType, 5, 5 )
                  for i in range( s.num_routers ) ]
 
     # Connect s.routers together in Mesh

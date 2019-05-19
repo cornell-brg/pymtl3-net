@@ -11,7 +11,6 @@ from directions import *
 from pclib.ifcs import RecvIfcRTL
 from pclib.ifcs import SendIfcRTL
 
-#TODO: should inherit from Component?
 class MeshRouterFL( Component ):
 
   def construct( s, PacketType, PositionType, num_inports, num_outports,
@@ -36,8 +35,8 @@ class MeshRouterFL( Component ):
     def up_routing():
 
       for i in range( s.num_inports ):
-        if s.recv[i].msg != None:
-          s.recv_queue[i].append( s.recv[i] )
+        if s.recv[i].rdy != 0:
+          s.recv_queue[i].append( s.recv[i].msg )
 
       current_arbiter = s.next_arbiter
       occupied_dir = []
@@ -47,14 +46,14 @@ class MeshRouterFL( Component ):
 
         if RouteUnitType == 'DORY':
           if len( s.recv_queue[ index ] ) != 0:
-            if s.pos.pos_x == s.recv_queue[ index ][ 0 ].msg.dst_x \
-             and s.pos.pos_y == s.recv_queue[ index ][ 0 ].msg.dst_y:
+            if s.pos.pos_x == s.recv_queue[ index ][ 0 ].dst_x \
+             and s.pos.pos_y == s.recv_queue[ index ][ 0 ].dst_y:
               out_dir = SELF
-            elif s.recv_queue[ index ][ 0 ].msg.dst_y < s.pos.pos_y:
+            elif s.recv_queue[ index ][ 0 ].dst_y < s.pos.pos_y:
               out_dir = SOUTH
-            elif s.recv_queue[ index ][ 0 ].msg.dst_y > s.pos.pos_y:
+            elif s.recv_queue[ index ][ 0 ].dst_y > s.pos.pos_y:
               out_dir = NORTH
-            elif s.recv_queue[ index ][ 0 ].msg.dst_x < s.pos.pos_x:
+            elif s.recv_queue[ index ][ 0 ].dst_x < s.pos.pos_x:
               out_dir = WEST
             else:
               out_dir = EAST
@@ -67,14 +66,14 @@ class MeshRouterFL( Component ):
 
         if RouteUnitType == 'DORX':
           if len( s.recv_queue[ index ] ) != 0:
-            if s.pos.pos_x == s.recv_queue[ index ][ 0 ].msg.dst_x \
-             and s.pos.pos_y == s.recv_queue[ index ][ 0 ].msg.dst_y:
+            if s.pos.pos_x == s.recv_queue[ index ][ 0 ].dst_x \
+                and s.pos.pos_y == s.recv_queue[ index ][ 0 ].dst_y:
               out_dir = SELF
-            elif s.recv_queue[ index ][ 0 ].msg.dst_x < s.pos.pos_x:
+            elif s.recv_queue[ index ][ 0 ].dst_x < s.pos.pos_x:
               out_dir = WEST
-            elif s.recv_queue[ index ][ 0 ].msg.dst_x > s.pos.pos_x:
+            elif s.recv_queue[ index ][ 0 ].dst_x > s.pos.pos_x:
               out_dir = EAST
-            elif s.recv_queue[ index ][ 0 ].msg.dst_y < s.pos.pos_y:
+            elif s.recv_queue[ index ][ 0 ].dst_y < s.pos.pos_y:
               out_dir = SOUTH
             else:
               out_dir = NORTH

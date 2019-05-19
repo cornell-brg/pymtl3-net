@@ -34,10 +34,10 @@ class MeshFlit{packet_size}_{mesh_wid}_by_{mesh_ht}( object ):
 
   def fill( s, id, pkt ):
     s.id    = s.IDType ( id      )
-    s.src_x = s.XType  ( pkt.src/{mesh_wid} )
-    s.src_y = s.YType  ( pkt.src%{mesh_wid} )
-    s.dst_x = s.XType  ( pkt.dst/{mesh_wid} )
-    s.dst_y = s.YType  ( pkt.dst%{mesh_wid} )
+    s.src_x = s.XType  ( pkt.src%{mesh_wid} )
+    s.src_y = s.YType  ( pkt.src/{mesh_wid} )
+    s.dst_x = s.XType  ( pkt.dst%{mesh_wid} )
+    s.dst_y = s.YType  ( pkt.dst/{mesh_wid} )
 
     HEAD = 0
     BODY = 1
