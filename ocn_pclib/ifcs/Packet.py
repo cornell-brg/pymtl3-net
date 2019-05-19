@@ -96,7 +96,7 @@ class BasePacket( object ):
     s.payload = Bits16( 0 )
 
   def __str__( s ):
-    return "({},{})>({},{}):{}:{}".format(
+    return "{}>{}:{}:{}".format(
       s.src, s.dst, s.opaque, s.payload ) 
 
 def mk_base_pkt( src, dst, opaque, payload ):
