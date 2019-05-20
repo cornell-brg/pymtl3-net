@@ -44,14 +44,14 @@ class RingRouteUnitCL( Component ):
       if s.msg is None and s.get.rdy():
         s.msg = s.get()
       if s.msg is not None:
-        if s.msg.dst == s.pos.pos:
+        if s.msg.dst == s.pos:
           s.rdy_lst[SELF] = True
         else:
-          if s.msg.dst > s.pos.pos:
-            right_dist = s.msg.dst - s.pos.pos
+          if s.msg.dst > s.pos:
+            right_dist = s.msg.dst - s.pos
             left_dist  = s.total_dist - right_dist
           else:
-            left_dist  = s.msg.dst - s.pos.pos
+            left_dist  = s.msg.dst - s.pos
             right_dist = s.total_dist - left_dist
           if left_dist < right_dist:
             s.rdy_lst[LEFT] = True
@@ -87,4 +87,4 @@ class RingRouteUnitCL( Component ):
   # TODO: CL line trace
 
   def line_trace( s ):
-    return "{:12}".format( s.msg )
+    return "{!s:12}".format( s.msg )
