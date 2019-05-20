@@ -1,34 +1,34 @@
 #=========================================================================
-# RingRouterCL.py
+# TorusRouterCL.py
 #=========================================================================
-# Ring network-on-chip router
+# Torus network-on-chip router in CL modeling
 #
-# Author : Yanghui Ou
-#   Date : May 16, 2019
+# Author : Cheng Tan
+#   Date : May 20, 2019
 
 from pymtl import *
 from pclib.ifcs.GuardedIfc import GuardedCalleeIfc, GuardedCallerIfc
-from router.Router       import Router
-from router.InputUnitCL  import InputUnitCL
-from router.SwitchUnitCL import SwitchUnitCL
-from router.OutputUnitCL import OutputUnitCL
-from RingRouteUnitCL     import RingRouteUnitCL
+from router.Router         import Router
+from router.InputUnitCL    import InputUnitCL
+from router.SwitchUnitCL   import SwitchUnitCL
+from router.OutputUnitCL   import OutputUnitCL
+from DORYTorusRouteUnitCL  import DORYTorusRouteUnitCL
 
-class RingRouterCL( Router ):
+class TorusRouterCL( Router ):
 
   def construct( s, 
                  PacketType, 
                  PositionType,
                  InputUnitType  = InputUnitCL, 
-                 RouteUnitType  = RingRouteUnitCL, 
+                 RouteUnitType  = DORYTorusRouteUnitCL, 
                  SwitchUnitType = SwitchUnitCL, 
                  OutputUnitType = OutputUnitCL, 
                  #RecvIfcType = GuardedCalleeIfc,
                  #SendIfcType = GuardedCallerIfc,
                  ):
 
-    s.num_inports  = 3
-    s.num_outports = 3
+    s.num_inports  = 5
+    s.num_outports = 5
 
     # Interface
     s.pos  = InPort( PositionType ) 
