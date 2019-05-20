@@ -16,8 +16,9 @@ class BitStruct( object ):
   # Default line trace
   def __str__( s ):
     trace = ""
-    for name, value in vars( s ).items():
-      trace += "{}:{},".format( name, value )
+    #for name, value in vars( s ).items():
+    for name, _ in s.fields:
+      trace += "{}:".format( vars( s )[name] )
     return trace[:-1]
   
   @classmethod
@@ -95,12 +96,13 @@ def mk_bit_struct( name, fields, str_func=None ):
       assign_str += "    s.{} = {}\n".format( field_name, field_name )
     args_str = args_str[:-2]
 
-#    print _struct_tmpl.format( **locals() )
+    print _struct_tmpl.format( **locals() )
     exec py.code.Source(
       _struct_tmpl.format( **locals() )
     ).compile() in globals()
 
     cls = _struct_dict[name]
+    cls.fields = fields
     if str_func is not None:
       cls.__str__ = str_func
 

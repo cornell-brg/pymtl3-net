@@ -7,14 +7,14 @@
 #   Date : May 19, 2019
 
 import pytest
-from pymtl                   import *
-from pclib.test              import mk_test_case_table
-from pclib.test.test_srcs    import TestSrcCL
-from pclib.test.test_sinks   import TestSinkCL
-from ocn_pclib.ifcs.Packet   import BasePacket, mk_base_pkt
-from ocn_pclib.ifcs.Position import RingPosition, mk_ring_pos
-from ringnet.RingNetworkCL   import RingNetworkCL
-from router.InputUnitCL      import InputUnitCL
+from pymtl                    import *
+from pclib.test               import mk_test_case_table
+from pclib.test.test_srcs     import TestSrcCL
+from ocn_pclib.test.net_sinks import TestNetSinkCL
+from ocn_pclib.ifcs.packets   import mk_ring_pkt
+from ocn_pclib.ifcs.positions import mk_ring_pos
+from ringnet.RingNetworkCL    import RingNetworkCL
+from router.InputUnitCL       import InputUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -32,9 +32,9 @@ class TestHarness( Component ):
     RingPos = mk_ring_pos( s.nrouters )
     s.dut = RingNetworkCL( PktType, RingPos, s.nrouters, 0 )
 
-    s.srcs  = [ TestSrcCL ( src_msgs[i],  src_initial,  src_interval  )
+    s.srcs  = [ TestSrcCL( src_msgs[i],  src_initial,  src_interval  )
                 for i in range ( s.nrouters ) ]
-    s.sinks = [ TestSinkCL( sink_msgs[i], sink_initial, sink_interval) 
+    s.sinks = [ TestNetSinkCL( sink_msgs[i], sink_initial, sink_interval) 
                 for i in range ( s.nrouters ) ]
 
     # Connections
@@ -101,19 +101,19 @@ def mk_src_sink_msgs( pkts, nrouters ):
 
   return src_msgs, sink_msgs
 
-def mk_pkt_list( lst ):
+def mk_pkt_list( PktType, lst ):
   ret = []
   for m in lst:
     src, dst, opq, payload = m[0], m[1], m[2], m[3]
-    ret.append( mk_base_pkt( src, dst, opq, payload ) )
+    ret.append( PktType( src, dst, opq, 0, payload ) )
   return ret
 
 #-------------------------------------------------------------------------
 # Test cases
 #-------------------------------------------------------------------------
 
-def simple_msg( nrouters=4 ):
-  return mk_pkt_list( [
+def simple_msg( PktType, nrouters=4 ):
+  return mk_pkt_list( PktType, [
   #   src dst opq   payload
     ( 0,  1,  0x00, 0x0010  ),
     ( 1,  2,  0x01, 0x0020  ),
@@ -134,10 +134,14 @@ test_case_table = mk_test_case_table([
 
 @pytest.mark.parametrize( **test_case_table )
 def test_ring_simple( test_params ):
-  pkt_list = test_params.msg_func( test_params.nrouters )
+  PktType = mk_ring_pkt( 
+    nrouters=test_params.nrouters,
+    nvcs=2,
+  )
+  pkt_list = test_params.msg_func( PktType, test_params.nrouters )
   src_msgs, sink_msgs = mk_src_sink_msgs( pkt_list, test_params.nrouters )
   th = TestHarness( 
-    BasePacket, 
+    PktType, 
     test_params.nrouters,
     src_msgs,
     sink_msgs, 
