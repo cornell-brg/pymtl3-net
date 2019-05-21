@@ -43,6 +43,7 @@ class RingRouteUnitCL( Component ):
     def ru_up_route():
       if s.msg is None and s.get.rdy():
         s.msg = s.get()
+      s.rdy_lst = [ False for _ in range( s.num_outports ) ]
       if s.msg is not None:
         if s.msg.dst == s.pos:
           s.rdy_lst[SELF] = True
@@ -57,10 +58,9 @@ class RingRouteUnitCL( Component ):
             s.rdy_lst[LEFT] = True
           else:
             s.rdy_lst[RIGHT] = True
-      else:
-        s.rdy_lst = [ False for _ in range( s.num_outports ) ]
     
     # Assign method and ready
+
     for i in range( s.num_outports ):
       def gen_give_rdy( s, port_id ):
         def give_rdy():
