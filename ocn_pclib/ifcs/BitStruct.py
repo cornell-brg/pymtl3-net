@@ -96,7 +96,7 @@ def mk_bit_struct( name, fields, str_func=None ):
       assign_str += "    s.{} = {}\n".format( field_name, field_name )
     args_str = args_str[:-2]
 
-    print _struct_tmpl.format( **locals() )
+    # print _struct_tmpl.format( **locals() )
     exec py.code.Source(
       _struct_tmpl.format( **locals() )
     ).compile() in globals()
