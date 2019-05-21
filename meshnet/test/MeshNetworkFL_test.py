@@ -25,26 +25,22 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
  
   def tv_in( model, test_vector ):
     num_routers = mesh_wid * mesh_ht
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+
+    for i in range( num_routers ):
+      model.recv[i].rdy = 0
+      model.recv[i].msg = None
 
     if test_vector[0] != 'x':
       router_id = test_vector[0]
       pkt = mk_pkt( router_id % mesh_wid, router_id / mesh_wid,
                   test_vector[1][0], test_vector[1][1], 1, test_vector[1][2])
     
-      # Enable the network interface on specific router
-
-##      model.recv[router_id].msg = pkt
+      model.recv[router_id].rdy = 1
       model.recv[router_id].msg = pkt
-#      model.router[router_id].recv[4].rdy = 1
-#      model.recv[router_id].en  = 1
-
-#    for i in range (num_routers):
-#      model.send[i].rdy = 1
 
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
-      print 'index: ', test_vector[2], '; payload: ', model.send[test_vector[2]].msg.payload, '; test_vector:', test_vector[3]
+#      print 'index: ', test_vector[2], '; payload: ', model.send[test_vector[2]].msg, '; test_vector:', test_vector[3]
       assert model.send[test_vector[2]].msg.payload == test_vector[3]
      
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
@@ -55,7 +51,7 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
   mesh_wid = 2
   mesh_ht  = 2
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = MeshNetworkFL( Packet, MeshPos, mesh_wid, mesh_ht )
+  model = MeshNetworkFL( Packet, mesh_wid, mesh_ht )
 
   num_routers = mesh_wid * mesh_ht 
   num_inports = 5
@@ -65,21 +61,14 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
   # Specific for wire connection (link delay = 0) in 2x2 Mesh topology
   simple_2_2_test = [
 #  router   [packet]   arr_router  msg 
-  [  0,    [1,0,1001],     x,       x  ],
-  [  0,    [1,1,1002],     x,       x  ],
-  [  0,    [0,1,1003],     1,     1001 ],
-  [  0,    [0,1,1004],     x,       x  ],
-  [  0,    [1,0,1005],     2,     1003 ],
-  [  2,    [0,0,1006],     x,       x  ],
-  [  1,    [0,1,1007],     1,     1005 ],
-  [  2,    [1,1,1008],     0,     1006 ],
-  [  x,    [0,0,0000],     x,       x  ],
-  [  x,    [0,0,0000],     2,     1007 ],
-  [  x,    [0,0,0000],     x,       x  ],
-  [  x,    [0,0,0000],     3,     1008 ],
-  [  x,    [0,0,0000],     x,       x  ],
-  [  x,    [0,0,0000],     x,       x  ],
-  [  x,    [0,0,0000],     x,       x  ],
+  [  0,    [1,0,1001],     1,     1001 ],
+  [  0,    [1,1,1002],     3,     1002 ],
+  [  0,    [0,1,1003],     2,     1003 ],
+  [  0,    [0,1,1004],     2,     1004 ],
+  [  0,    [1,0,1005],     1,     1005 ],
+  [  2,    [0,0,1006],     0,     1006 ],
+  [  1,    [0,1,1007],     2,     1007 ],
+  [  2,    [1,1,1008],     3,     1008 ],
   [  x,    [0,0,0000],     x,       x  ],
   ]
 
