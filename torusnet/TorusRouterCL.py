@@ -66,7 +66,7 @@ class TorusRouterCL( Router ):
 
   def line_trace( s ):
     return "{}>{}".format(
-      "|".join( [ s.input_units[i].line_trace()  for i in range(3) ] ), 
-      "|".join( [ s.route_units[i].line_trace() for i in range(3) ] ), 
+      "|".join( [ s.input_units[i].line_trace()  for i in range(5) ] ), 
+      "|".join( [ s.route_units[i].line_trace() for i in range(5) ] ), 
       #"|".join( [ s.switch_units[i].line_trace() for i in range(3) ] ), 
     )

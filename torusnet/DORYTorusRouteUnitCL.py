@@ -45,12 +45,6 @@ class DORYTorusRouteUnitCL( Component ):
     s.rdy_lst = [ False for _ in range( s.num_outports ) ]
     s.msg     = None
 
-    # Connections
-
-    for i in range( s.num_outports ):
-#      s.connect( s.get.msg,     s.give[i].msg )
-      s.connect( s.give_ens[i], s.give[i].en  )
-    
     # Routing logic
     @s.update
     def up_ru_routing():
@@ -58,8 +52,6 @@ class DORYTorusRouteUnitCL( Component ):
       if s.msg is None and s.get.rdy():
         s.msg = s.get()
       if s.msg is not None:
-        if s.msg.dst == s.pos.pos:
-          s.rdy_lst[SELF] = True
         if s.pos.pos_x == s.msg.dst_x and s.pos.pos_y == s.msg.dst_y:
           s.rdy_lst[SELF] = True
         elif s.msg.dst_y < s.pos.pos_y:
@@ -100,7 +92,7 @@ class DORYTorusRouteUnitCL( Component ):
 
     for i in range( s.num_outports ):
       s.add_constraints(
-        M( s.get ) < U( up_ru_route ) < M( s.give[i] ),
+        M( s.get ) < U( up_ru_routing ) < M( s.give[i] ),
       )
  
   def give_method( s ):
@@ -117,4 +109,4 @@ class DORYTorusRouteUnitCL( Component ):
     for i in range (s.num_outports):
       out_str[i] = "{}".format( s.give[i] ) 
 
-    return "{}({}){}".format( s.get, s.out_dir, "|".join( out_str ) )
+    return "{}{}".format( s.get, "|".join( out_str ) )
