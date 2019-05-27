@@ -14,6 +14,20 @@ import py
 # Static Packet type
 #-------------------------------------------------------------------------
 
+class BasePacket( object ):
+
+  def __init__( s ):
+    
+    s.src     = Bits4 ( 0 )
+    s.dst     = Bits4 ( 0 ) 
+    s.opaque  = Bits4 ( 0 ) 
+    s.payload = Bits16( 0 )
+
+  def __str__( s ):
+    return "{}>{}:{}:{}".format(
+      s.src, s.dst, s.opaque, s.payload ) 
+
+
 class Packet( object ):
 
   def __init__( s ):
@@ -33,6 +47,16 @@ class Packet( object ):
     return "({},{})>({},{}):{}:{}".format(
       s.src_x, s.src_y, s.dst_x, s.dst_y, s.opaque, s.payload ) 
 
+class BasePacketTimestamp( BasePacket ):
+
+  def __init__( s ):
+    BasePacket.__init__( s )
+    s.timestamp = 0
+    
+  def __str__( s ):
+    return "({})>({}):{}:{}:{}".format(
+      s.src, s.dst, s.opaque, s.payload, s.timestamp ) 
+
 class PacketTimestamp( Packet ):
 
   def __init__( s ):
@@ -42,6 +66,7 @@ class PacketTimestamp( Packet ):
   def __str__( s ):
     return "({},{})>({},{}):{}:{}:{}".format(
       s.src_x, s.src_y, s.dst_x, s.dst_y, s.opaque, s.payload, s.timestamp ) 
+
 
 class CMeshPacket( Packet ):
 
@@ -75,6 +100,15 @@ def mk_pkt_timestamp( src_x, src_y, dst_x, dst_y, opaque, payload, timestamp ):
   pkt.timestamp = timestamp
   return pkt
   
+def mk_ring_pkt_timestamp( src, dst, opaque, payload, timestamp ):
+  pkt = BasePacketTimestamp()
+  pkt.src       = src
+  pkt.dst       = dst
+  pkt.opaque    = opaque
+  pkt.payload   = payload
+  pkt.timestamp = timestamp
+  return pkt
+ 
 def mk_cmesh_pkt( src_x, src_y, dst_x, dst_y, terminal, opaque, payload ):
   pkt = CMeshPacket()
   pkt.src_x         = src_x
@@ -86,19 +120,6 @@ def mk_cmesh_pkt( src_x, src_y, dst_x, dst_y, terminal, opaque, payload ):
   pkt.dst_terminal  = terminal
   return pkt
  
-class BasePacket( object ):
-
-  def __init__( s ):
-    
-    s.src     = Bits4 ( 0 )
-    s.dst     = Bits4 ( 0 ) 
-    s.opaque  = Bits4 ( 0 ) 
-    s.payload = Bits16( 0 )
-
-  def __str__( s ):
-    return "{}>{}:{}:{}".format(
-      s.src, s.dst, s.opaque, s.payload ) 
-
 def mk_base_pkt( src, dst, opaque, payload ):
   pkt = BasePacket()
   pkt.src     = src

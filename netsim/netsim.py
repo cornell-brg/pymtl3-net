@@ -75,9 +75,11 @@ while sim_dir:
   os.system(sim_dir)
 
 from pymtl                    import *
+from crossbar.CrossbarRTL     import CrossbarRTL
+from ringnet.RingNetworkRTL   import RingNetworkRTL
+from ringnet.RingVCNetworkRTL import RingVCNetworkRTL
 from meshnet.MeshNetworkRTL   import MeshNetworkRTL
 from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
-from ringnet.RingNetworkRTL   import RingNetworkRTL
 from torusnet.TorusNetworkRTL import TorusNetworkRTL
 from bflynet.BflyNetworkRTL   import BflyNetworkRTL
 from ocn_pclib.ifcs.Packet    import *
@@ -211,20 +213,30 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 200
-NUM_SAMPLE_CYCLES   = 200 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 20
+NUM_SAMPLE_CYCLES   = 20 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
 # simulate
 #--------------------------------------------------------------------------
 
-def simulate( NetModel, num_nodes, net_width, net_height,
-              injection_rate, pattern, drain_limit, dump_vcd, trace, verbose ):
+def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbose ):
 
-  num_nodes = num_nodes
+  # Determine which model to use in the simulator
+
+  topology_dict = {
+    'Xbar'     : CrossbarRTL, 
+    'Ring'     : RingVCNetworkRTL, 
+    'Mesh'     : MeshNetworkRTL, 
+    'CMesh'    : CMeshNetworkRTL, 
+    'Torus'    : TorusNetworkRTL,
+    'Butterfly': BflyNetworkRTL
+  }
 
   # Simulation Variables
+
+  num_nodes             = opts.routers
 
   average_latency       = 0
   packets_generated     = 0
@@ -235,24 +247,31 @@ def simulate( NetModel, num_nodes, net_width, net_height,
   sim_done              = False
 
   # Instantiate and elaborate a ring network
-  
-  MeshPos = mk_mesh_pos( net_width, net_height )
+
+  if opts.topology == "Ring":
+
+    NetModel = topology_dict[ "Ring" ]
+    RingPos = mk_ring_pos( opts.routers )
+
+    model = NetModel( BasePacket, RingPos, opts.routers, 0 )
+    model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
+
+  elif opts.topology == "Mesh":
+
+    NetModel = topology_dict[ "Mesh" ]
+    net_width = opts.routers/opts.rows
+    net_height = opts.rows
+    MeshPos = mk_mesh_pos( net_width, net_height )
  
-  model = NetModel( Packet, MeshPos, net_width, net_height, 0 )
-
-  # Turn on vcd dumping
-
-#  if dump_vcd:
-#    model.vcd_file = dump_vcd
-#    if hasattr(model, 'inner'):
-#      model.inner.vcd_file = dump_vcd
+    model = NetModel( Packet, MeshPos, net_width, net_height, 0 )
 
   sim = model.apply( SimpleSim )
 
 #  model.elaborate()
-#
+
   # Source Queues - Modeled as Bypass Queues
   src = [ deque() for x in range( num_nodes ) ]
+
   # Run the simulation
 
   model.sim_reset()
@@ -271,6 +290,7 @@ def simulate( NetModel, num_nodes, net_width, net_height,
         # traffic pattern based dest selection
         if   pattern == "urandom":
           dest = randint( 0, num_nodes-1 )
+          print "src:{}, dst:{}".format(i, dest)
         elif pattern == "partition2":
           dest = ( randint( 0, num_nodes-1 ) ) & (num_nodes/2-1) | ( i & (num_nodes/2) )
         elif pattern == "opposite":
@@ -283,16 +303,39 @@ def simulate( NetModel, num_nodes, net_width, net_height,
         # inject packet past the warmup period
 
         if ( NUM_WARMUP_CYCLES < ncycles < NUM_SAMPLE_CYCLES ):
-          pkt = mk_pkt_timestamp( i%net_width, i/net_width, dest%net_width,
-                  dest/net_width, 1, 6, ncycles )
+          if opts.topology == "Ring":
+            if dest < i and i - dest <= num_nodes/2:
+              opaque = 0
+            elif dest > i and dest - i <= num_nodes/2:
+              opaque = 0
+            else:
+              opaque = 1
+            pkt = mk_ring_pkt_timestamp( i, dest, opaque, 6, ncycles )
+
+          elif opts.topology == "Mesh":
+            net_width = opts.routers / opts.rows
+            pkt = mk_pkt_timestamp( i%net_width, i/net_width, dest%net_width,
+                    dest/net_width, 1, 6, ncycles )
+
           src[i].append( pkt )
           packets_generated += 1
 
         # packet injection during warmup or drain phases
 
         else:
-          pkt = mk_pkt_timestamp( i%net_width, i/net_width, dest%net_width,
-                  dest/net_width, 1, 6, INVALID_TIMESTAMP )
+          if opts.topology == "Ring":
+            if dest < i and i - dest <= num_nodes/2:
+              opaque = 0
+            elif dest > i and dest - i <= num_nodes/2:
+              opaque = 0
+            else:
+              opaque = 1
+            pkt = mk_ring_pkt_timestamp( i, dest, opaque, 6, INVALID_TIMESTAMP )
+
+          elif opts.topology == "Mesh":
+            pkt = mk_pkt_timestamp( i%net_width, i/net_width, dest%net_width,
+                    dest/net_width, 1, 6, INVALID_TIMESTAMP )
+
           src[i].append( pkt )
           if ( ncycles < NUM_SAMPLE_CYCLES ):
             packets_generated += 1
@@ -358,23 +401,7 @@ def main():
 
   opts = parse_cmdline()
 
-  # Determine which model to use in the simulator
-
-  topology_dict = {
-    'Ring'     : RingNetworkRTL, 
-    'Mesh'     : MeshNetworkRTL, 
-    'CMesh'    : CMeshNetworkRTL, 
-    'Torus'    : TorusNetworkRTL,
-    'Butterfly': BflyNetworkRTL
-  }
-
   dump_vcd = None
-#  if opts.dump_vcd:
-#    dump_vcd = "net-{}-{}.vcd".format( opts.impl, opts.pattern )
-
-  print '==================== Config ====================='
-  print ' Topology: {}; Routers: {}; Rows: {}'.format(opts.topology, 
-        opts.routers, opts.rows)
 
   # sweep mode: sweep the injection rate until the network is saturated.
   # we assume the latency is 100 when the network is saturated.
@@ -396,9 +423,8 @@ def main():
 
     while avg_lat <= 100:
 
-      results = simulate( topology_dict[ opts.topology ], opts.routers, 
-                opts.routers/opts.rows, opts.rows, max(inj,1), 
-                opts.pattern, 500, opts.dump_vcd, opts.trace, opts.verbose )
+      results = simulate( opts, max(inj,1), opts.pattern, 500, 
+              opts.dump_vcd, opts.trace, opts.verbose )
 
       avg_lat = results[0]
 
@@ -424,9 +450,8 @@ def main():
     print()
 
   else:
-    results = simulate( topology_dict[ opts.topology ], opts.routers, 
-          opts.routers/opts.rows, opts.rows, opts.injection_rate, 
-          opts.pattern, 500, dump_vcd, opts.trace, opts.verbose )
+    results = simulate( opts, opts.injection_rate, opts.pattern, 500, 
+            dump_vcd, opts.trace, opts.verbose )
 
   if opts.stats:
     print()

@@ -72,9 +72,15 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
 #  model.set_parameter("top.routers*.input_units*.elaborate.QueueType", NormalQueueRTL)
 #  model.set_parameter("top.routers*.elaborate.RouteUnitType", TestMeshRouteUnitRTL)
 
-  model.set_param("top.routers*.input_units*.construct", QueueType=NormalQueueRTL)
+#  model.set_param("top.routers*.input_units*.construct", QueueType=NormalQueueRTL)
+
   model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
 
+  model.set_param("top.routers[2].translate", True)
+
+  model.set_param("top.routers*.translate", True)
+
+  model.set_param("top.translate", False)
 
   x = 'x'
 
@@ -104,7 +110,7 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
   run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
 
 
-def test_vector_mesh4x4( dump_vcd, test_verilog ):
+def ttest_vector_mesh4x4( dump_vcd, test_verilog ):
 
   mesh_wid = 4
   mesh_ht  = 4

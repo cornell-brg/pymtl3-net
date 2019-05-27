@@ -13,11 +13,12 @@ from router.SwitchUnitRTL import SwitchUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 
 from DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from TestMeshRouteUnitRTL import TestMeshRouteUnitRTL
 
 class MeshRouterRTL( Router ):
 
   def construct( s, PacketType, PositionType, InputUnitType = InputUnitRTL,
-                 RouteUnitType = DORYMeshRouteUnitRTL, 
+                 RouteUnitType = DORYMeshRouteUnitRTL,
                  SwitchUnitType = SwitchUnitRTL ):
 
     super( MeshRouterRTL, s ).construct(

@@ -27,15 +27,15 @@ class MeshNetworkRTL( Component ):
 
     # Interface
 
-    s.recv = [ RecvIfcRTL(PacketType) for _ in range( s.num_terminals ) ]
-    s.send = [ SendIfcRTL(PacketType) for _ in range( s.num_terminals ) ]
+    s.recv = [ RecvIfcRTL( PacketType ) for _ in range( s.num_terminals )]
+    s.send = [ SendIfcRTL( PacketType ) for _ in range( s.num_terminals )]
 
     # Components
 
     s.routers  = [ MeshRouterRTL( PacketType, PositionType )
                  for i in range( s.num_routers ) ]
 
-    s.channels = [ ChannelRTL( PacketType, latency = chl_lat)
+    s.channels = [ ChannelRTL( PacketType, latency = chl_lat )
                  for _ in range( num_channels ) ]
 
     # Connect s.routers together in Mesh
