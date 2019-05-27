@@ -211,8 +211,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 30
-NUM_SAMPLE_CYCLES   = 30 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 200
+NUM_SAMPLE_CYCLES   = 200 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
@@ -237,7 +237,7 @@ def simulate( NetModel, num_nodes, net_width, net_height,
   # Instantiate and elaborate a ring network
   
   MeshPos = mk_mesh_pos( net_width, net_height )
-  
+ 
   model = NetModel( Packet, MeshPos, net_width, net_height, 0 )
 
   # Turn on vcd dumping
@@ -333,14 +333,13 @@ def simulate( NetModel, num_nodes, net_width, net_height,
 
     # print line trace if enables
 
-#    if trace:
-#      sim.print_line_trace()
-
     # advance simulation
 
     model.tick()
     ncycles += 1
-    print "{}:{}".format( ncycles, model.line_trace() )
+    if trace:
+#      sim.print_line_trace()
+      print "{}:{}".format( ncycles, model.line_trace() )
     # if in verbose mode, print stats every 100 cycles
 
     if ncycles % 100 == 1 and verbose:
@@ -366,16 +365,68 @@ def main():
     'Mesh'     : MeshNetworkRTL, 
     'CMesh'    : CMeshNetworkRTL, 
     'Torus'    : TorusNetworkRTL,
-    'Butterfly': BfNetworkRTL
+    'Butterfly': BflyNetworkRTL
   }
 
   dump_vcd = None
 #  if opts.dump_vcd:
 #    dump_vcd = "net-{}-{}.vcd".format( opts.impl, opts.pattern )
 
-  results = simulate( topology_dict[ opts.topology ], opts.routers, 
-            opts.routers/opts.rows, opts.rows, opts.injection_rate, 
-            opts.pattern, 500, dump_vcd, opts.trace, opts.verbose )
+  print '==================== Config ====================='
+  print ' Topology: {}; Routers: {}; Rows: {}'.format(opts.topology, 
+        opts.routers, opts.rows)
+
+  # sweep mode: sweep the injection rate until the network is saturated.
+  # we assume the latency is 100 when the network is saturated.
+
+  if opts.sweep:
+
+    print()
+    print( "Pattern: " + opts.pattern )
+    print()
+    print( "{:<20} | {:<20}".format( "Injection rate (%)", "Avg. Latency" ) )
+
+    inj             = 0
+    avg_lat         = 0
+    zero_load_lat   = 0
+    running_avg_lat = 0.0
+    inj_shamt_mult  = 5
+    inj_shamt       = 0.0
+    inj_step        = 5 if opts.topology == "bus" else 10 # ring
+
+    while avg_lat <= 100:
+
+      results = simulate( topology_dict[ opts.topology ], opts.routers, 
+                opts.routers/opts.rows, opts.rows, max(inj,1), 
+                opts.pattern, 500, opts.dump_vcd, opts.trace, opts.verbose )
+
+      avg_lat = results[0]
+
+      print( "{:<20} | {:<20.1f}".format( max(inj,1), avg_lat ) )
+
+      if inj == 0:
+        zero_load_lat = avg_lat
+
+      # dynamically reduce inj_step depending on the slope
+      if running_avg_lat == 0.0:
+        running_avg_lat = int(avg_lat)
+      else:
+        running_avg_lat = 0.5 * int(avg_lat) + 0.5 * int(running_avg_lat)
+
+      inj_shamt = ( (int(avg_lat) / running_avg_lat) - 1 ) * inj_shamt_mult
+      inj_step  = inj_step >> int(inj_shamt)
+      if inj_step < 1:
+        inj_step = 1
+      inj += inj_step
+
+    print()
+    print( "Zero-load latency = %.1f" % zero_load_lat )
+    print()
+
+  else:
+    results = simulate( topology_dict[ opts.topology ], opts.routers, 
+          opts.routers/opts.rows, opts.rows, opts.injection_rate, 
+          opts.pattern, 500, dump_vcd, opts.trace, opts.verbose )
 
   if opts.stats:
     print()
@@ -388,107 +439,4 @@ def main():
     print()
 
 main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  # sweep mode: sweep the injection rate until the network is saturated.
-  # we assume the latency is 100 when the network is saturated.
-
-#  if opts.sweep:
-#
-#    print()
-#    print( "Pattern: " + opts.pattern )
-#    print()
-#    print( "{:<20} | {:<20}".format( "Injection rate (%)", "Avg. Latency" ) )
-#
-#    inj             = 0
-#    avg_lat         = 0
-#    zero_load_lat   = 0
-#    running_avg_lat = 0.0
-#    inj_shamt_mult  = 5
-#    inj_shamt       = 0.0
-#    inj_step        = 5 if opts.impl == "bus" else 10 # ring
-#
-#    while avg_lat <= 100:
-#
-#      results = simulate( impl_dict[ opts.impl ], opts.num_nodes, opts.net_width, opts.net_height, 
-#                          max(inj,1), opts.pattern, 500, opts.dump_vcd, opts.trace, opts.verbose )
-#
-#      avg_lat = results[0]
-#
-#      print( "{:<20} | {:<20.1f}".format( max(inj,1), avg_lat ) )
-#
-#      if inj == 0:
-#        zero_load_lat = avg_lat
-#
-#      # dynamically reduce inj_step depending on the slope
-#      if running_avg_lat == 0.0:
-#        running_avg_lat = int(avg_lat)
-#      else:
-#        running_avg_lat = 0.5 * int(avg_lat) + 0.5 * int(running_avg_lat)
-#
-#      inj_shamt = ( (int(avg_lat) / running_avg_lat) - 1 ) * inj_shamt_mult
-#      inj_step  = inj_step >> int(inj_shamt)
-#      if inj_step < 1:
-#        inj_step = 1
-#      inj += inj_step
-#
-#    print()
-#    print( "Zero-load latency = %.1f" % zero_load_lat )
-#    print()
-#
-#  # Single run mode:
-#
-#  else:
-#
-#    dump_vcd = None
-#    if opts.dump_vcd:
-#      dump_vcd = "net-{}-{}.vcd".format( opts.impl, opts.pattern )
-#
-#    results = simulate( impl_dict[ opts.impl ], opts.num_nodes, opts.net_width, opts.net_height, 
-#                        opts.injection_rate, opts.pattern, 500, dump_vcd, opts.trace, opts.verbose )
-#
-#    if opts.stats:
-#      print()
-#      print( "Pattern:        " + opts.pattern )
-#      print( "Injection rate: %d" % opts.injection_rate )
-#      print()
-#      print( "Average Latency = %.1f" % results[0] )
-#      print( "Num Packets     = %d" % results[1] )
-#      print( "Total cycles    = %d" % results[2] )
-#      print()
 
