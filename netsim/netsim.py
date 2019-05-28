@@ -213,8 +213,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 20
-NUM_SAMPLE_CYCLES   = 20 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 100
+NUM_SAMPLE_CYCLES   = 200 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
@@ -421,7 +421,7 @@ def main():
     inj_shamt       = 0.0
     inj_step        = 5 if opts.topology == "bus" else 10 # ring
 
-    while avg_lat <= 100:
+    while avg_lat <= 200:
 
       results = simulate( opts, max(inj,1), opts.pattern, 500, 
               opts.dump_vcd, opts.trace, opts.verbose )
@@ -439,11 +439,12 @@ def main():
       else:
         running_avg_lat = 0.5 * int(avg_lat) + 0.5 * int(running_avg_lat)
 
-      inj_shamt = ( (int(avg_lat) / running_avg_lat) - 1 ) * inj_shamt_mult
-      inj_step  = inj_step >> int(inj_shamt)
-      if inj_step < 1:
-        inj_step = 1
-      inj += inj_step
+#      inj_shamt = ( (int(avg_lat) / running_avg_lat) - 1 ) * inj_shamt_mult
+#      inj_step  = inj_step >> int(inj_shamt)
+#      if inj_step < 1:
+#        inj_step = 1
+#      inj += inj_step
+      inj += 10
 
     print()
     print( "Zero-load latency = %.1f" % zero_load_lat )
