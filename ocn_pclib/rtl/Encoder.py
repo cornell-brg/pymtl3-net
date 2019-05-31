@@ -6,7 +6,7 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 1, 2019
 
-from pymtl import *
+from pymtl3 import *
 
 class Encoder( Component ):
   def construct( s, in_width, out_width ):

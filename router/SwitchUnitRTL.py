@@ -6,12 +6,11 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Feb 28, 2019
 
-from pymtl                 import *
-from pclib.rtl             import Mux
-from pclib.rtl.arbiters    import RoundRobinArbiterEn
+from pymtl3 import *
+from pymtl3.stdlib.rtl          import Mux
+from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
 from ocn_pclib.rtl.Encoder import Encoder
-from ocn_pclib.ifcs        import GetIfcRTL
-from pclib.ifcs            import SendIfcRTL
+from pymtl3.stdlib.ifcs    import GetIfcRTL, SendIfcRTL
 
 class SwitchUnitRTL( Component ):
 

@@ -6,8 +6,8 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 26, 2019
 
-from pymtl      import *
-from pclib.ifcs import SendIfcRTL, RecvIfcRTL 
+from pymtl3      import *
+from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL 
 
 class Router( Component ):
 

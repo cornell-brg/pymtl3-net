@@ -7,12 +7,12 @@
 
 import pytest
 
-from pymtl                    import *
-from pymtl.passes.PassGroups  import SimpleSim
-from pclib.test.test_srcs     import TestSrcRTL
-from pclib.test.test_sinks    import TestSinkRTL
-from pclib.test               import TestVectorSimulator
-from pclib.rtl.queues         import NormalQueueRTL
+from pymtl3                    import *
+from pymtl3.passes.PassGroups  import SimpleSim
+from pymtl3.stdlib.test.test_srcs     import TestSrcRTL
+from pymtl3.stdlib.test.test_sinks    import TestSinkRTL
+from pymtl3.stdlib.test               import TestVectorSimulator
+from pymtl3.stdlib.rtl.queues         import NormalQueueRTL
 from router.InputUnitRTL      import InputUnitRTL 
 from router.ULVCUnitRTL       import ULVCUnitRTL 
 from ocn_pclib.ifcs.Packet    import *
@@ -46,8 +46,8 @@ def test_pipe_Bits():
   B1  = mk_bits(1)
   B32 = mk_bits(32)
   dut = ULVCUnitRTL( Packet )
-  dut.set_parameter("top.upper.elaborate.num_entries", 2)
-  dut.set_parameter("top.lower.elaborate.num_entries", 2)
+  dut.set_param("top.upper.construct", num_entries=2)
+  dut.set_param("top.lower.construct", num_entries=2)
   run_tv_test( dut , [
     # recv.en recv.rdy recv.msg opaque give.en give.rdy give.msg
     [  B1(1),  B1(1),  B32(1), B1(0), B1(0),  B1(0),    '?'    ],
@@ -105,8 +105,7 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Set parameters
 
-  test_harness.set_parameter("top.dut.elaborate.QueueType", NormalQueueRTL)
-  # test_harness.set_parameter("top.dut.elaborate.PacketType", Packet)
+  test_harness.set_param("top.dut.construct", QueueType=NormalQueueRTL)
 
   # Create a simulator
 

@@ -8,10 +8,10 @@
 
 import pytest
 
-from pymtl import *
-from pclib.test.test_srcs  import TestSrcCL
-from pclib.test.test_sinks import TestSinkCL
-from pclib.cl.queues   import NormalQueueCL
+from pymtl3 import *
+from pymtl3.stdlib.test.test_srcs  import TestSrcCL
+from pymtl3.stdlib.test.test_sinks import TestSinkCL
+from pymtl3.stdlib.cl.queues   import NormalQueueCL
 from router.OutputUnitCL   import OutputUnitCL
 
 #-------------------------------------------------------------------------
@@ -50,8 +50,8 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Set parameters
 
-#  test_harness.set_parameter("top.dut.queue.elaborate.num_entries", 4)
-#  test_harness.set_parameter("top.dut.elaborate.QueueType", NormalQueueRTL)
+#  test_harness.set_param("top.dut.queue.elaborate.num_entries", 4)
+#  test_harness.set_param("top.dut.elaborate.QueueType", NormalQueueRTL)
 
   # Create a simulator
 

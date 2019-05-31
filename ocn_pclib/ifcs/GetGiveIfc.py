@@ -7,7 +7,7 @@
 #   Date: Mar 19, 2019
 
 from pymtl import *
-from pclib.ifcs.SendRecvIfc import enrdy_to_str
+from pymtl3.stdlib.ifcs.SendRecvIfc import enrdy_to_str
 
 #-------------------------------------------------------------------------
 # GetIfcRTL

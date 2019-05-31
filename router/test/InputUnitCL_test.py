@@ -7,10 +7,10 @@
 
 import pytest
 
-from pymtl                   import *
-from pymtl.passes.PassGroups import SimpleSim
-from pclib.test.test_srcs    import TestSrcCL
-from pclib.test.test_sinks   import TestSinkCL
+from pymtl3                   import *
+from pymtl3.passes.PassGroups import SimpleSim
+from pymtl3.stdlib.test.test_srcs    import TestSrcCL
+from pymtl3.stdlib.test.test_sinks   import TestSinkCL
 from router.InputUnitCL      import InputUnitCL 
 
 #-------------------------------------------------------------------------

@@ -6,10 +6,10 @@
 # Author : Yanghui Ou
 #   Date : May 16, 2019
 
-from pymtl                 import *
-from pclib.ifcs.GuardedIfc import (
-  GuardedCallerIfc, 
-  GuardedCalleeIfc, 
+from pymtl3                 import *
+from pymtl3.stdlib.ifcs.GuardedIfc import (
+  NonBlockingCallerIfc, 
+  NonBlockingCalleeIfc, 
   guarded_ifc 
 )
 
@@ -23,8 +23,8 @@ class SwitchUnitCL( Component ):
 
     # Interface
 
-    s.get  = [ GuardedCallerIfc() for _ in range( s.num_inports ) ]
-    s.send = GuardedCallerIfc()
+    s.get  = [ NonBlockingCallerIfc() for _ in range( s.num_inports ) ]
+    s.send = NonBlockingCallerIfc()
 
     # Components
 

@@ -8,7 +8,7 @@
 #   Date : Apr 30, 2019
 
 from pymtl import *
-from pclib.ifcs import guarded_ifc, RecvIfcRTL, RecvRTL2SendCL, enrdy_to_str
+from pymtl3.stdlib.ifcs import guarded_ifc, RecvIfcRTL, RecvRTL2SendCL, enrdy_to_str
 
 #-------------------------------------------------------------------------
 # TestNetSinkCL

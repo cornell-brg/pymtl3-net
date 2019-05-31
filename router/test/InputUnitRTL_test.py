@@ -7,12 +7,12 @@
 
 import pytest
 
-from pymtl                    import *
-from pymtl.passes.PassGroups  import SimpleSim
-from pclib.test.test_srcs     import TestSrcRTL
-from pclib.test.test_sinks    import TestSinkRTL
-from pclib.test               import TestVectorSimulator
-from pclib.rtl.queues         import NormalQueueRTL
+from pymtl3                    import *
+from pymtl3.passes.PassGroups  import SimpleSim
+from pymtl3.stdlib.test.test_srcs     import TestSrcRTL
+from pymtl3.stdlib.test.test_sinks    import TestSinkRTL
+from pymtl3.stdlib.test               import TestVectorSimulator
+from pymtl3.stdlib.rtl.queues         import NormalQueueRTL
 from router.InputUnitRTL      import InputUnitRTL 
 
 #-------------------------------------------------------------------------
@@ -98,14 +98,13 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Set parameters
 
-  test_harness.set_parameter("top.dut.queue.elaborate.num_entries", 2)
-  test_harness.set_parameter("top.dut.elaborate.QueueType", NormalQueueRTL)
+  test_harness.set_param("top.dut.queue.construct", num_entries=2)
+  test_harness.set_param("top.dut.construct", QueueType=NormalQueueRTL)
 
   # Create a simulator
 
   test_harness.apply( SimpleSim )
   test_harness.sim_reset()
-
 
   # Run simulation
 

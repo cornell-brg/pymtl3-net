@@ -6,12 +6,12 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : April 11, 2019
 
-from pymtl                    import *
-from pclib.ifcs               import RecvIfcRTL
-from pclib.ifcs               import GiveIfcRTL
-from pclib.rtl.arbiters       import RoundRobinArbiterEn
-from pclib.rtl.queues         import NormalQueueRTL
-from pclib.rtl.enrdy_queues   import BypassQueue1RTL
+from pymtl3                    import *
+from pymtl3.stdlib.ifcs               import RecvIfcRTL
+from pymtl3.stdlib.ifcs               import GiveIfcRTL
+from pymtl3.stdlib.rtl.arbiters       import RoundRobinArbiterEn
+from pymtl3.stdlib.rtl.queues         import NormalQueueRTL
+from pymtl3.stdlib.rtl.enrdy_queues   import BypassQueue1RTL
 
 class ULVCUnitRTL( Component ):
 

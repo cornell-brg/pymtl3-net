@@ -6,9 +6,7 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 26, 2019
 
-from pymtl import *
-
-import py
+from pymtl3 import *
 
 #-------------------------------------------------------------------------
 # Static Packet type

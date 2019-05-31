@@ -6,20 +6,15 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Feb 28, 2019
 
-from pymtl import *
-from pclib.ifcs.GuardedIfc import (
-  GuardedCallerIfc, 
-  GuardedCalleeIfc, 
-  guarded_ifc
-)
+from pymtl3 import *
 
 class OutputUnitCL( Component ):
 
   def construct( s, PacketType, QueueType = None ):
     
     # Interface
-    s.recv = GuardedCalleeIfc()
-    s.send = GuardedCallerIfc()
+    s.recv = NonBlockingCalleeIfc()
+    s.send = NonBlockingCallerIfc()
     s.QueueType = QueueType
 
     # If no queue type is assigned

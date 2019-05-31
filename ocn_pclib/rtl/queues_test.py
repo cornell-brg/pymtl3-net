@@ -9,9 +9,9 @@ import pytest
 
 from pymtl                    import *
 from pymtl.dsl.test.sim_utils import simple_sim_pass
-from pclib.test.test_srcs     import TestSrcRTL
-from pclib.test.test_sinks    import TestSinkRTL
-from pclib.test               import TestVectorSimulator
+from pymtl3.stdlib.test.test_srcs     import TestSrcRTL
+from pymtl3.stdlib.test.test_sinks    import TestSinkRTL
+from pymtl3.stdlib.test               import TestVectorSimulator
 from pymtl.passes.PassGroups  import SimpleCLSim
 from queues import NormalQueueRTL
 

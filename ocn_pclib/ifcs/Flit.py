@@ -7,7 +7,7 @@
 #   Date : Mar 30, 2019
 
 from pymtl                 import *
-from ocn_pclib.ifcs.Packet import *
+from ocn_pymtl3.stdlib.ifcs.Packet import *
 
 import py
 

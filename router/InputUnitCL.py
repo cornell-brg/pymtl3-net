@@ -6,9 +6,8 @@
 # Author : Yanghui Ou
 #   Date : May 16, 2019
 
-from pymtl                 import *
-from pclib.ifcs.GuardedIfc import GuardedCallerIfc, GuardedCalleeIfc
-from pclib.cl.queues       import NormalQueueCL
+from pymtl3                 import *
+from pymtl3.stdlib.cl.queues       import NormalQueueCL
 
 class InputUnitCL( Component ):
 
@@ -16,8 +15,8 @@ class InputUnitCL( Component ):
 
     # Interface
 
-    s.recv = GuardedCalleeIfc()
-    s.give = GuardedCalleeIfc()
+    s.recv = NonBlockingCalleeIfc()
+    s.give = NonBlockingCalleeIfc()
 
     # Component
 

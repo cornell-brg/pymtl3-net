@@ -7,8 +7,8 @@
 #   Date : Feb 20, 2019
 
 from pymtl import *
-from pclib.ifcs import InValRdyIfc, OutValRdyIfc
-from pclib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
+from pymtl3.stdlib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
 
 #-------------------------------------------------------------------------
 # ValRdy2EnRdy
