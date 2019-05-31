@@ -6,8 +6,7 @@
 # Author : Yanghui Ou
 #   Date : May 16, 2019
 
-from pymtl import *
-from pclib.ifcs.GuardedIfc import GuardedCalleeIfc, GuardedCallerIfc
+from pymtl3 import *
 from router.Router         import Router
 from router.InputUnitCL    import InputUnitCL
 from router.SwitchUnitCL   import SwitchUnitCL
@@ -23,8 +22,8 @@ class MeshRouterCL( Router ):
                  RouteUnitType  = MeshRouteUnitXDorCL,
                  SwitchUnitType = SwitchUnitCL, 
                  OutputUnitType = OutputUnitCL, 
-                 #RecvIfcType = GuardedCalleeIfc,
-                 #SendIfcType = GuardedCallerIfc,
+                 #RecvIfcType = NonBlockingCalleeIfc,
+                 #SendIfcType = NonBlockingCallerIfc,
                  ):
 
     s.num_inports  = 5
@@ -32,8 +31,8 @@ class MeshRouterCL( Router ):
 
     # Interface
     s.pos  = InPort( PositionType ) 
-    s.recv = [ GuardedCalleeIfc() for _ in range( s.num_inports  ) ]
-    s.send = [ GuardedCallerIfc() for _ in range( s.num_outports ) ]
+    s.recv = [ NonBlockingCalleeIfc() for _ in range( s.num_inports  ) ]
+    s.send = [ NonBlockingCallerIfc() for _ in range( s.num_outports ) ]
     
     # Components
 

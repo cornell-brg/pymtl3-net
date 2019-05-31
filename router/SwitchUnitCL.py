@@ -7,11 +7,6 @@
 #   Date : May 16, 2019
 
 from pymtl3                 import *
-from pymtl3.stdlib.ifcs.GuardedIfc import (
-  NonBlockingCallerIfc, 
-  NonBlockingCalleeIfc, 
-  guarded_ifc 
-)
 
 class SwitchUnitCL( Component ):
 
@@ -33,12 +28,13 @@ class SwitchUnitCL( Component ):
     
     @s.update
     def up_su_arb_cl():
-      if s.send.rdy() and s.any_ready():
-        for i in s.priority:
-          if s.get[i].rdy():
-            s.priority.append( s.priority.pop(i) )
-            s.send( s.get[i]() )
-            break
+      if s.send.rdy is not None:
+        if s.send.rdy() and s.any_ready():
+          for i in s.priority:
+            if s.get[i].rdy():
+              s.priority.append( s.priority.pop(i) )
+              s.send( s.get[i]() )
+              break
     
     for i in range( s.num_inports ):
       s.add_constraints( M( s.get[i] ) < U( up_su_arb_cl ) )
@@ -48,7 +44,8 @@ class SwitchUnitCL( Component ):
   def any_ready( s ):
     flag = False
     for i in range( s.num_inports ):
-      flag = flag or s.get[i].rdy()
+      if s.get[i].rdy is not None:
+        flag = flag or s.get[i].rdy()
     return flag
 
   # TODO: CL line trace

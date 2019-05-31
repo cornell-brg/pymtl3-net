@@ -7,9 +7,9 @@
 #   Date : May 19, 2019
 
 import pytest
-from pymtl                    import *
-from pclib.test               import mk_test_case_table
-from pclib.test.test_srcs     import TestSrcCL
+from pymtl3                    import *
+from pymtl3.stdlib.test               import mk_test_case_table
+from pymtl3.stdlib.test.test_srcs     import TestSrcCL
 from ocn_pclib.test.net_sinks import TestNetSinkCL
 from ocn_pclib.ifcs.packets   import mk_mesh_pkt
 from ocn_pclib.ifcs.positions import mk_mesh_pos
@@ -113,44 +113,44 @@ def mk_pkt_list( PktType, lst ):
 # Test cases
 #-------------------------------------------------------------------------
 
-def simple_msg( PktType, mesh_wid=2, mesh_ht=2 ):
-  return mk_pkt_list( PktType, [
-  #   src_x src_y dst_x dst_y opq   payload
-    ( 0,    0,    0,    1,    0x00, 0x0010  ),
-    ( 1,    0,    1,    1,    0x01, 0x0020  ),
-  ])
+# def simple_msg( PktType, mesh_wid=2, mesh_ht=2 ):
+#   return mk_pkt_list( PktType, [
+#   #   src_x src_y dst_x dst_y opq   payload
+#     ( 0,    0,    0,    1,    0x00, 0x0010  ),
+#     ( 1,    0,    1,    1,    0x01, 0x0020  ),
+#   ])
 
 #-------------------------------------------------------------------------
 # test case table
 #-------------------------------------------------------------------------
 
-test_case_table = mk_test_case_table([
-  (            "msg_func    wid  ht  src_init src_intv sink_init sink_intv"),
-  ["simle_msg", simple_msg, 2,   2,  0,       0,       0,        0         ],
-])
+# test_case_table = mk_test_case_table([
+#   (            "msg_func    wid  ht  src_init src_intv sink_init sink_intv"),
+#   ["simle_msg", simple_msg, 2,   2,  0,       0,       0,        0         ],
+# ])
 
 #-------------------------------------------------------------------------
 # run test
 #-------------------------------------------------------------------------
 
-@pytest.mark.parametrize( **test_case_table )
-def test_ring_simple( test_params ):
-  PktType = mk_mesh_pkt( 
-    mesh_wid=test_params.wid,
-    mesh_ht =test_params.ht,
-    nvcs=1,
-  )
-  pkt_list = test_params.msg_func( PktType, test_params.wid, test_params.ht )
-  src_msgs, sink_msgs = mk_src_sink_msgs( pkt_list, test_params.wid, test_params.ht )
-  th = TestHarness( 
-    PktType, 
-    test_params.wid,
-    test_params.ht,
-    src_msgs,
-    sink_msgs, 
-    test_params.src_init,
-    test_params.src_intv,
-    test_params.sink_init,
-    test_params.sink_intv,
-  )
-  run_sim( th )
+# @pytest.mark.parametrize( **test_case_table )
+# def test_mesh_simple( test_params ):
+#   PktType = mk_mesh_pkt( 
+#     mesh_wid=test_params.wid,
+#     mesh_ht =test_params.ht,
+#     nvcs=1,
+#   )
+#   pkt_list = test_params.msg_func( PktType, test_params.wid, test_params.ht )
+#   src_msgs, sink_msgs = mk_src_sink_msgs( pkt_list, test_params.wid, test_params.ht )
+#   th = TestHarness( 
+#     PktType, 
+#     test_params.wid,
+#     test_params.ht,
+#     src_msgs,
+#     sink_msgs, 
+#     test_params.src_init,
+#     test_params.src_intv,
+#     test_params.sink_init,
+#     test_params.sink_intv,
+#   )
+#   run_sim( th )

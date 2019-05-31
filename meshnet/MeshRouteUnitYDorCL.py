@@ -6,14 +6,9 @@
 # Author : Yanghui Ou
 #   Date : May 21, 2019
 
-from pymtl import *
+from pymtl3 import *
 from directions import *
-from pclib.cl.queues import BypassQueueCL 
-from pclib.ifcs.GuardedIfc import (
-  GuardedCallerIfc, 
-  GuardedCalleeIfc, 
-  guarded_ifc, 
-)
+from pymtl3.stdlib.cl.queues import BypassQueueCL 
 
 class MeshRouteUnitYDorCL( Component ):
 
@@ -25,8 +20,8 @@ class MeshRouteUnitYDorCL( Component ):
 
     # Interface
 
-    s.get  = GuardedCallerIfc()
-    s.give = [ GuardedCalleeIfc() for _ in range( s.num_outports ) ]
+    s.get  = NonBlockingCallerIfc()
+    s.give = [ NonBlockingCalleeIfc() for _ in range( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Components

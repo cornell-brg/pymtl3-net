@@ -6,10 +6,10 @@
 # Author : Cheng Tan
 #   Date : May 18, 2019
 
-from pymtl      import *
+from pymtl3      import *
 from directions import *
-from pclib.ifcs import RecvIfcRTL
-from pclib.ifcs import SendIfcRTL
+from pymtl3.stdlib.ifcs import RecvIfcRTL
+from pymtl3.stdlib.ifcs import SendIfcRTL
 
 class MeshRouterFL( Component ):
 

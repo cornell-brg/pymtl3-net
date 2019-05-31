@@ -6,8 +6,7 @@
 # Author : Yanghui Ou
 #   Date : May 20, 2019
 
-from pymtl import *
-from BitStruct import mk_bit_struct
+from pymtl3 import *
 
 #=========================================================================
 # ring packet

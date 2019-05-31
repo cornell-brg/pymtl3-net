@@ -6,11 +6,10 @@
 # Author : Yanghui Ou
 #   Date : May 21, 2019
 
-from pymtl                 import *
-from pclib.ifcs.GuardedIfc import GuardedCalleeIfc, GuardedCallerIfc
-from directions            import *
-from channel.ChannelCL     import ChannelCL
-from MeshRouterCL          import MeshRouterCL
+from pymtl3            import *
+from directions        import *
+from channel.ChannelCL import ChannelCL
+from MeshRouterCL      import MeshRouterCL
 
 class MeshNetworkCL( Component ):
   def construct( s, PacketType, PositionType, 
@@ -25,8 +24,8 @@ class MeshNetworkCL( Component ):
 
     # Interface
 
-    s.recv = [ GuardedCalleeIfc() for _ in range( s.num_terminals ) ]
-    s.send = [ GuardedCallerIfc() for _ in range( s.num_terminals ) ]
+    s.recv = [ NonBlockingCalleeIfc() for _ in range( s.num_terminals ) ]
+    s.send = [ NonBlockingCallerIfc() for _ in range( s.num_terminals ) ]
 
     # Components
 
@@ -67,23 +66,23 @@ class MeshNetworkCL( Component ):
 
       # Connect the unused ports
       def dummy_rdy():
-        return False
+        return lambda : False
       # FIXME: this doesn't work!
       if i / mesh_wid == 0:
         print i, SOUTH
-        s.routers[i].send[SOUTH].rdy.method = dummy_rdy
+        s.routers[i].send[SOUTH].rdy.method = dummy_rdy()
 
       if i / mesh_wid == mesh_ht - 1:
         print i, NORTH
-        s.routers[i].send[NORTH].rdy.method = dummy_rdy
+        s.routers[i].send[NORTH].rdy.method = dummy_rdy()
 
       if i % mesh_wid == 0:
         print i, WEST
-        s.routers[i].send[WEST].rdy.method = dummy_rdy
+        s.routers[i].send[WEST].rdy.method = dummy_rdy()
 
       if i % mesh_wid == mesh_wid - 1:
         print i, EAST
-        s.routers[i].send[EAST].rdy.method = dummy_rdy
+        s.routers[i].send[EAST].rdy.method = dummy_rdy()
 
     # FIXME: unable to connect a struct to a port.
     @s.update

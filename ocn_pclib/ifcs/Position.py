@@ -6,8 +6,7 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 25, 2019
 
-from pymtl     import *
-from BitStruct import mk_bit_struct
+from pymtl3     import *
 import py
 
 #-------------------------------------------------------------------------

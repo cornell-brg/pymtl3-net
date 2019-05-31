@@ -6,13 +6,8 @@
 # Author : Yanghui Ou
 #   Date : May 19, 2019
 
-from pymtl import *
-from pclib.cl.queues import NormalQueueCL
-from pclib.ifcs.GuardedIfc import (
-  GuardedCallerIfc, 
-  GuardedCalleeIfc, 
-  guarded_ifc
-)
+from pymtl3 import *
+from pymtl3.stdlib.cl.queues import NormalQueueCL
 
 class ChannelCL( Component ):
 
@@ -23,8 +18,8 @@ class ChannelCL( Component ):
 
     # Interface
 
-    s.recv = GuardedCalleeIfc()
-    s.send = GuardedCallerIfc()
+    s.recv = NonBlockingCalleeIfc()
+    s.send = NonBlockingCallerIfc()
     s.QueueType = QueueType
     
     # Constants

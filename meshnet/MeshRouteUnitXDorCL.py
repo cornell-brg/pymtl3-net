@@ -6,14 +6,9 @@
 # Author : Yanghui Ou
 #   Date : May 21, 2019
 
-from pymtl import *
+from pymtl3 import *
 from directions import *
-from pclib.cl.queues import BypassQueueCL 
-from pclib.ifcs.GuardedIfc import (
-  GuardedCallerIfc, 
-  GuardedCalleeIfc, 
-  guarded_ifc, 
-)
+from pymtl3.stdlib.cl.queues import BypassQueueCL 
 
 class MeshRouteUnitXDorCL( Component ):
 
@@ -25,8 +20,8 @@ class MeshRouteUnitXDorCL( Component ):
 
     # Interface
 
-    s.get  = GuardedCallerIfc()
-    s.give = [ GuardedCalleeIfc() for _ in range( s.num_outports ) ]
+    s.get  = NonBlockingCallerIfc()
+    s.give = [ NonBlockingCalleeIfc() for _ in range( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Components
@@ -69,7 +64,6 @@ class MeshRouteUnitXDorCL( Component ):
       s.add_constraints( 
         M( s.get ) < U( ru_up_route ) < M( s.give[i] ),
       )
-
 
   def give_method( s ):
     assert s.pkt is not None

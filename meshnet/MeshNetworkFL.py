@@ -6,9 +6,9 @@
 # Author : Cheng Tan
 #   Date : Mar 20, 2019
 
-from pymtl                   import *
-from pclib.ifcs              import RecvIfcRTL
-from pclib.ifcs              import SendIfcRTL
+from pymtl3                   import *
+from pymtl3.stdlib.ifcs              import RecvIfcRTL
+from pymtl3.stdlib.ifcs              import SendIfcRTL
 from directions              import *
 from ocn_pclib.ifcs.Packet   import *
 from ocn_pclib.ifcs.Position import *

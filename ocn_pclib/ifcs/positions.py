@@ -1,6 +1,3 @@
-from pymtl     import *
-from BitStruct import mk_bit_struct
-
 #=========================================================================
 # positions.py
 #=========================================================================
@@ -8,6 +5,8 @@ from BitStruct import mk_bit_struct
 # 
 # Author : Yanghui Ou
 #   Date : May 20, 2019
+
+from pymtl3 import *
 
 def mk_mesh_pos( mesh_wid, mesh_ht ):
   XType = mk_bits( clog2( mesh_wid ) )

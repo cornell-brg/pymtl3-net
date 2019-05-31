@@ -7,8 +7,8 @@
 # Author : Yanghui Ou
 #   Date : Apr 30, 2019
 
-from pymtl import *
-from pymtl3.stdlib.ifcs import guarded_ifc, RecvIfcRTL, RecvRTL2SendCL, enrdy_to_str
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import RecvIfcRTL, RecvRTL2SendCL
 
 #-------------------------------------------------------------------------
 # TestNetSinkCL
@@ -70,7 +70,7 @@ class TestNetSinkCL( Component ):
       U( up_sink_count ) < M( s.recv.rdy )
     )
 
-  @guarded_ifc( lambda s: s.initial_count==0 and s.interval_count==0 )
+  @non_blocking( lambda s: s.initial_count==0 and s.interval_count==0 )
   def recv( s, msg ):
 
     s.recv_msg = msg

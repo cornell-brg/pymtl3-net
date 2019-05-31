@@ -7,15 +7,15 @@
 #   Date : May 19, 2019
 
 import tempfile
-from pymtl                        import *
-from ocn_pclib.rtl.queues         import NormalQueueRTL
-from pclib.rtl.enrdy_queues       import *
-from pclib.test.test_srcs         import TestSrcRTL
-from pclib.test.test_sinks        import TestSinkRTL
-from pclib.test                   import TestVectorSimulator
-from ocn_pclib.ifcs.Packet        import Packet, mk_pkt
-from ocn_pclib.ifcs.Position      import *
-from meshnet.MeshNetworkFL        import MeshNetworkFL
+from pymtl3                   import *
+from pymtl3.stdlib.rtl.queues import *
+from pymtl3.stdlib.rtl.enrdy_queues import *
+from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
+from pymtl3.stdlib.test.test_sinks  import TestSinkRTL
+from pymtl3.stdlib.test             import TestVectorSimulator
+from ocn_pclib.ifcs.Packet          import Packet, mk_pkt
+from ocn_pclib.ifcs.Position        import *
+from meshnet.MeshNetworkFL          import MeshNetworkFL
 # from ocn_pclib.draw               import *
 
 #-------------------------------------------------------------------------
@@ -89,8 +89,8 @@ def ttest_vector_mesh4x4( dump_vcd, test_verilog ):
     for i in range (num_inports):
       path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
       path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
-      model.set_parameter(path_qt, NormalQueueRTL)
-      model.set_parameter(path_ru, DORYMeshRouteUnitRTL)
+      model.set_param(path_qt, NormalQueueRTL)
+      model.set_param(path_ru, DORYMeshRouteUnitRTL)
 
   x = 'x'
   # Specific for wire connection (link delay = 0) in 4x4 Mesh topology

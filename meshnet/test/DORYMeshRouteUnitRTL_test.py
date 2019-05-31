@@ -6,14 +6,14 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 25, 2019
 
-from pymtl                        import *
-from pclib.test                   import TestVectorSimulator
+from pymtl3                        import *
+from pymtl3.stdlib.test                   import TestVectorSimulator
 from ocn_pclib.ifcs.Packet        import *
 from ocn_pclib.ifcs.Flit          import *
 from ocn_pclib.ifcs.Position      import mk_mesh_pos
-from pymtl.passes.PassGroups      import SimpleSim
-from pclib.test.test_srcs         import TestSrcRTL
-from pclib.test.test_sinks        import TestSinkRTL
+from pymtl3.passes.PassGroups      import SimpleSim
+from pymtl3.stdlib.test.test_srcs         import TestSrcRTL
+from pymtl3.stdlib.test.test_sinks        import TestSinkRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL 
 
 #-------------------------------------------------------------------------
