@@ -271,3 +271,62 @@ def ttest_srcsink_mesh2x2():
 
   th = TestHarness( Packet, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
   run_sim( th )
+
+def test_time_breakdown():
+  def no_set_param( mesh_wid=4, mesh_ht=4 ):
+    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    net = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
+    start_time = time.time()
+    net.elaborate()
+    end_time = time.time()
+    return 1000*(end_time - start_time)
+
+  def set_param_simple( mesh_wid=4, mesh_ht=4 ):
+    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    net = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
+    start_time = time.time()
+    for i in range( mesh_wid * mesh_ht ):
+      net.set_param("top.routers[{}].construct".format(i), RouteUnitType=DORYMeshRouteUnitRTL )
+    net.elaborate()
+    end_time = time.time()
+    return 1000*(end_time - start_time)
+
+  def set_param_regex( mesh_wid=4, mesh_ht=4 ):
+    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    net = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
+    start_time = time.time()
+    net.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL )
+    net.set_param("top.routers*.input_units*.construct", QueueType=NormalQueueRTL )
+    net.set_param("top.routers*.output_units*.construct", QueueType=NormalQueueRTL )
+    net.set_param("top.routers*.input_units*.queue.construct", num_entries=10 )
+    net.set_param("top.routers*.input_units[2].queue.construct", num_entries=2 )
+    net.set_param("top.routers[1].input_units*.queue.construct", num_entries=1 )
+    net.set_param("top.routers[1].input_units[3].queue.construct", num_entries=3 )
+    net.elaborate()
+    end_time = time.time()
+    return 1000*(end_time - start_time)
+
+  total_time = 0
+  mesh_wid = 4
+  mesh_ht  = 4
+  times = 5 
+  print
+  print( "="*74 )
+  for i in range( times ):
+    total_time += set_param_simple( mesh_wid, mesh_ht )
+  print( " Avg. elaborate time with set_param for {}x{} mesh: {} ms".format(
+           mesh_wid, mesh_ht, total_time/times )
+  )
+
+  total_time = 0
+  for i in range( times ):
+    total_time += set_param_regex( mesh_wid, mesh_ht )
+  print( " Avg. elaborate with set_param_regex for {}x{} mesh: {} ms".format(
+           mesh_wid, mesh_ht, total_time/times )
+  )
+
+  total_time = 0
+  for i in range( times ):
+    total_time += no_set_param( mesh_wid, mesh_ht )
+  print( " Avg. elaborate time without set_param : {} ms".format( total_time/times )
+  )
