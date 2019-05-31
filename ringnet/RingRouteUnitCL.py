@@ -43,6 +43,7 @@ class RingRouteUnitCL( Component ):
     def ru_up_route():
       if s.msg is None and s.get.rdy():
         s.msg = s.get()
+
       s.rdy_lst = [ False for _ in range( s.num_outports ) ]
       if s.msg is not None:
         if s.msg.dst == s.pos:

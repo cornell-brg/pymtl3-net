@@ -12,8 +12,8 @@ from hypothesis import strategies as st
 from pymtl                    import *
 from pclib.test.test_srcs     import TestSrcCL
 from ocn_pclib.test.net_sinks import TestNetSinkCL
-from ocn_pclib.ifcs.Position  import mk_ring_pos
-from ocn_pclib.ifcs.Packet    import BasePacket, mk_base_pkt 
+from ocn_pclib.ifcs.positions import mk_ring_pos
+from ocn_pclib.ifcs.packets   import mk_ring_pkt 
 from router.InputUnitCL       import InputUnitCL
 from ringnet.RingRouterCL     import RingRouterCL
 
@@ -68,10 +68,10 @@ class TestHarness( Component ):
     return srcs_done and sinks_done
 
   def line_trace( s ):
-    return "{} - {} - {}".format( 
-      "|".join( [ s.srcs[i].line_trace() for i in range(3) ] ),
+    return "{}".format( 
+      #"|".join( [ s.srcs[i].line_trace() for i in range(3) ] ),
       s.dut.line_trace(),
-      "|".join( [ s.sinks[i].line_trace() for i in range(3) ] ),
+      #"|".join( [ s.sinks[i].line_trace() for i in range(3) ] ),
     )
 
 #-------------------------------------------------------------------------
@@ -108,10 +108,11 @@ def run_sim( test_harness, max_cycles=100 ):
 #-------------------------------------------------------------------------
 
 def test_normal_simple():
-
-  pkt0 = mk_base_pkt( 1, 2, 0x01, 0xface )
-  src_packets = [ 
-   [ pkt0 ], 
+  nrouters = 4
+  TestPkt = mk_ring_pkt( nrouters )
+  pkt0 = TestPkt( 1, 2, 0, 0x01, 0xface )
+  src_packets = [
+   [ pkt0 ],
    [], 
    [] 
   ]
@@ -121,8 +122,9 @@ def test_normal_simple():
     [] 
   ]
 
-  th = TestHarness( BasePacket, 4, 1, src_packets, sink_packets, 0, 0, 0, 0 )
+  th = TestHarness( TestPkt, nrouters, 1, src_packets, sink_packets, 0, 0, 0, 0 )
   run_sim( th )
+  assert hasattr( th.dut.send[0].method, 'called' )
 
 
 #-------------------------------------------------------------------------

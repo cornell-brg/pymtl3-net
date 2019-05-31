@@ -65,8 +65,7 @@ class RingRouterCL( Router ):
       s.connect( s.output_units[j].send, s.send[j]              )
 
   def line_trace( s ):
-    return "{}".format(
-      "|".join( [ s.input_units[i].line_trace()  for i in range(3) ] ), 
-      #"|".join( [ s.route_units[i].line_trace() for i in range(3) ] ), 
-      #"|".join( [ s.switch_units[i].line_trace() for i in range(3) ] ), 
-    )
+    # return "{}".format(
+    #   "|".join( [ s.input_units[i].line_trace()  for i in range(3) ] ), 
+    # )
+    return "|".join( [ str( s.send[i] ) for i in range(s.num_inports) ] )
