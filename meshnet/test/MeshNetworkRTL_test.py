@@ -22,6 +22,8 @@ from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 from meshnet.TestMeshRouteUnitRTL import TestMeshRouteUnitRTL
 from router.InputUnitRTL          import InputUnitRTL
 
+import time
+
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
@@ -49,38 +51,22 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
     if test_vector[2] != 'x':
       assert model.send[test_vector[2]].msg.payload == test_vector[3]
      
+  time0 = time.time()
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
-  sim.run_test()
+
+  time_after = time.time()
+  print("--- Apply sim: %s ms ---" % (1000*(time_after - time0)))
+
+#  sim.run_test()
 
 def test_vector_mesh2x2( dump_vcd, test_verilog ):
 
   mesh_wid = 2
   mesh_ht  = 2
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
 
   num_routers = mesh_wid * mesh_ht 
   num_inports = 5
-#  for r in range (num_routers):
-#    for i in range (num_inports):
-#      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-#      path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
-#      model.set_parameter(path_qt, NormalQueueRTL)
-#      model.set_parameter(path_ru, DORXMeshRouteUnitRTL)
-
-#  model.set_parameter("top.routers*.elaborate.RouteUnitType", DORYMeshRouteUnitRTL)
-#  model.set_parameter("top.routers*.input_units*.elaborate.QueueType", NormalQueueRTL)
-#  model.set_parameter("top.routers*.elaborate.RouteUnitType", TestMeshRouteUnitRTL)
-
-#  model.set_param("top.routers*.input_units*.construct", QueueType=NormalQueueRTL)
-
-  model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
-
-  model.set_param("top.routers[2].translate", True)
-
-  model.set_param("top.routers*.translate", True)
-
-  model.set_param("top.translate", False)
 
   x = 'x'
 
@@ -104,6 +90,31 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
   [  x,    [0,0,0000],     x,       x  ],
   [  x,    [0,0,0000],     x,       x  ],
   ]
+
+  mesh_wid = 40
+  mesh_ht  = 40
+  time0 = time.time()
+
+  model = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
+
+  time_initialize = time.time()
+  print("\n--- Initialize: %s ms ---" % (1000*(time_initialize - time0)))
+
+#  model.set_param("top.routers*.input_units*.construct", QueueType=NormalQueueRTL)
+
+  time0 = time.time()
+  model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
+  for i in range(16):
+    model.set_param("top.routers[{}].construct".format(i), RouteUnitType=DORYMeshRouteUnitRTL)
+
+#  model.set_param("top.routers[2].translate", True)
+
+#  model.set_param("top.routers*.translate", True)
+
+#  model.set_param("top.translate", False)
+
+  time_param = time.time()
+  print("--- Set_param: %s ms ---" % (1000*(time_param - time0)))
 
   # dt = DrawGraph()
   # model.set_draw_graph( dt )
