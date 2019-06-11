@@ -16,6 +16,7 @@ class BasePacket( object ):
 
   def __init__( s ):
     
+    # FIXME: bitwidth
     s.src     = Bits4 ( 0 )
     s.dst     = Bits4 ( 0 ) 
     s.opaque  = Bits4 ( 0 ) 
