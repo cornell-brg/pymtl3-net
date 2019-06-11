@@ -22,9 +22,10 @@ class Encoder( Component ):
     # Logic
     @s.update
     def encode():
-      s.out = 0
+      #TODO: need to change the bitwidth for correct translation.
+      s.out = Bits3(0)
       for i in range( in_width ):
-        s.out = i if s.in_[i] else s.out
+        s.out = Bits3(i) if s.in_[i] else s.out
   
   def line_trace( s ):
     return "in:{:0>{n}b} | out:{}".format( int( s.in_ ), s.out, n=s.din_wid ) 
