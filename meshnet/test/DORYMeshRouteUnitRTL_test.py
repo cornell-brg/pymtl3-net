@@ -8,13 +8,15 @@
 
 from pymtl3                        import *
 from pymtl3.stdlib.test                   import TestVectorSimulator
-from ocn_pclib.ifcs.Packet        import *
+#from ocn_pclib.ifcs.Packet        import *
 from ocn_pclib.ifcs.Flit          import *
 from ocn_pclib.ifcs.Position      import mk_mesh_pos
+from ocn_pclib.ifcs.packets       import mk_mesh_pkt
 from pymtl3.passes.PassGroups      import SimpleSim
 from pymtl3.stdlib.test.test_srcs         import TestSrcRTL
 from pymtl3.stdlib.test.test_sinks        import TestSinkRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL 
+from pymtl3.passes.VcdGenerationPass import VcdGenerationPass
 
 #-------------------------------------------------------------------------
 # Driver function for TestVectorSimulator
@@ -48,6 +50,7 @@ def run_test( model, mesh_wid, mesh_ht, router_pos, test_vectors ):
         assert model.give[i].msg.payload == test_vector[3]
   
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
+
   sim.run_test()
 
 #-------------------------------------------------------------------------
@@ -59,8 +62,10 @@ def test_route_unit():
   mesh_ht  = 2
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = DORYMeshRouteUnitRTL( Packet, MeshPos, 5 )
+  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht, 1, 8, 32 )
+  model = DORYMeshRouteUnitRTL( PacketType, MeshPos, 5 )
 
+#  model.apply( VcdGenerationPass() )
   # Test for Y-DOR routing algorithm
 
   run_test( model, mesh_wid, mesh_ht, MeshPos( 0, 0 ), [
@@ -78,7 +83,9 @@ def test_route_unit3x3():
   mesh_ht  = 3
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = DORYMeshRouteUnitRTL( Packet, MeshPos )
+
+  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht, 1, 8, 32 )
+  model = DORYMeshRouteUnitRTL( PacketType, MeshPos )
 
   # Test for Y-DOR routing algorithm
 
