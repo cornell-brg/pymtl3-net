@@ -11,8 +11,6 @@ from pymtl3.stdlib.ifcs.SendRecvIfc  import *
 from directions              import *
 from channel.ChannelRTL      import ChannelRTL
 from MeshRouterRTL           import MeshRouterRTL
-from ocn_pclib.ifcs.Packet   import *
-from ocn_pclib.ifcs.Position import *
 
 class MeshNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, 

@@ -6,10 +6,10 @@
 # Author : Cheng Tan
 #   Date : April 6, 2019
 
-from pymtl                  import *
-from pclib.ifcs.SendRecvIfc import *
-from channel.ChannelRTL     import ChannelRTL
-from BflyRouterRTL          import BflyRouterRTL
+from pymtl3             import *
+from BflyRouterRTL      import BflyRouterRTL
+from channel.ChannelRTL import ChannelRTL
+from pymtl3.stdlib.ifcs.SendRecvIfc  import *
 
 class BflyNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, k_ary, n_fly, chl_lat=0 ):

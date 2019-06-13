@@ -81,3 +81,40 @@ def mk_mesh_pkt( mesh_wid=2, mesh_ht=2, nvcs=1,
       ( 'payload', PayloadType ),
     ])
   return new_class
+
+#=========================================================================
+# Butterfly packet
+#=========================================================================
+
+def mk_bfly_pkt( k_ary=2, n_fly=2, nvcs=2, opaque_nbits=8, payload_nbits=32 ):
+
+  KaryType = mk_bits( clog2( k_ary ) )
+  NflyType = mk_bits( clog2( n_fly ) )
+  OpqType = mk_bits( opaque_nbits )
+  PayloadType = mk_bits( payload_nbits )
+  new_name = "BflyPacket_{}_{}_{}_{}_{}".format( 
+    k_ary,
+    n_fly,
+    nvcs,
+    opaque_nbits,
+    payload_nbits, 
+  )
+  if nvcs > 1:
+    VcIdType = mk_bits( clog2( nvcs ) )
+    new_class = mk_bit_struct( new_name,[
+      ( 'src',     IdType      ),
+      ( 'dst',     IdType      ),
+      ( 'opaque',  OpqType     ),
+      ( 'vc_id',   VcIdType    ),
+      ( 'payload', PayloadType ),
+    ])
+  else:
+    new_class = mk_bit_struct( new_name,[
+      ( 'src',     IdType      ),
+      ( 'dst',     IdType      ),
+      ( 'opaque',  OpqType     ),
+      ( 'payload', PayloadType ),
+    ])
+  return new_class
+
+

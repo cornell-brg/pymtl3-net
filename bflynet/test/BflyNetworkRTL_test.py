@@ -7,14 +7,14 @@
 #   Date : April 8, 2019
 
 import tempfile
-from pymtl                   import *
-from bflynet.BflyNetworkRTL  import BflyNetworkRTL
-from ocn_pclib.rtl.queues    import NormalQueueRTL
-from pclib.test.test_srcs    import TestSrcRTL
-from pclib.test.test_sinks   import TestSinkRTL
-from pclib.test              import TestVectorSimulator
-from ocn_pclib.ifcs.Packet   import *
-from ocn_pclib.ifcs.Position import *
+from pymtl3                        import *
+from pymtl3.stdlib.rtl.queues      import NormalQueueRTL
+from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
+from pymtl3.stdlib.test.test_sinks import TestSinkRTL
+from pymtl3.stdlib.test            import TestVectorSimulator
+from bflynet.BflyNetworkRTL        import BflyNetworkRTL
+from ocn_pclib.ifcs.packets        import *
+from ocn_pclib.ifcs.positions      import *
 
 #-------------------------------------------------------------------------
 # Test Vector
