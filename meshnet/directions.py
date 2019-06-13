@@ -6,14 +6,12 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 10, 2019
 
-from pymtl3      import *
-
 #-------------------------------------------------------------------------
 # Constants
 #-------------------------------------------------------------------------
 
-NORTH = Bits3(0)
-SOUTH = Bits3(1)
-WEST  = Bits3(2)
-EAST  = Bits3(3)
-SELF  = Bits3(4)
+NORTH = 0
+SOUTH = 1
+WEST  = 2
+EAST  = 3
+SELF  = 4

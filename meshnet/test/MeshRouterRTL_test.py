@@ -16,13 +16,11 @@ from ocn_pclib.ifcs.positions      import mk_mesh_pos
 from ocn_pclib.ifcs.packets         import  mk_mesh_pkt
 from pymtl3.stdlib.test            import TestVectorSimulator
 from meshnet.MeshRouterRTL        import MeshRouterRTL
-#from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
-#from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from router.ULVCUnitRTL           import ULVCUnitRTL
 from router.InputUnitRTL          import InputUnitRTL
-from meshnet.DORYMeshRouteUnitRTL_wo_index import DORYMeshRouteUnitRTL
-from router.SwitchUnitRTL_wo_index          import SwitchUnitRTL
-#from router.SwitchUnitRTL          import SwitchUnitRTL
+from router.SwitchUnitRTL          import SwitchUnitRTL
 
 from test_helpers import dor_routing
 

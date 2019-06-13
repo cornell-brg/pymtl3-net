@@ -28,6 +28,9 @@ class SwitchUnitRTL( Component ):
 
     # Components
 
+    s.get_en  = [ Wire( Bits1 ) for _ in range( s.num_inports ) ]
+    s.get_rdy = [ Wire( Bits1 ) for _ in range( s.num_inports ) ]
+
     s.arbiter = RoundRobinArbiterEn( num_inports )
 
     s.mux = Mux( PacketType, num_inports )(
@@ -44,19 +47,21 @@ class SwitchUnitRTL( Component ):
     for i in range( num_inports ):
       s.connect( s.get[i].rdy, s.arbiter.reqs[i] )
       s.connect( s.get[i].msg, s.mux.in_[i]      )
+      s.connect( s.get[i].en,  s.get_en[i]       )
+      s.connect( s.get[i].rdy, s.get_rdy[i]      )
 
     @s.update
     def up_arb_send_en():
-      s.arbiter.en = s.arbiter.grants > 0 and s.send.rdy
-      s.send.en = s.arbiter.grants > 0 and s.send.rdy
+      s.arbiter.en = s.arbiter.grants > Bits5(0) and s.send.rdy
+      s.send.en = s.arbiter.grants > Bits5(0) and s.send.rdy
 
     @s.update
     def up_get_en():
       for i in range( num_inports ):
-        s.get[i].en = (
-          Bits1(1) if s.get[i].rdy and s.send.rdy and s.mux.sel==i else 
+        s.get_en[i] = (
+          Bits1(1) if s.get_rdy[i] and s.send.rdy and s.mux.sel==Bits3(i) else 
           Bits1(0)
-        ) 
+      )
 
   def line_trace( s ):
 
