@@ -22,6 +22,7 @@ from router.ULVCUnitRTL           import ULVCUnitRTL
 from router.InputUnitRTL          import InputUnitRTL
 from meshnet.DORYMeshRouteUnitRTL_wo_index import DORYMeshRouteUnitRTL
 from router.SwitchUnitRTL_wo_index          import SwitchUnitRTL
+#from router.SwitchUnitRTL          import SwitchUnitRTL
 
 from test_helpers import dor_routing
 
@@ -97,7 +98,6 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Create a simulator
 
-#  test_harness.apply( SimpleSim )
   test_harness.elaborate()
   test_harness.dut.sverilog_translate = True
   test_harness.dut.sverilog_import = True
