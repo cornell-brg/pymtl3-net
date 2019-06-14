@@ -61,7 +61,7 @@ class SwitchUnitRTL( Component ):
         s.get_en[i] = (
           Bits1(1) if s.get_rdy[i] and s.send.rdy and s.mux.sel==Bits3(i) else 
           Bits1(0)
-      )
+        )
 
   def line_trace( s ):
 

@@ -20,11 +20,13 @@ from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from router.ULVCUnitRTL           import ULVCUnitRTL
 from router.InputUnitRTL          import InputUnitRTL
+from router.OutputUnitRTL          import OutputUnitRTL
 from router.SwitchUnitRTL          import SwitchUnitRTL
 
 from test_helpers import dor_routing
 
 from pymtl3.passes.sverilog import ImportPass, TranslationPass
+from pymtl3.passes import DynamicSim
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -51,9 +53,8 @@ class TestHarness( Component ):
     # print "src:", src_msgs
     # print "sink:", sink_msgs
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = MeshRouterRTL( MsgType, MeshPos,
-        InputUnitType = InputUnitRTL, RouteUnitType = DORYMeshRouteUnitRTL,
-        SwitchUnitType = SwitchUnitRTL)
+    s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = InputUnitRTL, 
+        RouteUnitType = DORYMeshRouteUnitRTL )
 
     s.srcs  = [ TestSrcRTL    ( MsgType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range  ( s.dut.num_inports ) ]
@@ -74,11 +75,15 @@ class TestHarness( Component ):
   def done( s ):
     srcs_done = 1
     sinks_done = 1
-    for i in range( s.dut.num_inports ):
-      if s.srcs[i].done() == 0:
+#    for i in range( s.dut.num_inports ):
+#      if s.srcs[i].done() == 0:
+    for x in s.srcs:
+      if x.done() == 0:
         srcs_done = 0
-    for i in range( s.dut.num_outports ):
-      if s.sinks[i].done() == 0:
+#    for i in range( s.dut.num_outports ):
+#      if s.sinks[i].done() == 0:
+    for x in s.sinks:
+      if x.done() == 0:
         sinks_done = 0
     return srcs_done and sinks_done
 
@@ -101,7 +106,8 @@ def run_sim( test_harness, max_cycles=100 ):
   test_harness.dut.sverilog_import = True
   test_harness.apply( TranslationPass() )
   test_harness = ImportPass()( test_harness )
-  test_harness.apply( SimpleSim )
+#  test_harness.apply( SimpleSim )
+  test_harness.apply( DynamicSim )
   test_harness.sim_reset()
 
   # Run simulation
