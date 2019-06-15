@@ -65,11 +65,11 @@ def run_vector_test( model, test_vectors, k_ary, n_fly ):
       assert model.send[test_vector[2]].msg.payload == test_vector[3]
      
   model.elaborate()
-  model.sverilog_translate = True
+#  model.sverilog_translate = True
 #  model.sverilog_import = True
-  model.apply( TranslationPass() )
+#  model.apply( TranslationPass() )
 #  model = ImportPass()( test_harness )
-  model.apply( SimpleSim )
+#  model.apply( SimpleSim )
 #  model.apply( DynamicSim )
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()

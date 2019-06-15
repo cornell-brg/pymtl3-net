@@ -44,8 +44,7 @@ class DTRBflyRouteUnitRTL( Component ):
     # Routing logic
     @s.update
     def up_ru_routing():
- 
-      s.out_dir = OutType( 0 )
+#      s.out_dir = OutType( 0 )
       for i in range( s.num_outports ):
         s.give_rdy[i] = Bits1( 0 )
 

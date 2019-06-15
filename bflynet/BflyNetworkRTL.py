@@ -34,6 +34,9 @@ class BflyNetworkRTL( Component ):
     s.channels = [ ChannelRTL( PacketType, latency = chl_lat)
                      for _ in range( num_channels ) ]
 
+    s.pos      = [[ PositionType( r, n ) for r in range( r_rows )]
+                    for n in range( n_fly )]
+
     # Connect s.routers together in Butterfly
 
     chl_id = 0
@@ -66,7 +69,7 @@ class BflyNetworkRTL( Component ):
     def up_pos():
       for n in range( n_fly ):
         for r in range( r_rows ):
-          s.routers[r_rows * n + r].pos = PositionType( r, n )
+          s.routers[r_rows * n + r].pos = s.pos[n][r]
 
   def line_trace( s ):
     trace = [ "" for _ in range( s.num_terminals ) ]
