@@ -16,8 +16,11 @@ class DTRBflyRouteUnitRTL( Component ):
     # Constants 
 
     s.num_outports = num_outports
-    k_ary = num_outports
-    OutType = mk_bits( clog2( s.num_outports ) )
+    k_ary    = num_outports
+    OutType  = mk_bits( clog2( s.num_outports ) )
+    rows     = k_ary ** ( n_fly - 1 )
+    s.RowWidth = clog2( rows + 1 )
+    s.END = s.RowWidth
 
     # Interface
 
@@ -46,15 +49,16 @@ class DTRBflyRouteUnitRTL( Component ):
       for i in range( s.num_outports ):
         s.give_rdy[i] = Bits1( 0 )
 
+      for _ in range( s.pos.stage ):
+        s.END = s.END + s.RowWidth
+
       if s.get.rdy:
         # TODO: or embed this into the pos/packet
 #        mod = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1)))
 #        div = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1))-1)
 #        s.out_dir = ((int)(s.get.msg.dst_x) % mod) / div
-        print s.get.msg
-        s.out_dir = s.get.msg.dst[ s.pos.stage ]
+        s.out_dir = s.get.msg.dst[ s.END - s.RowWidth : s.END]
         s.give_rdy[ s.out_dir ] = Bits1( 1 )
-#        s.give[ s.out_dir ].rdy = 1
 
     @s.update
     def up_ru_get_en():

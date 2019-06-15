@@ -97,10 +97,9 @@ class TestHarness( Component ):
 # run_rtl_sim
 #-------------------------------------------------------------------------
 
-def run_sim( test_harness, max_cycles=100 ):
+def run_sim( test_harness, max_cycles=1000 ):
 
   # Create a simulator
-
   test_harness.elaborate()
   test_harness.dut.sverilog_translate = True
   test_harness.dut.sverilog_import = True
@@ -168,10 +167,13 @@ def test_h0():
   mesh_wid = 2
   mesh_ht  = 2
   PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
-  pkt0 = PacketType( 0, 0, 1, 0, 0, 0xdead )
-  pkt1 = PacketType( 0, 1, 1, 0, 0, 0xbeef )
-  src_pkts  = [ [pkt1], [], [], [],           [pkt0] ]
-  sink_pkts = [ [],     [], [], [pkt0, pkt1], []     ]
+  pkt0 = PacketType( 0, 0, 1, 0, 0, 0xbee1 )
+  pkt1 = PacketType( 0, 1, 1, 0, 0, 0xbee2 )
+  pkt2 = PacketType( 0, 1, 1, 0, 0, 0xbee3 )
+  pkt3 = PacketType( 0, 1, 1, 0, 0, 0xbee4 )
+  pkt4 = PacketType( 0, 1, 1, 0, 0, 0xbee5 )
+  src_pkts  = [ [pkt1,pkt2,pkt3], [], [], [],           [pkt0,pkt4] ]
+  sink_pkts = [ [],     [], [], [pkt0, pkt1,pkt2,pkt3,pkt4], []     ]
   th = TestHarness( 
     PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
     src_pkts, sink_pkts

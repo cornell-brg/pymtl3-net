@@ -14,7 +14,12 @@ from pymtl3.stdlib.test.test_sinks import TestSinkRTL
 from pymtl3.stdlib.test            import TestVectorSimulator
 from bflynet.BflyNetworkRTL        import BflyNetworkRTL
 from ocn_pclib.ifcs.packets        import *
+#from ocn_pclib.ifcs.Packet        import *
 from ocn_pclib.ifcs.positions      import *
+#from ocn_pclib.ifcs.Position      import *
+
+from pymtl3.passes.sverilog import ImportPass, TranslationPass
+from pymtl3.passes import DynamicSim
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -27,11 +32,24 @@ def run_vector_test( model, test_vectors, k_ary, n_fly ):
     num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
     num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
     r_rows        = k_ary ** ( n_fly - 1 )
-    BfPos         = mk_bf_pos( r_rows, n_fly )
+    BflyPosition  = mk_bfly_pos( k_ary, n_fly )
+    BflyPacket    = mk_bfly_pkt( k_ary, n_fly  )
 
     if test_vector[0] != 'x':
       terminal_id = test_vector[0]
-      pkt = mk_bf_pkt( terminal_id, test_vector[1][0], k_ary, n_fly, 1, test_vector[1][1])
+#      pkt = mk_bf_pkt( terminal_id, test_vector[1][0], k_ary, n_fly, 1, test_vector[1][1])
+      DstType = mk_bits( clog2( r_rows + 1 ) * n_fly )
+      dst = test_vector[1][0]
+      bf_dst = DstType(0)
+      tmp = 0
+      for i in range( n_fly ):
+        tmp = dst / (r_rows**(n_fly-i-1))
+        dst = dst % (r_rows**(n_fly-i-1))
+        bf_dst = DstType(bf_dst | DstType(tmp))
+        if i != n_fly - 1:
+          bf_dst << clog2(r_rows + 1)
+
+      pkt = BflyPacket( terminal_id, bf_dst, 1, test_vector[1][1])
     
       # Enable the network interface on specific router
       for i in range (num_terminals):
@@ -46,6 +64,13 @@ def run_vector_test( model, test_vectors, k_ary, n_fly ):
     if test_vector[2] != 'x':
       assert model.send[test_vector[2]].msg.payload == test_vector[3]
      
+  model.elaborate()
+  model.sverilog_translate = True
+#  model.sverilog_import = True
+  model.apply( TranslationPass() )
+#  model = ImportPass()( test_harness )
+  model.apply( SimpleSim )
+#  model.apply( DynamicSim )
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
   model.sim_reset()
@@ -56,17 +81,15 @@ def test_vector_Bf2( dump_vcd, test_verilog ):
   n_fly = 1
   num_routers = n_fly * ( k_ary ** ( n_fly - 1 ) )
   r_rows      = k_ary ** ( n_fly - 1 )
-  BfPos = mk_bf_pos( r_rows, n_fly )
-  model = BflyNetworkRTL( BfPacket, BfPos, k_ary, n_fly, 0 )
+#  BfPos = mk_bfly_pos( r_rows, n_fly )
+  BflyPosition = mk_bfly_pos( k_ary, n_fly )
+  BflyPacket   = mk_bfly_pkt( k_ary, n_fly )
+  model = BflyNetworkRTL( BflyPacket, BflyPosition, k_ary, n_fly, 0 )
 
-  for r in range (num_routers):
-    path_k = "top.routers[" + str(r) + "].elaborate.k_ary"
-    model.set_parameter(path_k, k_ary)
-    for i in range (k_ary):
-      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      path_nf = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.n_fly"
-      model.set_parameter(path_qt, NormalQueueRTL)
-      model.set_parameter(path_nf, n_fly)
+  model.set_param( "top.routers*.construct", k_ary=k_ary )
+  model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
+  model.set_param( "top.routers*.input_units*.construct", 
+                   QueueType=NormalQueueRTL )
 
   x = 'x'
 
@@ -89,7 +112,7 @@ def test_vector_Bf2( dump_vcd, test_verilog ):
 
   run_vector_test( model, simple_2_test, k_ary, n_fly)
 
-def test_vector_Bf4( dump_vcd, test_verilog ):
+def ttest_vector_Bf4( dump_vcd, test_verilog ):
 
   k_ary = 2
   n_fly = 2
@@ -196,7 +219,7 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases (specific for 4x4 butterfly)
 #-------------------------------------------------------------------------
 
-def test_srcsink_bf4x4():
+def ttest_srcsink_bf4x4():
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
