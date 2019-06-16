@@ -167,13 +167,16 @@ def test_h0():
   mesh_wid = 2
   mesh_ht  = 2
   PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
-  pkt0 = PacketType( 0, 0, 1, 0, 0, 0xbee1 )
-  pkt1 = PacketType( 0, 1, 1, 0, 0, 0xbee2 )
-  pkt2 = PacketType( 0, 1, 1, 0, 0, 0xbee3 )
-  pkt3 = PacketType( 0, 1, 1, 0, 0, 0xbee4 )
-  pkt4 = PacketType( 0, 1, 1, 0, 0, 0xbee5 )
-  src_pkts  = [ [pkt1,pkt2,pkt3], [], [], [],           [pkt0,pkt4] ]
-  sink_pkts = [ [],     [], [], [pkt0, pkt1,pkt2,pkt3,pkt4], []     ]
+  pkt0 = PacketType( 0, 0, 1, 0, 0, 0xbee0 )
+  pkt1 = PacketType( 0, 1, 1, 0, 0, 0xbee1 )
+  pkt2 = PacketType( 0, 1, 1, 0, 0, 0xbee2 )
+  pkt3 = PacketType( 0, 1, 1, 0, 0, 0xbee3 )
+  pkt4 = PacketType( 0, 1, 1, 0, 0, 0xbee4 )
+  pkt5 = PacketType( 0, 1, 0, 1, 0, 0xbee5 )
+  pkt6 = PacketType( 0, 1, 0, 1, 0, 0xbee6 )
+  pkt7 = PacketType( 0, 1, 0, 0, 0, 0xbee7 )
+  src_pkts  = [ [pkt1,pkt2,pkt3], [pkt5], [pkt6], [pkt7], [pkt0,pkt4] ]
+  sink_pkts = [ [pkt5,pkt6], [], [], [pkt0, pkt1,pkt2,pkt3,pkt4], [pkt7] ]
   th = TestHarness( 
     PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
     src_pkts, sink_pkts

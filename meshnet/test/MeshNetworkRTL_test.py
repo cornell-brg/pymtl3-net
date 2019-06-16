@@ -8,20 +8,25 @@
 
 import tempfile
 from pymtl3                        import *
-from pymtl3.stdlib.rtl.queues         import NormalQueueRTL
-from pymtl3.stdlib.test.test_srcs         import TestSrcRTL
-from pymtl3.stdlib.test.test_sinks        import TestSinkRTL
-from pymtl3.stdlib.test                   import TestVectorSimulator
-from ocn_pclib.ifcs.Packet        import Packet, mk_pkt
-from ocn_pclib.ifcs.Position      import *
+from pymtl3.stdlib.rtl.queues      import NormalQueueRTL
+from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
+from ocn_pclib.test.net_sinks      import TestNetSinkRTL
+#from pymtl3.stdlib.test.test_sinks import TestSinkRTL
+from pymtl3.stdlib.test            import TestVectorSimulator
+#from ocn_pclib.ifcs.Packet         import Packet, mk_pkt
+#from ocn_pclib.ifcs.Position       import *
 # from ocn_pclib.draw               import *
-from meshnet.MeshNetworkRTL       import MeshNetworkRTL
-from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
-from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
-from meshnet.TestMeshRouteUnitRTL import TestMeshRouteUnitRTL
-from router.InputUnitRTL          import InputUnitRTL
+from meshnet.MeshNetworkRTL        import MeshNetworkRTL
+from meshnet.DORYMeshRouteUnitRTL  import DORYMeshRouteUnitRTL
+from meshnet.DORXMeshRouteUnitRTL  import DORXMeshRouteUnitRTL
+from meshnet.TestMeshRouteUnitRTL  import TestMeshRouteUnitRTL
+from router.InputUnitRTL           import InputUnitRTL
 
-import time
+from ocn_pclib.ifcs.positions      import mk_mesh_pos
+from ocn_pclib.ifcs.packets        import  mk_mesh_pkt
+
+from pymtl3.passes.sverilog import ImportPass, TranslationPass
+from pymtl3.passes import DynamicSim
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -50,15 +55,10 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
     if test_vector[2] != 'x':
       assert model.send[test_vector[2]].msg.payload == test_vector[3]
      
-  time0 = time.time()
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
+  sim.run_test()
 
-  time_after = time.time()
-  print("--- Apply sim: %s ms ---" % (1000*(time_after - time0)))
-
-#  sim.run_test()
-
-def test_vector_mesh2x2( dump_vcd, test_verilog ):
+def ttest_vector_mesh2x2( dump_vcd, test_verilog ):
 
   mesh_wid = 2
   mesh_ht  = 2
@@ -90,35 +90,19 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
   [  x,    [0,0,0000],     x,       x  ],
   ]
 
-  mesh_wid = 40
-  mesh_ht  = 40
-  time0 = time.time()
-
   model = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
-
-  time_initialize = time.time()
-  print("\n--- Initialize: %s ms ---" % (1000*(time_initialize - time0)))
 
 #  model.set_param("top.routers*.input_units*.construct", QueueType=NormalQueueRTL)
 
-  time0 = time.time()
   model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
-  for i in range(16):
-    model.set_param("top.routers[{}].construct".format(i), RouteUnitType=DORYMeshRouteUnitRTL)
 
 #  model.set_param("top.routers[2].translate", True)
-
 #  model.set_param("top.routers*.translate", True)
-
 #  model.set_param("top.translate", False)
-
-  time_param = time.time()
-  print("--- Set_param: %s ms ---" % (1000*(time_param - time0)))
 
   # dt = DrawGraph()
   # model.set_draw_graph( dt )
   run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
-
 
 def ttest_vector_mesh4x4( dump_vcd, test_verilog ):
 
@@ -165,15 +149,16 @@ class TestHarness( Component ):
                  arrival_time=None ):
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    s.num_routers = mesh_wid * mesh_ht
     s.dut = MeshNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 0)
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_routers ) ]
     if arrival_time != None:
-      s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
+      s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
                 sink_interval, arrival_time[i]) for i in range ( s.dut.num_routers ) ]
     else:
-      s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
+      s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
                 sink_interval) for i in range ( s.dut.num_routers ) ]
 
     # Connections
@@ -181,13 +166,28 @@ class TestHarness( Component ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
+    #TODO: provide pos for router...
+    XYType = mk_bits( clog2( mesh_wid ) )
+    @s.update
+    def up_pos():
+#      s.dut.pos0 = MeshPos( 0, 0 )
+#      s.dut.pos1 = MeshPos( 1, 0 )
+#      s.dut.pos2 = MeshPos( 0, 1 )
+#      s.dut.pos3 = MeshPos( 1, 1 )
+
+      for y in range( mesh_ht ):
+        for x in range( mesh_wid ):
+          idx = y * mesh_wid + x
+          s.dut.pos_x[idx] = XYType(x)
+          s.dut.pos_y[idx] = XYType(y)
+
   def done( s ):
     srcs_done = 1
     sinks_done = 1
-    for i in range( s.dut.num_routers ):
+    for i in range( s.num_routers ):
       if s.srcs[i].done() == 0:
         srcs_done = 0
-    for i in range( s.dut.num_routers ):
+    for i in range( s.num_routers ):
       if s.sinks[i].done() == 0:
         sinks_done = 0
     return srcs_done and sinks_done
@@ -202,7 +202,13 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Create a simulator
 
-  test_harness.apply( SimpleSim )
+  test_harness.elaborate()
+  test_harness.dut.sverilog_translate = True
+  test_harness.dut.sverilog_import = True
+  test_harness.apply( TranslationPass() )
+  test_harness = ImportPass()( test_harness )
+#  test_harness.apply( SimpleSim )
+  test_harness.apply( DynamicSim )
   test_harness.sim_reset()
 
   # Run simulation
@@ -262,17 +268,20 @@ def ttest_srcsink_mesh4x4_():
                     0, 0, 0, 0, arrival_pipes )
   run_sim( th )
 
-def ttest_srcsink_mesh2x2():
+def test_srcsink_mesh2x2():
 
-  pkt = mk_pkt( 0, 0, 1, 1, 0, 0xfaceb00c )
+  mesh_wid = mesh_ht = 2
+  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
+#  pkt = mk_pkt( 0, 0, 1, 1, 0, 0xfaceb00c )
+  pkt = PacketType( 0, 0, 1, 1, 0, 0xfaceb00c )
 
   src_packets  = [ [ pkt ], [], [], [] ]
   sink_packets = [ [], [], [], [ pkt ] ]
 
-  th = TestHarness( Packet, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
+  th = TestHarness( PacketType, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
   run_sim( th )
 
-def test_time_breakdown():
+def ttest_time_breakdown():
   def no_set_param( mesh_wid=4, mesh_ht=4 ):
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     net = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
