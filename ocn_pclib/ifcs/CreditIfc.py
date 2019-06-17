@@ -9,11 +9,15 @@ Author : Yanghui Ou
 """
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL, enrdy_to_str
-from pymtl3.stdlib.rtl import Encoder
+from pymtl3.stdlib.rtl.Encoder import Encoder
 from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
 from pymtl3.stdlib.rtl.queues import BypassQueueRTL
 
 from ocn_pclib.rtl import Counter
+
+#-------------------------------------------------------------------------
+# RTL interfaces
+#-------------------------------------------------------------------------
 
 class CreditRecvIfcRTL( Interface ):
 
@@ -33,7 +37,7 @@ class CreditRecvIfcRTL( Interface ):
     except AttributeError:
       s.trace_len = len( str(s.MsgType()) )
       trace_len = s.trace_len
-    return "{},{}".format(
+    return "{}|{}".format(
       enrdy_to_str( s.msg, s.en, True, s.trace_len ),
       "".join( [ "$" if x else '.' for x in s.yum ] )
     )
@@ -56,10 +60,14 @@ class CreditSendIfcRTL( Interface ):
     except AttributeError:
       s.trace_len = len( str(s.MsgType()) )
       trace_len = s.trace_len
-    return "{},{}".format(
+    return "{}|{}".format(
       enrdy_to_str( s.msg, s.en, True, s.trace_len ),
       "".join( [ "$" if s.yum[i] else '.' for i in range(s.nvcs) ] )
     )
+
+#-------------------------------------------------------------------------
+# CL interfaces
+#-------------------------------------------------------------------------
 
 class CreditSendIfcCL( Interface ):
 
@@ -89,14 +97,13 @@ class CreditRecvIfcCL( Interface ):
   def __str__( s ):
     return ""
 
-
 #-------------------------------------------------------------------------
 # CreditIfc adapters
 #-------------------------------------------------------------------------
 
 class RecvRTL2CreditSendRTL( Component ):
 
-  def consrtuct( s, MsgType, nvcs=2, credit_line=1 ):
+  def construct( s, MsgType, nvcs=2, credit_line=1 ):
     assert nvcs > 1
 
     # Interface
@@ -121,11 +128,13 @@ class RecvRTL2CreditSendRTL( Component ):
     @s.update
     def up_credit_send():
       s.send.en = b1(0)
-      for i in range( nvcs ):
-        if VcIDType(i) == s.buffer.deq.msg.vc_id and \
-           s.credit[i].count > CreditType(0):
-          s.send.en = b1(1)
-    
+      s.buffer.deq.en = b1(0)
+      if s.buffer.deq.rdy:
+        for i in range( nvcs ):
+          if VcIDType(i) == s.buffer.deq.msg.vc_id and s.credit[i].count > CreditType(0):
+            s.send.en = b1(1)
+            s.buffer.deq.en = b1(1)
+
     @s.update
     def up_counter_decr():
       for i in range( nvcs ):
@@ -145,13 +154,13 @@ class RecvRTL2CreditSendRTL( Component ):
 
 class CreditRecvRTL2SendRTL( Component ):
 
-  def consrtuct( s, MsgType, nvcs=2, credit_line=1 ):
+  def construct( s, MsgType, nvcs=2, credit_line=1, QType=BypassQueueRTL ):
     assert nvcs > 1
 
     # Interface
 
-    s.recv = CreditRecvIfcRTL( MsgType )
-    s.send = SendIfcRTL( MsgType, nvcs )
+    s.recv = CreditRecvIfcRTL( MsgType, nvcs )
+    s.send = SendIfcRTL( MsgType )
 
     s.MsgType = MsgType
     s.nvcs    = nvcs
@@ -162,15 +171,25 @@ class CreditRecvRTL2SendRTL( Component ):
     ArbReqType = mk_bits( nvcs )
     VcIDType   = mk_bits( clog2( nvcs ) if nvcs > 1 else 1 )
 
-    s.buffers = [ BypassQueueRTL( MsgType, num_entries=credit_line ) 
+    s.buffers = [ QType( MsgType, num_entries=credit_line ) 
                   for _ in range( nvcs ) ]
     s.arbiter = RoundRobinArbiterEn( nreqs=nvcs )
     s.encoder = Encoder( in_nbits=nvcs, out_nbits=clog2(nvcs) )
 
     for i in range( nvcs ):
+      s.connect( s.buffers[i].enq.msg, s.recv.msg        )
       s.connect( s.buffers[i].deq.rdy, s.arbiter.reqs[i] )
     s.connect( s.arbiter.grants, s.encoder.in_ )
     s.connect( s.arbiter.en,     s.send.en     )
+    
+    @s.update
+    def up_enq():
+      if s.recv.en:
+        for i in range( nvcs ):
+          s.buffers[i].enq.en = s.recv.msg.vc_id == VcIDType(i)
+      else:
+        for i in range( nvcs ):
+          s.buffers[i].enq.en = b1(0)
 
     @s.update
     def up_deq_and_send():
