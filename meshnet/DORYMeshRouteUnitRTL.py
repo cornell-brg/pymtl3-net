@@ -1,5 +1,5 @@
 #=========================================================================
-# DORYRouteUnitRTL.py
+# DORYMeshRouteUnitRTL.py
 #=========================================================================
 # A DOR route unit with get/give interface.
 #
@@ -7,8 +7,8 @@
 #   Date : Mar 25, 2019
 
 from pymtl3      import *
-from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 from directions import *
+from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 
 class DORYMeshRouteUnitRTL( Component ):
 
@@ -26,7 +26,7 @@ class DORYMeshRouteUnitRTL( Component ):
 
     # Componets
 
-    s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
+#    s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
     s.give_ens = Wire( mk_bits( s.num_outports ) ) 
 
     # Connections
@@ -39,7 +39,7 @@ class DORYMeshRouteUnitRTL( Component ):
     @s.update
     def up_ru_routing():
  
-      s.out_dir = Bits3(0)
+#      s.out_dir = Bits3(0)
 #      s.give[NORTH].rdy = Bits1(0)
 #      s.give[SOUTH].rdy = Bits1(0)
 #      s.give[WEST ].rdy = Bits1(0)
@@ -79,4 +79,4 @@ class DORYMeshRouteUnitRTL( Component ):
     for i in range (s.num_outports):
       out_str[i] = "{}".format( s.give[i] ) 
 
-    return "{}({}){}".format( s.get, s.out_dir, "|".join( out_str ) )
+    return "{}({}){}".format( s.get, "|".join( out_str ) )

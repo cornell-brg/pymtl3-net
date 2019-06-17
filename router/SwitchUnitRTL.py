@@ -20,6 +20,7 @@ class SwitchUnitRTL( Component ):
 
     s.num_inports = num_inports
     s.sel_width   = clog2( num_inports )
+    InType = mk_bits( num_inports )
 
     # Interface
 
@@ -52,8 +53,8 @@ class SwitchUnitRTL( Component ):
 
     @s.update
     def up_arb_send_en():
-      s.arbiter.en = s.arbiter.grants > Bits5(0) and s.send.rdy
-      s.send.en = s.arbiter.grants > Bits5(0) and s.send.rdy
+      s.arbiter.en = s.arbiter.grants > InType(0) and s.send.rdy
+      s.send.en = s.arbiter.grants > InType(0) and s.send.rdy
 
     @s.update
     def up_get_en():
