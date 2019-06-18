@@ -270,13 +270,25 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     inports   = opts.router_inports
     outports  = opts.router_outports
     term_each = opts.terminals_each
-    print 'num_nodes: ', num_nodes
     MeshPos = mk_mesh_pos( net_width, net_height )
     PacketType = mk_cmesh_pkt_timestamp( net_width, net_height,
                  inports, outports,
                  payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, MeshPos, net_width, net_height, 
                       term_each, 0 )
+
+  elif opts.topology == "Butterfly":
+    NetModel = topology_dict[ "Butterfly" ]
+    k_ary = 4
+    n_fly = 2
+    num_nodes = k_ary * ( k_ary ** ( n_fly - 1 ) )
+    num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
+    MeshPos = mk_bfly_pos( k_ary, n_fly )
+    PacketType = mk_bfly_pkt_timestamp( k_ary, n_fly,
+                 payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
+    model = NetModel( PacketType, MeshPos, k_ary, n_fly, 0 ) 
+    model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
+    model.set_param( "top.routers*.construct", k_ary=k_ary )
 
 #  model.elaborate()
   sim = model.apply( SimpleSim )
@@ -341,6 +353,23 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                               dest%term_each,
                               1, 0, ncycles )
 
+          elif opts.topology == "Butterfly":
+            r_rows = k_ary ** ( n_fly - 1 )
+            DstType = mk_bits( clog2( r_rows ) * n_fly )
+            bf_dst = DstType(0)
+            tmp = 0
+            dst = dest
+            for index in range( n_fly ):
+              tmp = dst / (r_rows**(n_fly-index-1))
+              dst = dst % (r_rows**(n_fly-index-1))
+              bf_dst = DstType(bf_dst | DstType(tmp))
+              if index != n_fly - 1:
+                if r_rows == 1:
+                  bf_dst = bf_dst * 2
+                else:
+                  bf_dst = bf_dst * r_rows
+            pkt = PacketType( i, bf_dst, 1, 6, ncycles )
+
           src[i].append( pkt )
           packets_generated += 1
 
@@ -369,6 +398,23 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                               (dest/term_each)/net_width,
                               dest%term_each,
                               1, 0, INVALID_TIMESTAMP )
+
+          elif opts.topology == "Butterfly":
+            r_rows = k_ary ** ( n_fly - 1 )
+            DstType = mk_bits( clog2( r_rows ) * n_fly )
+            bf_dst = DstType(0)
+            tmp = 0
+            dst = dest
+            for index in range( n_fly ):
+              tmp = dst / (r_rows**(n_fly-index-1))
+              dst = dst % (r_rows**(n_fly-index-1))
+              bf_dst = DstType(bf_dst | DstType(tmp))
+              if index != n_fly - 1:
+                if r_rows == 1:
+                  bf_dst = bf_dst * 2
+                else:
+                  bf_dst = bf_dst * r_rows
+            pkt = PacketType( i, bf_dst, 1, 6, INVALID_TIMESTAMP )
 
           src[i].append( pkt )
           if ( ncycles < NUM_SAMPLE_CYCLES ):
