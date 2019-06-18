@@ -45,15 +45,15 @@ class BflyNetworkRTL( Component ):
     for i in range( s.num_routers ):
       if i < s.num_routers - r_rows:
         for j in range( k_ary ):
-          s.connect( s.routers[i].send[j],    s.channels[chl_id].recv       )
+          s.connect( s.routers[i].send[j], s.channels[chl_id].recv )
 
           # FIXME: Utilize bit to index the specific router.
           s.connect( s.channels[chl_id].send, 
-                     s.routers[(i/r_rows+1)*r_rows+(i%k_ary+j
+                     s.routers[(i/r_rows+1)*r_rows+(j
                          *(r_rows/k_ary))%r_rows].recv[i%k_ary] )
           chl_id += 1
 
-      # Connect the ports with Network Interfaces
+      # Connect the router ports with Network Interfaces
       if i < r_rows:
         for j in range( k_ary ):
           s.connect(s.recv[terminal_id_recv], s.routers[i].recv[j])

@@ -137,10 +137,22 @@ def mk_cmesh_pkt( mesh_wid=2, mesh_ht=2,
 def mk_bfly_pkt( k_ary=2, n_fly=2, nvcs=0, opaque_nbits=8, payload_nbits=32 ):
 
   IdType   = mk_bits( clog2( k_ary ** n_fly ) )
-  KaryType = mk_bits( clog2( k_ary + 1 ) )
-  NflyType = mk_bits( clog2( n_fly + 1 ) )
-  RrowType = mk_bits( clog2( k_ary ** ( n_fly - 1 ) + 1) )
-  DstType = mk_bits( clog2( k_ary ** ( n_fly - 1 ) + 1) * n_fly )
+  if k_ary == 1:
+    KaryType = Bits1
+  else:
+    KaryType = mk_bits( clog2( k_ary ) )
+  if n_fly == 1:
+    NflyType = Bits1
+  else:
+    NflyType = mk_bits( clog2( n_fly ) )
+  if k_ary ** ( n_fly - 1 ) == 1:
+    RrowType = Bits1
+  else:
+    RrowType = mk_bits( clog2( k_ary ** ( n_fly - 1 ) ) )
+  if k_ary ** ( n_fly - 1 ) == 1:
+    DstType = mk_bits( n_fly )
+  else:
+    DstType = mk_bits( clog2( k_ary ** ( n_fly - 1 ) ) * n_fly )
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
   new_name = "BflyPacket_{}_{}_{}_{}_{}".format( 

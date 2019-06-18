@@ -19,7 +19,10 @@ class DTRBflyRouteUnitRTL( Component ):
     k_ary    = num_outports
     OutType  = mk_bits( clog2( s.num_outports ) )
     rows     = k_ary ** ( n_fly - 1 )
-    s.RowWidth = clog2( rows + 1 )
+    if rows == 1:
+      s.RowWidth = 1
+    else:
+      s.RowWidth = clog2( rows )
     s.END = s.RowWidth
 
     # Interface
@@ -48,7 +51,8 @@ class DTRBflyRouteUnitRTL( Component ):
       for i in range( s.num_outports ):
         s.give_rdy[i] = Bits1( 0 )
 
-      for _ in range( s.pos.stage ):
+      s.END =  s.RowWidth
+      for _ in range( n_fly - s.pos.stage - 1 ):
         s.END = s.END + s.RowWidth
 
       if s.get.rdy:

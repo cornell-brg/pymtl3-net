@@ -6,17 +6,14 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : April 8, 2019
 
-import tempfile
 from pymtl3                        import *
 from pymtl3.stdlib.rtl.queues      import NormalQueueRTL
 from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
-from pymtl3.stdlib.test.test_sinks import TestSinkRTL
+from ocn_pclib.test.net_sinks      import TestNetSinkRTL
 from pymtl3.stdlib.test            import TestVectorSimulator
 from bflynet.BflyNetworkRTL        import BflyNetworkRTL
 from ocn_pclib.ifcs.packets        import *
-#from ocn_pclib.ifcs.Packet        import *
 from ocn_pclib.ifcs.positions      import *
-#from ocn_pclib.ifcs.Position      import *
 
 from pymtl3.passes.sverilog import ImportPass, TranslationPass
 from pymtl3.passes import DynamicSim
@@ -25,7 +22,7 @@ from pymtl3.passes import DynamicSim
 # Test Vector
 #-------------------------------------------------------------------------
 
-def run_vector_test( model, test_vectors, k_ary, n_fly ):
+def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
  
   def tv_in( model, test_vector ):
 
@@ -33,12 +30,14 @@ def run_vector_test( model, test_vectors, k_ary, n_fly ):
     num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
     r_rows        = k_ary ** ( n_fly - 1 )
     BflyPosition  = mk_bfly_pos( k_ary, n_fly )
-    BflyPacket    = mk_bfly_pkt( k_ary, n_fly  )
 
     if test_vector[0] != 'x':
       terminal_id = test_vector[0]
 #      pkt = mk_bf_pkt( terminal_id, test_vector[1][0], k_ary, n_fly, 1, test_vector[1][1])
-      DstType = mk_bits( clog2( r_rows + 1 ) * n_fly )
+      if r_rows == 1:
+        DstType = mk_bits( n_fly )
+      else:
+        DstType = mk_bits( clog2( r_rows ) * n_fly )
       dst = test_vector[1][0]
       bf_dst = DstType(0)
       tmp = 0
@@ -47,9 +46,12 @@ def run_vector_test( model, test_vectors, k_ary, n_fly ):
         dst = dst % (r_rows**(n_fly-i-1))
         bf_dst = DstType(bf_dst | DstType(tmp))
         if i != n_fly - 1:
-          bf_dst << clog2(r_rows + 1)
+          if r_rows == 1:
+            bf_dst = bf_dst * 2
+          else:
+            bf_dst = bf_dst * r_rows
 
-      pkt = BflyPacket( terminal_id, bf_dst, 1, test_vector[1][1])
+      pkt = PacketType( terminal_id, bf_dst, 1, test_vector[1][1])
     
       # Enable the network interface on specific router
       for i in range (num_terminals):
@@ -63,6 +65,8 @@ def run_vector_test( model, test_vectors, k_ary, n_fly ):
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
       assert model.send[test_vector[2]].msg.payload == test_vector[3]
+#    for i in range(model.num_terminals):
+#      print 'msg: ', model.send[test_vector[2]].msg.payload, '; vec: ', test_vector[3]
      
   model.elaborate()
 #  model.sverilog_translate = True
@@ -86,8 +90,10 @@ def test_vector_Bf2( dump_vcd, test_verilog ):
   BflyPacket   = mk_bfly_pkt( k_ary, n_fly )
   model = BflyNetworkRTL( BflyPacket, BflyPosition, k_ary, n_fly, 0 )
 
-  model.set_param( "top.routers*.construct", k_ary=k_ary )
-  model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
+  model.set_param( "top.routers*.construct", 
+                   k_ary=k_ary )
+  model.set_param( "top.routers*.route_units*.construct", 
+                   n_fly=n_fly )
   model.set_param( "top.routers*.input_units*.construct", 
                    QueueType=NormalQueueRTL )
 
@@ -110,29 +116,23 @@ def test_vector_Bf2( dump_vcd, test_verilog ):
   [  x,    [0,0000],     x,       x  ],
   ]
 
-  run_vector_test( model, simple_2_test, k_ary, n_fly)
+  run_vector_test( model, BflyPacket, simple_2_test, k_ary, n_fly)
 
-def ttest_vector_Bf4( dump_vcd, test_verilog ):
+def test_vector_Bf4( dump_vcd, test_verilog ):
 
   k_ary = 2
   n_fly = 2
   num_routers  = n_fly * ( k_ary ** ( n_fly - 1 ) )
   r_rows = k_ary ** ( n_fly - 1 )
-  BfPos = mk_bf_pos( r_rows, n_fly )
+  BflyPos = mk_bfly_pos( r_rows, n_fly )
+  PacketType   = mk_bfly_pkt( k_ary, n_fly )
+  model = BflyNetworkRTL( PacketType, BflyPos, k_ary, n_fly, 0 )
 
-  model = BflyNetworkRTL( BfPacket, BfPos, k_ary, n_fly, 0 )
-
-  for r in range (num_routers):
-    path_k = "top.routers[" + str(r) + "].elaborate.k_ary"
-    model.set_parameter(path_k, k_ary)
-    for i in range (k_ary):
-      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      path_nf = "top.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.n_fly"
-      model.set_parameter(path_qt, NormalQueueRTL)
-      model.set_parameter(path_nf, n_fly)
+  #FIXME: This should have other way to set the default value
+  model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
 
   x = 'x'
-  # Specific for wire connection (link delay = 0) in 4x4 Torus topology
+  # Specific for wire connection (link delay = 0) in 2x2 bfly topology
   simple_4_test = [
 # terminal [packet]   arr_term   msg
   [  0,    [0,1001],     x,       x  ],
@@ -145,45 +145,47 @@ def ttest_vector_Bf4( dump_vcd, test_verilog ):
   [  x,    [0,0000],     0,     1005 ],
   ]
 
-  run_vector_test( model, simple_4_test, k_ary, n_fly )
+  run_vector_test( model, PacketType, simple_4_test, k_ary, n_fly )
 
 #-------------------------------------------------------------------------
 # TestHarness
 #-------------------------------------------------------------------------
 class TestHarness( Component ):
 
-  def construct( s, MsgType, num_routers, src_msgs, sink_msgs,
+  def construct( s, MsgType, k_ary, n_fly, src_msgs, sink_msgs,
                  src_initial, src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
+    num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
+    num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
     r_rows = k_ary ** ( n_fly - 1 )
-    BfPos  = mk_bf_pos( r_rows, n_fly )
-    s.dut  = BflyNetworkRTL( MsgType, BfPos, num_routers, 0)
+    BflyPos  = mk_bfly_pos( r_rows, n_fly )
+    s.dut  = BflyNetworkRTL( MsgType, BflyPos, k_ary, n_fly, 0)
 
-    s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
-              for i in range ( s.dut.num_routers ) ]
-    s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-              sink_interval, arrival_time[i]) for i in range ( s.dut.num_routers ) ]
+    s.srcs  = [ TestSrcRTL ( MsgType, src_msgs[i],  src_initial,  src_interval  )
+              for i in range ( s.dut.num_terminals ) ]
+    s.sinks = [ TestNetSinkRTL ( MsgType, sink_msgs[i], sink_initial,
+              sink_interval) 
+              for i in range ( s.dut.num_terminals ) ]
 
     # Connections
-    for i in range ( s.dut.num_routers ):
+    for i in range ( s.dut.num_terminals ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
   def done( s ):
     srcs_done = 1
     sinks_done = 1
-    for i in range( s.dut.num_routers ):
+    for i in range( s.dut.num_terminals ):
       if s.srcs[i].done() == 0:
         srcs_done = 0
-        break
       if s.sinks[i].done() == 0:
         sinks_done = 0
-        break
     return srcs_done and sinks_done
 
   def line_trace( s ):
-    return s.dut.line_trace()
+    pass
+#    return s.dut.line_trace()
 
 #-------------------------------------------------------------------------
 # run_rtl_sim
@@ -214,12 +216,11 @@ def run_sim( test_harness, max_cycles=100 ):
   test_harness.tick()
   test_harness.tick()
 
-
 #-------------------------------------------------------------------------
-# Test cases (specific for 4x4 butterfly)
+# Test cases (specific for 4-ary 2-fly butterfly)
 #-------------------------------------------------------------------------
 
-def ttest_srcsink_bf4x4():
+def test_srcsink_bfly4x2():
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
@@ -237,29 +238,34 @@ def ttest_srcsink_bf4x4():
                     [],[],[],[],
                     [],[],[],[] ]
   
-  # note that need to yield one/two cycle for reset
-  arrival_pipes = [[3], [5], [7], [9],
-                   [9], [7], [5], [3],
-                   [3], [5], [7], [9],
-                   [9], [7], [5], [3]]
-  num_routers = 16
-  
-  for (src, dst, payload) in test_msgs:
-    pkt = mk_bf_pkt( src, dst, 4, 4, 1, payload )
-    src_packets [src].append( pkt )
-    sink_packets[dst].append( pkt )
+  k_ary = 4
+  n_fly = 2
+  for (vec_src, vec_dst, payload) in test_msgs:
+    PacketType  = mk_bfly_pkt( k_ary, n_fly )
+    r_rows = k_ary ** ( n_fly - 1 )
+    DstType = mk_bits( clog2( r_rows ) * n_fly )
+    bf_dst = DstType(0)
+    tmp = 0
+    dst = vec_dst
+    for i in range( n_fly ):
+      tmp = dst / (r_rows**(n_fly-i-1))
+      dst = dst % (r_rows**(n_fly-i-1))
+      bf_dst = DstType(bf_dst | DstType(tmp))
+      if i != n_fly - 1:
+        if r_rows == 1:
+          bf_dst = bf_dst * 2
+        else:
+          bf_dst = bf_dst * r_rows
 
-  th = TestHarness( BfPacket, num_routers, src_packets, sink_packets, 
-                    0, 0, 0, 0, arrival_pipes )
+    pkt = PacketType( vec_src, bf_dst, 1, payload)
+    src_packets [vec_src].append( pkt )
+    sink_packets[vec_dst].append( pkt )
 
-  num_inports = 3 
-  for r in range ( num_routers ):
-    for i in range (num_inports):
-      path_ru_nr = "top.dut.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.num_routers"
-      path_qt      = "top.dut.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      th.set_parameter(path_qt,    NormalQueueRTL)
-      th.set_parameter(path_ru_nr, num_routers )
+  th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets, 
+                    0, 0, 0, 0 )
 
+  th.set_param( "top.dut.routers*.route_units*.construct", n_fly=n_fly )
+  th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
 
-#  run_sim( th )
+  run_sim( th )
 
