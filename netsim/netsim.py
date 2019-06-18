@@ -69,22 +69,22 @@ while sim_dir:
   if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
     sys.path.insert(0,sim_dir)
     # include the pymtl environment here
-    sys.path.insert(0,sim_dir + "/../pymtl-v3/")
+    sys.path.insert(0,sim_dir + "/../pymtl3/")
     break
   sim_dir = os.path.dirname(sim_dir)
   os.system(sim_dir)
 
-from pymtl                    import *
-from crossbar.CrossbarRTL     import CrossbarRTL
-from ringnet.RingNetworkRTL   import RingNetworkRTL
-from ringnet.RingVCNetworkRTL import RingVCNetworkRTL
+from pymtl3                   import *
+#from crossbar.CrossbarRTL     import CrossbarRTL
+#from ringnet.RingNetworkRTL   import RingNetworkRTL
+#from ringnet.RingVCNetworkRTL import RingVCNetworkRTL
 from meshnet.MeshNetworkRTL   import MeshNetworkRTL
 from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
-from torusnet.TorusNetworkRTL import TorusNetworkRTL
+#from torusnet.TorusNetworkRTL import TorusNetworkRTL
 from bflynet.BflyNetworkRTL   import BflyNetworkRTL
-from ocn_pclib.ifcs.Packet    import *
-from ocn_pclib.ifcs.Position  import *
-from pclib.test               import TestVectorSimulator
+from ocn_pclib.ifcs.packets   import *
+from ocn_pclib.ifcs.positions import *
+from pymtl3.stdlib.test       import TestVectorSimulator
 
 seed(0xdeadbeef)
 
@@ -189,19 +189,19 @@ def parse_cmdline():
 
   parser.add_argument( "--router-inports",   
                        type    = int, 
-                       default = 5,
+                       default = 8,
                        action  = "store",
                        help    = "number of inports in each router."       )
 
   parser.add_argument( "--router-outports",  
                        type    = int, 
-                       default = 5,
+                       default = 8,
                        action  = "store",
                        help    = "number of outports in each router."      )
 
   parser.add_argument( "--terminals-each",  
                        type    = int, 
-                       default = 1,
+                       default = 4,
                        action  = "store",
                        help    = "number of terminals attached to router." )
 
@@ -213,8 +213,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 100
-NUM_SAMPLE_CYCLES   = 200 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 10
+NUM_SAMPLE_CYCLES   = 20 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
@@ -226,11 +226,11 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   # Determine which model to use in the simulator
 
   topology_dict = {
-    'Xbar'     : CrossbarRTL, 
-    'Ring'     : RingVCNetworkRTL, 
+#    'Xbar'     : CrossbarRTL, 
+#    'Ring'     : RingVCNetworkRTL, 
     'Mesh'     : MeshNetworkRTL, 
     'CMesh'    : CMeshNetworkRTL, 
-    'Torus'    : TorusNetworkRTL,
+#    'Torus'    : TorusNetworkRTL,
     'Butterfly': BflyNetworkRTL
   }
 
@@ -249,25 +249,37 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   # Instantiate and elaborate a ring network
 
   if opts.topology == "Ring":
-
     NetModel = topology_dict[ "Ring" ]
-    RingPos = mk_ring_pos( opts.routers )
-
-    model = NetModel( BasePacket, RingPos, opts.routers, 0 )
-    model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
+#    RingPos = mk_ring_pos( opts.routers )
+#    model = NetModel( BasePacket, RingPos, opts.routers, 0 )
+#    model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
 
   elif opts.topology == "Mesh":
-
     NetModel = topology_dict[ "Mesh" ]
     net_width = opts.routers/opts.rows
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
- 
-    model = NetModel( Packet, MeshPos, net_width, net_height, 0 )
+    PacketType = mk_mesh_pkt_timestamp( net_width, net_height, 
+                 payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
+    model = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
 
-  sim = model.apply( SimpleSim )
+  elif opts.topology == "CMesh":
+    NetModel = topology_dict[ "CMesh" ]
+    net_width = 2
+    net_height = 2
+    inports   = opts.router_inports
+    outports  = opts.router_outports
+    term_each = opts.terminals_each
+    print 'num_nodes: ', num_nodes
+    MeshPos = mk_mesh_pos( net_width, net_height )
+    PacketType = mk_cmesh_pkt_timestamp( net_width, net_height,
+                 inports, outports,
+                 payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
+    model = NetModel( PacketType, MeshPos, net_width, net_height, 
+                      term_each, 0 )
 
 #  model.elaborate()
+  sim = model.apply( SimpleSim )
 
   # Source Queues - Modeled as Bypass Queues
   src = [ deque() for x in range( num_nodes ) ]
@@ -277,6 +289,11 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   model.sim_reset()
   for i in range( num_nodes ):
     model.send[i].rdy = 1
+
+    if opts.topology == "Mesh":
+      XYType = mk_bits( clog2( net_width ) )
+      model.pos_x[i] = XYType(i%net_width)
+      model.pos_y[i] = XYType(i/net_height)
 
   ncycles = 0
   while not sim_done:
@@ -290,7 +307,6 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
         # traffic pattern based dest selection
         if   pattern == "urandom":
           dest = randint( 0, num_nodes-1 )
-          print "src:{}, dst:{}".format(i, dest)
         elif pattern == "partition2":
           dest = ( randint( 0, num_nodes-1 ) ) & (num_nodes/2-1) | ( i & (num_nodes/2) )
         elif pattern == "opposite":
@@ -313,9 +329,17 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             pkt = mk_ring_pkt_timestamp( i, dest, opaque, 6, ncycles )
 
           elif opts.topology == "Mesh":
-            net_width = opts.routers / opts.rows
-            pkt = mk_pkt_timestamp( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 1, 6, ncycles )
+#            net_width = opts.routers / opts.rows
+            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
+                    dest/net_width, 1, 0, ncycles )
+
+          elif opts.topology == "CMesh":
+            pkt = PacketType( (i/term_each)%net_width, 
+                              (i/term_each)/net_width, 
+                              (dest/term_each)%net_width,
+                              (dest/term_each)/net_width, 
+                              dest%term_each,
+                              1, 0, ncycles )
 
           src[i].append( pkt )
           packets_generated += 1
@@ -326,15 +350,25 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
           if opts.topology == "Ring":
             if dest < i and i - dest <= num_nodes/2:
               opaque = 0
-            elif dest > i and dest - i <= num_nodes/2:
-              opaque = 0
-            else:
-              opaque = 1
-            pkt = mk_ring_pkt_timestamp( i, dest, opaque, 6, INVALID_TIMESTAMP )
+#            elif dest > i and dest - i <= num_nodes/2:
+#              opaque = 0
+#            else:
+#              opaque = 1
+#            pkt = mk_ring_pkt_timestamp( i, dest, opaque, 6, INVALID_TIMESTAMP )
 
           elif opts.topology == "Mesh":
-            pkt = mk_pkt_timestamp( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 1, 6, INVALID_TIMESTAMP )
+            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
+                    dest/net_width, 1, 0, INVALID_TIMESTAMP )
+#            pkt = mk_mesh_pkt_timestamp( i%net_width, i/net_width, dest%net_width,
+#                    dest/net_width, 1, 6, INVALID_TIMESTAMP )
+
+          elif opts.topology == "CMesh":
+            pkt = PacketType( (i/term_each)%net_width, 
+                              (i/term_each)/net_width, 
+                              (dest/term_each)%net_width,
+                              (dest/term_each)/net_width,
+                              dest%term_each,
+                              1, 0, INVALID_TIMESTAMP )
 
           src[i].append( pkt )
           if ( ncycles < NUM_SAMPLE_CYCLES ):
@@ -355,7 +389,6 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
         all_packets_received += 1
 
         # collect data for measurement packets
-
         if ( timestamp != INVALID_TIMESTAMP ):
           total_latency    += ( ncycles - timestamp )
           packets_received += 1
@@ -421,7 +454,7 @@ def main():
     inj_shamt       = 0.0
     inj_step        = 5 if opts.topology == "bus" else 10 # ring
 
-    while avg_lat <= 200:
+    while avg_lat <= 200 and inj <= 100:
 
       results = simulate( opts, max(inj,1), opts.pattern, 500, 
               opts.dump_vcd, opts.trace, opts.verbose )
@@ -454,7 +487,7 @@ def main():
     results = simulate( opts, opts.injection_rate, opts.pattern, 500, 
             dump_vcd, opts.trace, opts.verbose )
 
-  if opts.stats:
+  if opts.stats and not opts.sweep:
     print()
     print( "Pattern:        " + opts.pattern )
     print( "Injection rate: %d" % opts.injection_rate )

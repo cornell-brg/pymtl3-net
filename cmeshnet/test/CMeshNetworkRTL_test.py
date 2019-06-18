@@ -7,15 +7,15 @@
 #   Date : April 16, 2019
 
 import tempfile
-from pymtl                          import *
+from pymtl3                          import *
 from meshnet.MeshNetworkRTL         import MeshNetworkRTL
 from cmeshnet.CMeshNetworkRTL       import CMeshNetworkRTL
-from ocn_pclib.rtl.queues           import NormalQueueRTL
-from pclib.test.test_srcs           import TestSrcRTL
-from pclib.test.test_sinks          import TestSinkRTL
-from pclib.test                     import TestVectorSimulator
-from ocn_pclib.ifcs.Packet          import *
-from ocn_pclib.ifcs.Position        import *
+from pymtl3.stdlib.rtl.queues       import NormalQueueRTL
+from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
+from ocn_pclib.test.net_sinks       import TestNetSinkRTL
+from pymtl3.stdlib.test             import TestVectorSimulator
+from ocn_pclib.ifcs.packets         import *
+from ocn_pclib.ifcs.positions       import *
 from meshnet.DORYMeshRouteUnitRTL   import DORYMeshRouteUnitRTL
 from meshnet.DORXMeshRouteUnitRTL   import DORXMeshRouteUnitRTL
 from cmeshnet.DORXCMeshRouteUnitRTL import DORXCMeshRouteUnitRTL
@@ -24,7 +24,7 @@ from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
-def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
+def run_vector_test( model, PacketType, test_vectors, mesh_wid, mesh_ht ):
  
   def tv_in( model, test_vector ):
     num_routers = mesh_wid * mesh_ht
@@ -32,7 +32,7 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
 
     if test_vector[0] != 'x':
       router_id = test_vector[0]
-      pkt = mk_cmesh_pkt( router_id % mesh_wid, router_id / mesh_wid,
+      pkt = PacketType( router_id % mesh_wid, router_id / mesh_wid,
             test_vector[1][0], test_vector[1][1], test_vector[2], 1, 
             test_vector[1][2] )
     
@@ -57,16 +57,18 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
 
   mesh_wid = 2
   mesh_ht  = 2
+  inports = outports = 8
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = CMeshNetworkRTL( CMeshPacket, MeshPos, mesh_wid, mesh_ht, 4, 0 )
+  PacketType = mk_cmesh_pkt( mesh_wid, mesh_ht, inports, outports )
+  model = CMeshNetworkRTL( PacketType, MeshPos, mesh_wid, mesh_ht, 4, 0 )
 
-  num_routers = mesh_wid * mesh_ht * 4
-  num_inports = 8
-  for r in range (num_routers):
-    for i in range (num_inports):
-      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
-      model.set_parameter(path_qt, NormalQueueRTL)
+#  num_routers = mesh_wid * mesh_ht * 4
+#  num_inports = 8
+#  for r in range (num_routers):
+#    for i in range (num_inports):
+#      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+#      path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
+#      model.set_parameter(path_qt, NormalQueueRTL)
 #      model.set_parameter(path_ru, DORXMeshRouteUnitRTL)
 
   x = 'x'
@@ -84,7 +86,7 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
   [  2,    [1,1,1008],    0,    x,       x  ],
   ]
 
-  run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
+  run_vector_test( model, PacketType, simple_2_2_test, mesh_wid, mesh_ht)
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -101,7 +103,7 @@ class TestHarness( Component ):
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_terminals ) ]
-    s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
+    s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
                 sink_interval) for i in range ( s.dut.num_terminals ) ]
 
     # Connections
@@ -157,10 +159,13 @@ def run_sim( test_harness, max_cycles=100 ):
 
 def test_srcsink_mesh2x2():
 
-  pkt = mk_cmesh_pkt( 0, 0, 1, 1, 1, 0, 0xfaceb00c )
+  mesh_wid = mesh_ht = 2
+  inports = outports = 6
+  PacketType = mk_cmesh_pkt( mesh_wid, mesh_ht, inports, outports )
+  pkt = PacketType( 0, 0, 1, 1, 1, 0, 0xfaceb00c )
 
   src_packets  = [ [ pkt ], [], [], [], [], [], [], [] ]
   sink_packets = [ [], [], [], [], [], [], [], [ pkt ] ]
 
-  th = TestHarness( CMeshPacket, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
+  th = TestHarness( PacketType, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
   run_sim( th )

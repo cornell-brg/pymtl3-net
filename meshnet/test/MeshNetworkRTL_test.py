@@ -23,7 +23,7 @@ from meshnet.TestMeshRouteUnitRTL  import TestMeshRouteUnitRTL
 from router.InputUnitRTL           import InputUnitRTL
 
 from ocn_pclib.ifcs.positions      import mk_mesh_pos
-from ocn_pclib.ifcs.packets        import  mk_mesh_pkt
+from ocn_pclib.ifcs.packets        import mk_mesh_pkt
 
 from pymtl3.passes.sverilog import ImportPass, TranslationPass
 from pymtl3.passes import DynamicSim
@@ -36,10 +36,11 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
   def tv_in( model, test_vector ):
     num_routers = mesh_wid * mesh_ht
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
 
     if test_vector[0] != 'x':
       router_id = test_vector[0]
-      pkt = mk_pkt( router_id % mesh_wid, router_id / mesh_wid,
+      pkt = PacketType( router_id % mesh_wid, router_id / mesh_wid,
                   test_vector[1][0], test_vector[1][1], 1, test_vector[1][2])
     
       # Enable the network interface on specific router
@@ -48,8 +49,11 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
       model.recv[router_id].msg = pkt
       model.recv[router_id].en  = 1
 
+    XYType = mk_bits( clog2( mesh_wid ) )
     for i in range (num_routers):
       model.send[i].rdy = 1
+      model.pos_x[i] = XYType(i%mesh_wid)
+      model.pos_y[i] = XYType(i/mesh_ht)
 
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
@@ -58,14 +62,15 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
 
-def ttest_vector_mesh2x2( dump_vcd, test_verilog ):
+def test_vector_mesh2x2( dump_vcd, test_verilog ):
 
   mesh_wid = 2
   mesh_ht  = 2
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-
   num_routers = mesh_wid * mesh_ht 
   num_inports = 5
+  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
+  model = MeshNetworkRTL( PacketType, MeshPos, mesh_wid, mesh_ht, 0 )
 
   x = 'x'
 
@@ -90,8 +95,6 @@ def ttest_vector_mesh2x2( dump_vcd, test_verilog ):
   [  x,    [0,0,0000],     x,       x  ],
   ]
 
-  model = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
-
 #  model.set_param("top.routers*.input_units*.construct", QueueType=NormalQueueRTL)
 
   model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
@@ -104,22 +107,22 @@ def ttest_vector_mesh2x2( dump_vcd, test_verilog ):
   # model.set_draw_graph( dt )
   run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
 
-def ttest_vector_mesh4x4( dump_vcd, test_verilog ):
+def test_vector_mesh4x4( dump_vcd, test_verilog ):
 
   mesh_wid = 4
   mesh_ht  = 4
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0)
+  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
+  model = MeshNetworkRTL( PacketType, MeshPos, mesh_wid, mesh_ht, 0)
 
   num_routers = mesh_wid * mesh_ht 
   num_inports = 5
-  for r in range (num_routers):
-    for i in range (num_inports):
-      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
-      model.set_param(path_qt, NormalQueueRTL)
-      model.set_param(path_ru, DORYMeshRouteUnitRTL)
-
+#  for r in range (num_routers):
+#    for i in range (num_inports):
+#      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
+#      path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
+#      model.set_param(path_qt, NormalQueueRTL)
+#      model.set_param(path_ru, DORYMeshRouteUnitRTL)
 
   x = 'x'
   # Specific for wire connection (link delay = 0) in 4x4 Mesh topology
@@ -170,11 +173,6 @@ class TestHarness( Component ):
     XYType = mk_bits( clog2( mesh_wid ) )
     @s.update
     def up_pos():
-#      s.dut.pos0 = MeshPos( 0, 0 )
-#      s.dut.pos1 = MeshPos( 1, 0 )
-#      s.dut.pos2 = MeshPos( 0, 1 )
-#      s.dut.pos3 = MeshPos( 1, 1 )
-
       for y in range( mesh_ht ):
         for x in range( mesh_wid ):
           idx = y * mesh_wid + x
@@ -203,12 +201,12 @@ def run_sim( test_harness, max_cycles=100 ):
   # Create a simulator
 
   test_harness.elaborate()
-  test_harness.dut.sverilog_translate = True
-  test_harness.dut.sverilog_import = True
-  test_harness.apply( TranslationPass() )
-  test_harness = ImportPass()( test_harness )
-#  test_harness.apply( SimpleSim )
-  test_harness.apply( DynamicSim )
+#  test_harness.dut.sverilog_translate = True
+#  test_harness.dut.sverilog_import = True
+#  test_harness.apply( TranslationPass() )
+#  test_harness = ImportPass()( test_harness )
+  test_harness.apply( SimpleSim )
+#  test_harness.apply( DynamicSim )
   test_harness.sim_reset()
 
   # Run simulation
@@ -233,7 +231,7 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases (specific for 4x4 mesh)
 #-------------------------------------------------------------------------
 
-def ttest_srcsink_mesh4x4_():
+def test_srcsink_mesh4x4():
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
@@ -259,12 +257,14 @@ def ttest_srcsink_mesh4x4_():
 
   mesh_wid = 4
   mesh_ht  = 4
+
+  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
   for (src, dst, payload) in test_msgs:
-    pkt = mk_pkt( src%mesh_wid, src/mesh_wid, dst%mesh_wid, dst/mesh_wid, 1, payload )
+    pkt = PacketType( src%mesh_wid, src/mesh_wid, dst%mesh_wid, dst/mesh_wid, 1, payload )
     src_packets [src].append( pkt )
     sink_packets[dst].append( pkt )
 
-  th = TestHarness( Packet, mesh_wid, mesh_ht, src_packets, sink_packets, 
+  th = TestHarness( PacketType, mesh_wid, mesh_ht, src_packets, sink_packets, 
                     0, 0, 0, 0, arrival_pipes )
   run_sim( th )
 
@@ -281,61 +281,3 @@ def test_srcsink_mesh2x2():
   th = TestHarness( PacketType, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
   run_sim( th )
 
-def ttest_time_breakdown():
-  def no_set_param( mesh_wid=4, mesh_ht=4 ):
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    net = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
-    start_time = time.time()
-    net.elaborate()
-    end_time = time.time()
-    return 1000*(end_time - start_time)
-
-  def set_param_simple( mesh_wid=4, mesh_ht=4 ):
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    net = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
-    start_time = time.time()
-    for i in range( mesh_wid * mesh_ht ):
-      net.set_param("top.routers[{}].construct".format(i), RouteUnitType=DORYMeshRouteUnitRTL )
-    net.elaborate()
-    end_time = time.time()
-    return 1000*(end_time - start_time)
-
-  def set_param_regex( mesh_wid=4, mesh_ht=4 ):
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    net = MeshNetworkRTL( Packet, MeshPos, mesh_wid, mesh_ht, 0 )
-    start_time = time.time()
-    net.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL )
-    net.set_param("top.routers*.input_units*.construct", QueueType=NormalQueueRTL )
-    net.set_param("top.routers*.output_units*.construct", QueueType=NormalQueueRTL )
-    net.set_param("top.routers*.input_units*.queue.construct", num_entries=10 )
-    net.set_param("top.routers*.input_units[2].queue.construct", num_entries=2 )
-    net.set_param("top.routers[1].input_units*.queue.construct", num_entries=1 )
-    net.set_param("top.routers[1].input_units[3].queue.construct", num_entries=3 )
-    net.elaborate()
-    end_time = time.time()
-    return 1000*(end_time - start_time)
-
-  total_time = 0
-  mesh_wid = 4
-  mesh_ht  = 4
-  times = 5 
-  print
-  print( "="*74 )
-  for i in range( times ):
-    total_time += set_param_simple( mesh_wid, mesh_ht )
-  print( " Avg. elaborate time with set_param for {}x{} mesh: {} ms".format(
-           mesh_wid, mesh_ht, total_time/times )
-  )
-
-  total_time = 0
-  for i in range( times ):
-    total_time += set_param_regex( mesh_wid, mesh_ht )
-  print( " Avg. elaborate with set_param_regex for {}x{} mesh: {} ms".format(
-           mesh_wid, mesh_ht, total_time/times )
-  )
-
-  total_time = 0
-  for i in range( times ):
-    total_time += no_set_param( mesh_wid, mesh_ht )
-  print( " Avg. elaborate time without set_param : {} ms".format( total_time/times )
-  )

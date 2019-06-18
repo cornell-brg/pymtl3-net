@@ -6,42 +6,39 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : April 16, 2019
 
-from pymtl                        import *
-from pclib.test.test_srcs         import TestSrcRTL
-from pclib.test.test_sinks        import TestSinkRTL
-from ocn_pclib.ifcs.Position      import *
-from ocn_pclib.ifcs.Packet        import * 
-from ocn_pclib.ifcs.Flit          import *
-from pclib.test                   import TestVectorSimulator
-from cmeshnet.CMeshRouterRTL      import CMeshRouterRTL
-from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
-from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
-from router.ULVCUnitRTL           import ULVCUnitRTL
-from router.InputUnitRTL          import InputUnitRTL
+from pymtl3                         import *
+from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
+from ocn_pclib.test.net_sinks       import TestNetSinkRTL
+from ocn_pclib.ifcs.positions       import *
+from ocn_pclib.ifcs.packets         import * 
+from pymtl3.stdlib.test             import TestVectorSimulator
+from cmeshnet.CMeshRouterRTL        import CMeshRouterRTL
+from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
+from router.ULVCUnitRTL             import ULVCUnitRTL
+from router.InputUnitRTL            import InputUnitRTL
+from test_helpers                   import dor_routing
 
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
 
-def run_vector_test( model, test_vectors, mesh_wid=4, mesh_ht=4, 
-                     pos_x=1, pos_y=1 ):
+def run_vector_test( model, PacketType, test_vectors, 
+                     mesh_wid=4, mesh_ht=4, pos_x=1, pos_y=1 ):
  
   def tv_in( model, test_vector ):
 
-    MeshPos   = mk_mesh_pos( mesh_wid, mesh_ht )
-    model.pos = MeshPos( pos_x, pos_y )
+    MeshPos    = mk_mesh_pos( mesh_wid, mesh_ht )
+    model.pos  = MeshPos( pos_x, pos_y )
 
-    for i in range( 8 ):
+    for i in range( model.num_outports ):
       if model.recv[i].rdy and test_vector[3][i]:
-        pkt = mk_cmesh_pkt( 0, 0, test_vector[0][i]/4, test_vector[0][i]%4, 
+        pkt = PacketType( 0, 0, test_vector[0][i]%4, test_vector[0][i]/4, 
                       test_vector[1], 1, test_vector[2][i] )
   
         model.recv[i].msg = pkt
-
         model.recv[i].en = 1
       elif model.recv[i].rdy == 0:
         model.recv[i].en = 0
-        
 
     for i in range( model.num_outports ):
       model.send[i].rdy = 1
@@ -49,7 +46,6 @@ def run_vector_test( model, test_vectors, mesh_wid=4, mesh_ht=4,
   def tv_out( model, test_vector ):
 
     for i in range( model.num_outports ):
-      assert model.send[i].en == (test_vector[4][i] != 'x')
       if model.send[i].en == 1:
         pkt = model.send[i].msg
         assert pkt.payload == test_vector[4][i]
@@ -57,10 +53,10 @@ def run_vector_test( model, test_vectors, mesh_wid=4, mesh_ht=4,
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
 
-def test_vector_Router_4_4X():
+def test_vector_router4x4():
 
-  mesh_wid = 4
-  mesh_ht  = 4
+  mesh_wid = mesh_ht = 4
+  inports = outports = 8
   pos_x    = 1
   pos_y    = 1
   
@@ -68,15 +64,17 @@ def test_vector_Router_4_4X():
   inputs_buffer= [
 #     [dst]   term     payload          recv_rdy               send_msg
   [[4,4,7,4,5],0,[11,12,13,14,15],[1,1,1,0,1,0,0,0],[xx,xx,xx,xx,xx,xx,xx,xx]],
-  [[4,4,7,9,5],1,[21,22,23,24,25],[1,1,1,1,1,0,0,0],[13,11,xx,xx,15,xx,xx,xx]],
-  [[4,4,7,8,5],2,[31,32,33,34,35],[0,0,0,0,1,0,0,0],[23,12,xx,24,xx,25,xx,xx]],
-  [[4,6,7,8,5],3,[41,42,43,44,45],[0,1,0,0,1,0,0,0],[23,21,xx,24,xx,xx,35,xx]],
+  [[4,4,7,9,5],1,[21,22,23,24,25],[1,1,1,1,1,0,0,0],[xx,xx,xx,xx,xx,xx,xx,xx]],
+  [[4,4,7,8,5],2,[31,32,33,34,35],[0,0,0,0,1,0,0,0],[24,xx,21,23,xx,25,xx,xx]],
   ]
 
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = CMeshRouterRTL( CMeshPacket, MeshPos, 8, 8 )
+  PacketType = mk_cmesh_pkt( mesh_wid, mesh_ht, inports, outports )
+  model = CMeshRouterRTL( PacketType, MeshPos, inports, outports )
+  model.set_param("top.output_units*.construct", QueueType=None )
 
-  run_vector_test( model, inputs_buffer, mesh_wid, mesh_ht, pos_x, pos_y )
+  run_vector_test( model, PacketType, inputs_buffer, mesh_wid, mesh_ht, 
+                   pos_x, pos_y )
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -89,11 +87,12 @@ class TestHarness( Component ):
                  arrival_time=None ):
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = CMeshRouterRTL( MsgType, MeshPos, 8, 8, RouteUnitType = DORYMeshRouteUnitRTL )
+    s.dut = CMeshRouterRTL( MsgType, MeshPos, 8, 8, 
+                            RouteUnitType = DORYCMeshRouteUnitRTL )
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( 8 ) ]
-    s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial, sink_interval ) 
+    s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial, sink_interval ) 
               for i in range ( 8 ) ]
 
     # Connections
@@ -163,13 +162,21 @@ result_msgs = [[],[],[],[],[],[],[],[]]
 
 def test_normal_simple():
 
+  mesh_wid = mesh_ht = 4
+  inports = outports = 5
+  PacketType = mk_cmesh_pkt( mesh_wid, mesh_ht, 8, 8 )
   src_packets = [[],[],[],[],[],[],[],[]]
   for item in test_msgs:
     for i in range( len( item ) ):
       (dst_x,dst_y,payload,dir_out,terminal) = item[i]
-      pkt = mk_cmesh_pkt (0, 0, dst_x, dst_y, terminal, 1, payload)
+      pkt = PacketType( 0, 0, dst_x, dst_y, terminal, 1, payload )
       src_packets[7-dir_out].append( pkt )
-      result_msgs[dir_out].append( pkt )
+      if dir_out == 4:
+        result_msgs[dir_out+terminal].append( pkt )
+      else:
+        result_msgs[dir_out].append( pkt )
 
-  th = TestHarness( CMeshPacket, 4, 4, src_packets, result_msgs, 0, 0, 0, 0 )
+  th = TestHarness( PacketType, mesh_wid, mesh_ht, 
+                    src_packets, result_msgs, 0, 0, 0, 0 )
+
   run_sim( th )

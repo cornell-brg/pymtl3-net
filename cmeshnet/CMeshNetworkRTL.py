@@ -6,13 +6,11 @@
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
 
-from pymtl                   import *
-from pclib.ifcs.SendRecvIfc  import *
-from directions              import *
-from channel.ChannelRTL      import ChannelRTL
-from CMeshRouterRTL          import CMeshRouterRTL
-from ocn_pclib.ifcs.Packet   import *
-from ocn_pclib.ifcs.Position import *
+from pymtl3                         import *
+from directions                     import *
+from CMeshRouterRTL                 import CMeshRouterRTL
+from channel.ChannelRTL             import ChannelRTL
+from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 class CMeshNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, 

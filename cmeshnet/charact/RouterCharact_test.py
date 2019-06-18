@@ -17,11 +17,9 @@ from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
 from router.InputUnitRTL            import InputUnitRTL
 from router.OutputUnitRTL           import OutputUnitRTL
 from router.SwitchUnitRTL           import SwitchUnitRTL
-
-from test_helpers import dor_routing
-
-from pymtl3.passes          import DynamicSim
-from pymtl3.passes.sverilog import ImportPass, TranslationPass
+from test_helpers                   import dor_routing
+from pymtl3.passes                  import DynamicSim
+from pymtl3.passes.sverilog         import ImportPass, TranslationPass
 
 import random
 

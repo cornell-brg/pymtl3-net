@@ -6,11 +6,11 @@
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
 
-from pymtl3                   import *
-from pymtl3.stdlib.ifcs.SendRecvIfc  import *
-from directions              import *
-from channel.ChannelRTL      import ChannelRTL
-from MeshRouterRTL           import MeshRouterRTL
+from pymtl3                         import *
+from directions                     import *
+from channel.ChannelRTL             import ChannelRTL
+from MeshRouterRTL                  import MeshRouterRTL
+from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 class MeshNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, 
