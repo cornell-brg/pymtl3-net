@@ -48,8 +48,9 @@ def mk_ring_pkt( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=32 ):
 def mk_mesh_pkt( mesh_wid=2, mesh_ht=2, nvcs=1, 
                  opaque_nbits=8, payload_nbits=32 ):
 
-  XType = mk_bits( clog2( mesh_wid ) )
-  YType = mk_bits( clog2( mesh_ht  ) )
+  assert mesh_wid > 0 and mesh_ht > 0
+  XType = mk_bits(clog2( mesh_wid )) if mesh_wid != 1 else mk_bits(1)
+  YType = mk_bits(clog2( mesh_ht  )) if mesh_ht  != 1 else mk_bits(1)
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
   new_name = "MeshPacket_{}x{}_{}_{}_{}".format( 
@@ -90,8 +91,8 @@ def mk_cmesh_pkt( mesh_wid=2, mesh_ht=2,
                   inports=8, outports=8, nvcs=1, 
                   opaque_nbits=8, payload_nbits=32 ):
 
-  XType = mk_bits( clog2( mesh_wid ) )
-  YType = mk_bits( clog2( mesh_ht  ) )
+  XType = mk_bits(clog2( mesh_wid )) if mesh_wid != 1 else mk_bits(1)
+  YType = mk_bits(clog2( mesh_ht  )) if mesh_ht  != 1 else mk_bits(1)
   TType = mk_bits( clog2( outports - 4 ) )
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )

@@ -78,5 +78,4 @@ class DORYMeshRouteUnitRTL( Component ):
     out_str = [ "" for _ in range( s.num_outports ) ]
     for i in range (s.num_outports):
       out_str[i] = "{}".format( s.give[i] ) 
-
     return "{}({}){}".format( s.get, "|".join( out_str ) )

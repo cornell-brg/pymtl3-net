@@ -184,8 +184,8 @@ class TestHarness( Component ):
     return srcs_done and sinks_done
 
   def line_trace( s ):
-    pass
-#    return s.dut.line_trace()
+#    pass
+    return s.dut.line_trace()
 
 #-------------------------------------------------------------------------
 # run_rtl_sim
@@ -266,6 +266,8 @@ def test_srcsink_bfly4x2():
 
   th.set_param( "top.dut.routers*.route_units*.construct", n_fly=n_fly )
   th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
+  th.set_param( "top.dut.line_trace",  )
+
 
   run_sim( th )
 

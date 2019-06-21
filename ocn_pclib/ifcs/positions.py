@@ -9,8 +9,9 @@
 from pymtl3 import *
 
 def mk_mesh_pos( mesh_wid, mesh_ht ):
-  XType = mk_bits( clog2( mesh_wid ) )
-  YType = mk_bits( clog2( mesh_ht  ) )
+  assert mesh_wid > 0 and mesh_ht > 0
+  XType = mk_bits(clog2( mesh_wid )) if mesh_wid != 1 else mk_bits(1)
+  YType = mk_bits(clog2( mesh_ht  )) if mesh_ht  != 1 else mk_bits(1)
   new_name  = "MeshPosition_" + str( mesh_wid ) + "x" + str( mesh_ht )
   new_class = mk_bit_struct( new_name, [
     ( 'pos_x' , XType ),
