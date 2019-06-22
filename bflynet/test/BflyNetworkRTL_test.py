@@ -34,10 +34,10 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
     if test_vector[0] != 'x':
       terminal_id = test_vector[0]
 #      pkt = mk_bf_pkt( terminal_id, test_vector[1][0], k_ary, n_fly, 1, test_vector[1][1])
-      if r_rows == 1:
+      if r_rows == 1 or k_ary == 1:
         DstType = mk_bits( n_fly )
       else:
-        DstType = mk_bits( clog2( r_rows ) * n_fly )
+        DstType = mk_bits( clog2( k_ary ) * n_fly )
       dst = test_vector[1][0]
       bf_dst = DstType(0)
       tmp = 0

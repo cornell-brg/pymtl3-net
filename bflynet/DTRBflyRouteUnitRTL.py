@@ -61,6 +61,9 @@ class DTRBflyRouteUnitRTL( Component ):
 #        div = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1))-1)
 #        s.out_dir = ((int)(s.get.msg.dst_x) % mod) / div
         s.out_dir = s.get.msg.dst[ s.END - s.RowWidth : s.END]
+#        print 'len: ', len(s.give_rdy)
+#        print 'range (end-rowwidth -> end): ', s.END - s.RowWidth, s.END
+#        print 'out_dir: ', s.out_dir
         s.give_rdy[ s.out_dir ] = Bits1( 1 )
 
     @s.update

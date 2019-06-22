@@ -10,13 +10,13 @@ import hypothesis
 from hypothesis import strategies as st
 
 from pymtl3                       import *
-from pymtl3.stdlib.test.test_srcs        import TestSrcCL
-from ocn_pclib.test.net_sinks    import TestNetSinkCL
-from ocn_pclib.ifcs.positions    import mk_mesh_pos
-from ocn_pclib.ifcs.packets      import mk_mesh_pkt
-from meshnet.MeshRouterCL        import MeshRouterCL
-from meshnet.MeshRouteUnitXDorCL import MeshRouteUnitXDorCL
-from router.InputUnitCL          import InputUnitCL
+from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from ocn_pclib.test.net_sinks     import TestNetSinkCL
+from ocn_pclib.ifcs.positions     import mk_mesh_pos
+from ocn_pclib.ifcs.packets       import mk_mesh_pkt
+from meshnet.MeshRouterCL         import MeshRouterCL
+from meshnet.MeshRouteUnitXDorCL  import MeshRouteUnitXDorCL
+from router.InputUnitCL           import InputUnitCL
 
 from test_helpers import dor_routing
 
@@ -110,14 +110,14 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases
 #-------------------------------------------------------------------------
 
-# TestPkt = mk_mesh_pkt( 4, 4 )
-# 
-# def test_self_simple():
-#   pkt = TestPkt( 0, 0, 0, 0, 0, 0xdead )
-#   src_pkts  = [ [], [], [], [], [pkt] ]
-#   sink_pkts = [ [], [], [], [], [pkt] ]
-#   th = TestHarness( TestPkt, 4, 4, 0, 0, src_pkts, sink_pkts )
-#   run_sim( th )
+TestPkt = mk_mesh_pkt( 4, 4 )
+ 
+def test_self_simple():
+  pkt = TestPkt( 0, 0, 0, 0, 0, 0xdead )
+  src_pkts  = [ [], [], [], [], [pkt] ]
+  sink_pkts = [ [], [], [], [], [pkt] ]
+  th = TestHarness( TestPkt, 4, 4, 0, 0, src_pkts, sink_pkts )
+  run_sim( th )
 # 
 # # Failing test cases captured by hypothesis
 # def test_h0():

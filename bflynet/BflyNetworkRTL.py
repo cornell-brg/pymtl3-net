@@ -42,18 +42,35 @@ class BflyNetworkRTL( Component ):
     chl_id = 0
     terminal_id_recv = 0
     terminal_id_send = 0
-    for i in range( s.num_routers ):
-      if i < s.num_routers - r_rows:
+    for n in range( n_fly-1 ):
+      print '----- each fly -----'
+      for r in range( r_rows ):
+        i = n * r_rows + r
         for j in range( k_ary ):
-          s.connect( s.routers[i].send[j], s.channels[chl_id].recv )
-
-          # FIXME: Utilize bit to index the specific router.
+          s.connect( s.routers[i].send[j], 
+                     s.channels[chl_id].recv )
           s.connect( s.channels[chl_id].send, 
-                     s.routers[(i/r_rows+1)*r_rows+(j
-                         *(r_rows/k_ary))%r_rows].recv[i%k_ary] )
+                     s.routers[(n+1)*r_rows+(r+(j+r/(r_rows/k_ary))*(r_rows/k_ary))%r_rows].\
+                             recv[r/(r_rows/k_ary)] )
+          print 'connect: ({},{})->({},{})'.format(i,j,
+                  (n+1)*r_rows+(r+(j+r/(r_rows/k_ary))*(r_rows/k_ary))%r_rows,
+                  r/(r_rows/k_ary))
+
+#    for i in range( s.num_routers ):
+#      if i < s.num_routers - r_rows:
+#        for j in range( k_ary ):
+#          s.connect( s.routers[i].send[j], s.channels[chl_id].recv )
+#
+#          # FIXME: Utilize bit to index the specific router.
+#          s.connect( s.channels[chl_id].send, 
+#                     s.routers[(i/r_rows+1)*r_rows+(j
+#                         *(r_rows/k_ary))%r_rows].recv[i%k_ary] )
+#          print 'connect: from(router{},port{})-to(router{},port{})'.\
+#                  format(i, j, (i/r_rows+1)*r_rows+(j*(r_rows/k_ary))%r_rows, i%k_ary)
           chl_id += 1
 
-      # Connect the router ports with Network Interfaces
+    # Connect the router ports with Network Interfaces
+    for i in range( s.num_routers ):
       if i < r_rows:
         for j in range( k_ary ):
           s.connect(s.recv[terminal_id_recv], s.routers[i].recv[j])

@@ -17,7 +17,13 @@
 #  --sweep             Sweep the injection rates
 #  --dump-vcd          Dump vcd
 #  --stats             Print stats
+#  --time              Print simulation time
 #  --trace             Display line-trace
+#
+#  --mode              Choose model
+#                      FL  : functional-level models
+#                      CL  : cycle-level models
+#                      RTL : register-transfer-level models
 #
 #  --topology          Choose NoC topology
 #                      Ring     : ring network
@@ -75,6 +81,11 @@ while sim_dir:
   os.system(sim_dir)
 
 from pymtl3                   import *
+
+#from meshnet.MeshNetworkFL    import MeshNetworkFL
+
+from meshnet.MeshNetworkCL    import MeshNetworkCL
+
 #from crossbar.CrossbarRTL     import CrossbarRTL
 #from ringnet.RingNetworkRTL   import RingNetworkRTL
 #from ringnet.RingVCNetworkRTL import RingVCNetworkRTL
@@ -85,6 +96,8 @@ from bflynet.BflyNetworkRTL   import BflyNetworkRTL
 from ocn_pclib.ifcs.packets   import *
 from ocn_pclib.ifcs.positions import *
 from pymtl3.stdlib.test       import TestVectorSimulator
+
+import time
 
 seed(0xdeadbeef)
 
@@ -129,6 +142,9 @@ def parse_cmdline():
   parser.add_argument( "--stats",    
                        action  = "store_true"                              )
 
+  parser.add_argument( "--time",    
+                       action  = "store_true"                              )
+
   parser.add_argument( "--trace",  
                        action  = "store_true"                              )
 
@@ -137,7 +153,13 @@ def parse_cmdline():
 
   # OCN related command line arguments
 
-  parser.add_argument( "--topology",         
+  parser.add_argument( "--model",
+                       type    = str, 
+                       default = "RTL",
+                       choices = [ 'FL', 'CL', 'RTL' ],
+                       help    = "model can be applied for simulation." )
+
+  parser.add_argument( "--topology",
                        type    = str, 
                        default = "Mesh",
                        choices = [ 'Ring', 'Mesh', 'CMesh', 
@@ -213,8 +235,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 10
-NUM_SAMPLE_CYCLES   = 20 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 100
+NUM_SAMPLE_CYCLES   = 500 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
@@ -225,14 +247,25 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   # Determine which model to use in the simulator
 
-  topology_dict = {
-#    'Xbar'     : CrossbarRTL, 
-#    'Ring'     : RingVCNetworkRTL, 
-    'Mesh'     : MeshNetworkRTL, 
-    'CMesh'    : CMeshNetworkRTL, 
-#    'Torus'    : TorusNetworkRTL,
-    'Butterfly': BflyNetworkRTL
-  }
+  if opts.model == "FL":
+    topology_dict = {
+      'Mesh'     : MeshNetworkFL,
+    }
+  elif opts.model == "CL":
+    topology_dict = {
+#      'Xbar'     : CrossbarRTL, 
+#      'Ring'     : RingVCNetworkRTL, 
+      'Mesh'     : MeshNetworkCL, 
+    }
+  else:
+    topology_dict = {
+#      'Xbar'     : CrossbarRTL, 
+#      'Ring'     : RingVCNetworkRTL, 
+      'Mesh'     : MeshNetworkRTL, 
+      'CMesh'    : CMeshNetworkRTL, 
+#      'Torus'    : TorusNetworkRTL,
+      'Butterfly': BflyNetworkRTL
+    }
 
   # Simulation Variables
 
@@ -265,8 +298,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   elif opts.topology == "CMesh":
     NetModel = topology_dict[ "CMesh" ]
-    net_width = 2
-    net_height = 2
+    net_width = opts.routers/opts.rows
+    net_height = opts.rows
     inports   = opts.router_inports
     outports  = opts.router_outports
     term_each = opts.terminals_each
@@ -287,8 +320,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     PacketType = mk_bfly_pkt_timestamp( k_ary, n_fly,
                  payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, MeshPos, k_ary, n_fly, 0 ) 
-    model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
     model.set_param( "top.routers*.construct", k_ary=k_ary )
+    model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
 
 #  model.elaborate()
   sim = model.apply( SimpleSim )
@@ -308,6 +341,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
       model.pos_y[i] = XYType(i/net_height)
 
   ncycles = 0
+
   while not sim_done:
     # Iterate over all terminals
     for i in range( num_nodes ):
@@ -320,7 +354,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
         if   pattern == "urandom":
           dest = randint( 0, num_nodes-1 )
         elif pattern == "partition2":
-          dest = ( randint( 0, num_nodes-1 ) ) & (num_nodes/2-1) | ( i & (num_nodes/2) )
+          dest = ( randint( 0, num_nodes-1 ) ) & (num_nodes/2-1) |\
+                 ( i & (num_nodes/2) )
         elif pattern == "opposite":
           dest = ( i + 2 ) % num_nodes
         elif pattern == "neighbor":
@@ -459,6 +494,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
     model.tick()
     ncycles += 1
+
     if trace:
 #      sim.print_line_trace()
       print "{}:{}".format( ncycles, model.line_trace() )
@@ -490,7 +526,9 @@ def main():
     print()
     print( "Pattern: " + opts.pattern )
     print()
-    print( "{:<20} | {:<20}".format( "Injection rate (%)", "Avg. Latency" ) )
+    print( "{:<20} | {:<20} | {:<20} | {:<20}".\
+            format( "Injection rate (%)", "Avg. Latency", \
+                    "Sim. Cycle (s)", "Sim. Speed (cyc/s)") )
 
     inj             = 0
     avg_lat         = 0
@@ -500,14 +538,22 @@ def main():
     inj_shamt       = 0.0
     inj_step        = 5 if opts.topology == "bus" else 10 # ring
 
-    while avg_lat <= 200 and inj <= 100:
+    while avg_lat <= 500 and inj <= 100:
+
+      if opts.time:
+        start_time = time.time()
 
       results = simulate( opts, max(inj,1), opts.pattern, 500, 
               opts.dump_vcd, opts.trace, opts.verbose )
 
+      if opts.time:
+        end_time = time.time()
+
       avg_lat = results[0]
 
-      print( "{:<20} | {:<20.1f}".format( max(inj,1), avg_lat ) )
+      print( "{:<20} | {:<20.1f} | {:<20.1f} | {:<20.1f}".\
+              format( max(inj,1), avg_lat, (end_time - start_time), 
+              results[2]/(end_time - start_time)) )
 
       if inj == 0:
         zero_load_lat = avg_lat
@@ -530,17 +576,27 @@ def main():
     print()
 
   else:
+    if opts.time:
+      start_time = time.time()
+
     results = simulate( opts, opts.injection_rate, opts.pattern, 500, 
             dump_vcd, opts.trace, opts.verbose )
 
+    if opts.time:
+      end_time = time.time()
+
   if opts.stats and not opts.sweep:
     print()
-    print( "Pattern:        " + opts.pattern )
-    print( "Injection rate: %d" % opts.injection_rate )
+    print( "Pattern:         " + opts.pattern )
+    print( "Injection rate:  %d" % opts.injection_rate )
     print()
-    print( "Average Latency = %.1f" % results[0] )
-    print( "Num Packets     = %d" % results[1] )
-    print( "Total cycles    = %d" % results[2] )
+    print( "Average Latency  = %.1f" % results[0] )
+    print( "Num Packets      = %d" % results[1] )
+    print( "Total cycles     = %d" % results[2] )
+    if opts.time:
+      print( "Simulation time  = %.1f sec" % (end_time - start_time) )
+      print( "Simulation speed = %.1f cycle/sec" % \
+              (results[2]/(end_time - start_time)) )
     print()
 
 main()

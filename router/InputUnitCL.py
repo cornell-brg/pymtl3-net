@@ -20,7 +20,7 @@ class InputUnitCL( Component ):
 
     # Component
 
-    s.queue = QueueType( size=2 )
+    s.queue = QueueType( num_entries=2 )
     
     # Connections
 
