@@ -8,8 +8,9 @@ Author : Yanghui Ou
   Date : June 22, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL, enrdy_to_str
+from pymtl3.stdlib.ifcs import GetIfcRTL, enrdy_to_str
 
+from ocn_pclib.ifcs.CreditIfc import CreditSendIfcRTL
 from ocn_pclib.rtl import Counter
 
 class OutputUnitCreditRTL( Component ):
@@ -54,7 +55,7 @@ class OutputUnitCreditRTL( Component ):
 
   def line_trace( s ):
     return "{}({}){}".format(
-      s.recv,
+      s.get,
       ",".join( [ str(s.credit[i].count) for i in range(s.nvcs) ] ),
       s.send,
     )

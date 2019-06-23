@@ -13,7 +13,7 @@ from pymtl3.stdlib.rtl.queues import NormalQueueRTL
 from pymtl3.stdlib.rtl.Encoder import Encoder
 from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
 
-from ocn_pclib.ifcs import CreditRecvIfcRTL
+from ocn_pclib.ifcs.CreditIfc import CreditRecvIfcRTL
 
 class InputUnitCreditRTL( Component ):
 
@@ -28,7 +28,7 @@ class InputUnitCreditRTL( Component ):
     ArbReqType = mk_bits( nvcs )
     VcIDType   = mk_bits( clog2( nvcs ) if nvcs > 1 else 1 )
 
-    s.buffers = [ QType( MsgType, num_entries=credit_line )
+    s.buffers = [ QueueType( PacketType, num_entries=credit_line )
                   for _ in range( nvcs ) ]
     s.arbiter = RoundRobinArbiterEn( nreqs=nvcs )
     s.encoder = Encoder( in_nbits=nvcs, out_nbits=clog2(nvcs) )
@@ -37,7 +37,7 @@ class InputUnitCreditRTL( Component ):
       s.connect( s.buffers[i].enq.msg, s.recv.msg        )
       s.connect( s.buffers[i].deq.rdy, s.arbiter.reqs[i] )
     s.connect( s.arbiter.grants, s.encoder.in_ )
-    s.connect( s.arbiter.en,     s.send.en     )
+    s.connect( s.arbiter.en,     s.give.en     )
 
     @s.update
     def up_enq():
@@ -49,16 +49,13 @@ class InputUnitCreditRTL( Component ):
           s.buffers[i].enq.en = b1(0)
 
     @s.update
-    def up_deq_and_send():
+    def up_deq_and_give():
       for i in range( nvcs ):
         s.buffers[i].deq.en = b1(0)
 
-      s.send.msg = s.buffers[ s.encoder.out ].deq.msg
-      if s.send.rdy & ( s.arbiter.grants > ArbReqType(0) ):
-        s.send.en = b1(1)
-        s.buffers[ s.encoder.out ].deq.en = b1(1)
-      else:
-        s.send.en = b1(0)
+      s.give.msg = s.buffers[ s.encoder.out ].deq.msg
+      s.give.rdy = s.buffers[ s.encoder.out ].deq.rdy
+      s.buffers[ s.encoder.out ].deq.en = s.give.en
 
     @s.update
     def up_yummy():
@@ -66,4 +63,4 @@ class InputUnitCreditRTL( Component ):
         s.recv.yum[i] = s.buffers[i].deq.en
 
   def line_trace( s ):
-    return "{}(){}".format( s.recv, s.send )
+    return "{}(){}".format( s.recv, s.give )
