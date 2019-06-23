@@ -1,11 +1,12 @@
-#=========================================================================
-# SwitchUnitRTL.py
-#=========================================================================
-# A switch unit with GetIfcRTL and SendIfcRTL.
-#
-# Author : Yanghui Ou, Cheng Tan
-#   Date : Feb 28, 2019
+"""
+=========================================================================
+SwitchUnitRTL.py
+=========================================================================
+A switch unit with GetIfcRTL and SendIfcRTL.
 
+Author : Yanghui Ou, Cheng Tan
+  Date : Feb 28, 2019
+"""
 from pymtl3 import *
 from pymtl3.stdlib.rtl import Mux
 from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn

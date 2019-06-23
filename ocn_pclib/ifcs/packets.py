@@ -1,8 +1,8 @@
 #=========================================================================
 # packets.py
 #=========================================================================
-# Packets definition.
-# 
+# Collection of packets definition.
+#
 # Author : Yanghui Ou
 #   Date : May 20, 2019
 
@@ -17,11 +17,11 @@ def mk_generic_pkt( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=32 ):
   IdType = mk_bits( clog2( nrouters ) )
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
-  new_name = "GenericPacket_{}_{}_{}_{}".format( 
-    nrouters, 
+  new_name = "GenericPacket_{}_{}_{}_{}".format(
+    nrouters,
     nvcs,
     opaque_nbits,
-    payload_nbits, 
+    payload_nbits,
   )
   if nvcs > 1:
     VcIdType = mk_bits( clog2( nvcs ) )
