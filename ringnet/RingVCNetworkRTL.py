@@ -1,31 +1,36 @@
-#=========================================================================
-# RingVCNetworkRTL.py
-#=========================================================================
-# Ring network implementation with Virtual Channel.
-#
-# Author : Cheng Tan
-#   Date : May 27, 2019
+"""
+=========================================================================
+RingNetworkRTL.py
+=========================================================================
+Ring network implementation.
 
-from pymtl3                 import *
-from pymtl3.stdlib.ifcs.SendRecvIfc import *
-from directions             import *
-from RingRouterRTL          import RingRouterRTL
-from channel.ChannelRTL     import ChannelRTL
-from router.ULVCUnitRTL     import ULVCUnitRTL
+Author : Yanghui Ou, Cheng Tan
+  Date : June 22, 2019
+"""
+from pymtl3 import *
+from pymtl3.ifcs import SendIfcRTL, RecvIfcRTL
 
-class RingVCNetworkRTL( Component ):
-  def construct( s, PacketType, PositionType, num_routers=4, chl_lat=0 ):
+from directions import *
+from RingRouterRTL import RingRouterRTL
+from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
+
+class RingNetworkRTL( Component ):
+
+  def construct( s,
+    PacketType,
+    PositionType,
+    num_routers=4,
+    chl_lat=0,
+    nvcs=2,
+    credit_line=2,
+   ):
 
     # Constants
-
     s.num_routers = num_routers
-    num_channels  = num_routers * 2
-    s.num_terminals = num_routers
 
     # Interface
-
-    s.recv = [ RecvIfcRTL( PacketType ) for _ in range( s.num_terminals )]
-    s.send = [ SendIfcRTL( PacketType ) for _ in range( s.num_terminals )]
+    s.recv = [ RecvIfcRTL(PacketType) for _ in range(s.num_terminals)]
+    s.send = [ SendIfcRTL(PacketType) for _ in range(s.num_terminals)]
 
     # Components
 
@@ -36,22 +41,18 @@ class RingVCNetworkRTL( Component ):
     s.channels = [ ChannelRTL( PacketType, latency = chl_lat )
                      for _ in range( num_channels )]
 
-    # Connect s.routers together in Mesh
+    # Connect s.routers together in ring
 
-    chl_id = 0
     for i in range( s.num_routers ):
-      s.connect( s.routers[i].send[RIGHT], s.channels[chl_id].recv                   )
-      s.connect( s.channels[chl_id].send,  s.routers[(i+1)%num_routers].recv[LEFT] )
-      chl_id += 1
-
-      s.connect( s.routers[(i+1)%num_routers].send[LEFT], s.channels[chl_id].recv  )
-      s.connect( s.channels[chl_id].send,                 s.routers[i].recv[RIGHT] )
-      chl_id += 1
+      next_id = (i+1) % num_routers
+      s.connect( s.routers[i].send[RIGHT],      s.routers[next_id].recv[LEFT] )
+      s.connect( s.routers[next_id].send[LEFT], s.routers[i].recv[RIGHT]      )
 
       # Connect the self port (with Network Interface)
 
-      s.connect(s.recv[i], s.routers[i].recv[SELF])
-      s.connect(s.send[i], s.routers[i].send[SELF])
+      s.connect( s.recv[i],               s.routers[i].recv[SELF] )
+
+      s.connect( s.routers[i].send[SELF], s.send[i]               )
 
     # FIXME: unable to connect a struct to a port.
     @s.update
@@ -60,22 +61,7 @@ class RingVCNetworkRTL( Component ):
         s.routers[r].pos = PositionType( r )
 
   def line_trace( s ):
-    trace = [ "" for _ in range( s.num_terminals ) ]
-    for i in range( s.num_terminals ):
+    trace = [ "" for _ in range( s.num_routers ) ]
+    for i in range( s.num_routers ):
       trace[i] += s.send[i].line_trace()
     return "|".join( trace )
-
-#  def elaborate_physical( s ):
-#    # Initialize dimension for sub-modules.
-#    BOUNDARY = 10
-#    MAX = len( s.routers )
-#
-#    for i, r in enumerate( s.routers ):
-#      if i < (MAX / 2):
-#        r.dim.x = BOUNDARY + i * ( r.dim.w + s.channels[0].dim.w )
-#        r.dim.y = BOUNDARY
-#      else:
-#        r.dim.x = BOUNDARY + (MAX - i - 1) * ( r.dim.w + s.channels[0].dim.w )
-#        r.dim.y = BOUNDARY + r.dim.h + s.channels[0].dim.w
-#    s.dim.w = MAX/2 * r.dim.w + (MAX/2 - 1) * s.channels[0].dim.w
-#    s.dim.h = 2 * r.dim.h + s.channels[0].dim.w

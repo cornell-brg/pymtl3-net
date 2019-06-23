@@ -87,8 +87,8 @@ from pymtl3                   import *
 from meshnet.MeshNetworkCL    import MeshNetworkCL
 
 #from crossbar.CrossbarRTL     import CrossbarRTL
-#from ringnet.RingNetworkRTL   import RingNetworkRTL
-from ringnet.RingVCNetworkRTL import RingVCNetworkRTL
+from ringnet.RingNetworkRTL   import RingNetworkRTL
+#from ringnet.RingVCNetworkRTL import RingVCNetworkRTL
 from meshnet.MeshNetworkRTL   import MeshNetworkRTL
 from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
 #from torusnet.TorusNetworkRTL import TorusNetworkRTL
@@ -260,7 +260,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   else:
     topology_dict = {
 #      'Xbar'     : CrossbarRTL, 
-      'Ring'     : RingVCNetworkRTL, 
+      'Ring'     : RingNetworkRTL, 
       'Mesh'     : MeshNetworkRTL, 
       'CMesh'    : CMeshNetworkRTL, 
 #      'Torus'    : TorusNetworkRTL,
