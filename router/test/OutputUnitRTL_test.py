@@ -1,71 +1,20 @@
-#=========================================================================
-# OutputUnitRTLSourceSink_test.py
-#=========================================================================
-# Test for OutputUnitRTL using Source and Sink
-#
-# Author : Cheng Tan, Yanghui Ou
-#   Date : Feb 28, 2019
+"""
+==========================================================================
+OutputUnitRTLSourceSink_test.py
+==========================================================================
+Test for OutputUnitRTL using Source and Sink
 
+Author : Yanghui Ou, Cheng Tan
+  Date : June 22, 2019
+"""
 import pytest
 
 from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs    import TestSrcRTL
-from pymtl3.stdlib.test.test_sinks   import TestSinkRTL
-from pymtl3.stdlib.test              import TestVectorSimulator
-
-from router.OutputUnitRTL     import OutputUnitRTL
+from pymtl3.stdlib.test.test_srcs    import TestSrcCL
+from pymtl3.stdlib.test.test_sinks   import TestSinkCL
+from pymtl3.stdlib.rtl.queues import BypassQueueRTL
+from router.OutputUnitRTL import OutputUnitRTL
 from pymtl3.stdlib.rtl.queues import NormalQueueRTL
-
-#-------------------------------------------------------------------------
-# TestVectorSimulator test
-#-------------------------------------------------------------------------
-
-def run_tv_test( dut, test_vectors ):
-
-  # Define input/output functions
-
-  def tv_in( dut, tv ):
-    dut.recv.en  = tv[0]
-    dut.recv.msg = tv[2]
-    dut.send.rdy = tv[3]
-
-  def tv_out( dut, tv ):
-    if tv[1] != '?': assert dut.recv.rdy == tv[1]
-    if tv[4] != '?': assert dut.send.en  == tv[4]
-    if tv[5] != '?': assert dut.send.msg == tv[5]
-
-  # Run the test
-
-  sim = TestVectorSimulator( dut, test_vectors, tv_in, tv_out )
-  sim.run_test()
-
-def test_pipe_Bits():
-
-  B1  = mk_bits(1)
-  B32 = mk_bits(32)
-
-  test_vector_0 = [
-    # recv.en recv.rdy recv.msg send.rdy send.en send.msg
-    [  B1(0),  B1(0),  B32(123), B1(0),  B1(0),  B32(123) ],
-    [  B1(1),  B1(1),  B32(345), B1(1),  B1(1),  B32(345) ],
-    [  B1(0),  B1(0),  B32(567), B1(0),  B1(0),  B32(567) ],
-  ]
-
-  test_vector_1 = [
-    # recv.en recv.rdy recv.msg send.rdy send.en send.msg
-    [  B1(1),  B1(1),  B32(123), B1(0),  B1(0),    '?'    ],
-    [  B1(1),  B1(1),  B32(345), B1(0),  B1(0),  B32(123) ],
-    [  B1(0),  B1(0),  B32(567), B1(0),  B1(0),  B32(123) ],
-    [  B1(0),  B1(0),  B32(567), B1(1),  B1(1),  B32(123) ],
-    [  B1(0),  B1(1),  B32(567), B1(1),  B1(1),  B32(345) ],
-    [  B1(1),  B1(1),  B32(567), B1(0),  B1(0),    '?'    ],
-    [  B1(1),  B1(1),  B32(0  ), B1(1),  B1(1),  B32(567) ],
-    [  B1(1),  B1(1),  B32(1  ), B1(1),  B1(1),  B32(0  ) ],
-    [  B1(1),  B1(1),  B32(2  ), B1(1),  B1(1),  B32(1  ) ],
-    [  B1(0),  B1(1),  B32(2  ), B1(1),  B1(1),  B32(2  ) ],
-  ]
-  run_tv_test( OutputUnitRTL( Bits32 ), test_vector_0)
-#  run_tv_test( OutputUnitRTL( Bits32, NormalQueueRTL ), test_vector_1)
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -77,20 +26,25 @@ class TestHarness( Component ):
                  src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    s.src  = TestSrcRTL    ( MsgType, src_msgs,  src_initial,  src_interval  )
-    s.sink = TestSinkRTL   ( MsgType, sink_msgs, sink_initial, sink_interval )
-    s.dut  = OutputUnitRTL ( MsgType )
+    s.src   = TestSrcCL( MsgType, src_msgs,  src_initial,  src_interval  )
+    s.src_q = BypassQueueRTL( MsgType, num_entries=1 )
+    s.dut   = OutputUnitRTL( MsgType )
+    s.sink  = TestSinkCL( MsgType, sink_msgs, sink_initial, sink_interval )
 
     # Connections
-    s.connect( s.src.send, s.dut.recv  )
+    s.connect( s.src.send, s.src_q.enq )
+    s.connect( s.src_q.deq, s.dut.get  )
     s.connect( s.dut.send, s.sink.recv )
-  
+
   def done( s ):
     return s.src.done() and s.sink.done()
 
   def line_trace( s ):
-    return s.src.line_trace() + "-> | " + s.dut.line_trace() + \
-                               " | -> " + s.sink.line_trace()
+    return "{}>{}>{}".format(
+      s.src.line_trace(),
+      s.dut.line_trace(),
+      s.sink.line_trace()
+    )
 
 #-------------------------------------------------------------------------
 # run_rtl_sim
