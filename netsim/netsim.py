@@ -88,10 +88,9 @@ from meshnet.MeshNetworkCL    import MeshNetworkCL
 
 #from crossbar.CrossbarRTL     import CrossbarRTL
 from ringnet.RingNetworkRTL   import RingNetworkRTL
-#from ringnet.RingVCNetworkRTL import RingVCNetworkRTL
 from meshnet.MeshNetworkRTL   import MeshNetworkRTL
 from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
-#from torusnet.TorusNetworkRTL import TorusNetworkRTL
+from torusnet.TorusNetworkRTL import TorusNetworkRTL
 from bflynet.BflyNetworkRTL   import BflyNetworkRTL
 from ocn_pclib.ifcs.packets   import *
 from ocn_pclib.ifcs.positions import *
@@ -235,8 +234,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 100
-NUM_SAMPLE_CYCLES   = 500 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 10
+NUM_SAMPLE_CYCLES   = 50 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
@@ -263,7 +262,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
       'Ring'     : RingNetworkRTL, 
       'Mesh'     : MeshNetworkRTL, 
       'CMesh'    : CMeshNetworkRTL, 
-#      'Torus'    : TorusNetworkRTL,
+      'Torus'    : TorusNetworkRTL,
       'Butterfly': BflyNetworkRTL
     }
 
@@ -284,11 +283,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   if opts.topology == "Ring":
     NetModel = topology_dict[ "Ring" ]
     RingPos = mk_ring_pos( opts.routers )
-    PacketType = mk_ring_pkt_timestamp( opts.routers, max_time = NUM_SAMPLE_CYCLES )
+    PacketType = mk_ring_pkt_timestamp( opts.routers, nvcs = 2, 
+            max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, RingPos, opts.routers, 0 )
     model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
-    print 'size: ', opts.routers
-    print 'Ring'
 
   elif opts.topology == "Mesh":
     NetModel = topology_dict[ "Mesh" ]
@@ -296,6 +294,15 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
     PacketType = mk_mesh_pkt_timestamp( net_width, net_height, 
+                 payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
+    model = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
+
+  elif opts.topology == "Torus":
+    NetModel = topology_dict[ "Torus" ]
+    net_width = opts.routers/opts.rows
+    net_height = opts.rows
+    MeshPos = mk_mesh_pos( net_width, net_height )
+    PacketType = mk_mesh_pkt_timestamp( net_width, net_height, nvcs = 2,
                  payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
 
@@ -384,6 +391,11 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             pkt = PacketType( i%net_width, i/net_width, dest%net_width,
                     dest/net_width, 1, 0, ncycles )
 
+          elif opts.topology == "Torus":
+#            net_width = opts.routers / opts.rows
+            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
+                    dest/net_width, 0, 1, 6, ncycles )
+
           elif opts.topology == "CMesh":
             pkt = PacketType( (i/term_each)%net_width, 
                               (i/term_each)/net_width, 
@@ -429,6 +441,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                     dest/net_width, 1, 0, INVALID_TIMESTAMP )
 #            pkt = mk_mesh_pkt_timestamp( i%net_width, i/net_width, dest%net_width,
 #                    dest/net_width, 1, 6, INVALID_TIMESTAMP )
+
+          elif opts.topology == "Torus":
+            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
+                    dest/net_width, 0, 1, 6, ncycles )
 
           elif opts.topology == "CMesh":
             pkt = PacketType( (i/term_each)%net_width, 
@@ -480,6 +496,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
           average_latency = total_latency / float( packets_received )
 
       # Check if finished - drain phase
+      print 'all_packets_received: ', all_packets_received
+      print 'packets_generated: ', packets_generated
 
       if ( ncycles >= NUM_SAMPLE_CYCLES and
            all_packets_received >= packets_generated ):
@@ -522,7 +540,7 @@ def main():
 
   dump_vcd = None
   start_time      = 0
-  end_time        = 0
+  end_time        = 1
 
   # sweep mode: sweep the injection rate until the network is saturated.
   # we assume the latency is 100 when the network is saturated.

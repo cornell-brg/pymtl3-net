@@ -6,9 +6,9 @@
 # Author : Cheng Tan
 #   Date : Mar 29, 2019
 
-from pymtl          import *
-from directions     import *
-from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
+from pymtl3             import *
+from directions         import *
+from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 
 class DORYTorusRouteUnitRTL( Component ):
 
@@ -30,6 +30,8 @@ class DORYTorusRouteUnitRTL( Component ):
     s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
     s.give_ens = Wire( mk_bits( s.num_outports ) ) 
 
+    s.give_msg_wire = Wire( PacketType )
+
     # Connections
 
     for i in range( s.num_outports ):
@@ -41,6 +43,7 @@ class DORYTorusRouteUnitRTL( Component ):
     def up_ru_routing():
  
       s.out_dir = 0
+      s.give_msg_wire = s.get.msg
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
 
@@ -67,8 +70,19 @@ class DORYTorusRouteUnitRTL( Component ):
             s.out_dir = EAST
           else:
             s.out_dir = WEST
+
+        if s.pos.pos_x == 0 and s.out_dir == WEST:
+          s.give_msg_wire.vc_id = 1
+        elif s.pos.pos_x == cols - 1 and s.out_dir == EAST:
+          s.give_msg_wire.vc_id = 1
+        elif s.pos.pos_y == 0 and s.out_dir == SOUTH:
+          s.give_msg_wire.vc_id = 1
+        elif s.pos.pos_y == rows - 1 and s.out_dir == NORTH:
+          s.give_msg_wire.vc_id = 1
+
         s.give[ s.out_dir ].rdy = 1
-        s.give[ s.out_dir ].msg = s.get.msg
+        s.give[ s.out_dir ].msg = s.give_msg_wire
+#        s.give[ s.out_dir ].msg = s.get.msg
 
     @s.update
     def up_ru_get_en():
