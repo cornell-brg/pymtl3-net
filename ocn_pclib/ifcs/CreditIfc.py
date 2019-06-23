@@ -119,6 +119,7 @@ class RecvRTL2CreditSendRTL( Component ):
     CreditType = mk_bits( clog2(credit_line+1) )
     VcIDType   = mk_bits( clog2( nvcs ) if nvcs > 1 else 1 )
     
+    # FIXME: use multiple buffers to avoid deadlock.
     s.buffer = BypassQueueRTL( MsgType, num_entries=1 )
     s.credit = [ Counter( CreditType, credit_line ) for _ in range( nvcs ) ]
 

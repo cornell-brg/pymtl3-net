@@ -7,36 +7,34 @@
 #   Date : Feb 28, 2019
 
 from pymtl3 import *
-from pymtl3.stdlib.rtl          import Mux
+from pymtl3.stdlib.rtl import Mux
 from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
 from ocn_pclib.rtl.Encoder import Encoder
-from pymtl3.stdlib.ifcs    import GetIfcRTL, SendIfcRTL
+from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL, GiveIfcRTL
 
 class SwitchUnitRTL( Component ):
 
   def construct( s, PacketType, num_inports=5 ):
 
-    # Constants
+    # Local parameters
 
     s.num_inports = num_inports
     s.sel_width   = clog2( num_inports )
-    InType = mk_bits( num_inports )
+    GrantType     = mk_bits( num_inports )
+    SelType       = mk_bits( s.sel_width )
 
     # Interface
 
     s.get  = [ GetIfcRTL( PacketType ) for _ in range( s.num_inports ) ]
-    s.send = SendIfcRTL( PacketType )
+    s.give = GiveIfcRTL( PacketType )
 
     # Components
 
     s.get_en  = [ Wire( Bits1 ) for _ in range( s.num_inports ) ]
     s.get_rdy = [ Wire( Bits1 ) for _ in range( s.num_inports ) ]
 
-    s.arbiter = RoundRobinArbiterEn( num_inports )
-
-    s.mux = Mux( PacketType, num_inports )(
-      out = s.send.msg
-    )
+    s.arbiter = RoundRobinArbiterEn( num_inports )( en=s.give.en )
+    s.mux = Mux( PacketType, num_inports )( out = s.give.msg )
 
     s.encoder = Encoder( num_inports, s.sel_width )(
       in_ = s.arbiter.grants,
@@ -52,22 +50,17 @@ class SwitchUnitRTL( Component ):
       s.connect( s.get[i].rdy, s.get_rdy[i]      )
 
     @s.update
-    def up_arb_send_en():
-      s.arbiter.en = s.arbiter.grants > InType(0) and s.send.rdy
-      s.send.en = s.arbiter.grants > InType(0) and s.send.rdy
+    def up_give():
+      s.give.rdy = s.arbiter.grants > GrantType(0)
 
     @s.update
     def up_get_en():
       for i in range( num_inports ):
-        s.get_en[i] = (
-          Bits1(1) if s.get_rdy[i] and s.send.rdy and s.mux.sel==Bits3(i) else 
-          Bits1(0)
-        )
+        # s.get_en[i] = s.get_rdy[i] & s.give.en & ( s.mux.sel==SelType(i) )
+        s.get_en[i] = s.give.en & ( s.mux.sel==SelType(i) )
+
+  # Line trace
 
   def line_trace( s ):
-
-    in_trace = [ "" for _ in range( s.num_inports ) ]
-    for i in range( s.num_inports ):
-      in_trace[i] = "{}".format( s.get[i] )
-
-    return "{}(){}".format( "|".join( in_trace ), s.send )
+    in_trace = [ str(s.get[i]) for i in range( s.num_inports ) ]
+    return "{}(){}".format( "|".join( in_trace ), s.give )

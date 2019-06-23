@@ -9,6 +9,56 @@
 from pymtl3 import *
 
 #=========================================================================
+# Generic packet
+#=========================================================================
+
+def mk_generic_pkt( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=32 ):
+
+  IdType = mk_bits( clog2( nrouters ) )
+  OpqType = mk_bits( opaque_nbits )
+  PayloadType = mk_bits( payload_nbits )
+  new_name = "GenericPacket_{}_{}_{}_{}".format( 
+    nrouters, 
+    nvcs,
+    opaque_nbits,
+    payload_nbits, 
+  )
+  if nvcs > 1:
+    VcIdType = mk_bits( clog2( nvcs ) )
+    def str_func( self ):
+      return "{}>{}:{}:{}:{}".format(
+        IdType     ( self.src     ),
+        IdType     ( self.dst     ),
+        OpqType    ( self.opaque  ),
+        VcIdType   ( self.vc_id   ),
+        PayloadType( self.payload ),
+      )
+    new_class = mk_bit_struct( new_name,[
+      ( 'src',     IdType      ),
+      ( 'dst',     IdType      ),
+      ( 'opaque',  OpqType     ),
+      ( 'vc_id',   VcIdType    ),
+      ( 'payload', PayloadType ),
+    ], str_func )
+
+  else:
+    def str_func( self ):
+      return "{}>{}:{}:{}".format(
+        IdType     ( self.src     ),
+        IdType     ( self.dst     ),
+        OpqType    ( self.opaque  ),
+        PayloadType( self.payload ),
+      )
+    new_class = mk_bit_struct( new_name,[
+      ( 'src',     IdType      ),
+      ( 'dst',     IdType      ),
+      ( 'opaque',  OpqType     ),
+      ( 'payload', PayloadType ),
+    ], str_func )
+
+  return new_class
+
+#=========================================================================
 # ring packet
 #=========================================================================
 

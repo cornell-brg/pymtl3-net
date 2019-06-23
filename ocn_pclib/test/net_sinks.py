@@ -8,7 +8,7 @@
 #   Date : Apr 30, 2019
 
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvIfcRTL, RecvRTL2SendCL
+from pymtl3.stdlib.ifcs import RecvIfcRTL, RecvRTL2SendCL, enrdy_to_str
 
 #-------------------------------------------------------------------------
 # TestNetSinkCL
@@ -16,8 +16,10 @@ from pymtl3.stdlib.ifcs import RecvIfcRTL, RecvRTL2SendCL
 
 class TestNetSinkCL( Component ):
 
-  def construct( s, msgs, initial_delay=0, interval_delay=0,
+  def construct( s, Type, msgs, initial_delay=0, interval_delay=0,
                  arrival_time=None ):
+    
+    s.recv.Type = Type
 
     # [msgs] and [arrival_time] must have the same length.
     if arrival_time is not None:
@@ -103,8 +105,7 @@ Received at    : {}""".format( s.arrival_time[ s.idx ], s.cycle_count ) )
 
   # Line trace
   def line_trace( s ):
-    trace = enrdy_to_str( s.recv_msg, s.recv_called, s.recv_rdy )
-    return "{}".format( trace.ljust( s.trace_len ) )
+    return "{}".format( s.recv )
 
 #-------------------------------------------------------------------------
 # TestSinkRTL
@@ -121,7 +122,7 @@ class TestNetSinkRTL( Component ):
 
     # Components
 
-    s.sink    = TestNetSinkCL( msgs, initial_delay, interval_delay,
+    s.sink    = TestNetSinkCL( MsgType, msgs, initial_delay, interval_delay,
                                arrival_time )
     s.adapter = RecvRTL2SendCL( MsgType )
 
