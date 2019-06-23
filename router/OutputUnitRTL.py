@@ -1,22 +1,22 @@
-#=========================================================================
-# OutputUnitRTL.py
-#=========================================================================
-# An Output unit of the router. Just one normal queue, no credit.
-# Note that the interface is send/recv-based.
-# Enabling parameter passing.
-#
-# Author : Cheng Tan, Yanghui Ou
-#   Date : Feb 28, 2019
+"""
+=========================================================================
+OutputUnitRTL.py
+=========================================================================
+An Output unit of the router. Just one normal queue, no credit.
+Note that the interface is send/recv-based.
+Enabling parameter passing.
 
+Author : Cheng Tan, Yanghui Ou
+  Date : Feb 28, 2019
+"""
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL
 from pymtl3.stdlib.rtl.queues import NormalQueueRTL
 
 class OutputUnitRTL( Component ):
   def construct( s, PacketType, QueueType = NormalQueueRTL ):
-    
-    # Interface
 
+    # Interface
     s.get  = GetIfcRTL ( PacketType )
     s.send = SendIfcRTL( PacketType )
 
@@ -26,11 +26,9 @@ class OutputUnitRTL( Component ):
     if s.QueueType != None:
 
       # Component
+      s.queue = QueueType( PacketType )
 
-      s.queue = QueueType( PacketType ) 
-  
       # Connections
-      
       s.connect( s.get.msg,       s.queue.enq.msg )
       s.connect( s.queue.deq.msg, s.send.msg      )
 
@@ -46,6 +44,9 @@ class OutputUnitRTL( Component ):
 
     # No ouput queue
     else:
+
+      s.connect( s.get.msg, s.send.msg )
+
       @s.update
       def up_get_send():
         s.get.en  = s.get.rdy & s.send.rdy

@@ -1,11 +1,12 @@
-#=========================================================================
-# packets.py
-#=========================================================================
-# Collection of packets definition.
-#
-# Author : Yanghui Ou
-#   Date : May 20, 2019
+"""
+=========================================================================
+packets.py
+=========================================================================
+Collection of packets definition.
 
+Author : Yanghui Ou
+  Date : May 20, 2019
+"""
 from pymtl3 import *
 
 #=========================================================================
@@ -67,11 +68,11 @@ def mk_ring_pkt( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=32 ):
   IdType = mk_bits( clog2( nrouters ) )
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
-  new_name = "RingPacket_{}_{}_{}_{}".format( 
-    nrouters, 
+  new_name = "RingPacket_{}_{}_{}_{}".format(
+    nrouters,
     nvcs,
     opaque_nbits,
-    payload_nbits, 
+    payload_nbits,
   )
   if nvcs > 1:
     VcIdType = mk_bits( clog2( nvcs ) )
@@ -95,7 +96,7 @@ def mk_ring_pkt( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=32 ):
 # mesh packet
 #=========================================================================
 
-def mk_mesh_pkt( mesh_wid=2, mesh_ht=2, nvcs=1, 
+def mk_mesh_pkt( mesh_wid=2, mesh_ht=2, nvcs=1,
                  opaque_nbits=8, payload_nbits=32 ):
 
   assert mesh_wid > 0 and mesh_ht > 0
@@ -103,11 +104,11 @@ def mk_mesh_pkt( mesh_wid=2, mesh_ht=2, nvcs=1,
   YType = mk_bits(clog2( mesh_ht  )) if mesh_ht  != 1 else mk_bits(1)
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
-  new_name = "MeshPacket_{}x{}_{}_{}_{}".format( 
-    mesh_wid, 
-    mesh_ht, 
-    nvcs, 
-    opaque_nbits, 
+  new_name = "MeshPacket_{}x{}_{}_{}_{}".format(
+    mesh_wid,
+    mesh_ht,
+    nvcs,
+    opaque_nbits,
     payload_nbits
   )
 
@@ -137,8 +138,8 @@ def mk_mesh_pkt( mesh_wid=2, mesh_ht=2, nvcs=1,
 # cmesh packet
 #=========================================================================
 
-def mk_cmesh_pkt( mesh_wid=2, mesh_ht=2, 
-                  inports=8, outports=8, nvcs=1, 
+def mk_cmesh_pkt( mesh_wid=2, mesh_ht=2,
+                  inports=8, outports=8, nvcs=1,
                   opaque_nbits=8, payload_nbits=32 ):
 
   XType = mk_bits(clog2( mesh_wid )) if mesh_wid != 1 else mk_bits(1)
@@ -146,13 +147,13 @@ def mk_cmesh_pkt( mesh_wid=2, mesh_ht=2,
   TType = mk_bits( clog2( outports - 4 ) )
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
-  new_name = "CMeshPacket_{}x{}_{}x{}_{}_{}_{}".format( 
-    mesh_wid, 
+  new_name = "CMeshPacket_{}x{}_{}x{}_{}_{}_{}".format(
+    mesh_wid,
     mesh_ht,
     inports,
     outports,
-    nvcs, 
-    opaque_nbits, 
+    nvcs,
+    opaque_nbits,
     payload_nbits
   )
 
@@ -206,12 +207,12 @@ def mk_bfly_pkt( k_ary=2, n_fly=2, nvcs=0, opaque_nbits=8, payload_nbits=32 ):
     DstType = mk_bits( clog2( k_ary ** ( n_fly - 1 ) ) * n_fly )
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
-  new_name = "BflyPacket_{}_{}_{}_{}_{}".format( 
+  new_name = "BflyPacket_{}_{}_{}_{}_{}".format(
     k_ary,
     n_fly,
     nvcs,
     opaque_nbits,
-    payload_nbits, 
+    payload_nbits,
   )
   if nvcs > 1:
     VcIdType = mk_bits( clog2( nvcs ) )
@@ -235,7 +236,7 @@ def mk_bfly_pkt( k_ary=2, n_fly=2, nvcs=0, opaque_nbits=8, payload_nbits=32 ):
 # mesh packet with timestamp
 #=========================================================================
 
-def mk_mesh_pkt_timestamp( mesh_wid=2, mesh_ht=2, nvcs=1, 
+def mk_mesh_pkt_timestamp( mesh_wid=2, mesh_ht=2, nvcs=1,
                  opaque_nbits=8, payload_nbits=32, max_time=10 ):
 
   XType = mk_bits( clog2( mesh_wid ) )
@@ -243,11 +244,11 @@ def mk_mesh_pkt_timestamp( mesh_wid=2, mesh_ht=2, nvcs=1,
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
   TimestampType = mk_bits( clog2(max_time + 1) )
-  new_name = "MeshPacketTimestamp_{}x{}_{}_{}_{}".format( 
-    mesh_wid, 
-    mesh_ht, 
-    nvcs, 
-    opaque_nbits, 
+  new_name = "MeshPacketTimestamp_{}x{}_{}_{}_{}".format(
+    mesh_wid,
+    mesh_ht,
+    nvcs,
+    opaque_nbits,
     payload_nbits,
     max_time
   )
@@ -289,13 +290,13 @@ def mk_cmesh_pkt_timestamp( mesh_wid=2, mesh_ht=2, inports=8, outports=8,
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
   TimestampType = mk_bits( clog2(max_time + 1) )
-  new_name = "MeshPacketTimestamp_{}x{}_{}x{}_{}_{}_{}".format( 
+  new_name = "MeshPacketTimestamp_{}x{}_{}x{}_{}_{}_{}".format(
     mesh_wid,
     mesh_ht,
     inports,
     outports,
-    nvcs, 
-    opaque_nbits, 
+    nvcs,
+    opaque_nbits,
     payload_nbits,
     max_time
   )
@@ -330,7 +331,7 @@ def mk_cmesh_pkt_timestamp( mesh_wid=2, mesh_ht=2, inports=8, outports=8,
 # Butterfly packet with timestamp
 #=========================================================================
 
-def mk_bfly_pkt_timestamp( k_ary=2, n_fly=2, nvcs=0, 
+def mk_bfly_pkt_timestamp( k_ary=2, n_fly=2, nvcs=0,
     opaque_nbits=8, payload_nbits=32, max_time=10 ):
 
   IdType   = mk_bits( clog2( k_ary ** n_fly ) )
@@ -353,12 +354,12 @@ def mk_bfly_pkt_timestamp( k_ary=2, n_fly=2, nvcs=0,
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
   TimestampType = mk_bits( clog2(max_time + 1) )
-  new_name = "BflyPacketTimestamp_{}_{}_{}_{}_{}".format( 
+  new_name = "BflyPacketTimestamp_{}_{}_{}_{}_{}".format(
     k_ary,
     n_fly,
     nvcs,
     opaque_nbits,
-    payload_nbits, 
+    payload_nbits,
     max_time
   )
   if nvcs > 1:
