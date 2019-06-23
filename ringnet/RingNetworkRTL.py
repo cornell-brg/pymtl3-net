@@ -8,7 +8,7 @@ Author : Yanghui Ou, Cheng Tan
   Date : June 22, 2019
 """
 from pymtl3 import *
-from pymtl3.ifcs import SendIfcRTL, RecvIfcRTL
+from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
 
 from directions import *
 from RingRouterRTL import RingRouterRTL
