@@ -6,6 +6,7 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : April 6, 2019
 
+from copy import deepcopy
 from pymtl3          import *
 from directions      import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL, GiveIfcRTL
@@ -29,10 +30,12 @@ class RingRouteUnitRTL( Component ):
     s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
     s.give_ens = Wire( mk_bits( s.num_outports ) )
 
+    s.give_msg_wire = Wire( PacketType )
+
     # Connections
 
     for i in range( s.num_outports ):
-      s.connect( s.get.msg,     s.give[i].msg )
+#      s.connect( s.get.msg,     s.give[i].msg )
       s.connect( s.give_ens[i], s.give[i].en  )
 
     # Routing logic
@@ -40,6 +43,7 @@ class RingRouteUnitRTL( Component ):
     def up_ru_routing():
 
       s.out_dir = 0
+      s.give_msg_wire = deepcopy( s.get.msg )
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
 
@@ -54,7 +58,13 @@ class RingRouteUnitRTL( Component ):
           s.out_dir = LEFT
         else:
           s.out_dir = RIGHT
+
+        if s.pos == 0 and s.out_dir == LEFT:
+          s.give_msg_wire.vc_id = 1
+        elif s.pos == s.num_routers-1 and s.out_dir == RIGHT:
+          s.give_msg_wire.vc_id = 1
         s.give[ s.out_dir ].rdy = 1
+        s.give[ s.out_dir ].msg = s.give_msg_wire
 
     @s.update
     def up_ru_get_en():

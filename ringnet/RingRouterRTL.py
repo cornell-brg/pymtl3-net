@@ -8,7 +8,7 @@
 
 from pymtl3 import *
 
-from ocn_pclib.ifcs.CreditIfc import RecvIfcCreditRTL, SendIfcCreditRTL
+from ocn_pclib.ifcs.CreditIfc import CreditRecvIfcRTL, CreditSendIfcRTL
 from router.Router import Router
 from router.SwitchUnitRTL import SwitchUnitRTL
 from router.InputUnitCreditRTL import InputUnitCreditRTL
@@ -20,21 +20,21 @@ class RingRouterRTL( Router ):
 
   def construct( s,
     PacketType,
-  	PositionType,
-  	InputUnitType=InputUnitCreditRTL,
+    PositionType,
+    InputUnitType=InputUnitCreditRTL,
     RouteUnitType=RingRouteUnitRTL,
     SwitchUnitType=SwitchUnitRTL,
     OutputUnitType=OutputUnitCreditRTL
   ):
 
-    s.num_inports  = num_inports
-    s.num_outports = num_outports
+    s.num_inports  = 3
+    s.num_outports = 3
 
     # Interface
 
     s.pos  = InPort( PositionType )
-    s.recv = [ RecvIfcCreditRTL( PacketType ) for _ in range( s.num_inports  ) ]
-    s.send = [ SendIfcCreditRTL( PacketType ) for _ in range( s.num_outports ) ]
+    s.recv = [ CreditRecvIfcRTL( PacketType, 2 ) for _ in range( s.num_inports  ) ]
+    s.send = [ CreditSendIfcRTL( PacketType, 2 ) for _ in range( s.num_outports ) ]
 
     # Components
 

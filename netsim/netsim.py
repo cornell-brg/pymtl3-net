@@ -287,6 +287,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     PacketType = mk_ring_pkt_timestamp( opts.routers, max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, RingPos, opts.routers, 0 )
     model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
+    print 'size: ', opts.routers
+    print 'Ring'
 
   elif opts.topology == "Mesh":
     NetModel = topology_dict[ "Mesh" ]
@@ -325,7 +327,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
 
 #  model.elaborate()
-  sim = model.apply( SimpleSim )
+  sim = model.apply( DynamicSim )
 
   # Source Queues - Modeled as Bypass Queues
   src = [ deque() for x in range( num_nodes ) ]
@@ -373,8 +375,9 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             elif dest > i and dest - i <= num_nodes/2:
               opaque = 0
             else:
-              opaque = 1
-            pkt = mk_ring_pkt_timestamp( i, dest, opaque, 6, ncycles )
+              opaque = 0
+
+            pkt = PacketType( i, dest, opaque, 0, 6, ncycles )
 
           elif opts.topology == "Mesh":
 #            net_width = opts.routers / opts.rows
@@ -418,8 +421,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             elif dest > i and dest - i <= num_nodes/2:
               opaque = 0
             else:
-              opaque = 1
-            pkt = mk_ring_pkt_timestamp( i, dest, opaque, 6, INVALID_TIMESTAMP )
+              opaque = 0
+            pkt = PacketType( i, dest, opaque, 0, 6, INVALID_TIMESTAMP )
 
           elif opts.topology == "Mesh":
             pkt = PacketType( i%net_width, i/net_width, dest%net_width,
@@ -479,7 +482,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
       # Check if finished - drain phase
 
       if ( ncycles >= NUM_SAMPLE_CYCLES and
-           all_packets_received == packets_generated ):
+           all_packets_received >= packets_generated ):
         average_latency = total_latency / float( packets_received )
         sim_done = True
         break
@@ -518,6 +521,8 @@ def main():
   opts = parse_cmdline()
 
   dump_vcd = None
+  start_time      = 0
+  end_time        = 0
 
   # sweep mode: sweep the injection rate until the network is saturated.
   # we assume the latency is 100 when the network is saturated.

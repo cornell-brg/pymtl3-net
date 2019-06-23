@@ -29,8 +29,8 @@ class RingNetworkRTL( Component ):
     s.num_routers = num_routers
 
     # Interface
-    s.recv = [ RecvIfcRTL(PacketType) for _ in range(s.num_terminals)]
-    s.send = [ SendIfcRTL(PacketType) for _ in range(s.num_terminals)]
+    s.recv = [ RecvIfcRTL(PacketType) for _ in range(s.num_routers)]
+    s.send = [ SendIfcRTL(PacketType) for _ in range(s.num_routers)]
 
     # Components
     s.routers    = [ RingRouterRTL( PacketType, PositionType )
