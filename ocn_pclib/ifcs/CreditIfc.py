@@ -113,12 +113,12 @@ class RecvRTL2CreditSendRTL( Component ):
 
     s.MsgType = MsgType
     s.nvcs    = nvcs
-    
+
     # Components
 
     CreditType = mk_bits( clog2(credit_line+1) )
     VcIDType   = mk_bits( clog2( nvcs ) if nvcs > 1 else 1 )
-    
+
     # FIXME: use multiple buffers to avoid deadlock.
     s.buffer = BypassQueueRTL( MsgType, num_entries=1 )
     s.credit = [ Counter( CreditType, credit_line ) for _ in range( nvcs ) ]
@@ -172,7 +172,7 @@ class CreditRecvRTL2SendRTL( Component ):
     ArbReqType = mk_bits( nvcs )
     VcIDType   = mk_bits( clog2( nvcs ) if nvcs > 1 else 1 )
 
-    s.buffers = [ QType( MsgType, num_entries=credit_line ) 
+    s.buffers = [ QType( MsgType, num_entries=credit_line )
                   for _ in range( nvcs ) ]
     s.arbiter = RoundRobinArbiterEn( nreqs=nvcs )
     s.encoder = Encoder( in_nbits=nvcs, out_nbits=clog2(nvcs) )
@@ -182,7 +182,7 @@ class CreditRecvRTL2SendRTL( Component ):
       s.connect( s.buffers[i].deq.rdy, s.arbiter.reqs[i] )
     s.connect( s.arbiter.grants, s.encoder.in_ )
     s.connect( s.arbiter.en,     s.send.en     )
-    
+
     @s.update
     def up_enq():
       if s.recv.en:

@@ -45,7 +45,7 @@ class TestHarness( Component ):
       s.sink_adapter.line_trace(),
       s.sink.line_trace()
     )
-  
+
   def done( s ):
     return s.src.done() and s.sink.done()
 
