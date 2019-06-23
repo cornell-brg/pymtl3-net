@@ -6,8 +6,8 @@
 # Author : Cheng Tan
 #   Date : May 27, 2019
 
-from pymtl                  import *
-from pclib.ifcs.SendRecvIfc import *
+from pymtl3                 import *
+from pymtl3.stdlib.ifcs.SendRecvIfc import *
 from directions             import *
 from RingRouterRTL          import RingRouterRTL
 from channel.ChannelRTL     import ChannelRTL

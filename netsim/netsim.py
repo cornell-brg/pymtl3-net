@@ -88,7 +88,7 @@ from meshnet.MeshNetworkCL    import MeshNetworkCL
 
 #from crossbar.CrossbarRTL     import CrossbarRTL
 #from ringnet.RingNetworkRTL   import RingNetworkRTL
-#from ringnet.RingVCNetworkRTL import RingVCNetworkRTL
+from ringnet.RingVCNetworkRTL import RingVCNetworkRTL
 from meshnet.MeshNetworkRTL   import MeshNetworkRTL
 from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
 #from torusnet.TorusNetworkRTL import TorusNetworkRTL
@@ -260,7 +260,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   else:
     topology_dict = {
 #      'Xbar'     : CrossbarRTL, 
-#      'Ring'     : RingVCNetworkRTL, 
+      'Ring'     : RingVCNetworkRTL, 
       'Mesh'     : MeshNetworkRTL, 
       'CMesh'    : CMeshNetworkRTL, 
 #      'Torus'    : TorusNetworkRTL,
@@ -283,9 +283,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   if opts.topology == "Ring":
     NetModel = topology_dict[ "Ring" ]
-#    RingPos = mk_ring_pos( opts.routers )
-#    model = NetModel( BasePacket, RingPos, opts.routers, 0 )
-#    model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
+    RingPos = mk_ring_pos( opts.routers )
+    PacketType = mk_ring_pkt_timestamp( opts.routers, max_time = NUM_SAMPLE_CYCLES )
+    model = NetModel( PacketType, RingPos, opts.routers, 0 )
+    model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
 
   elif opts.topology == "Mesh":
     NetModel = topology_dict[ "Mesh" ]
@@ -414,11 +415,11 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
           if opts.topology == "Ring":
             if dest < i and i - dest <= num_nodes/2:
               opaque = 0
-#            elif dest > i and dest - i <= num_nodes/2:
-#              opaque = 0
-#            else:
-#              opaque = 1
-#            pkt = mk_ring_pkt_timestamp( i, dest, opaque, 6, INVALID_TIMESTAMP )
+            elif dest > i and dest - i <= num_nodes/2:
+              opaque = 0
+            else:
+              opaque = 1
+            pkt = mk_ring_pkt_timestamp( i, dest, opaque, 6, INVALID_TIMESTAMP )
 
           elif opts.topology == "Mesh":
             pkt = PacketType( i%net_width, i/net_width, dest%net_width,

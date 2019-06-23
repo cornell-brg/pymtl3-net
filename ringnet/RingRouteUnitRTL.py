@@ -6,9 +6,9 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : April 6, 2019
 
-from pymtl          import *
+from pymtl3          import *
 from directions      import *
-from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
+from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL, GiveIfcRTL
 
 class RingRouteUnitRTL( Component ):
 
@@ -44,13 +44,13 @@ class RingRouteUnitRTL( Component ):
         s.give[i].rdy = 0
 
       if s.get.rdy:
-        if s.pos.pos == s.get.msg.dst: 
+        if s.pos == s.get.msg.dst: 
           s.out_dir = SELF
-        elif s.get.msg.dst < s.pos.pos and \
-             s.pos.pos - s.get.msg.dst <= num_routers/2:
+        elif s.get.msg.dst < s.pos and \
+             s.pos - s.get.msg.dst <= num_routers/2:
           s.out_dir = LEFT
-        elif s.get.msg.dst > s.pos.pos and \
-             s.get.msg.dst - s.pos.pos > num_routers/2:
+        elif s.get.msg.dst > s.pos and \
+             s.get.msg.dst - s.pos > num_routers/2:
           s.out_dir = LEFT
         else:
           s.out_dir = RIGHT

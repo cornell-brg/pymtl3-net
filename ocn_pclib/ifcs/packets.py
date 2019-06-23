@@ -233,6 +233,43 @@ def mk_bfly_pkt( k_ary=2, n_fly=2, nvcs=0, opaque_nbits=8, payload_nbits=32 ):
   return new_class
 
 #=========================================================================
+# ring packet with timestamp
+#=========================================================================
+
+def mk_ring_pkt_timestamp( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=32, max_time=10 ):
+
+  IdType = mk_bits( clog2( nrouters ) )
+  OpqType = mk_bits( opaque_nbits )
+  PayloadType = mk_bits( payload_nbits )
+  TimestampType = mk_bits( clog2(max_time + 1) )
+  new_name = "RingPacketTimestamp_{}_{}_{}_{}".format(
+    nrouters,
+    nvcs,
+    opaque_nbits,
+    payload_nbits,
+    max_time
+  )
+  if nvcs > 1:
+    VcIdType = mk_bits( clog2( nvcs ) )
+    new_class = mk_bit_struct( new_name,[
+      ( 'src',     IdType      ),
+      ( 'dst',     IdType      ),
+      ( 'opaque',  OpqType     ),
+      ( 'vc_id',   VcIdType    ),
+      ( 'payload', PayloadType ),
+      ( 'timestamp', TimestampType ),
+    ])
+  else:
+    new_class = mk_bit_struct( new_name,[
+      ( 'src',     IdType      ),
+      ( 'dst',     IdType      ),
+      ( 'opaque',  OpqType     ),
+      ( 'payload', PayloadType ),
+      ( 'timestamp', TimestampType ),
+    ])
+  return new_class
+
+#=========================================================================
 # mesh packet with timestamp
 #=========================================================================
 
