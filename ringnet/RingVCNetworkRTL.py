@@ -29,8 +29,8 @@ class RingVCNetworkRTL( Component ):
 
     # Components
 
-    s.routers  = [ RingRouterRTL( PacketType, PositionType, 
-                   InputUnitType = ULVCUnitRTL ) 
+    s.routers  = [ RingRouterRTL( PacketType, PositionType,
+                   InputUnitType = ULVCUnitRTL )
                    for i in range( s.num_routers )]
 
     s.channels = [ ChannelRTL( PacketType, latency = chl_lat )
