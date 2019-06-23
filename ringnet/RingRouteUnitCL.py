@@ -9,23 +9,23 @@
 
 from pymtl import *
 from directions import *
-from pclib.cl.queues import BypassQueueCL 
+from pclib.cl.queues import BypassQueueCL
 from pclib.ifcs.GuardedIfc import (
-  GuardedCallerIfc, 
-  GuardedCalleeIfc, 
-  guarded_ifc 
+  GuardedCallerIfc,
+  GuardedCalleeIfc,
+  guarded_ifc
 )
 
 class RingRouteUnitCL( Component ):
 
-  def construct( s, 
-                 PacketType, 
-                 PositionType, 
+  def construct( s,
+                 PacketType,
+                 PositionType,
                  num_routers=4 ):
 
-    # Constants 
+    # Constants
 
-    s.num_outports = 3 # left, right, self 
+    s.num_outports = 3 # left, right, self
     s.total_dist = num_routers-1
 
     # Interface
@@ -33,7 +33,7 @@ class RingRouteUnitCL( Component ):
     s.get  = GuardedCallerIfc()
     s.give = [ GuardedCalleeIfc() for _ in range ( s.num_outports ) ]
     s.pos  = InPort( PositionType )
-    
+
     # Components
 
     s.rdy_lst = [ False for _ in range( s.num_outports ) ]
@@ -59,7 +59,7 @@ class RingRouteUnitCL( Component ):
             s.rdy_lst[LEFT] = True
           else:
             s.rdy_lst[RIGHT] = True
-    
+
     # Assign method and ready
 
     for i in range( s.num_outports ):
@@ -75,16 +75,16 @@ class RingRouteUnitCL( Component ):
       s.give[i].method.method = s.give_method
 
     for i in range( s.num_outports ):
-      s.add_constraints( 
+      s.add_constraints(
         M( s.get ) < U( ru_up_route ) < M( s.give[i] ),
       )
-  
+
   def give_method( s ):
     assert s.msg is not None
     ret = s.msg
     s.msg = None
     return ret
-  
+
   # TODO: CL line trace
 
   def line_trace( s ):
