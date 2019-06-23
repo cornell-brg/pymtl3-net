@@ -1,11 +1,12 @@
-#=========================================================================
-# RingNetworkRTL.py
-#=========================================================================
-# Ring network implementation.
-#
-# Author : Cheng Tan
-#   Date : April 6, 2019
+"""
+=========================================================================
+RingNetworkRTL.py
+=========================================================================
+Ring network implementation.
 
+Author : Yanghui Ou, Cheng Tan
+  Date : June 22, 2019
+"""
 from pymtl3 import *
 from pymtl3.ifcs import SendIfcRTL, RecvIfcRTL
 

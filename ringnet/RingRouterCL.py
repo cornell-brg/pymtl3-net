@@ -16,13 +16,13 @@ from RingRouteUnitCL     import RingRouteUnitCL
 
 class RingRouterCL( Router ):
 
-  def construct( s, 
-                 PacketType, 
+  def construct( s,
+                 PacketType,
                  PositionType,
-                 InputUnitType  = InputUnitCL, 
-                 RouteUnitType  = RingRouteUnitCL, 
-                 SwitchUnitType = SwitchUnitCL, 
-                 OutputUnitType = OutputUnitCL, 
+                 InputUnitType  = InputUnitCL,
+                 RouteUnitType  = RingRouteUnitCL,
+                 SwitchUnitType = SwitchUnitCL,
+                 OutputUnitType = OutputUnitCL,
                  #RecvIfcType = GuardedCalleeIfc,
                  #SendIfcType = GuardedCallerIfc,
                  ):
@@ -31,13 +31,13 @@ class RingRouterCL( Router ):
     s.num_outports = 3
 
     # Interface
-    s.pos  = InPort( PositionType ) 
+    s.pos  = InPort( PositionType )
     s.recv = [ GuardedCalleeIfc() for _ in range( s.num_inports  ) ]
     s.send = [ GuardedCallerIfc() for _ in range( s.num_outports ) ]
-    
+
     # Components
 
-    s.input_units  = [ InputUnitType( PacketType ) 
+    s.input_units  = [ InputUnitType( PacketType )
                       for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports ) 
@@ -45,17 +45,17 @@ class RingRouterCL( Router ):
 
     s.switch_units = [ SwitchUnitType( PacketType, s.num_inports )
                       for _ in range( s.num_outports ) ]
-    
+
     s.output_units = [ OutputUnitType( PacketType )
                       for _ in range( s.num_outports ) ]
-    
+
     # Connection
-    
+
     for i in range( s.num_inports ):
       s.connect( s.recv[i],             s.input_units[i].recv )
       s.connect( s.input_units[i].give, s.route_units[i].get  )
       s.connect( s.pos,                 s.route_units[i].pos  )
-    
+
     for i in range( s.num_inports ):
       for j in range( s.num_outports ):
         s.connect( s.route_units[i].give[j], s.switch_units[j].get[i] )
