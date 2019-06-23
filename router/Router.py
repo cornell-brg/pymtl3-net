@@ -50,7 +50,8 @@ class Router( Component ):
         s.connect( s.route_units[i].give[j], s.switch_units[j].get[i] )
 
     for j in range( s.num_outports ):
-      s.connect( s.switch_units[j].send, s.output_units[j].recv )
+#      s.connect( s.switch_units[j].send, s.output_units[j].recv )
+      s.connect( s.switch_units[j].give, s.output_units[j].get )
       s.connect( s.output_units[j].send, s.send[j]              )
 
   # Line trace

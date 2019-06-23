@@ -9,10 +9,11 @@
 #   Date : Feb 28, 2019
 
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import GetIfcRTL, RecvIfcRTL
+from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL
+from pymtl3.stdlib.rtl.queues import NormalQueueRTL
 
 class OutputUnitRTL( Component ):
-  def construct( s, PacketType, QueueType = None ):
+  def construct( s, PacketType, QueueType = NormalQueueRTL ):
     
     # Interface
 
@@ -54,4 +55,4 @@ class OutputUnitRTL( Component ):
     if s.QueueType != None:
       return "{}({}){}".format( s.get, s.queue.count, s.send )
     else:
-      return "{}(0){}".format( s.get-, s.send)
+      return "{}(0){}".format( s.get, s.send)
