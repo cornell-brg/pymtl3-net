@@ -12,7 +12,11 @@
   ** hypothesis tests
 
 [TODO]
-  1. FL, CL implementation
-  2. terminaladapter
-  3. openpiton
-  4. testing compact
+  1. Ring, Torus based on credit-based flow control
+  2. Bfly reorganize position for each router
+  3. CL for each network
+  4. Packet can split based on bandwidth
+
+  5. terminaladapter
+  6. openpiton
+  7. testing compact

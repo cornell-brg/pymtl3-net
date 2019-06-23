@@ -14,7 +14,7 @@ from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL
 from pymtl3.stdlib.rtl.queues import NormalQueueRTL
 
 class OutputUnitRTL( Component ):
-  def construct( s, PacketType, QueueType = NormalQueueRTL ):
+  def construct( s, PacketType, QueueType = None ):
 
     # Interface
     s.get  = GetIfcRTL ( PacketType )
