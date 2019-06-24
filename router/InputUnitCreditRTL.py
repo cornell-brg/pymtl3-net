@@ -37,7 +37,8 @@ class InputUnitCreditRTL( Component ):
       s.connect( s.buffers[i].enq.msg, s.recv.msg        )
       s.connect( s.buffers[i].deq.rdy, s.arbiter.reqs[i] )
     s.connect( s.arbiter.grants, s.encoder.in_ )
-    s.connect( s.arbiter.en,     s.give.en     )
+    # s.connect( s.arbiter.en,     s.give.en     )
+    s.connect( s.arbiter.en,     b1(1)     )
 
     @s.update
     def up_enq():
@@ -63,4 +64,7 @@ class InputUnitCreditRTL( Component ):
         s.recv.yum[i] = s.buffers[i].deq.en
 
   def line_trace( s ):
-    return "{}(){}".format( s.recv, s.give )
+    return "{}({}){}".format(
+      s.recv,
+      s.give,
+    )

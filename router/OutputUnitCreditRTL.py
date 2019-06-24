@@ -15,7 +15,7 @@ from ocn_pclib.rtl import Counter
 
 class OutputUnitCreditRTL( Component ):
 
-  def construct( s, MsgType, nvcs=2, credit_line=1 ):
+  def construct( s, MsgType, nvcs=2, credit_line=2 ):
     assert nvcs > 1
 
     # Interface
@@ -38,6 +38,7 @@ class OutputUnitCreditRTL( Component ):
       s.send.en = b1(0)
       s.get.en = b1(0)
       if s.get.rdy:
+        # print( str(s) + " : " + str(s.get.msg) )
         for i in range( nvcs ):
           if vcid_type(i) == s.get.msg.vc_id and s.credit[i].count > credit_type(0):
             s.send.en = b1(1)

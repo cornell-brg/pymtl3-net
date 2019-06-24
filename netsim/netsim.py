@@ -36,7 +36,7 @@
 #
 #  --routing-strategy  Choose a routing algorithm
 #                      DORX : Dimension Order Routing - X
-#                      DORY : Dimension Order Routing - Y 
+#                      DORY : Dimension Order Routing - Y
 #
 #  --routers           Number of routers in network
 #
@@ -118,110 +118,110 @@ def parse_cmdline():
 
   # Standard command line arguments
 
-  parser.add_argument( "-v", 
-                       "--verbose",  
+  parser.add_argument( "-v",
+                       "--verbose",
                        action  = "store_true"                              )
 
-  parser.add_argument( "-h", 
+  parser.add_argument( "-h",
                        "--help",
                        action = "store_true"                               )
 
-  parser.add_argument( "--pattern",  
-                       choices = ["urandom", "partition2", "opposite", 
-                                  "neighbor", "complement"], 
+  parser.add_argument( "--pattern",
+                       choices = ["urandom", "partition2", "opposite",
+                                  "neighbor", "complement"],
                        default = "urandom"                                 )
 
-  parser.add_argument( "--injection-rate",              
-                       type    = int, 
+  parser.add_argument( "--injection-rate",
+                       type    = int,
                        default = 10                                        )
 
-  parser.add_argument( "--dump-vcd", 
+  parser.add_argument( "--dump-vcd",
                        action  = "store_true"                              )
 
-  parser.add_argument( "--stats",    
+  parser.add_argument( "--stats",
                        action  = "store_true"                              )
 
-  parser.add_argument( "--time",    
+  parser.add_argument( "--time",
                        action  = "store_true"                              )
 
-  parser.add_argument( "--trace",  
+  parser.add_argument( "--trace",
                        action  = "store_true"                              )
 
-  parser.add_argument( "--sweep",   
+  parser.add_argument( "--sweep",
                        action  = "store_true"                              )
 
   # OCN related command line arguments
 
   parser.add_argument( "--model",
-                       type    = str, 
+                       type    = str,
                        default = "RTL",
                        choices = [ 'FL', 'CL', 'RTL' ],
                        help    = "model can be applied for simulation." )
 
   parser.add_argument( "--topology",
-                       type    = str, 
+                       type    = str,
                        default = "Mesh",
-                       choices = [ 'Ring', 'Mesh', 'CMesh', 
+                       choices = [ 'Ring', 'Mesh', 'CMesh',
                                    'Torus', 'Butterfly' ],
                        help    = "topology can be applied in the network." )
 
-  parser.add_argument( "--router-latency",   
-                       type    = int, 
+  parser.add_argument( "--router-latency",
+                       type    = int,
                        default = 1,
                        action  = "store",
                        help    = "number of pipeline stages in router."    )
 
-  parser.add_argument( "--channel-latency",     
-                       type    = int, 
+  parser.add_argument( "--channel-latency",
+                       type    = int,
                        default = 1,
                        action  = "store",
                        help    = "number of input stages in router."       )
 
-  parser.add_argument( "--link-width-bits",  
-                       type    = int, 
+  parser.add_argument( "--link-width-bits",
+                       type    = int,
                        default = 128,
                        action  = "store",
                        help    = "width in bits for all links."            )
 
-  parser.add_argument( "--virtual-channels",  
-                       type    = int, 
+  parser.add_argument( "--virtual-channels",
+                       type    = int,
                        default = 4,
                        action  = "store",
                        help    = "number of virtual channels."             )
 
-  parser.add_argument( "--routing-strategy", 
+  parser.add_argument( "--routing-strategy",
                        type    = str,
                        default = "DORY",
-                       action  = "store", 
+                       action  = "store",
                        choices = ['DORX', 'DORY', 'WFR', 'NLR'],
                        help    = "routing algorithm applied in network."   )
 
   parser.add_argument( "--routers",
-                       type    = int, 
+                       type    = int,
                        default = 16,
                        action  = "store",
                        help    = "number of routers in network."           )
 
   parser.add_argument( "--rows",
-                       type    = int, 
+                       type    = int,
                        default = 4,
                        action  = "store",
                        help    = "number of rows of routers in network."   )
 
-  parser.add_argument( "--router-inports",   
-                       type    = int, 
+  parser.add_argument( "--router-inports",
+                       type    = int,
                        default = 8,
                        action  = "store",
                        help    = "number of inports in each router."       )
 
-  parser.add_argument( "--router-outports",  
-                       type    = int, 
+  parser.add_argument( "--router-outports",
+                       type    = int,
                        default = 8,
                        action  = "store",
                        help    = "number of outports in each router."      )
 
-  parser.add_argument( "--terminals-each",  
-                       type    = int, 
+  parser.add_argument( "--terminals-each",
+                       type    = int,
                        default = 4,
                        action  = "store",
                        help    = "number of terminals attached to router." )
@@ -252,16 +252,16 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     }
   elif opts.model == "CL":
     topology_dict = {
-#      'Xbar'     : CrossbarRTL, 
-#      'Ring'     : RingVCNetworkRTL, 
-      'Mesh'     : MeshNetworkCL, 
+#      'Xbar'     : CrossbarRTL,
+#      'Ring'     : RingVCNetworkRTL,
+      'Mesh'     : MeshNetworkCL,
     }
   else:
     topology_dict = {
-#      'Xbar'     : CrossbarRTL, 
-      'Ring'     : RingNetworkRTL, 
-      'Mesh'     : MeshNetworkRTL, 
-      'CMesh'    : CMeshNetworkRTL, 
+#      'Xbar'     : CrossbarRTL,
+      'Ring'     : RingNetworkRTL,
+      'Mesh'     : MeshNetworkRTL,
+      'CMesh'    : CMeshNetworkRTL,
       'Torus'    : TorusNetworkRTL,
       'Butterfly': BflyNetworkRTL
     }
@@ -283,7 +283,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   if opts.topology == "Ring":
     NetModel = topology_dict[ "Ring" ]
     RingPos = mk_ring_pos( opts.routers )
-    PacketType = mk_ring_pkt_timestamp( opts.routers, nvcs = 2, 
+    PacketType = mk_ring_pkt_timestamp( opts.routers, nvcs = 2,
             max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, RingPos, opts.routers, 0 )
     model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
@@ -293,7 +293,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     net_width = opts.routers/opts.rows
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
-    PacketType = mk_mesh_pkt_timestamp( net_width, net_height, 
+    PacketType = mk_mesh_pkt_timestamp( net_width, net_height,
                  payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
 
@@ -317,7 +317,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     PacketType = mk_cmesh_pkt_timestamp( net_width, net_height,
                  inports, outports,
                  payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
-    model = NetModel( PacketType, MeshPos, net_width, net_height, 
+    model = NetModel( PacketType, MeshPos, net_width, net_height,
                       term_each, 0 )
 
   elif opts.topology == "Butterfly":
@@ -329,7 +329,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     MeshPos = mk_bfly_pos( k_ary, n_fly )
     PacketType = mk_bfly_pkt_timestamp( k_ary, n_fly,
                  payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
-    model = NetModel( PacketType, MeshPos, k_ary, n_fly, 0 ) 
+    model = NetModel( PacketType, MeshPos, k_ary, n_fly, 0 )
     model.set_param( "top.routers*.construct", k_ary=k_ary )
     model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
 
@@ -397,10 +397,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                     dest/net_width, 0, 1, 6, ncycles )
 
           elif opts.topology == "CMesh":
-            pkt = PacketType( (i/term_each)%net_width, 
-                              (i/term_each)/net_width, 
+            pkt = PacketType( (i/term_each)%net_width,
+                              (i/term_each)/net_width,
                               (dest/term_each)%net_width,
-                              (dest/term_each)/net_width, 
+                              (dest/term_each)/net_width,
                               dest%term_each,
                               1, 0, ncycles )
 
@@ -447,8 +447,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                     dest/net_width, 0, 1, 6, ncycles )
 
           elif opts.topology == "CMesh":
-            pkt = PacketType( (i/term_each)%net_width, 
-                              (i/term_each)/net_width, 
+            pkt = PacketType( (i/term_each)%net_width,
+                              (i/term_each)/net_width,
                               (dest/term_each)%net_width,
                               (dest/term_each)/net_width,
                               dest%term_each,
@@ -496,8 +496,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
           average_latency = total_latency / float( packets_received )
 
       # Check if finished - drain phase
-      print 'all_packets_received: ', all_packets_received
-      print 'packets_generated: ', packets_generated
+      #print 'all_packets_received: ', all_packets_received
+      #print 'packets_generated: ', packets_generated
 
       if ( ncycles >= NUM_SAMPLE_CYCLES and
            all_packets_received >= packets_generated ):
@@ -567,7 +567,7 @@ def main():
       if opts.time:
         start_time = time.time()
 
-      results = simulate( opts, max(inj,1), opts.pattern, 500, 
+      results = simulate( opts, max(inj,1), opts.pattern, 500,
               opts.dump_vcd, opts.trace, opts.verbose )
 
       if opts.time:
@@ -576,7 +576,7 @@ def main():
       avg_lat = results[0]
 
       print( "{:<20} | {:<20.1f} | {:<20.1f} | {:<20.1f}".\
-              format( max(inj,1), avg_lat, (end_time - start_time), 
+              format( max(inj,1), avg_lat, (end_time - start_time),
               results[2]/(end_time - start_time)) )
 
       if inj == 0:
@@ -603,7 +603,7 @@ def main():
     if opts.time:
       start_time = time.time()
 
-    results = simulate( opts, opts.injection_rate, opts.pattern, 500, 
+    results = simulate( opts, opts.injection_rate, opts.pattern, 500,
             dump_vcd, opts.trace, opts.verbose )
 
     if opts.time:
