@@ -65,5 +65,5 @@ class RingNetworkRTL( Component ):
   def line_trace( s ):
     trace = [ "" for _ in range( s.num_routers ) ]
     for i in range( s.num_routers ):
-      trace[i] += s.send[i].line_trace()
+      trace[i] += s.recv[i].line_trace()
     return "|".join( trace )
