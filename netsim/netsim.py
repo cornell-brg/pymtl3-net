@@ -384,7 +384,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             else:
               opaque = 0
 
-            pkt = PacketType( i, dest, opaque, 0, 6, ncycles )
+            pkt = PacketType( i, dest, opaque, 0, 98+i+ncycles, ncycles )
 
           elif opts.topology == "Mesh":
 #            net_width = opts.routers / opts.rows
@@ -434,7 +434,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
               opaque = 0
             else:
               opaque = 0
-            pkt = PacketType( i, dest, opaque, 0, 6, INVALID_TIMESTAMP )
+            pkt = PacketType( i, dest, opaque, 0, 98+i+ncycles, INVALID_TIMESTAMP )
 
           elif opts.topology == "Mesh":
             pkt = PacketType( i%net_width, i/net_width, dest%net_width,
@@ -478,8 +478,11 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
       # Inject from source queue
 
       if ( len( src[i] ) > 0 ):
-        model.recv[i].msg = src[i][0]
-        model.recv[i].en  = 1
+        if model.recv[i].rdy:
+          model.recv[i].msg = src[i][0]
+          model.recv[i].en  = 1
+        else:
+          model.recv[i].en  = 0
       else:
         model.recv[i].en  = 0
 
@@ -552,7 +555,7 @@ def main():
     print()
     print( "{:<20} | {:<20} | {:<20} | {:<20}".\
             format( "Injection rate (%)", "Avg. Latency", \
-                    "Sim. Cycle (s)", "Sim. Speed (cyc/s)") )
+                    "Sim.Time (sec)", "Sim.Speed (cyc/s)") )
 
     inj             = 0
     avg_lat         = 0
