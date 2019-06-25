@@ -252,7 +252,7 @@ def mk_ring_pkt_timestamp( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=32,
   if nvcs > 1:
     VcIdType = mk_bits( clog2( nvcs ) )
     def str_func( self ):
-      return "{}>{}:{}:{}:{}".format(
+      return "{}>{}:{}:{}:{}:{}".format(
         IdType       ( self.src       ),
         IdType       ( self.dst       ),
         OpqType      ( self.opaque    ),
