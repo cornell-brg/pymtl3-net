@@ -47,25 +47,21 @@ class RingRouteUnitRTL( Component ):
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
 
-      # if s.get.rdy:
-      #   if s.pos == s.get.msg.dst:
-      #     s.out_dir = SELF
-      #   elif s.get.msg.dst < s.pos and \
-      #        s.pos - s.get.msg.dst <= num_routers/2:
-      #     s.out_dir = LEFT
-      #   elif s.get.msg.dst > s.pos and \
-      #        s.get.msg.dst - s.pos > num_routers/2:
-      #     s.out_dir = LEFT
-      #   else:
-      #     s.out_dir = RIGHT
-
       if s.get.rdy:
         if s.pos == s.get.msg.dst:
           s.out_dir = SELF
+        elif s.get.msg.dst < s.pos and \
+             s.pos - s.get.msg.dst <= num_routers/2:
+          s.out_dir = LEFT
+        elif s.get.msg.dst > s.pos and \
+             s.get.msg.dst - s.pos > num_routers/2:
+          s.out_dir = LEFT
         else:
           s.out_dir = RIGHT
 
         if s.pos == s.num_routers-1 and s.out_dir == RIGHT:
+          s.give_msg_wire.vc_id = 1
+        elif s.pos == 0 and s.out_dir == LEFT:
           s.give_msg_wire.vc_id = 1
 
         s.give[ s.out_dir ].rdy = 1

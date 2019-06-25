@@ -9,6 +9,7 @@
 from pymtl3             import *
 from directions         import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
+from copy import deepcopy
 
 class DORYTorusRouteUnitRTL( Component ):
 
@@ -43,11 +44,11 @@ class DORYTorusRouteUnitRTL( Component ):
     def up_ru_routing():
  
       s.out_dir = 0
-      s.give_msg_wire = s.get.msg
+      s.give_msg_wire = deepcopy( s.get.msg )
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
 
-      if s.get.rdy:
+      if s.get.rdy == 1:
         if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
           s.out_dir = SELF
         elif s.get.msg.dst_y < s.pos.pos_y:
@@ -82,10 +83,14 @@ class DORYTorusRouteUnitRTL( Component ):
 
         s.give[ s.out_dir ].rdy = 1
         s.give[ s.out_dir ].msg = s.give_msg_wire
+        print 'get is rdy??????   pos: ', s.pos
 #        s.give[ s.out_dir ].msg = s.get.msg
+      else:
+        print 'get is not rdy!!!!!&&&&&&&& pos: ', s.pos
 
     @s.update
     def up_ru_get_en():
+      print 'see get enable??: ', s.get.en, '; pos: ', s.pos
       s.get.en = s.give_ens > 0 
 
   # Line trace

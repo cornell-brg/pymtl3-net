@@ -24,17 +24,20 @@ class TorusRouterRTL( Component ):
           InputUnitType=InputUnitCreditRTL, 
           RouteUnitType=DORYTorusRouteUnitRTL, 
           SwitchUnitType=SwitchUnitRTL,
-          OutputUnitType=OutputUnitCreditRTL 
+          OutputUnitType=OutputUnitCreditRTL,
+          nvcs=2,
   ):
 
     s.num_inports  = 5
     s.num_outports = 5
+    s.nvcs = nvcs
+    s.num_route_units = s.num_inports * s.nvcs
 
     # Interface
 
     s.pos  = InPort( PositionType )
-    s.recv = [ CreditRecvIfcRTL( PacketType, 2 ) for _ in range( s.num_inports  ) ]
-    s.send = [ CreditSendIfcRTL( PacketType, 2 ) for _ in range( s.num_outports ) ]
+    s.recv = [ CreditRecvIfcRTL( PacketType, s.nvcs ) for _ in range( s.num_inports  ) ]
+    s.send = [ CreditSendIfcRTL( PacketType, s.nvcs ) for _ in range( s.num_outports ) ]
 
     # Components
 
@@ -42,9 +45,9 @@ class TorusRouterRTL( Component ):
                       for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports )
-                      for i in range( s.num_inports ) ]
+                      for i in range( s.num_route_units ) ]
 
-    s.switch_units = [ SwitchUnitType( PacketType, s.num_inports )
+    s.switch_units = [ SwitchUnitType( PacketType, s.num_route_units )
                       for _ in range( s.num_outports ) ]
 
     s.output_units = [ OutputUnitType( PacketType )
@@ -54,10 +57,12 @@ class TorusRouterRTL( Component ):
 
     for i in range( s.num_inports ):
       s.connect( s.recv[i],             s.input_units[i].recv )
-      s.connect( s.input_units[i].give, s.route_units[i].get  )
-      s.connect( s.pos,                 s.route_units[i].pos  )
+      for j in range( s.nvcs ):
+        ru_idx = i * s.nvcs + j
+        s.connect( s.input_units[i].give[j], s.route_units[ru_idx].get  )
+        s.connect( s.pos,                    s.route_units[ru_idx].pos  )
 
-    for i in range( s.num_inports ):
+    for i in range( s.num_route_units ):
       for j in range( s.num_outports ):
         s.connect( s.route_units[i].give[j], s.switch_units[j].get[i] )
 
