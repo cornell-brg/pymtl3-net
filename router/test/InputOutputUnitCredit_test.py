@@ -15,6 +15,7 @@ from ocn_pclib.test.net_sinks import TestNetSinkRTL
 from ocn_pclib.ifcs.packets import mk_generic_pkt
 from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
 from ..InputUnitCreditRTL import InputUnitCreditRTL
+from ..SwitchUnitRTL import SwitchUnitRTL
 from ..OutputUnitCreditRTL import OutputUnitCreditRTL
 
 #-------------------------------------------------------------------------
@@ -27,24 +28,28 @@ class TestHarness( Component ):
     s.src = TestSrcRTL( Type, src_msgs )
     s.src_q = BypassQueueRTL( Type, num_entries=1 )
     s.output_unit = OutputUnitCreditRTL( Type, nvcs=nvcs, credit_line=credit_line )
-    s.input_unit = InputUnitCreditRTL( Type, nvcs=nvcs, credit_line=credit_line )
+    s.input_unit  = InputUnitCreditRTL( Type, nvcs=nvcs, credit_line=credit_line )
+    s.switch_unit = SwitchUnitRTL( Type, num_inports=nvcs )
     s.sink = TestNetSinkRTL( Type, sink_msgs )
 
-    s.connect( s.src.send,            s.src_q.enq       )
-    s.connect( s.src_q.deq,           s.output_unit.get )
-    s.connect( s.output_unit.send,    s.input_unit.recv )
-    s.connect( s.input_unit.give.msg, s.sink.recv.msg   )
+    s.connect( s.src.send,             s.src_q.enq       )
+    s.connect( s.src_q.deq,            s.output_unit.get )
+    s.connect( s.output_unit.send,     s.input_unit.recv )
+    s.connect( s.switch_unit.give.msg, s.sink.recv.msg   )
+    for i in range( nvcs ):
+      s.connect( s.input_unit.give[i], s.switch_unit.get[i] )
 
     @s.update
     def up_sink_recv():
-      s.sink.recv.en = s.input_unit.give.rdy & s.sink.recv.rdy
-      s.input_unit.give.en = s.input_unit.give.rdy & s.sink.recv.rdy
+      s.sink.recv.en = s.switch_unit.give.rdy & s.sink.recv.rdy
+      s.switch_unit.give.en = s.switch_unit.give.rdy & s.sink.recv.rdy
 
   def line_trace( s ):
-    return "{} > {} > {} > {}".format(
+    return "{} >>> {} >>> {} >>> {} >>> {}".format(
       s.src.line_trace(),
       s.output_unit.line_trace(),
       s.input_unit.line_trace(),
+      s.switch_unit.line_trace(),
       s.sink.line_trace()
     )
 

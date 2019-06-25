@@ -13,7 +13,7 @@ from pymtl                    import *
 from pclib.test.test_srcs     import TestSrcCL
 from ocn_pclib.test.net_sinks import TestNetSinkCL
 from ocn_pclib.ifcs.positions import mk_ring_pos
-from ocn_pclib.ifcs.packets   import mk_ring_pkt 
+from ocn_pclib.ifcs.packets   import mk_ring_pkt
 from router.InputUnitCL       import InputUnitCL
 from ringnet.RingRouterCL     import RingRouterCL
 
@@ -23,17 +23,17 @@ from ringnet.RingRouterCL     import RingRouterCL
 
 class TestHarness( Component ):
 
-  def construct( s, 
-                 MsgType       = None, 
-                 nrouters      = 4, 
+  def construct( s,
+                 MsgType       = None,
+                 nrouters      = 4,
                  router_id     = 0,
-                 src_msgs      = [], 
-                 sink_msgs     = [], 
-                 src_initial   = 0, 
-                 src_interval  = 0, 
-                 sink_initial  = 0, 
+                 src_msgs      = [],
+                 sink_msgs     = [],
+                 src_initial   = 0,
+                 src_interval  = 0,
+                 sink_initial  = 0,
                  sink_interval = 0,
-                 arrival_time  =[None, None, None, None, None] 
+                 arrival_time  =[None, None, None, None, None]
                ):
 
     print "=" * 74
@@ -42,7 +42,7 @@ class TestHarness( Component ):
 
     s.srcs  = [ TestSrcCL    ( src_msgs[i],  src_initial,  src_interval  )
                 for i in range  ( s.dut.num_inports ) ]
-    s.sinks = [ TestNetSinkCL( sink_msgs[i], sink_initial, 
+    s.sinks = [ TestNetSinkCL( sink_msgs[i], sink_initial,
                 sink_interval ) for i in range ( s.dut.num_outports ) ]
 
     # Connections
@@ -51,7 +51,7 @@ class TestHarness( Component ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
-    #TODO: provide pos for router... 
+    #TODO: provide pos for router...
     @s.update
     def up_pos():
       s.dut.pos = RingPos( router_id )
@@ -68,7 +68,7 @@ class TestHarness( Component ):
     return srcs_done and sinks_done
 
   def line_trace( s ):
-    return "{}".format( 
+    return "{}".format(
       #"|".join( [ s.srcs[i].line_trace() for i in range(3) ] ),
       s.dut.line_trace(),
       #"|".join( [ s.sinks[i].line_trace() for i in range(3) ] ),
@@ -113,13 +113,13 @@ def test_normal_simple():
   pkt0 = TestPkt( 1, 2, 0, 0x01, 0xface )
   src_packets = [
    [ pkt0 ],
-   [], 
-   [] 
+   [],
+   []
   ]
-  sink_packets = [ 
-    [], 
-    [ pkt0 ], 
-    [] 
+  sink_packets = [
+    [],
+    [ pkt0 ],
+    []
   ]
 
   th = TestHarness( TestPkt, nrouters, 1, src_packets, sink_packets, 0, 0, 0, 0 )
@@ -140,7 +140,7 @@ def test_normal_simple():
 #   opaque  = draw( st.integers(0, 4) )
 #   payload = draw( st.sampled_from([ 0, 0xdeadbeef, 0xfaceb00c, 0xc001cafe ]) )
 #   pkt = mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload )
-#   tsrc, tsink = dor_routing( src_x, src_y, dst_x, dst_y, pos_x, pos_y, routing_algo ) 
+#   tsrc, tsink = dor_routing( src_x, src_y, dst_x, dst_y, pos_x, pos_y, routing_algo )
 #   return tsrc, tsink, pkt
 
 # @hypothesis.settings( deadline = None )
@@ -156,15 +156,15 @@ def test_normal_simple():
 #   sink_init  = st.integers(0, 20),
 #   sink_inter = st.integers(0, 5 ),
 # )
-# def test_hypothesis( mesh_wid, mesh_ht, routing, pos_x, pos_y, pkts, 
+# def test_hypothesis( mesh_wid, mesh_ht, routing, pos_x, pos_y, pkts,
 #     src_init, src_inter, sink_init, sink_inter ):
 #   # Draw some numbers
 #   pos_x = pos_x.draw( st.integers(0,mesh_wid-1), label="pos_x" )
 #   pos_y = pos_y.draw( st.integers(0,mesh_wid-1), label="pos_y" )
-#   msgs  = pkts.draw( 
-#     st.lists( 
-#       mesh_pkt_strat(mesh_wid, mesh_ht, routing, pos_x, pos_y), 
-#       min_size = 1, max_size = 50 
+#   msgs  = pkts.draw(
+#     st.lists(
+#       mesh_pkt_strat(mesh_wid, mesh_ht, routing, pos_x, pos_y),
+#       min_size = 1, max_size = 50
 #     ),
 #     label = "msgs"
 #   )
@@ -176,11 +176,11 @@ def test_normal_simple():
 
 #   # Configure the test harness
 #   # TODO: add delays
-#   th = TestHarness( Packet, mesh_wid, mesh_ht, pos_x, pos_y, 
+#   th = TestHarness( Packet, mesh_wid, mesh_ht, pos_x, pos_y,
 #                     src_msgs, sink_msgs,
 #                     src_init, src_inter,
 #                     sink_init, sink_inter )
-#   th.set_param( "top.dut.construct", 
+#   th.set_param( "top.dut.construct",
 #     RouteUnitType = DORXMeshRouteUnitRTL if routing=='x' else DORYMeshRouteUnitRTL,
 #     InputUnitType = InputUnitRTL
 #   )

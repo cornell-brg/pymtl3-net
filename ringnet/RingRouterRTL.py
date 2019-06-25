@@ -24,17 +24,22 @@ class RingRouterRTL( Router ):
     InputUnitType=InputUnitCreditRTL,
     RouteUnitType=RingRouteUnitRTL,
     SwitchUnitType=SwitchUnitRTL,
-    OutputUnitType=OutputUnitCreditRTL
+    OutputUnitType=OutputUnitCreditRTL,
+    nvcs=2,
   ):
+
+    # Local paramters
 
     s.num_inports  = 3
     s.num_outports = 3
+    s.nvcs = nvcs
+    s.num_route_units = s.num_inports * s.nvcs
 
     # Interface
 
     s.pos  = InPort( PositionType )
-    s.recv = [ CreditRecvIfcRTL( PacketType, 2 ) for _ in range( s.num_inports  ) ]
-    s.send = [ CreditSendIfcRTL( PacketType, 2 ) for _ in range( s.num_outports ) ]
+    s.recv = [ CreditRecvIfcRTL( PacketType, s.nvcs ) for _ in range( s.num_inports  ) ]
+    s.send = [ CreditSendIfcRTL( PacketType, s.nvcs ) for _ in range( s.num_outports ) ]
 
     # Components
 
@@ -42,9 +47,9 @@ class RingRouterRTL( Router ):
                       for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports )
-                      for i in range( s.num_inports ) ]
+                      for i in range( s.num_route_units ) ]
 
-    s.switch_units = [ SwitchUnitType( PacketType, s.num_inports )
+    s.switch_units = [ SwitchUnitType( PacketType, s.num_route_units )
                       for _ in range( s.num_outports ) ]
 
     s.output_units = [ OutputUnitType( PacketType )
@@ -54,15 +59,16 @@ class RingRouterRTL( Router ):
 
     for i in range( s.num_inports ):
       s.connect( s.recv[i],             s.input_units[i].recv )
-      s.connect( s.input_units[i].give, s.route_units[i].get  )
-      s.connect( s.pos,                 s.route_units[i].pos  )
+      for j in range( s.nvcs ):
+        ru_idx = i * s.nvcs + j
+        s.connect( s.input_units[i].give[j], s.route_units[ru_idx].get )
+        s.connect( s.pos,                    s.route_units[ru_idx].pos  )
 
-    for i in range( s.num_inports ):
+    for i in range( s.num_route_units ):
       for j in range( s.num_outports ):
         s.connect( s.route_units[i].give[j], s.switch_units[j].get[i] )
 
     for j in range( s.num_outports ):
-#      s.connect( s.switch_units[j].send, s.output_units[j].recv )
       s.connect( s.switch_units[j].give, s.output_units[j].get )
       s.connect( s.output_units[j].send, s.send[j]              )
 

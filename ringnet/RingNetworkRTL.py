@@ -94,7 +94,7 @@ class RingNetworkRTL( Component ):
       for j in range( 3 ):
         in_trace[i] += "IU{}{{".format( j )
         in_trace[i] += "({},{})".format( s.routers[i].input_units[j].buffers[0].count, s.routers[i].input_units[j].buffers[1].count )
-        in_trace[i] += ">{}}}".format( s.routers[i].input_units[j].give.msg )
+        in_trace[i] += ">{}}}".format( "|".join( [ str(s.routers[i].input_units[j].give[x].msg) for x in range(2)] ) )
         in_trace[i] += "RU{}{{".format( j )
         in_trace[i] += "|".join([ "{}r{}".format( s.routers[i].route_units[j].give[x].msg, s.routers[i].route_units[j].give[x].rdy ) for x in range(3) ])
         in_trace[i] += "}}"

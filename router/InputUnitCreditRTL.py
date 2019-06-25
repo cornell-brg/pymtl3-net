@@ -20,43 +20,32 @@ class InputUnitCreditRTL( Component ):
   def construct( s, PacketType, QueueType = NormalQueueRTL,
                  nvcs=2, credit_line=2 ):
 
+    # Local paramters
+    s.nvcs = nvcs
+
     # Interface
     s.recv = CreditRecvIfcRTL( PacketType, nvcs=nvcs )
-    s.give = GiveIfcRTL( PacketType )
+    s.give = [ GiveIfcRTL( PacketType ) for _ in range( nvcs ) ]
 
     # Component
-    ArbReqType = mk_bits( nvcs )
     VcIDType   = mk_bits( clog2( nvcs ) if nvcs > 1 else 1 )
 
     s.buffers = [ QueueType( PacketType, num_entries=credit_line )
                   for _ in range( nvcs ) ]
-    s.arbiter = RoundRobinArbiterEn( nreqs=nvcs )
-    s.encoder = Encoder( in_nbits=nvcs, out_nbits=clog2(nvcs) )
 
     for i in range( nvcs ):
-      s.connect( s.buffers[i].enq.msg, s.recv.msg        )
-      s.connect( s.buffers[i].deq.rdy, s.arbiter.reqs[i] )
-    s.connect( s.arbiter.grants, s.encoder.in_ )
-    # s.connect( s.arbiter.en,     s.give.en     )
-    s.connect( s.arbiter.en,     b1(1)     )
+      s.connect( s.buffers[i].enq.msg, s.recv.msg )
+      s.connect( s.buffers[i].deq,     s.give[i]  )
 
     @s.update
     def up_enq():
       if s.recv.en:
         for i in range( nvcs ):
           s.buffers[i].enq.en = s.recv.msg.vc_id == VcIDType(i)
+          if s.buffers[i].enq.en: assert s.buffers[i].enq.rdy, "{}: buffer[{}] enable when not rdy!".format( s, i )
       else:
         for i in range( nvcs ):
           s.buffers[i].enq.en = b1(0)
-
-    @s.update
-    def up_deq_and_give():
-      for i in range( nvcs ):
-        s.buffers[i].deq.en = b1(0)
-
-      s.give.msg = s.buffers[ s.encoder.out ].deq.msg
-      s.give.rdy = s.buffers[ s.encoder.out ].deq.rdy
-      s.buffers[ s.encoder.out ].deq.en = s.give.en
 
     @s.update
     def up_yummy():
@@ -66,5 +55,6 @@ class InputUnitCreditRTL( Component ):
   def line_trace( s ):
     return "{}({}){}".format(
       s.recv,
-      s.give,
+      ",".join([ str( s.buffers[i].count ) for i in range( s.nvcs ) ]),
+      "|".join([ str(s.give[i]) for i in range( s.nvcs ) ]),
     )
