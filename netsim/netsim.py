@@ -234,8 +234,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 10
-NUM_SAMPLE_CYCLES   = 50 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 100
+NUM_SAMPLE_CYCLES   = 500 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
