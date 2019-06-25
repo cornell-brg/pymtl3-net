@@ -517,12 +517,12 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
     # advance simulation
 
+    if trace:
+      print "{:3}:{}".format( ncycles, model.line_trace() )
+
     model.tick()
     ncycles += 1
 
-    if trace:
-#      sim.print_line_trace()
-      print "{}:{}".format( ncycles, model.line_trace() )
     # if in verbose mode, print stats every 100 cycles
 
     if ncycles % 100 == 1 and verbose:
