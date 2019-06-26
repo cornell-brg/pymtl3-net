@@ -40,7 +40,7 @@ class TorusNetworkRTL( Component ):
 
     # Components
 
-    s.routers    = [ TorusRouterRTL( PacketType, PositionType,  )
+    s.routers    = [ TorusRouterRTL( PacketType, PositionType )
                      for i in range( s.num_routers ) ]
 
     s.recv_adapters = [ RecvRTL2CreditSendRTL( PacketType, nvcs=nvcs, 
@@ -57,13 +57,13 @@ class TorusNetworkRTL( Component ):
     for i in range (s.num_routers):
       # Connect s.routers together in Torus
       s.connect( s.routers[i].send[SOUTH],
-                 s.routers[(i-mesh_ht+s.num_routers)%s.num_routers].recv[NORTH])
+                 s.routers[(i-mesh_wid+s.num_routers)%s.num_routers].recv[NORTH])
       s.connect( s.routers[i].send[NORTH],
-                 s.routers[(i-mesh_ht+s.num_routers)%s.num_routers].recv[SOUTH])
+                 s.routers[(i+mesh_wid+s.num_routers)%s.num_routers].recv[SOUTH])
       s.connect( s.routers[i].send[WEST],
-                 s.routers[(i-mesh_ht+s.num_routers)%s.num_routers].recv[EAST])
+                 s.routers[i-(i%mesh_wid-(i-1)%mesh_wid)].recv[EAST])
       s.connect( s.routers[i].send[EAST],
-                 s.routers[(i-mesh_ht+s.num_routers)%s.num_routers].recv[WEST])
+                 s.routers[i+(i+1)%mesh_wid-i%mesh_wid].recv[WEST])
 
 #      s.connect(s.routers[i].send[SOUTH], s.channels[chl_id].recv)
 #      s.connect(s.channels[chl_id].send, s.routers[(i-mesh_ht+
@@ -88,8 +88,9 @@ class TorusNetworkRTL( Component ):
       # Connect the self port (with Network Interface)
       s.connect( s.recv[i],               s.recv_adapters[i].recv )
       s.connect( s.recv_adapters[i].send, s.routers[i].recv[SELF] )
-      s.connect( s.send[i],               s.send_adapters[i].send )
-      s.connect( s.send_adapters[i].recv, s.routers[i].send[SELF] )
+
+      s.connect( s.routers[i].send[SELF], s.send_adapters[i].recv )
+      s.connect( s.send_adapters[i].send, s.send[i]               )
 
 #      s.connect(s.recv[i], s.routers[i].recv[SELF])
 #      s.connect(s.send[i], s.routers[i].send[SELF])
@@ -104,7 +105,26 @@ class TorusNetworkRTL( Component ):
   def line_trace( s ):
     trace = [ "" for _ in range( s.num_terminals ) ]
     for i in range( s.num_terminals ):
-      trace[i] += s.send[i].line_trace()
+#      trace[i] += '------ recv[{}]: '.format(i)
+      trace[i] += s.recv[i].line_trace()
+#    for i in range( s.num_terminals ):
+#      for j in range( 5 ):
+#        trace[i] += '************ input[{}][{}]: {}\n'.format( i, j, 
+#                s.routers[i].input_units[j].line_trace())
+#
+#    for i in range( s.num_terminals ):
+#      for j in range( 10 ):
+#        trace[i] += '************ route[{}][{}]: {}\n'.format( i, j, 
+#                s.routers[i].route_units[j].line_trace())
+#
+#    for i in range( s.num_terminals ):
+#      for j in range( 5 ):
+#        trace[i] += '************ switch[{}][{}]: {}\n'.format( i, j, 
+#                s.routers[i].switch_units[j].line_trace())
+#    for i in range( s.num_terminals ):
+#      trace[i] += '\n************ send[{}]: '.format( i )
+#      trace[i] += s.send[i].line_trace()
+#      trace[i] += '\n'
     return "|".join( trace )
 
 #  def line_trace( s ):

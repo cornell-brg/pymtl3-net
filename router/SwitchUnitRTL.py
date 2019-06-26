@@ -59,6 +59,7 @@ class SwitchUnitRTL( Component ):
       for i in range( num_inports ):
         # s.get_en[i] = s.get_rdy[i] & s.give.en & ( s.mux.sel==SelType(i) )
         s.get_en[i] = s.give.en & ( s.mux.sel==SelType(i) )
+#        print 'switch: set get_en[', i, ']=', s.get_en[i]
 
   # Line trace
 

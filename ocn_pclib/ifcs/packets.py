@@ -79,8 +79,8 @@ def mk_ring_pkt( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=32 ):
     new_class = mk_bit_struct( new_name,[
       ( 'src',     IdType      ),
       ( 'dst',     IdType      ),
-      ( 'opaque',  OpqType     ),
       ( 'vc_id',   VcIdType    ),
+      ( 'opaque',  OpqType     ),
       ( 'payload', PayloadType ),
     ])
   else:
@@ -219,8 +219,8 @@ def mk_bfly_pkt( k_ary=2, n_fly=2, nvcs=0, opaque_nbits=8, payload_nbits=32 ):
     new_class = mk_bit_struct( new_name,[
       ( 'src',     IdType      ),
       ( 'dst',     DstType      ),
-      ( 'opaque',  OpqType     ),
       ( 'vc_id',   VcIdType    ),
+      ( 'opaque',  OpqType     ),
       ( 'payload', PayloadType ),
     ])
   else:
@@ -414,8 +414,8 @@ def mk_bfly_pkt_timestamp( k_ary=2, n_fly=2, nvcs=0,
     new_class = mk_bit_struct( new_name,[
       ( 'src',       IdType        ),
       ( 'dst',       DstType       ),
-      ( 'opaque',    OpqType       ),
       ( 'vc_id',     VcIdType      ),
+      ( 'opaque',    OpqType       ),
       ( 'payload',   PayloadType   ),
       ( 'timestamp', TimestampType ),
     ])

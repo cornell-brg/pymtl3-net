@@ -44,11 +44,11 @@ class DORYTorusRouteUnitRTL( Component ):
     def up_ru_routing():
  
       s.out_dir = 0
-      s.give_msg_wire = deepcopy( s.get.msg )
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
 
-      if s.get.rdy == 1:
+      if s.get.rdy:
+        s.give_msg_wire = deepcopy( s.get.msg )
         if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
           s.out_dir = SELF
         elif s.get.msg.dst_y < s.pos.pos_y:
@@ -83,15 +83,18 @@ class DORYTorusRouteUnitRTL( Component ):
 
         s.give[ s.out_dir ].rdy = 1
         s.give[ s.out_dir ].msg = s.give_msg_wire
-        print 'get is rdy??????   pos: ', s.pos
-#        s.give[ s.out_dir ].msg = s.get.msg
-      else:
-        print 'get is not rdy!!!!!&&&&&&&& pos: ', s.pos
+#        print 'get is rdy??????   pos: ', s.pos, '; msg: ', s.give_msg_wire,\
+#                '; s.out_dir: ', s.out_dir, '; s.get_msg: ', s.get.msg, '; rdy: ',\
+#                s.get.rdy, '; get.en: ', s.get.en
+#      else:
+#        print 'get is not rdy!!!!!&&&&&&&& pos: ', s.pos, '; enabled?:', s.get.en
 
     @s.update
     def up_ru_get_en():
-      print 'see get enable??: ', s.get.en, '; pos: ', s.pos
+#      print 'see get enable??: ', s.get.en, '; pos: ', s.pos
       s.get.en = s.give_ens > 0 
+
+#    s.add_constraints( U( up_ru_get_en ) < U ( up_ru_routing ) )
 
   # Line trace
   def line_trace( s ):
@@ -100,4 +103,4 @@ class DORYTorusRouteUnitRTL( Component ):
     for i in range (s.num_outports):
       out_str[i] = "{}".format( s.give[i] ) 
 
-    return "{}({}){}".format( s.get, s.out_dir, "|".join( out_str ) )
+    return "{}({}){}*{}*".format( s.get, s.out_dir, "|".join( out_str ), s.give_msg_wire )
