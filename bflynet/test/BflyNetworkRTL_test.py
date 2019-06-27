@@ -79,7 +79,7 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
   sim.run_test()
   model.sim_reset()
 
-def test_vector_Bf2( dump_vcd, test_verilog ):
+def test_vector_2ary_1fly( dump_vcd, test_verilog ):
 
   k_ary = 2
   n_fly = 1
@@ -118,7 +118,7 @@ def test_vector_Bf2( dump_vcd, test_verilog ):
 
   run_vector_test( model, BflyPacket, simple_2_test, k_ary, n_fly)
 
-def test_vector_Bf4( dump_vcd, test_verilog ):
+def test_vector_2ary_2fly( dump_vcd, test_verilog ):
 
   k_ary = 2
   n_fly = 2
@@ -220,7 +220,7 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases (specific for 4-ary 2-fly butterfly)
 #-------------------------------------------------------------------------
 
-def test_srcsink_bfly4x2():
+def test_srcsink_4ary_2fly():
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),

@@ -17,7 +17,6 @@
 #  --sweep             Sweep the injection rates
 #  --dump-vcd          Dump vcd
 #  --stats             Print stats
-#  --time              Print simulation time
 #  --trace             Display line-trace
 #
 #  --mode              Choose model
@@ -139,9 +138,6 @@ def parse_cmdline():
                        action  = "store_true"                              )
 
   parser.add_argument( "--stats",
-                       action  = "store_true"                              )
-
-  parser.add_argument( "--time",
                        action  = "store_true"                              )
 
   parser.add_argument( "--trace",
@@ -327,7 +323,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   elif opts.topology == "Butterfly":
     NetModel = topology_dict[ "Butterfly" ]
     k_ary = 4
-    n_fly = 2
+    n_fly = 3
     num_nodes = k_ary * ( k_ary ** ( n_fly - 1 ) )
     num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
     MeshPos = mk_bfly_pos( k_ary, n_fly )
@@ -340,9 +336,6 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 #  model.elaborate()
   sim = model.apply( DynamicSim )
 
-  print 'model cols: ', model.routers[0].route_units[0].cols
-  print 'model rows: ', model.routers[0].route_units[0].rows
-  print 'model pos : ', model.routers[1].route_units[3].pos
   # Source Queues - Modeled as Bypass Queues
   src = [ deque() for x in range( num_nodes ) ]
 
@@ -488,7 +481,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
         if model.recv[i].rdy:
           model.recv[i].msg = src[i][0]
           model.recv[i].en  = 1
-          print 'injected pkt: ', src[i][0]
+#          print 'injected pkt: ', src[i][0]
         else:
           model.recv[i].en  = 0
       else:
@@ -575,14 +568,12 @@ def main():
 
     while avg_lat <= 500 and inj <= 100:
 
-      if opts.time:
-        start_time = time.time()
+      start_time = time.time()
 
       results = simulate( opts, max(inj,1), opts.pattern, 500,
               opts.dump_vcd, opts.trace, opts.verbose )
 
-      if opts.time:
-        end_time = time.time()
+      end_time = time.time()
 
       avg_lat = results[0]
 
@@ -611,14 +602,12 @@ def main():
     print()
 
   else:
-    if opts.time:
-      start_time = time.time()
+    start_time = time.time()
 
     results = simulate( opts, opts.injection_rate, opts.pattern, 500,
             dump_vcd, opts.trace, opts.verbose )
 
-    if opts.time:
-      end_time = time.time()
+    end_time = time.time()
 
   if opts.stats and not opts.sweep:
     print()
@@ -628,10 +617,9 @@ def main():
     print( "Average Latency  = %.1f" % results[0] )
     print( "Num Packets      = %d" % results[1] )
     print( "Total cycles     = %d" % results[2] )
-    if opts.time:
-      print( "Simulation time  = %.1f sec" % (end_time - start_time) )
-      print( "Simulation speed = %.1f cycle/sec" % \
-              (results[2]/(end_time - start_time)) )
+    print( "Simulation time  = %.1f sec" % (end_time - start_time) )
+    print( "Simulation speed = %.1f cycle/sec" % \
+            (results[2]/(end_time - start_time)) )
     print()
 
 main()

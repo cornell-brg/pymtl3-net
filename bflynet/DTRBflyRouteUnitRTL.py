@@ -22,7 +22,7 @@ class DTRBflyRouteUnitRTL( Component ):
     if rows == 1:
       s.RowWidth = 1
     else:
-      s.RowWidth = clog2( rows )
+      s.RowWidth = clog2( k_ary )
     s.END = s.RowWidth
 
     # Interface
@@ -63,7 +63,8 @@ class DTRBflyRouteUnitRTL( Component ):
         s.out_dir = s.get.msg.dst[ s.END - s.RowWidth : s.END]
 #        print 'len: ', len(s.give_rdy)
 #        print 'range (end-rowwidth -> end): ', s.END - s.RowWidth, s.END
-#        print 'out_dir: ', s.out_dir
+#        print 'out_dir: ', s.out_dir, '; give_rdy size: ', s.num_outports
+#        print 'msg: ', s.get.msg
         s.give_rdy[ s.out_dir ] = Bits1( 1 )
 
     @s.update
