@@ -40,7 +40,7 @@ class RingRouterCL( Router ):
     s.input_units  = [ InputUnitType( PacketType )
                       for _ in range( s.num_inports ) ]
 
-    s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports ) 
+    s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports )
                       for i in range( s.num_inports ) ]
 
     s.switch_units = [ SwitchUnitType( PacketType, s.num_inports )
@@ -66,6 +66,6 @@ class RingRouterCL( Router ):
 
   def line_trace( s ):
     # return "{}".format(
-    #   "|".join( [ s.input_units[i].line_trace()  for i in range(3) ] ), 
+    #   "|".join( [ s.input_units[i].line_trace()  for i in range(3) ] ),
     # )
     return "|".join( [ str( s.send[i] ) for i in range(s.num_inports) ] )
