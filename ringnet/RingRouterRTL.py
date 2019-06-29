@@ -26,6 +26,7 @@ class RingRouterRTL( Router ):
     SwitchUnitType=SwitchUnitRTL,
     OutputUnitType=OutputUnitCreditRTL,
     nvcs=2,
+    credit_line=2,
   ):
 
     # Local paramters
@@ -43,7 +44,7 @@ class RingRouterRTL( Router ):
 
     # Components
 
-    s.input_units  = [ InputUnitType( PacketType )
+    s.input_units  = [ InputUnitType( PacketType, nvcs=nvcs, credit_line=credit_line )
                       for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports )

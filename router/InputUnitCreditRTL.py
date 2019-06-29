@@ -42,7 +42,6 @@ class InputUnitCreditRTL( Component ):
       if s.recv.en:
         for i in range( nvcs ):
           s.buffers[i].enq.en = s.recv.msg.vc_id == VcIDType(i)
-          if s.buffers[i].enq.en: assert s.buffers[i].enq.rdy, "{}: buffer[{}] enable when not rdy!".format( s, i )
       else:
         for i in range( nvcs ):
           s.buffers[i].enq.en = b1(0)

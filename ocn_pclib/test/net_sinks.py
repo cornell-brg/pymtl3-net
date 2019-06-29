@@ -18,7 +18,7 @@ class TestNetSinkCL( Component ):
 
   def construct( s, Type, msgs, initial_delay=0, interval_delay=0,
                  arrival_time=None ):
-    
+
     s.recv.Type = Type
 
     # [msgs] and [arrival_time] must have the same length.
@@ -32,6 +32,9 @@ class TestNetSinkCL( Component ):
     s.arrival_time = None if arrival_time is None else \
                      list( arrival_time )
     s.perf_regr    = True if arrival_time is not None else False
+    s.error_msg    = ""
+    # TODO: maybe make this a parameter
+    s.match_func   = lambda a, b : a.src == b.src and a.dst==b.dst and a.payload == b.payload
 
     s.initial_count  = initial_delay
     s.interval_delay = interval_delay
@@ -45,7 +48,9 @@ class TestNetSinkCL( Component ):
 
     @s.update
     def up_sink_count():
-      if not s.reset: 
+      if s.error_msg:
+        raise Exception( s.error_msg )
+      if not s.reset:
         s.cycle_count += 1
       else:
         s.cycle_count = 0
@@ -76,29 +81,40 @@ class TestNetSinkCL( Component ):
   def recv( s, msg ):
 
     s.recv_msg = msg
+
     # Sanity check
     if s.idx >= s.nmsgs:
-      raise Exception( """
+      s.error_msg = ("""
 Test Sink received more msgs than expected
 Received : {}
-""".format( msg )
-)
+""".format( msg ) )
 
     # Check correctness first
-    if s.recv_msg not in s.msgs:
-      raise Exception( """
-Test Sink received WRONG msg!
+    if not [ pkt for pkt in s.msgs if s.match_func( s.recv_msg, pkt) ]:
+      # FIXME: s.idx does not mean anything here...
+      s.error_msg = ("""
+Test Sink {} received WRONG msg!
 Expected : {}
-Received : {}""".format( s.msgs[ s.idx ], s.recv_msg ) )
+Received : {}
+""".format( str(s), s.msgs[ s.idx ], s.recv_msg ) )
+
+    # Check performace regression
     elif s.perf_regr and s.cycle_count > s.arrival_time[ s.idx ]:
-      raise Exception( """
-Test Sink received msg LATER than expected!
+      s.error_msg = ("""
+Test Sink {} received msg LATER than expected!
+Message        : {}
 Expected cycles: {}
-Received at    : {}""".format( s.arrival_time[ s.idx ], s.cycle_count ) )
+Received at    : {}""".format( str(s), s.msgs[ s.idx ], s.arrival_time[ s.idx ], s.cycle_count ) )
+
+    # No error
     else:
       s.idx += 1
-      s.msgs.remove( s.recv_msg )
       s.recv_called = True
+      # Remove received pkt from list
+      for pkt in s.msgs:
+        if s.match_func( s.recv_msg, pkt ):
+          s.msgs.remove( pkt )
+          break
 
   def done( s ):
     return s.idx >= s.nmsgs
@@ -135,6 +151,4 @@ class TestNetSinkRTL( Component ):
   # Line trace
 
   def line_trace( s ):
-    return "{}".format(
-      s.sink.line_trace() 
-    )
+    return "{}".format( s.recv )

@@ -19,6 +19,9 @@ class RingRouteUnitRTL( Component ):
     s.num_outports = num_outports
     s.num_routers  = num_routers
 
+    id_type = mk_bits( clog2( num_routers ) )
+    s.last_idx = id_type( num_routers-1 )
+
     # Interface
 
     s.get  = GetIfcRTL( PacketType )
@@ -30,15 +33,26 @@ class RingRouteUnitRTL( Component ):
     s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
     s.give_ens = Wire( mk_bits( s.num_outports ) )
 
+    s.left_dist  = Wire( mk_bits( clog2(s.num_routers+1) ) )
+    s.right_dist = Wire( mk_bits( clog2(s.num_routers+1) ) )
     s.give_msg_wire = Wire( PacketType )
 
     # Connections
 
     for i in range( s.num_outports ):
-#      s.connect( s.get.msg,     s.give[i].msg )
       s.connect( s.give_ens[i], s.give[i].en  )
 
     # Routing logic
+    @s.update
+    def up_left_right_dist():
+      if s.get.msg.dst < s.pos:
+        s.left_dist  = s.pos - s.get.msg.dst
+        s.right_dist = s.last_idx - s.pos + s.get.msg.dst + id_type(1)
+      else:
+        s.left_dist  = s.pos + id_type(1) + s.last_idx - s.get.msg.dst
+        s.right_dist = s.get.msg.dst -s.pos
+
+    # FIXME: Don't use integers!
     @s.update
     def up_ru_routing():
 
@@ -50,21 +64,17 @@ class RingRouteUnitRTL( Component ):
       if s.get.rdy:
         if s.pos == s.get.msg.dst:
           s.out_dir = SELF
-        elif s.get.msg.dst < s.pos and \
-             s.pos - s.get.msg.dst <= num_routers/2:
-          s.out_dir = LEFT
-        elif s.get.msg.dst > s.pos and \
-             s.get.msg.dst - s.pos > num_routers/2:
+        elif s.left_dist < s.right_dist:
           s.out_dir = LEFT
         else:
           s.out_dir = RIGHT
 
-        if s.pos == s.num_routers-1 and s.out_dir == RIGHT:
-          s.give_msg_wire.vc_id = 1
-        elif s.pos == 0 and s.out_dir == LEFT:
-          s.give_msg_wire.vc_id = 1
+        if s.pos == s.last_idx and s.out_dir == RIGHT:
+          s.give_msg_wire.vc_id = b1(1)
+        elif s.pos == id_type(0) and s.out_dir == LEFT:
+          s.give_msg_wire.vc_id = b1(1)
 
-        s.give[ s.out_dir ].rdy = 1
+        s.give[ s.out_dir ].rdy = b1(1)
         s.give[ s.out_dir ].msg = s.give_msg_wire
 
     @s.update

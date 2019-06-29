@@ -3,33 +3,37 @@
 #=========================================================================
 # Test for RingNetworkRTL
 #
-# Author : Cheng Tan, Yanghui Ou
-#   Date : Mar 20, 2019
+# Author : Yanghui Ou
+#   Date : June 28, 2019
 
 from pymtl3 import *
 
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from ocn_pclib.test.net_sinks import TestNetSinkRTL
 
-from ocn_pclib.ifcs.packets   import mk_ring_pkt
+from ocn_pclib.ifcs.packets import mk_ring_pkt
 from ocn_pclib.ifcs.positions import mk_ring_pos
 from ringnet.RingNetworkRTL import RingNetworkRTL
+from ..RingNetworkFL import ringnet_fl
 
 from copy import deepcopy
 
 #-------------------------------------------------------------------------
 # TestHarness
 #-------------------------------------------------------------------------
+
 class TestHarness( Component ):
 
   def construct( s, MsgType, num_routers, src_msgs, sink_msgs ):
 
+    s.num_routers = num_routers
     RingPos = mk_ring_pos( num_routers )
-    s.dut = RingNetworkRTL( MsgType, RingPos, num_routers, 0)
 
-    s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i] )
-              for i in range ( s.dut.num_routers ) ]
-    s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i] ) for i in range ( s.dut.num_routers ) ]
+    s.srcs  = [ TestSrcRTL( MsgType, src_msgs[i] )
+              for i in range( num_routers ) ]
+    s.dut   = RingNetworkRTL( MsgType, RingPos, num_routers, 0)
+    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i] )
+              for i in range( num_routers ) ]
 
     # Connections
     for i in range ( s.dut.num_routers ):
@@ -37,96 +41,88 @@ class TestHarness( Component ):
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
   def done( s ):
-    srcs_done = 1
-    sinks_done = 1
-    for i in range( s.dut.num_routers ):
-      if s.srcs[i].done() == 0:
-        srcs_done = 0
-        break
-      if s.sinks[i].done() == 0:
-        sinks_done = 0
-        break
+    srcs_done = True
+    sinks_done = True
+    for i in range( s.num_routers ):
+      srcs_done = srcs_done and s.srcs[i].done()
+      sinks_done = sinks_done and s.sinks[i].done()
     return srcs_done and sinks_done
 
   def line_trace( s ):
     return s.dut.line_trace()
 
 #-------------------------------------------------------------------------
-# run_rtl_sim
+# mk_src_pkts
 #-------------------------------------------------------------------------
 
-def run_sim( test_harness, max_cycles=100 ):
+def mk_src_pkts( nterminals, lst ):
+  src_pkts = [ [] for _ in range( nterminals ) ]
+  for pkt in lst:
+    src_pkts[ int(pkt.src) ].append( pkt )
+  return src_pkts
 
-  # Create a simulator
+#=========================================================================
+# Test cases
+#=========================================================================
 
-  test_harness.apply( DynamicSim )
-  test_harness.sim_reset()
+class Ringnet_Tests( object ):
 
-  # Run simulation
+  @classmethod
+  def setup_class( cls ):
+    cls.DutType = RingNetworkRTL
 
-  ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
-  while not test_harness.done() and ncycles < max_cycles:
-    test_harness.tick()
-    ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
+  def run_sim( s, th, max_cycles=20 ):
+    th.elaborate()
+    th.apply( SimulationPass )
+    th.sim_reset()
 
-  # Check timeout
+    # Run simulation
+    ncycles = 0
+    print ""
+    print "{:3}:{}".format( ncycles, th.line_trace() )
+    while not th.done() and ncycles < max_cycles:
+      th.tick()
+      ncycles += 1
+      print "{:3}:{}".format( ncycles, th.line_trace() )
 
-  assert ncycles < max_cycles
+    # Check timeout
+    assert ncycles < max_cycles
 
-  test_harness.tick()
-  test_harness.tick()
-  test_harness.tick()
+  def test_simple( s ):
+    nterminals = 4
+    Pkt = mk_ring_pkt( nterminals )
+    src_pkts = mk_src_pkts( nterminals, [
+      #    src  dst opq vc payload
+      Pkt( 3,   0,  0,  0, 0xfaceb00c ),
+    ])
+    dst_pkts = ringnet_fl( src_pkts )
+    th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
+    s.run_sim( th )
 
+  def test_cycle( s ):
+    nterminals = 4
+    Pkt = mk_ring_pkt( nterminals )
+    src_pkts = mk_src_pkts( nterminals, [
+      #    src  dst opq vc payload
+      Pkt( 0,   1,  0,  0, 0xfaceb00c ),
+      Pkt( 1,   2,  1,  0, 0xdeadbeef ),
+      Pkt( 2,   3,  2,  0, 0xbaadface ),
+      Pkt( 3,   0,  0,  0, 0xfaceb00c ),
+    ])
+    dst_pkts = ringnet_fl( src_pkts )
+    th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
+    s.run_sim( th )
 
-#-------------------------------------------------------------------------
-# Test cases (specific for 4x4 mesh)
-#-------------------------------------------------------------------------
-
-def test_srcsink_torus4x4():
-
-  #           src, dst, payload
-  test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
-                (4, 11, 105), (5, 10, 106), (6,  9, 107), (7,  8, 108),
-                (8,  7, 109), (9,  6, 110), (10, 5, 111), (11, 4, 112),
-                (12, 3, 113), (13, 2, 114), (14, 1, 115), (15, 0, 116),
-                (7,  9, 99),  (8,  9, 98),  (6,  9, 97) ]
-
-  src_packets  =  [ [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[] ]
-
-  sink_packets =  [ [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[] ]
-
-  num_routers = 16
-  PktType = mk_ring_pkt( num_routers )
-
-  for (src, dst, payload) in test_msgs:
-    pkt = PktType( src, dst, 1, 0, payload )
-#    flits = flitisize_ring_flit( pkt, 1, num_routers )
-    src_packets [src].append( pkt )
-    sink_pkt = deepcopy( pkt )
-    if abs(dst - src) > num_routers/2:
-      sink_pkt.vc_id = 1
-    sink_packets[dst].append( sink_pkt )
-
-  th = TestHarness( PktType, num_routers, src_packets, sink_packets )
-#                    0, 0, 0, 0, arrival_pipes )
-
-  th.set_param( 'top.dut.routers*.route_units*.construct', num_routers = num_routers )
-#  num_inports = 3
-#  for r in range ( num_routers ):
-#    for i in range (num_inports):
-#      path_ru_nr = "top.dut.routers[" + str(r) + "].route_units[" + str(i) + "].elaborate.num_routers"
-#      path_qt      = "top.dut.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-#      th.set_parameter(path_qt,    NormalQueueRTL)
-#      th.set_parameter(path_ru_nr, num_routers )
-
-  run_sim( th )
-
+  def test_anti_cycle( s ):
+    nterminals = 4
+    Pkt = mk_ring_pkt( nterminals )
+    src_pkts = mk_src_pkts( nterminals, [
+      #    src  dst opq vc payload
+      Pkt( 0,   3,  0,  0, 0xfaceb00c ),
+      Pkt( 1,   0,  1,  0, 0xdeadbeef ),
+      Pkt( 2,   1,  2,  0, 0xbaadface ),
+      Pkt( 3,   2,  0,  0, 0xfaceb00c ),
+    ])
+    dst_pkts = ringnet_fl( src_pkts )
+    th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
+    s.run_sim( th )

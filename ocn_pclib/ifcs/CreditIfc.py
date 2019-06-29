@@ -147,8 +147,9 @@ class RecvRTL2CreditSendRTL( Component ):
       s.connect( s.credit[i].load_value, CreditType(0) )
 
   def line_trace( s ):
-    return "{}({}){}".format(
+    return "{}({},{}){}".format(
       s.recv,
+      s.buffer.line_trace(),
       ",".join( [ str(s.credit[i].count) for i in range(s.nvcs) ] ),
       s.send,
     )
