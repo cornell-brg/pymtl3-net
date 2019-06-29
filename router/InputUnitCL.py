@@ -6,8 +6,8 @@
 # Author : Yanghui Ou
 #   Date : May 16, 2019
 
-from pymtl3                 import *
-from pymtl3.stdlib.cl.queues       import NormalQueueCL
+from pymtl3                  import *
+from pymtl3.stdlib.cl.queues import NormalQueueCL
 
 class InputUnitCL( Component ):
 

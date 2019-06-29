@@ -9,14 +9,15 @@
 import hypothesis
 from hypothesis import strategies as st
 
-from pymtl3                       import *
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
-from ocn_pclib.test.net_sinks     import TestNetSinkCL
-from ocn_pclib.ifcs.positions     import mk_mesh_pos
-from ocn_pclib.ifcs.packets       import mk_mesh_pkt
-from meshnet.MeshRouterCL         import MeshRouterCL
-from meshnet.MeshRouteUnitXDorCL  import MeshRouteUnitXDorCL
-from router.InputUnitCL           import InputUnitCL
+from pymtl3                        import *
+from pymtl3.stdlib.test.test_srcs  import TestSrcCL
+from pymtl3.stdlib.test.test_sinks import TestSinkCL
+#from ocn_pclib.test.net_sinks      import TestNetSinkCL
+from ocn_pclib.ifcs.positions      import mk_mesh_pos
+from ocn_pclib.ifcs.packets        import mk_mesh_pkt
+from meshnet.MeshRouterCL          import MeshRouterCL
+from meshnet.MeshRouteUnitXDorCL   import MeshRouteUnitXDorCL
+from router.InputUnitCL            import InputUnitCL
 
 from test_helpers import dor_routing
 
@@ -47,7 +48,7 @@ class TestHarness( Component ):
 
     s.srcs  = [ TestSrcCL( MsgType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range  ( s.dut.num_inports ) ]
-    s.sinks = [ TestNetSinkCL( MsgType, sink_msgs[i], sink_initial, sink_interval ) 
+    s.sinks = [ TestSinkCL( MsgType, sink_msgs[i], sink_initial, sink_interval )
                 for i in range ( s.dut.num_outports ) ]
 
     # Connections

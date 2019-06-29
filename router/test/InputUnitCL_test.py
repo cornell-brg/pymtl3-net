@@ -23,8 +23,8 @@ class TestHarness( Component ):
                  src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    s.src  = TestSrcCL  ( src_msgs,  src_initial,  src_interval  )
-    s.sink = TestSinkCL ( sink_msgs, sink_initial, sink_interval )
+    s.src  = TestSrcCL  ( MsgType, src_msgs,  src_initial,  src_interval  )
+    s.sink = TestSinkCL ( MsgType, sink_msgs, sink_initial, sink_interval )
     s.dut  = InputUnitCL( MsgType )
 
     # Connections
