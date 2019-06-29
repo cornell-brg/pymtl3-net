@@ -13,8 +13,8 @@ class OutputUnitCL( Component ):
   def construct( s, PacketType, QueueType = None ):
     
     # Interface
-    s.recv = NonBlockingCalleeIfc()
-    s.send = NonBlockingCallerIfc()
+    s.recv = NonBlockingCalleeIfc( PacketType )
+    s.send = NonBlockingCallerIfc( PacketType )
     s.QueueType = QueueType
 
     # If no queue type is assigned

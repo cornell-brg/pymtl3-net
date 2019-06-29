@@ -20,8 +20,8 @@ class MeshRouteUnitXDorCL( Component ):
 
     # Interface
 
-    s.get  = NonBlockingCallerIfc()
-    s.give = [ NonBlockingCalleeIfc() for _ in range( s.num_outports ) ]
+    s.get  = NonBlockingCallerIfc( PacketType )
+    s.give = [ NonBlockingCalleeIfc( PacketType ) for _ in range( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Components

@@ -31,8 +31,8 @@ class MeshRouterCL( Router ):
 
     # Interface
     s.pos  = InPort( PositionType ) 
-    s.recv = [ NonBlockingCalleeIfc() for _ in range( s.num_inports  ) ]
-    s.send = [ NonBlockingCallerIfc() for _ in range( s.num_outports ) ]
+    s.recv = [ NonBlockingCalleeIfc( PacketType ) for _ in range( s.num_inports  ) ]
+    s.send = [ NonBlockingCallerIfc( PacketType ) for _ in range( s.num_outports ) ]
     
     # Components
 

@@ -45,9 +45,9 @@ class TestHarness( Component ):
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.dut = MeshRouterCL( MsgType, MeshPos )
 
-    s.srcs  = [ TestSrcCL( src_msgs[i],  src_initial,  src_interval  )
+    s.srcs  = [ TestSrcCL( MsgType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range  ( s.dut.num_inports ) ]
-    s.sinks = [ TestNetSinkCL( sink_msgs[i], sink_initial, sink_interval ) 
+    s.sinks = [ TestNetSinkCL( MsgType, sink_msgs[i], sink_initial, sink_interval ) 
                 for i in range ( s.dut.num_outports ) ]
 
     # Connections
@@ -85,6 +85,7 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Create a simulator
 
+  test_harness.elaborate()
   test_harness.apply( SimpleSim )
   test_harness.sim_reset()
 

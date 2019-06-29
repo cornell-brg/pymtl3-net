@@ -18,8 +18,8 @@ class SwitchUnitCL( Component ):
 
     # Interface
 
-    s.get  = [ NonBlockingCallerIfc() for _ in range( s.num_inports ) ]
-    s.send = NonBlockingCallerIfc()
+    s.get  = [ NonBlockingCallerIfc( PacketType ) for _ in range( s.num_inports ) ]
+    s.send = NonBlockingCallerIfc( PacketType )
 
     # Components
 

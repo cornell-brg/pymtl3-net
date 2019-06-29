@@ -24,8 +24,8 @@ class MeshNetworkCL( Component ):
 
     # Interface
 
-    s.recv = [ NonBlockingCalleeIfc() for _ in range( s.num_terminals ) ]
-    s.send = [ NonBlockingCallerIfc() for _ in range( s.num_terminals ) ]
+    s.recv = [ NonBlockingCalleeIfc( PacketType ) for _ in range( s.num_terminals ) ]
+    s.send = [ NonBlockingCallerIfc( PacketType ) for _ in range( s.num_terminals ) ]
 
     # Components
 
