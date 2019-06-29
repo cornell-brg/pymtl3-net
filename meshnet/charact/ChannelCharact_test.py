@@ -10,22 +10,17 @@ from pymtl3                        import *
 from pymtl3.stdlib.rtl.queues      import NormalQueueRTL
 from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
 from ocn_pclib.test.net_sinks      import TestNetSinkRTL
-#from pymtl3.stdlib.test.test_sinks import TestSinkRTL
 from pymtl3.stdlib.test            import TestVectorSimulator
-#from ocn_pclib.ifcs.Packet         import Packet, mk_pkt
-#from ocn_pclib.ifcs.Position       import *
-# from ocn_pclib.draw               import *
 from meshnet.MeshNetworkRTL        import MeshNetworkRTL
 from meshnet.DORYMeshRouteUnitRTL  import DORYMeshRouteUnitRTL
 from meshnet.DORXMeshRouteUnitRTL  import DORXMeshRouteUnitRTL
 from meshnet.TestMeshRouteUnitRTL  import TestMeshRouteUnitRTL
 from router.InputUnitRTL           import InputUnitRTL
-
 from ocn_pclib.ifcs.positions      import mk_mesh_pos
 from ocn_pclib.ifcs.packets        import mk_mesh_pkt
-
-from pymtl3.passes.sverilog import ImportPass, TranslationPass
-from pymtl3.passes import DynamicSim
+from pymtl3.passes.sverilog        import ImportPass, TranslationPass
+from pymtl3.passes                 import DynamicSim
+import random
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -37,16 +32,19 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
 
-    if test_vector[0] != 'x':
-      router_id = test_vector[0]
-      pkt = PacketType( router_id % mesh_wid, router_id / mesh_wid,
-                  test_vector[1][0], test_vector[1][1], 1, test_vector[1][2])
-    
-      # Enable the network interface on specific router
-      for i in range (num_routers):
-        model.recv[i].en  = 0
-      model.recv[router_id].msg = pkt
-      model.recv[router_id].en  = 1
+    src_x = random.randint( 0, mesh_wid - 1 )
+    src_y = 0
+    dst_x = random.randint( 0, mesh_wid - 1 )
+    dst_y = 0
+    payload = random.randint( 0, 2**16 ) & 0xffff
+    pkt = PacketType( src_x, src_y, dst_x, dst_y, 0, payload)
+
+    router_id = src_y * mesh_wid + src_x
+    for i in range (num_routers):
+      model.recv[i].en  = 0
+    model.recv[router_id].msg = pkt
+    print 'generate: msg: ', pkt
+    model.recv[router_id].en  = 1
 
     XYType = mk_bits( clog2( mesh_wid ) )
     for i in range (num_routers):
@@ -54,21 +52,39 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
       model.pos_x[i] = XYType(i%mesh_wid)
       model.pos_y[i] = XYType(i/mesh_wid)
 
+#    if test_vector[0] != 'x':
+#      router_id = test_vector[0]
+#      pkt = PacketType( router_id % mesh_wid, router_id / mesh_wid,
+#                  test_vector[1][0], test_vector[1][1], 1, test_vector[1][2])
+#
+#      # Enable the network interface on specific router
+#      for i in range (num_routers):
+#        model.recv[i].en  = 0
+#      model.recv[router_id].msg = pkt
+#      model.recv[router_id].en  = 1
+#
+#    XYType = mk_bits( clog2( mesh_wid ) )
+#    for i in range (num_routers):
+#      model.send[i].rdy = 1
+#      model.pos_x[i] = XYType(i%mesh_wid)
+#      model.pos_y[i] = XYType(i/mesh_wid)
+
   def tv_out( model, test_vector ):
-    if test_vector[2] != 'x':
-      assert model.send[test_vector[2]].msg.payload == test_vector[3]
-     
+    print 'recv: ', model.send[1].msg
+#    if test_vector[2] != 'x':
+#      assert model.send[test_vector[2]].msg.payload == test_vector[3]
+
   model.elaborate()
-  model.sverilog_translate = True
-  model.sverilog_import = True
-  model.apply( TranslationPass() )
-  model = ImportPass()( model )
-#  model.apply( SimpleSim )
+#  model.sverilog_translate = True
+#  model.sverilog_import = True
+#  model.apply( TranslationPass() )
+#  model = ImportPass()( model )
+  model.apply( SimpleSim )
 #  model.apply( DynamicSim )
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
 
-def test_vector_mesh2x1( dump_vcd, test_verilog ):
+def test_mesh2x1( dump_vcd, test_verilog ):
 
   mesh_wid = 2
   mesh_ht  = 1
@@ -95,7 +111,10 @@ def test_vector_mesh2x1( dump_vcd, test_verilog ):
   [  x,    [0,0,0000],     1,     1008 ],
   ]
 
+  long_test = [ [] _ in range( 500 ) ]
+
   model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
 
-  run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
+  run_vector_test( model, long_test, mesh_wid, mesh_ht)
+#  run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
 

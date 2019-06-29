@@ -48,7 +48,7 @@ class DORYTorusRouteUnitRTL( Component ):
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
 
-      if s.get.rdy:
+      if s.get.rdy == 1:
         if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
           s.out_dir = SELF
         elif s.get.msg.dst_y < s.pos.pos_y:

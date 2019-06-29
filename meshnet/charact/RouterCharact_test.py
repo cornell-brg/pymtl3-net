@@ -74,13 +74,9 @@ class TestHarness( Component ):
   def done( s ):
     srcs_done = 1
     sinks_done = 1
-#    for i in range( s.dut.num_inports ):
-#      if s.srcs[i].done() == 0:
     for x in s.srcs:
       if x.done() == 0:
         srcs_done = 0
-#    for i in range( s.dut.num_outports ):
-#      if s.sinks[i].done() == 0:
     for x in s.sinks:
       if x.done() == 0:
         sinks_done = 0
@@ -89,7 +85,6 @@ class TestHarness( Component ):
   def line_trace( s ):
     return "{}".format(
       s.dut.line_trace(),
-      #'|'.join( [ s.sinks[i].line_trace() for i in range(5) ] ), 
     )
 
 #-------------------------------------------------------------------------
