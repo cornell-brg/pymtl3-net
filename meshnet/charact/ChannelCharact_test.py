@@ -43,7 +43,6 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
     for i in range (num_routers):
       model.recv[i].en  = 0
     model.recv[router_id].msg = pkt
-    print 'generate: msg: ', pkt
     model.recv[router_id].en  = 1
 
     XYType = mk_bits( clog2( mesh_wid ) )
@@ -70,16 +69,16 @@ def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
 #      model.pos_y[i] = XYType(i/mesh_wid)
 
   def tv_out( model, test_vector ):
-    print 'recv: ', model.send[1].msg
+    pass
 #    if test_vector[2] != 'x':
 #      assert model.send[test_vector[2]].msg.payload == test_vector[3]
 
   model.elaborate()
-#  model.sverilog_translate = True
-#  model.sverilog_import = True
-#  model.apply( TranslationPass() )
-#  model = ImportPass()( model )
-  model.apply( SimpleSim )
+  model.sverilog_translate = True
+  model.sverilog_import = True
+  model.apply( TranslationPass() )
+  model = ImportPass()( model )
+#  model.apply( SimpleSim )
 #  model.apply( DynamicSim )
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
@@ -111,7 +110,7 @@ def test_mesh2x1( dump_vcd, test_verilog ):
   [  x,    [0,0,0000],     1,     1008 ],
   ]
 
-  long_test = [ [] _ in range( 500 ) ]
+  long_test = [ [] for _ in range( 2000 ) ]
 
   model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
 
