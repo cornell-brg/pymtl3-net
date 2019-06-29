@@ -11,11 +11,7 @@ from pymtl3                        import *
 from pymtl3.stdlib.rtl.queues      import NormalQueueRTL
 from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
 from ocn_pclib.test.net_sinks      import TestNetSinkRTL
-#from pymtl3.stdlib.test.test_sinks import TestSinkRTL
 from pymtl3.stdlib.test            import TestVectorSimulator
-#from ocn_pclib.ifcs.Packet         import Packet, mk_pkt
-#from ocn_pclib.ifcs.Position       import *
-# from ocn_pclib.draw               import *
 from meshnet.MeshNetworkRTL        import MeshNetworkRTL
 from meshnet.DORYMeshRouteUnitRTL  import DORYMeshRouteUnitRTL
 from meshnet.DORXMeshRouteUnitRTL  import DORXMeshRouteUnitRTL

@@ -6,15 +6,14 @@
 # Author : Cheng Tan, Yanghui, Ou
 #   Date : June 23, 2019
 
-from pymtl3 import *
-from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
-
-from ocn_pclib.ifcs.CreditIfc import CreditRecvIfcRTL, CreditSendIfcRTL
-from router.Router import Router
-from router.SwitchUnitRTL import SwitchUnitRTL
-from router.InputUnitCreditRTL import InputUnitCreditRTL
+from pymtl3                     import *
+from pymtl3.stdlib.ifcs         import SendIfcRTL, RecvIfcRTL
+from ocn_pclib.ifcs.CreditIfc   import CreditRecvIfcRTL, CreditSendIfcRTL
+from router.Router              import Router
+from router.SwitchUnitRTL       import SwitchUnitRTL
+from router.InputUnitCreditRTL  import InputUnitCreditRTL
 from router.OutputUnitCreditRTL import OutputUnitCreditRTL
-from DORYTorusRouteUnitRTL     import DORYTorusRouteUnitRTL
+from DORYTorusRouteUnitRTL      import DORYTorusRouteUnitRTL
 
 class TorusRouterRTL( Component ):
 
@@ -74,14 +73,13 @@ class TorusRouterRTL( Component ):
   # Line trace
 
   def line_trace( s ):
-
     in_trace  = [ "" for _ in range( s.num_inports  ) ]
     out_trace = [ "" for _ in range( s.num_outports ) ]
 
     for i in range( s.num_inports ):
-      in_trace[i]  = "{}".format( s.recv[i].line_trace() )
+      in_trace[i]  = "{}".format( s.recv[i].msg )
     for i in range( s.num_outports ):
-      out_trace[i] = "{}".format( s.send[i].line_trace() )
+      out_trace[i] = "{}".format( s.send[i].msg )
 
     return "{}({}){}".format(
       "|".join( in_trace ),

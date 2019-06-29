@@ -43,12 +43,12 @@ class DORYTorusRouteUnitRTL( Component ):
     @s.update
     def up_ru_routing():
  
+      s.give_msg_wire = deepcopy( s.get.msg )
       s.out_dir = 0
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
 
       if s.get.rdy:
-        s.give_msg_wire = deepcopy( s.get.msg )
         if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
           s.out_dir = SELF
         elif s.get.msg.dst_y < s.pos.pos_y:
@@ -56,9 +56,11 @@ class DORYTorusRouteUnitRTL( Component ):
             s.out_dir = SOUTH
           else:
             s.out_dir = NORTH
+            print "what: ", s.get.msg
         elif s.get.msg.dst_y > s.pos.pos_y:
           if s.get.msg.dst_y - s.pos.pos_y <= s.rows - s.get.msg.dst_y + s.pos.pos_y:
             s.out_dir = NORTH
+            print "what: ", s.get.msg
           else:
             s.out_dir = SOUTH
         elif s.get.msg.dst_x < s.pos.pos_x:
@@ -67,7 +69,7 @@ class DORYTorusRouteUnitRTL( Component ):
           else:
             s.out_dir = EAST
         else:
-          if s.get.msg.dst_x - s.pos.pos_x <= s.rows - s.get.msg.dst_x + s.pos.pos_x:
+          if s.get.msg.dst_x - s.pos.pos_x <= s.cols - s.get.msg.dst_x + s.pos.pos_x:
             s.out_dir = EAST
           else:
             s.out_dir = WEST
