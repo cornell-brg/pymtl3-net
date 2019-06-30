@@ -1,11 +1,12 @@
-#=========================================================================
-# RingRouteUnitRTL.py
-#=========================================================================
-# A ring route unit with get/give interface.
-#
-# Author : Yanghui Ou, Cheng Tan
-#   Date : April 6, 2019
+"""
+==========================================================================
+RingRouteUnitRTL.py
+==========================================================================
+A ring route unit with get/give interface.
 
+Author : Yanghui Ou, Cheng Tan
+  Date : April 6, 2019
+"""
 from copy import deepcopy
 from pymtl3          import *
 from directions      import *
@@ -19,8 +20,9 @@ class RingRouteUnitRTL( Component ):
     s.num_outports = num_outports
     s.num_routers  = num_routers
 
-    id_type = mk_bits( clog2( num_routers ) )
-    s.last_idx = id_type( num_routers-1 )
+    id_type    = mk_bits( clog2( num_routers ) )
+    dist_type  = mk_bits( clog2( num_routers+1 ) )
+    s.last_idx = dist_type( num_routers-1 )
 
     # Interface
 
@@ -47,9 +49,9 @@ class RingRouteUnitRTL( Component ):
     def up_left_right_dist():
       if s.get.msg.dst < s.pos:
         s.left_dist  = s.pos - s.get.msg.dst
-        s.right_dist = s.last_idx - s.pos + s.get.msg.dst + id_type(1)
+        s.right_dist = s.last_idx - s.pos + s.get.msg.dst + dist_type(1)
       else:
-        s.left_dist  = s.pos + id_type(1) + s.last_idx - s.get.msg.dst
+        s.left_dist  = s.pos + dist_type(1) + s.last_idx - s.get.msg.dst
         s.right_dist = s.get.msg.dst -s.pos
 
     # FIXME: Don't use integers!

@@ -6,12 +6,10 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 10, 2019
 
-#-------------------------------------------------------------------------
-# Constants
-#-------------------------------------------------------------------------
+from pymtl3 import *
 
-NORTH = 0
-SOUTH = 1
-WEST  = 2
-EAST  = 3
-SELF  = 4
+NORTH = b3(0)
+SOUTH = b3(1)
+WEST  = b3(2)
+EAST  = b3(3)
+SELF  = b3(4)

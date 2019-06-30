@@ -1,11 +1,12 @@
-#=========================================================================
-# DORYTorusRouteUnitGetGiveRTL.py
-#=========================================================================
-# A DOR route unit with get/give interface for Torus topology.
-#
-# Author : Cheng Tan
-#   Date : Mar 29, 2019
+"""
+==========================================================================
+DORYTorusRouteUnitRTL.py
+==========================================================================
+A DOR route unit with get/give interface for Torus topology.
 
+Author : Yanghui Ou, Cheng Tan
+  Date : June 30, 2019
+"""
 from pymtl3             import *
 from directions         import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
@@ -13,96 +14,97 @@ from copy import deepcopy
 
 class DORYTorusRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType, num_outports, cols=2, rows=2 ):
+  def construct( s, PacketType, PositionType, ncols=2, nrows=2 ):
 
-    # Constants 
-    s.num_outports = num_outports
-    s.cols = cols
-    s.rows = rows
+    # Constants
+    s.num_outports = 5
+    s.ncols = ncols
+    s.nrows = nrows
+
+    # Here we add 1 to avoid overflow
+    ns_dist_type  = mk_bits( clog2( nrows+1 ) )
+    we_dist_type  = mk_bits( clog2( ncols+1 ) )
+    s.last_row_id = ns_dist_type( nrows-1 )
+    s.last_col_id = we_dist_type( ncols-1 )
 
     # Interface
-
     s.get  = GetIfcRTL( PacketType )
     s.give = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Componets
-
-    s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
-    s.give_ens = Wire( mk_bits( s.num_outports ) ) 
-
-    s.give_msg_wire = Wire( PacketType )
+    s.out_dir       = Wire( mk_bits( clog2( s.num_outports ) ) )
+    s.give_ens      = Wire( mk_bits( s.num_outports ) )
+    s.north_dist    = Wire( ns_dist_type )
+    s.south_dist    = Wire( ns_dist_type )
+    s.west_dist     = Wire( we_dist_type )
+    s.east_dist     = Wire( we_dist_type )
+    s.give_msg_wire = Wire( PacketType   )
 
     # Connections
-
     for i in range( s.num_outports ):
-#      s.connect( s.get.msg,     s.give[i].msg )
-      s.connect( s.give_ens[i], s.give[i].en  )
-    
+      s.connect( s.give_ens[i], s.give[i].en )
+
+    # Calculate distance
+    @s.update
+    def up_ns_dist():
+      if s.get.msg.dst_y < s.pos.pos_y:
+        s.south_dist = s.pos.pos_y - s.get.msg.dst_y
+        s.north_dist = s.last_row_id - s.pos.pos_y + ns_dist_type(1) + s.get.msg.dst_y
+      else:
+        s.south_dist = s.pos.pos_y + ns_dist_type(1) + s.last_row_id - s.get.msg.dst_y
+        s.north_dist = s.get.msg.dst_y - s.pos.pos_y
+
+    @s.update
+    def up_we_dist():
+      if s.get.msg.dst_x < s.pos.pos_x:
+        s.west_dist = s.pos.pos_x - s.get.msg.dst_x
+        s.east_dist = s.last_col_id - s.pos.pos_x + ns_dist_type(1) + s.get.msg.dst_y
+      else:
+        s.west_dist = s.pos.pos_x + ns_dist_type(1) + s.last_col_id - s.get.msg.dst_y
+        s.east_dist = s.get.msg.dst_y - s.pos.pos_x
+
     # Routing logic
     @s.update
     def up_ru_routing():
- 
-      s.give_msg_wire = deepcopy( s.get.msg )
-      s.out_dir = 0
-      for i in range( s.num_outports ):
-        s.give[i].rdy = 0
 
-      if s.get.rdy == 1:
+      s.give_msg_wire = deepcopy( s.get.msg )
+      s.out_dir = b3(0)
+
+      for i in range( s.num_outports ):
+        s.give[i].rdy = b1(0)
+
+      if s.get.rdy:
         if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
           s.out_dir = SELF
-        elif s.get.msg.dst_y < s.pos.pos_y:
-          if s.pos.pos_y - s.get.msg.dst_y <= s.rows - s.pos.pos_y + s.get.msg.dst_y:
-            s.out_dir = SOUTH
-          else:
-            s.out_dir = NORTH
-            print "what: ", s.get.msg
-        elif s.get.msg.dst_y > s.pos.pos_y:
-          if s.get.msg.dst_y - s.pos.pos_y <= s.rows - s.get.msg.dst_y + s.pos.pos_y:
-            s.out_dir = NORTH
-            print "what: ", s.get.msg
-          else:
-            s.out_dir = SOUTH
-        elif s.get.msg.dst_x < s.pos.pos_x:
-          if s.pos.pos_x - s.get.msg.dst_x <= s.cols - s.pos.pos_x + s.get.msg.dst_x:
-            s.out_dir = WEST
-          else:
-            s.out_dir = EAST
+        elif s.get.msg.dst_y != s.pos.pos_y:
+          s.out_dir = NORTH if s.north_dist < s.south_dist else SOUTH
         else:
-          if s.get.msg.dst_x - s.pos.pos_x <= s.cols - s.get.msg.dst_x + s.pos.pos_x:
-            s.out_dir = EAST
-          else:
-            s.out_dir = WEST
+          s.out_dir = WEST if s.west_dist < s.east_dist else EAST
 
+        # Dateline logic
+        # FIXME: replace 0 and 1 with proper types
         if s.pos.pos_x == 0 and s.out_dir == WEST:
           s.give_msg_wire.vc_id = 1
-        elif s.pos.pos_x == cols - 1 and s.out_dir == EAST:
+        elif s.pos.pos_x == s.last_col_id and s.out_dir == EAST:
           s.give_msg_wire.vc_id = 1
-        elif s.pos.pos_y == 0 and s.out_dir == SOUTH:
+        if s.pos.pos_y == 0 and s.out_dir == SOUTH:
           s.give_msg_wire.vc_id = 1
-        elif s.pos.pos_y == rows - 1 and s.out_dir == NORTH:
+        elif s.pos.pos_y == s.last_col_id and s.out_dir == NORTH:
           s.give_msg_wire.vc_id = 1
 
         s.give[ s.out_dir ].rdy = 1
         s.give[ s.out_dir ].msg = s.give_msg_wire
-#        print 'get is rdy??????   pos: ', s.pos, '; msg: ', s.give_msg_wire,\
-#                '; s.out_dir: ', s.out_dir, '; s.get_msg: ', s.get.msg, '; rdy: ',\
-#                s.get.rdy, '; get.en: ', s.get.en
-#      else:
-#        print 'get is not rdy!!!!!&&&&&&&& pos: ', s.pos, '; enabled?:', s.get.en
 
     @s.update
     def up_ru_get_en():
-#      print 'see get enable??: ', s.get.en, '; pos: ', s.pos
-      s.get.en = s.give_ens > 0 
-
-#    s.add_constraints( U( up_ru_get_en ) < U ( up_ru_routing ) )
+      s.get.en = s.give_ens > 0
 
   # Line trace
   def line_trace( s ):
 
     out_str = [ "" for _ in range( s.num_outports ) ]
     for i in range (s.num_outports):
-      out_str[i] = "{}".format( s.give[i] ) 
+      out_str[i] = "{}".format( s.give[i] )
 
     return "{}({}){}*{}*".format( s.get, s.out_dir, "|".join( out_str ), s.give_msg_wire )
