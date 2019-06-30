@@ -1,104 +1,23 @@
-#=========================================================================
-# DORYTorusRouteUnitRTL_test.py
-#=========================================================================
-# Test for DORYTorusRouteUnitRTL
-#
-# Author : Cheng Tan
-#   Date : June 28, 2019
+"""
+==========================================================================
+DORYTorusRouteUnitRTL_test.py
+==========================================================================
+Test for DORYTorusRouteUnitRTL
 
-from pymtl3                          import *
-from pymtl3.stdlib.test              import TestVectorSimulator
-#from ocn_pclib.ifcs.Flit             import *
-from ocn_pclib.ifcs.positions        import mk_mesh_pos
-from ocn_pclib.ifcs.packets          import mk_mesh_pkt
-from pymtl3.passes.PassGroups        import SimpleSim
-from pymtl3.stdlib.test.test_srcs    import TestSrcRTL
-from ocn_pclib.test.net_sinks        import TestNetSinkRTL
-from torusnet.DORYTorusRouteUnitRTL   import DORYTorusRouteUnitRTL 
-from pymtl3.passes.VcdGenerationPass import VcdGenerationPass
+Author : Yanghui Ou
+  Date : June 28, 2019
+"""
+import pytest
+from itertools import product
 
-from pymtl3.passes                   import DynamicSim
-
-#-------------------------------------------------------------------------
-# Driver function for TestVectorSimulator
-#-------------------------------------------------------------------------
-
-def run_test( model, PacketType, router_pos, test_vectors ):
- 
-  def tv_in( model, test_vector ):
-
-    dst_x   = test_vector[0]
-    dst_y   = test_vector[1]
-    opaque  = test_vector[2]
-    payload = test_vector[3]
-
-    pkt = PacketType( 0, 0, dst_x, dst_y, 1, opaque, payload )
-
-    model.pos = router_pos
-    model.get.msg = pkt
-    model.get.rdy = test_vector[5]
-
-    for i in range( model.num_outports ):
-      model.give[i].en = test_vector[7][i]
-
-  def tv_out( model, test_vector ):
-
-    assert model.get.en == test_vector[4]
-    for i in range( 5 ):
-      assert model.give[i].rdy == test_vector[6][i]
-      if test_vector[6][i]:
-        assert model.give[i].msg.opaque  == test_vector[2]
-        assert model.give[i].msg.payload == test_vector[3]
-  
-  sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
-
-  sim.run_test()
-
-#-------------------------------------------------------------------------
-# Test cases
-#-------------------------------------------------------------------------
-
-def test_route_unit():
-  mesh_wid = 2
-  mesh_ht  = 2
-
-  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht, nvcs=2 )
-  model = DORYTorusRouteUnitRTL( PacketType, MeshPos, 5 )
-
-#  model.apply( VcdGenerationPass() )
-  # Test for Y-DOR routing algorithm
-
-  run_test( model, PacketType, MeshPos( 0, 0 ), [
-   # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en 
-   [   1,     1,     1,       9,      0,     0,    [0,0,0,0,0],  [0,0,0,0,0] ],
-   [   0,     1,     1,       7,      1,     1,    [1,0,0,0,0],  [1,0,0,0,0] ],
-   [   1,     0,     1,       3,      0,     1,    [0,0,0,1,0],  [0,0,0,0,0] ],
-   [   0,     0,     1,       6,      0,     1,    [0,0,0,0,1],  [0,0,0,0,0] ],
-   [   0,     0,     1,       4,      0,     0,    [0,0,0,0,0],  [0,0,0,0,0] ],
-   [   0,     0,     1,       4,      1,     1,    [0,0,0,0,1],  [0,0,0,0,1] ],
-  ] )
-
-def test_route_unit3x3():
-  mesh_wid = 3
-  mesh_ht  = 3
-
-  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht, nvcs=2 )
-  model = DORYTorusRouteUnitRTL( PacketType, MeshPos, 5 )
-
-  # Test for Y-DOR routing algorithm
-
-  run_test( model, PacketType, MeshPos( 1, 1 ), [
-   # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en 
-   [   1,     1,     1,       9,      0,     1,    [0,0,0,0,1],  [0,0,0,0,0] ],
-   [   0,     1,     1,       7,      0,     1,    [0,0,1,0,0],  [0,0,0,0,0] ],
-   [   1,     0,     1,       3,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
-   [   0,     0,     1,       6,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
-   [   1,     1,     1,       4,      0,     0,    [0,0,0,0,0],  [0,0,0,0,0] ],
-   [   1,     1,     1,       4,      1,     1,    [0,0,0,0,1],  [0,0,0,0,1] ],
-  ] )
+from pymtl3 import *
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.rtl.queues import BypassQueueRTL
+from ocn_pclib.ifcs.positions import mk_mesh_pos
+from ocn_pclib.ifcs.packets import mk_mesh_pkt
+from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from torusnet.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
+from torusnet.RouteUnitDorFL import RouteUnitDorFL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -106,20 +25,24 @@ def test_route_unit3x3():
 
 class TestHarness( Component ):
 
-  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs, src_initial,
-                 src_interval, sink_initial, sink_interval,
-                 arrival_time=None ):
+  def construct( s, MsgType, src_msgs, sink_msgs, mesh_wid=2, mesh_ht=2, pos_x=0, pos_y=0 ):
+
     outports = 5
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = DORYTorusRouteUnitRTL( MsgType, MeshPos, outports )
-    s.dut.pos = MeshPos( 1, 1 )
 
-    s.src   = TestSrcRTL   ( MsgType, src_msgs,  src_initial,  src_interval  )
-    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial, sink_interval )
+    match_func = lambda a, b : a.src_x == b.src_x and a.src_y == b.src_y and \
+                               a.dst_y == b.dst_y and a.payload == b.payload
+
+
+    s.src   = TestSrcRTL( MsgType, src_msgs )
+    s.src_q = BypassQueueRTL( MsgType, num_entries=1 )
+    s.dut   = DORYTorusRouteUnitRTL( MsgType, MeshPos, ncols=mesh_wid, nrows=mesh_ht )
+    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], match_func=match_func )
                 for i in range ( outports ) ]
 
     # Connections
-    s.connect( s.src.send.msg, s.dut.get.msg )
+    s.connect( s.src.send,  s.src_q.enq )
+    s.connect( s.src_q.deq, s.dut.get   )
 
     for i in range ( s.dut.num_outports ):
       s.connect( s.dut.give[i].msg, s.sinks[i].recv.msg )
@@ -128,78 +51,81 @@ class TestHarness( Component ):
     def up_give_en():
       for i in range (s.dut.num_outports):
         if s.dut.give[i].rdy and s.sinks[i].recv.rdy:
-          s.dut.give[i].en  = 1
-          s.sinks[i].recv.en = 1
+          s.dut.give[i].en   = b1(1)
+          s.sinks[i].recv.en = b1(1)
         else:
-          s.dut.give[i].en  = 0
-          s.sinks[i].recv.en = 0
+          s.dut.give[i].en   = b1(0)
+          s.sinks[i].recv.en = b1(0)
 
-    # FIXME: connect send to get
-    s.connect( s.src.send.rdy, Bits1( 1 )    )
-    s.connect( s.dut.get.rdy,  s.src.send.en )
+    @s.update
+    def up_dut_pos():
+      s.dut.pos = MeshPos( pos_x, pos_y )
 
   def done( s ):
     sinks_done = 1
     for i in range( s.dut.num_outports ):
-      if s.sinks[i].done() == 0:
+      if not s.sinks[i].done():
         sinks_done = 0
     return s.src.done() and sinks_done
 
   def line_trace( s ):
-    return s.src.line_trace() + "-> | " + s.dut.line_trace() + \
-                               " | -> " + s.sinks[0].line_trace()
+    return "{}".format( s.dut.line_trace() )
 
 #-------------------------------------------------------------------------
-# run_sim
+# mk_dst_pkts
 #-------------------------------------------------------------------------
+# A helper function that computes destination packets using the FL model.
 
-def run_sim( test_harness, max_cycles=100 ):
+def mk_dst_pkts( pos_x, pos_y, ncols, nrows, src_pkts ):
+  route_unit = RouteUnitDorFL( pos_x, pos_y, ncols, nrows, dimension='y' )
+  return route_unit.route( src_pkts )
 
-  # Create a simulator
-
-  test_harness.apply( SimpleSim )
-  test_harness.sim_reset()
-
-
-  # Run simulation
-
-  ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
-  while not test_harness.done() and ncycles < max_cycles:
-    test_harness.tick()
-    ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
-
-  # Check timeout
-
-  assert ncycles < max_cycles
-
-  test_harness.tick()
-  test_harness.tick()
-  test_harness.tick()
-
-#-------------------------------------------------------------------------
+#=========================================================================
 # Test cases
-#-------------------------------------------------------------------------
+#=========================================================================
+# TODO: Test DORX as well.
 
-#               x,y,pl,dir
-test_msgs   = [(0,0,101,1), (0,2,102,0), (0,1,103,2), (2,1,104,3), 
-               (1,1,105,4), (1,1,106,4)]
-result_msgs = [ [], [], [], [], [] ]
+class RouteUnitDorRTL_Tests( object ):
 
-#arrival_time = [ [1], [2], [3], [4], [5,6] ]
+  @classmethod
+  def setup_method( cls ):
+    pass
 
-def test_normal_simple():
- 
-  mesh_wid = 4
-  mesh_ht  = 4
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht, nvcs=2 )
-  src_packets = []
-  for ( dst_x, dst_y, payload, dir_out ) in test_msgs:
-    pkt = PacketType( 0, 0, dst_x, dst_y, 0, 0, payload )
-    src_packets.append( pkt )
-    result_msgs[dir_out].append ( pkt )
- 
-  th = TestHarness( PacketType, mesh_wid, mesh_ht, src_packets, result_msgs, 0, 0, 0, 0 )
-  run_sim( th )
+  def run_sim( s, th, max_cycles=100 ):
+    # Create a simulator
+    th.apply( DynamicSim )
+    th.sim_reset()
+
+    # Run simulation
+    ncycles = 0
+    print ""
+    print "{:3}:{}".format( ncycles, th.line_trace() )
+    while not th.done() and ncycles < max_cycles:
+      th.tick()
+      ncycles += 1
+      print "{:3}:{}".format( ncycles, th.line_trace() )
+
+    # Check timeout
+    assert ncycles < max_cycles
+
+  @pytest.mark.parametrize(
+    'pos_x, pos_y',
+    product( [ 0, 1, 2, 3 ], [ 0, 1, 2, 3 ] )
+  )
+  def test_simple_4x4( s, pos_x, pos_y ):
+
+    mesh_wid = 4
+    mesh_ht  = 4
+
+    Pkt = mk_mesh_pkt( mesh_wid, mesh_ht, nvcs=2 )
+
+    src_pkts = [
+      #   src_x  y  dst_x  y  opq  vc  payload
+      Pkt(    0, 0,     1, 1,   0,  0, 0xfaceb00c ),
+      Pkt(    0, 0,     0, 0,   0,  0, 0xdeaddead ),
+      Pkt(    0, 0,     1, 0,   0,  0, 0xdeadface ),
+      Pkt(    0, 0,     3, 3,   0,  0, 0xdeadface ),
+    ]
+    dst_pkts = mk_dst_pkts( pos_x, pos_y, mesh_wid, mesh_ht, src_pkts )
+    th = TestHarness( Pkt, src_pkts, dst_pkts, mesh_wid, mesh_ht, pos_x, pos_y )
+    s.run_sim( th )

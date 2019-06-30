@@ -5,7 +5,7 @@ DORYTorusRouteUnitRTL.py
 A DOR route unit with get/give interface for Torus topology.
 
 Author : Yanghui Ou, Cheng Tan
-  Date : June 30, 2019
+  Date : June 29, 2019
 """
 from pymtl3             import *
 from directions         import *
@@ -22,8 +22,11 @@ class DORYTorusRouteUnitRTL( Component ):
     s.nrows = nrows
 
     # Here we add 1 to avoid overflow
+    posx_type     = mk_bits( clog2( ncols ) )
+    posy_type     = mk_bits( clog2( nrows ) )
     ns_dist_type  = mk_bits( clog2( nrows+1 ) )
     we_dist_type  = mk_bits( clog2( ncols+1 ) )
+
     s.last_row_id = ns_dist_type( nrows-1 )
     s.last_col_id = we_dist_type( ncols-1 )
 
@@ -83,17 +86,16 @@ class DORYTorusRouteUnitRTL( Component ):
           s.out_dir = WEST if s.west_dist < s.east_dist else EAST
 
         # Dateline logic
-        # FIXME: replace 0 and 1 with proper types
-        if s.pos.pos_x == 0 and s.out_dir == WEST:
-          s.give_msg_wire.vc_id = 1
+        if s.pos.pos_x == posx_type(0) and s.out_dir == WEST:
+          s.give_msg_wire.vc_id = b1(1)
         elif s.pos.pos_x == s.last_col_id and s.out_dir == EAST:
-          s.give_msg_wire.vc_id = 1
-        if s.pos.pos_y == 0 and s.out_dir == SOUTH:
-          s.give_msg_wire.vc_id = 1
+          s.give_msg_wire.vc_id = b1(1)
+        elif s.pos.pos_y == posy_type(0) and s.out_dir == SOUTH:
+          s.give_msg_wire.vc_id = b1(1)
         elif s.pos.pos_y == s.last_col_id and s.out_dir == NORTH:
-          s.give_msg_wire.vc_id = 1
+          s.give_msg_wire.vc_id = b1(1)
 
-        s.give[ s.out_dir ].rdy = 1
+        s.give[ s.out_dir ].rdy = b1(1)
         s.give[ s.out_dir ].msg = s.give_msg_wire
 
     @s.update
@@ -107,4 +109,11 @@ class DORYTorusRouteUnitRTL( Component ):
     for i in range (s.num_outports):
       out_str[i] = "{}".format( s.give[i] )
 
-    return "{}({}){}*{}*".format( s.get, s.out_dir, "|".join( out_str ), s.give_msg_wire )
+    return "{}({}){}".format(
+      s.get,
+      "N" if s.out_dir == NORTH else
+      "S" if s.out_dir == SOUTH else
+      "W" if s.out_dir == WEST  else
+      "E",
+      "|".join( out_str ),
+    )

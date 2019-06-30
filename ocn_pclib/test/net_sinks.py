@@ -16,8 +16,14 @@ from pymtl3.stdlib.ifcs import RecvIfcRTL, RecvRTL2SendCL, enrdy_to_str
 
 class TestNetSinkCL( Component ):
 
-  def construct( s, Type, msgs, initial_delay=0, interval_delay=0,
-                 arrival_time=None ):
+  def construct( s,
+    Type,
+    msgs,
+    initial_delay=0,
+    interval_delay=0,
+    arrival_time=None,
+    match_func=lambda a, b : a.src == b.src and a.dst==b.dst and a.payload == b.payload,
+  ):
 
     s.recv.Type = Type
 
@@ -34,7 +40,7 @@ class TestNetSinkCL( Component ):
     s.perf_regr    = True if arrival_time is not None else False
     s.error_msg    = ""
     # TODO: maybe make this a parameter
-    s.match_func   = lambda a, b : a.src == b.src and a.dst==b.dst and a.payload == b.payload
+    s.match_func   = match_func
 
     s.initial_count  = initial_delay
     s.interval_delay = interval_delay
@@ -94,9 +100,8 @@ Received : {}
       # FIXME: s.idx does not mean anything here...
       s.error_msg = ("""
 Test Sink {} received WRONG msg!
-Expected : {}
 Received : {}
-""".format( str(s), s.msgs[ s.idx ], s.recv_msg ) )
+""".format( str(s), s.recv_msg ) )
 
     # Check performace regression
     elif s.perf_regr and s.cycle_count > s.arrival_time[ s.idx ]:
@@ -129,8 +134,14 @@ Received at    : {}""".format( str(s), s.msgs[ s.idx ], s.arrival_time[ s.idx ],
 
 class TestNetSinkRTL( Component ):
 
-  def construct( s, MsgType, msgs, initial_delay=0, interval_delay=0,
-                 arrival_time=None ):
+  def construct( s,
+    MsgType,
+    msgs,
+    initial_delay=0,
+    interval_delay=0,
+    arrival_time=None,
+    match_func=lambda a, b : a.src == b.src and a.dst==b.dst and a.payload == b.payload,
+  ):
 
     # Interface
 
@@ -139,7 +150,7 @@ class TestNetSinkRTL( Component ):
     # Components
 
     s.sink    = TestNetSinkCL( MsgType, msgs, initial_delay, interval_delay,
-                               arrival_time )
+                               arrival_time, match_func )
     s.adapter = RecvRTL2SendCL( MsgType )
 
     s.connect( s.recv,         s.adapter.recv )
