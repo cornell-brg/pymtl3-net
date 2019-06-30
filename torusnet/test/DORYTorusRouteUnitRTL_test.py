@@ -25,7 +25,7 @@ from torusnet.RouteUnitDorFL import RouteUnitDorFL
 
 class TestHarness( Component ):
 
-  def construct( s, MsgType, src_msgs, sink_msgs, mesh_wid=2, mesh_ht=2, pos_x=0, pos_y=0 ):
+  def construct( s, PktType, src_msgs, sink_msgs, mesh_wid=2, mesh_ht=2, pos_x=0, pos_y=0 ):
 
     outports = 5
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
@@ -34,10 +34,10 @@ class TestHarness( Component ):
                                a.dst_y == b.dst_y and a.payload == b.payload
 
 
-    s.src   = TestSrcRTL( MsgType, src_msgs )
-    s.src_q = BypassQueueRTL( MsgType, num_entries=1 )
-    s.dut   = DORYTorusRouteUnitRTL( MsgType, MeshPos, ncols=mesh_wid, nrows=mesh_ht )
-    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], match_func=match_func )
+    s.src   = TestSrcRTL( PktType, src_msgs )
+    s.src_q = BypassQueueRTL( PktType, num_entries=1 )
+    s.dut   = DORYTorusRouteUnitRTL( PktType, MeshPos, ncols=mesh_wid, nrows=mesh_ht )
+    s.sinks = [ TestNetSinkRTL( PktType, sink_msgs[i], match_func=match_func )
                 for i in range ( outports ) ]
 
     # Connections
