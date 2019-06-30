@@ -62,8 +62,8 @@ def test_vector_Torus2x2( dump_vcd, test_verilog ):
   model = TorusNetworkRTL( PacketType, MeshPos, mesh_wid, mesh_ht, 0 )
 
   num_inports = 5
-  model.set_param( 'top.routers*.route_units*.construct', cols = mesh_wid)
-  model.set_param( 'top.routers*.route_units*.construct', rows = mesh_ht )
+  model.set_param( 'top.routers*.route_units*.construct', ncols = mesh_wid)
+  model.set_param( 'top.routers*.route_units*.construct', nrows = mesh_ht )
 
   x = 'x'
 

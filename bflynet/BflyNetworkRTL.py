@@ -16,10 +16,10 @@ class BflyNetworkRTL( Component ):
 
     # Constants
 
-    r_rows        = k_ary ** ( n_fly - 1 )
-    s.num_routers = n_fly * ( r_rows )
+    s.r_rows        = k_ary ** ( n_fly - 1 )
+    s.num_routers = n_fly * ( s.r_rows )
     s.num_terminals = k_ary ** n_fly
-    num_channels  = ( n_fly - 1 ) * ( r_rows ) * k_ary
+    num_channels  = ( n_fly - 1 ) * ( s.r_rows ) * k_ary
 
     # Interface
 
@@ -31,10 +31,10 @@ class BflyNetworkRTL( Component ):
     s.routers  = [ BflyRouterRTL( PacketType, PositionType )
                    for i in range( s.num_routers ) ]
 
-#    s.channels = [ ChannelRTL( PacketType, latency = chl_lat)
-#                     for _ in range( num_channels ) ]
+    s.channels = [ ChannelRTL( PacketType, latency = chl_lat)
+                     for _ in range( num_channels ) ]
 
-    s.pos      = [[ PositionType( r, n ) for r in range( r_rows )]
+    s.pos      = [[ PositionType( r, n ) for r in range( s.r_rows )]
                     for n in range( n_fly )]
 
     # Connect s.routers together in Butterfly
@@ -42,61 +42,33 @@ class BflyNetworkRTL( Component ):
     chl_id = 0
     terminal_id_recv = 0
     terminal_id_send = 0
-#    for n in range( n_fly-1 ):
-#      print '----- each fly -----'
-#      for r in range( r_rows ):
-#        i = n * r_rows + r
-#        for j in range( k_ary ):
-#          s.connect( s.routers[i].send[j], 
-#                     s.channels[chl_id].recv )
-#          s.connect( s.channels[chl_id].send, 
-#                     s.routers[(n+1)*r_rows+(r+(j+r/(r_rows/k_ary))*(r_rows/k_ary))%r_rows].\
-#                             recv[r/(r_rows/k_ary)] )
-#          print 'connect: ({},{})->({},{})'.format(i,j,
-#                  (n+1)*r_rows+(r+(j+r/(r_rows/k_ary))*(r_rows/k_ary))%r_rows,
-#                  r/(r_rows/k_ary))
-
-    group_size = r_rows
+    group_size = s.r_rows
   
     for f in range( n_fly - 1 ):
-      num_group  = r_rows / group_size
+      num_group  = s.r_rows / group_size
       for g in range( num_group ):
         for gs in range( group_size ):
           for k in range( k_ary ):
             index = g * group_size + gs
             base  = g * group_size
-   #         reverse_index  = g * group_size + group_size - s - 1
             interval = group_size/k_ary * k
-            s.connect( s.routers[f*r_rows+index].\
+            s.connect( s.routers[f*s.r_rows+index].\
                     send[(k+gs/(group_size/k_ary))%k_ary],
-#                       s.channels[chl_id].recv )
-#            s.connect( s.channels[chl_id].send,
-                       s.routers[(f+1)*r_rows+base+(gs+interval)%group_size].\
+                       s.channels[chl_id].recv )
+            s.connect( s.channels[chl_id].send,
+                       s.routers[(f+1)*s.r_rows+base+(gs+interval)%group_size].\
                                recv[k] )
-#            print '({},{}[{}]) -> [{}]({},{})'.format( f, index, k,
-#                    k, f + 1, base + (gs + interval) % group_size )
 
-#    for i in range( s.num_routers ):
-#      if i < s.num_routers - r_rows:
-#        for j in range( k_ary ):
-#          s.connect( s.routers[i].send[j], s.channels[chl_id].recv )
-#
-#          # FIXME: Utilize bit to index the specific router.
-#          s.connect( s.channels[chl_id].send, 
-#                     s.routers[(i/r_rows+1)*r_rows+(j
-#                         *(r_rows/k_ary))%r_rows].recv[i%k_ary] )
-#          print 'connect: from(router{},port{})-to(router{},port{})'.\
-#                  format(i, j, (i/r_rows+1)*r_rows+(j*(r_rows/k_ary))%r_rows, i%k_ary)
-          chl_id += 1
+            chl_id += 1
 
     # Connect the router ports with Network Interfaces
     for i in range( s.num_routers ):
-      if i < r_rows:
+      if i < s.r_rows:
         for j in range( k_ary ):
           s.connect(s.recv[terminal_id_recv], s.routers[i].recv[j])
           terminal_id_recv += 1
 
-      if i >= s.num_routers - r_rows:
+      if i >= s.num_routers - s.r_rows:
         for j in range( k_ary ):
           s.connect(s.send[terminal_id_send], s.routers[i].send[j])
           terminal_id_send += 1
@@ -105,11 +77,32 @@ class BflyNetworkRTL( Component ):
     @s.update
     def up_pos():
       for n in range( n_fly ):
-        for r in range( r_rows ):
-          s.routers[r_rows * n + r].pos = s.pos[n][r]
+        for r in range( s.r_rows ):
+          s.routers[s.r_rows * n + r].pos = s.pos[n][r]
 
   def line_trace( s ):
     trace = [ "" for _ in range( s.num_terminals ) ]
     for i in range( s.num_terminals ):
       trace[i] += s.send[i].line_trace()
     return "|".join( trace )
+
+  def elaborate_physical( s ):
+
+    link_length = s.channels[0].dim.w
+
+    for i, r in enumerate( s.routers ):
+      r.dim.x = i / s.r_rows * ( r.dim.w + link_length )
+      r.dim.y = i % s.r_rows * ( r.dim.h + link_length )
+
+    s.dim.w = s.r_rows * ( r.dim.w + link_length )
+    s.dim.h = s.r_rows * ( r.dim.h + link_length )
+
+  def elaborate_logical( s ):
+    link_length = s.channels[0].dim.w
+
+    for i, r in enumerate( s.routers ):
+      r.dim.x = i / s.r_rows * ( r.dim.w + link_length )
+      r.dim.y = i % s.r_rows * ( r.dim.h + link_length )
+
+    s.dim.w = s.r_rows * ( r.dim.w + link_length )
+    s.dim.h = s.r_rows * ( r.dim.h + link_length )
