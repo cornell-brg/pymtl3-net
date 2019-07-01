@@ -47,7 +47,8 @@ class DORYTorusRouteUnitRTL( Component ):
 
     # Connections
     for i in range( s.num_outports ):
-      s.connect( s.give_ens[i], s.give[i].en )
+      s.connect( s.give_ens[i],   s.give[i].en  )
+      s.connect( s.give_msg_wire, s.give[i].msg )
 
     # Calculate distance
     @s.update
@@ -104,7 +105,7 @@ class DORYTorusRouteUnitRTL( Component ):
           s.give_msg_wire.vc_id = b1(1)
 
         s.give[ s.out_dir ].rdy = b1(1)
-        s.give[ s.out_dir ].msg = s.give_msg_wire
+        # s.give[ s.out_dir ].msg = s.give_msg_wire
 
     @s.update
     def up_ru_get_en():
