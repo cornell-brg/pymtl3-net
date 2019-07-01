@@ -10,12 +10,16 @@ from pymtl3             import *
 from BflyRouterRTL      import BflyRouterRTL
 from channel.ChannelRTL import ChannelRTL
 from pymtl3.stdlib.ifcs.SendRecvIfc  import *
+from ocn_pclib.ifcs.PhysicalDimension import PhysicalDimension
 
 class BflyNetworkRTL( Component ):
   def construct( s, PacketType, PositionType, k_ary, n_fly, chl_lat=0 ):
 
     # Constants
 
+    s.dim = PhysicalDimension()
+    s.k_ary = k_ary
+    s.n_fly = n_fly
     s.r_rows        = k_ary ** ( n_fly - 1 )
     s.num_routers = n_fly * ( s.r_rows )
     s.num_terminals = k_ary ** n_fly
@@ -88,14 +92,34 @@ class BflyNetworkRTL( Component ):
 
   def elaborate_physical( s ):
 
+    # FIXME: This should be done by the pass (but not yet merged into master...)
+    for r in s.routers:
+      r.elaborate_physical()
+    for c in s.channels:
+      c.elaborate_physical()
+
+    BOUNDARY = 10
+    router_length = s.routers[0].dim.w
     link_length = s.channels[0].dim.w
 
-    for i, r in enumerate( s.routers ):
-      r.dim.x = i / s.r_rows * ( r.dim.w + link_length )
-      r.dim.y = i % s.r_rows * ( r.dim.h + link_length )
+    for row in range( s.r_rows ):
+      for f in range( s.n_fly ):
+        r = s.routers[ row + f * s.r_rows ]
+        r.dim.x = BOUNDARY + row%s.k_ary * (s.n_fly*router_length + link_length) + \
+                  f * router_length
+        r.dim.y = BOUNDARY + (s.r_rows/s.k_ary - 1 - row/s.k_ary) * \
+                  (s.n_fly*router_length + link_length)
+        print 'createFence routers__{}\t\t{}\t{}\t{}\t{}'.\
+              format( row+f*s.r_rows, r.dim.x, r.dim.y,\
+                      r.dim.x+router_length, r.dim.y+router_length )
 
-    s.dim.w = s.r_rows * ( r.dim.w + link_length )
-    s.dim.h = s.r_rows * ( r.dim.h + link_length )
+#        print 'router[{}].dim: ({},{}); pos: {}'.\
+#              format( row+f*s.r_rows, r.dim.x, r.dim.y, r.pos )
+
+    s.dim.w = 2*BOUNDARY + s.r_rows/s.k_ary*(s.n_fly*r.dim.w+link_length) - link_length
+    s.dim.h = 2*BOUNDARY + s.r_rows/s.k_ary*(s.n_fly*r.dim.h+link_length) - link_length
+#    print 'size: {},{}'.format( s.dim.w, s.dim.h )
+
 
   def elaborate_logical( s ):
     link_length = s.channels[0].dim.w

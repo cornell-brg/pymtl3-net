@@ -6,14 +6,11 @@
 # Author : Cheng Tan
 #   Date : May 7, 2019
 
-from pymtl                 import *
-import py
-
 #-------------------------------------------------------------------------
 # Dimension information used for floorplanning and topology demo 
 #-------------------------------------------------------------------------
 
-class Dimension( object ):
+class PhysicalDimension( object ):
 
   def __init__( s ):
     s.x     = 0

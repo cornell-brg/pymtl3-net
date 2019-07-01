@@ -8,6 +8,7 @@
 
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
+from ocn_pclib.ifcs.PhysicalDimension import PhysicalDimension
 
 class Router( Component ):
 
@@ -15,6 +16,7 @@ class Router( Component ):
                  InputUnitType, RouteUnitType, SwitchUnitType,
                  OutputUnitType ):
 
+    s.dim = PhysicalDimension()
     s.num_inports  = num_inports
     s.num_outports = num_outports
 

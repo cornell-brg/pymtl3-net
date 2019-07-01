@@ -9,11 +9,13 @@
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3.stdlib.rtl.queues import NormalQueueRTL
+from ocn_pclib.ifcs.PhysicalDimension import PhysicalDimension
 
 class ChannelRTL( Component ):
   def construct(s, PacketType, QueueType=None, latency=2, num_entries=2):
 
     # Constant
+    s.dim = PhysicalDimension()
     s.QueueType   = QueueType
     s.latency     = latency
     s.num_entries = num_entries
@@ -57,4 +59,4 @@ class ChannelRTL( Component ):
       return "{}(0){}".format( s.recv.msg, s.send.msg)
 
   def elaborate_physical( s ):
-    s.dim.w = 20
+    s.dim.w = 100
