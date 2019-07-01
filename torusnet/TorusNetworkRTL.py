@@ -15,12 +15,12 @@ from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRT
 
 class TorusNetworkRTL( Component ):
 
-  def construct( s, 
-                 PacketType, 
-                 PositionType, 
-                 mesh_wid=4, 
-                 mesh_ht=4, 
-                 chl_lat=0, 
+  def construct( s,
+                 PacketType,
+                 PositionType,
+                 mesh_wid=4,
+                 mesh_ht=4,
+                 chl_lat=0,
                  nvcs=2,
                  credit_line=2,
                ):
@@ -40,12 +40,12 @@ class TorusNetworkRTL( Component ):
 
     # Components
 
-    s.routers    = [ TorusRouterRTL( PacketType, PositionType )
+    s.routers    = [ TorusRouterRTL( PacketType, PositionType, ncols=mesh_wid, nrows=mesh_ht, nvcs=nvcs, credit_line=credit_line )
                      for i in range( s.num_routers ) ]
 
-    s.recv_adapters = [ RecvRTL2CreditSendRTL( PacketType, nvcs=nvcs, 
+    s.recv_adapters = [ RecvRTL2CreditSendRTL( PacketType, nvcs=nvcs,
         credit_line=credit_line ) for _ in range( s.num_routers ) ]
-    s.send_adapters = [ CreditRecvRTL2SendRTL( PacketType, nvcs=nvcs, 
+    s.send_adapters = [ CreditRecvRTL2SendRTL( PacketType, nvcs=nvcs,
         credit_line=credit_line ) for _ in range( s.num_routers ) ]
 
 #    s.channels   = [ ChannelRTL( PacketType, latency = chl_lat)
@@ -69,17 +69,17 @@ class TorusNetworkRTL( Component ):
 #      s.connect(s.channels[chl_id].send, s.routers[(i-mesh_ht+
 #          s.num_routers)%s.num_routers].recv[NORTH])
 #      chl_id += 1
-# 
+#
 #      s.connect(s.routers[i].send[NORTH], s.channels[chl_id].recv)
 #      s.connect(s.channels[chl_id].send, s.routers[
 #          (i+mesh_ht+s.num_routers)%s.num_routers].recv[SOUTH])
 #      chl_id += 1
-# 
+#
 #      s.connect(s.routers[i].send[WEST],  s.channels[chl_id].recv)
 #      s.connect(s.channels[chl_id].send, s.routers[
 #          i-(i%mesh_wid-(i-1)%mesh_wid)].recv[EAST])
 #      chl_id += 1
-# 
+#
 #      s.connect(s.routers[i].send[EAST],  s.channels[chl_id].recv)
 #      s.connect(s.channels[chl_id].send, s.routers[
 #          i+(i+1)%mesh_wid-i%mesh_wid].recv[WEST])
@@ -109,17 +109,17 @@ class TorusNetworkRTL( Component ):
       trace[i] += s.recv[i].line_trace()
 #    for i in range( s.num_terminals ):
 #      for j in range( 5 ):
-#        trace[i] += '************ input[{}][{}]: {}\n'.format( i, j, 
+#        trace[i] += '************ input[{}][{}]: {}\n'.format( i, j,
 #                s.routers[i].input_units[j].line_trace())
 #
 #    for i in range( s.num_terminals ):
 #      for j in range( 10 ):
-#        trace[i] += '************ route[{}][{}]: {}\n'.format( i, j, 
+#        trace[i] += '************ route[{}][{}]: {}\n'.format( i, j,
 #                s.routers[i].route_units[j].line_trace())
 #
 #    for i in range( s.num_terminals ):
 #      for j in range( 5 ):
-#        trace[i] += '************ switch[{}][{}]: {}\n'.format( i, j, 
+#        trace[i] += '************ switch[{}][{}]: {}\n'.format( i, j,
 #                s.routers[i].switch_units[j].line_trace())
 #    for i in range( s.num_terminals ):
 #      trace[i] += '\n************ send[{}]: '.format( i )
@@ -135,8 +135,8 @@ class TorusNetworkRTL( Component ):
 #        if isinstance(s.routers[r].recv[i].msg, int):
 #          trace += '|{}'.format(s.routers[r].recv[i].msg)
 #        else:
-#          trace += '|{}:{}->({},{})'.format( i, 
-#                s.routers[r].recv[i].msg.payload, 
+#          trace += '|{}:{}->({},{})'.format( i,
+#                s.routers[r].recv[i].msg.payload,
 #                s.routers[r].recv[i].msg.dst_x,
 #                s.routers[r].recv[i].msg.dst_y)
 #      trace += '\n out: '
@@ -144,12 +144,12 @@ class TorusNetworkRTL( Component ):
 #        if isinstance(s.routers[r].recv[i].msg, int):
 #          trace += '|{}'.format(s.routers[r].recv[i].msg)
 #        else:
-#          trace += '|{}:{}->({},{})'.format( i, 
-#                s.routers[r].send[i].msg.payload, 
+#          trace += '|{}:{}->({},{})'.format( i,
+#                s.routers[r].send[i].msg.payload,
 #                s.routers[r].send[i].msg.dst_x,
 #                s.routers[r].send[i].msg.dst_y)
 #    return trace
-    
+
   def elaborate_physical( s ):
     # Initialize dimension for sub-modules.
     BOUNDARY = 10
