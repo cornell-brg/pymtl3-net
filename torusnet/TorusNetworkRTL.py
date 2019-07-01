@@ -103,52 +103,10 @@ class TorusNetworkRTL( Component ):
           s.routers[idx].pos = PositionType( x, y )
 
   def line_trace( s ):
-    trace = [ "" for _ in range( s.num_terminals ) ]
-    for i in range( s.num_terminals ):
-#      trace[i] += '------ recv[{}]: '.format(i)
-      trace[i] += s.recv[i].line_trace()
-#    for i in range( s.num_terminals ):
-#      for j in range( 5 ):
-#        trace[i] += '************ input[{}][{}]: {}\n'.format( i, j,
-#                s.routers[i].input_units[j].line_trace())
-#
-#    for i in range( s.num_terminals ):
-#      for j in range( 10 ):
-#        trace[i] += '************ route[{}][{}]: {}\n'.format( i, j,
-#                s.routers[i].route_units[j].line_trace())
-#
-#    for i in range( s.num_terminals ):
-#      for j in range( 5 ):
-#        trace[i] += '************ switch[{}][{}]: {}\n'.format( i, j,
-#                s.routers[i].switch_units[j].line_trace())
-#    for i in range( s.num_terminals ):
-#      trace[i] += '\n************ send[{}]: '.format( i )
-#      trace[i] += s.send[i].line_trace()
-#      trace[i] += '\n'
-    return "|".join( trace )
+    in_trace  = [ str( s.recv[i] ) for i in range( s.num_terminals ) ]
+    out_trace = [ str( s.send[i] ) for i in range( s.num_terminals ) ]
 
-#  def line_trace( s ):
-#    trace = ''
-#    for r in range(s.num_routers):
-#      trace += '\n({},{})|'.format(s.routers[r].pos.pos_x, s.routers[r].pos.pos_y)
-#      for i in range(s.routers[r].num_inports):
-#        if isinstance(s.routers[r].recv[i].msg, int):
-#          trace += '|{}'.format(s.routers[r].recv[i].msg)
-#        else:
-#          trace += '|{}:{}->({},{})'.format( i,
-#                s.routers[r].recv[i].msg.payload,
-#                s.routers[r].recv[i].msg.dst_x,
-#                s.routers[r].recv[i].msg.dst_y)
-#      trace += '\n out: '
-#      for i in range(s.routers[r].num_outports):
-#        if isinstance(s.routers[r].recv[i].msg, int):
-#          trace += '|{}'.format(s.routers[r].recv[i].msg)
-#        else:
-#          trace += '|{}:{}->({},{})'.format( i,
-#                s.routers[r].send[i].msg.payload,
-#                s.routers[r].send[i].msg.dst_x,
-#                s.routers[r].send[i].msg.dst_y)
-#    return trace
+    return "{}_()_{}".format( "|".join( in_trace ), "|".join( out_trace ) )
 
   def elaborate_physical( s ):
     # Initialize dimension for sub-modules.

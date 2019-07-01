@@ -45,7 +45,7 @@ class TestHarness( Component ):
       if not s.srcs[i].done():
         srcs_done = False
         break
-      if not s.sinks[i].done() == 0:
+      if not s.sinks[i].done():
         sinks_done = False
         break
     return srcs_done and sinks_done
