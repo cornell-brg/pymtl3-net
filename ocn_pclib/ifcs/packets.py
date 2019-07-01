@@ -337,17 +337,38 @@ def mk_mesh_pkt_timestamp( mesh_wid=2, mesh_ht=2, nvcs=1,
 
   if nvcs > 1:
     VcIdType = mk_bits( clog2( nvcs ) )
+    def str_func( self ):
+      return "({},{})>({},{}):{}:{}:{}:{}".format(
+        XType        ( self.src_x     ),
+        YType        ( self.src_y     ),
+        XType        ( self.dst_x     ),
+        YType        ( self.dst_y     ),
+        OpqType      ( self.opaque    ),
+        VcIdType     ( self.vc_id     ),
+        PayloadType  ( self.payload   ),
+        TimestampType( self.timestamp ),
+      )
     new_class = mk_bit_struct( new_name,[
       ( 'src_x',     XType         ),
       ( 'src_y',     YType         ),
       ( 'dst_x',     XType         ),
       ( 'dst_y',     YType         ),
+      ( 'opaque',    OpqType       ),
       ( 'vc_id',     VcIdType      ),
-      ( 'opaque',    OpqType       ),
       ( 'payload',   PayloadType   ),
       ( 'timestamp', TimestampType ),
-    ])
+    ], str_func)
   else:
+    def str_func( self ):
+      return "({},{})>({},{}):{}:{}:{}".format(
+        XType        ( self.src_x     ),
+        YType        ( self.src_y     ),
+        XType        ( self.dst_x     ),
+        YType        ( self.dst_y     ),
+        OpqType      ( self.opaque    ),
+        PayloadType  ( self.payload   ),
+        TimestampType( self.timestamp ),
+      )
     new_class = mk_bit_struct( new_name,[
       ( 'src_x',     XType         ),
       ( 'src_y',     YType         ),
@@ -356,7 +377,7 @@ def mk_mesh_pkt_timestamp( mesh_wid=2, mesh_ht=2, nvcs=1,
       ( 'opaque',    OpqType       ),
       ( 'payload',   PayloadType   ),
       ( 'timestamp', TimestampType ),
-    ])
+    ], str_func)
   return new_class
 
 #=========================================================================
