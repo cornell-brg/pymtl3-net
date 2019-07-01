@@ -74,7 +74,7 @@ while sim_dir:
   if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
     sys.path.insert(0,sim_dir)
     # include the pymtl environment here
-    sys.path.insert(0,sim_dir + "/../pymtl3/")
+    # sys.path.insert(0,sim_dir + "/../pymtl3/")
     break
   sim_dir = os.path.dirname(sim_dir)
   os.system(sim_dir)
@@ -303,8 +303,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     print 'routers: ', opts.routers, '; rows: ', opts.rows, '; wid: ', net_width,\
             '; ht: ', net_height
     model = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
-    model.set_param('top.routers*.route_units*.construct', cols=net_width )
-    model.set_param('top.routers*.route_units*.construct', rows=net_height)
+    # model.set_param('top.routers*.route_units*.construct', ncols=net_width )
+    # model.set_param('top.routers*.route_units*.construct', nrows=net_height)
 
   elif opts.topology == "CMesh":
     NetModel = topology_dict[ "CMesh" ]
