@@ -6,6 +6,9 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : July 1, 2019
 
+import hypothesis
+from hypothesis import strategies as st
+
 from pymtl3 import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from ocn_pclib.test.net_sinks import TestNetSinkRTL
@@ -57,13 +60,27 @@ class TestHarness( Component ):
 # mk_src_pkts
 #-------------------------------------------------------------------------
 
-def mk_src_pkts( nrows, ncols, lst ):
+def mk_src_pkts( ncols, nrows, lst ):
   nterminals = nrows * ncols
   src_pkts = [ [] for _ in range( nterminals ) ]
   for pkt in lst:
     src_id = int(pkt.src_x) + int(pkt.src_y) * ncols
     src_pkts[ src_id ].append( pkt )
   return src_pkts
+
+#-------------------------------------------------------------------------
+# mk_src_pkts
+#-------------------------------------------------------------------------
+
+@st.composite
+def torus_pkt_strat( draw, ncols, nrows ):
+  src_x = draw( st.integers(0, ncols-1) )
+  src_y = draw( st.integers(0, nrows-1) )
+  dst_x = draw( st.integers(0, ncols-1) )
+  dst_y = draw( st.integers(0, nrows-1) )
+  payload = draw( st.sampled_from([ 0xdeadface, 0xfaceb00c, 0xdeadbabe ]) )
+  Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+  return Pkt( src_x, src_y, dst_x, dst_y, 0, 0, payload )
 
 #=========================================================================
 # Test cases
@@ -97,7 +114,27 @@ class Ringnet_Tests( object ):
     src_pkts = mk_src_pkts( ncols, nrows, [
       #    src_x  y  dst_x  y   opq vc payload
       Pkt(     0, 0,     1, 1,  0,  0, 0xfaceb00c ),
+      Pkt(     1, 1,     1, 0,  0,  0, 0xdeadface ),
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
     s.run_sim( th )
+
+  @hypothesis.settings( deadline=None )
+  @hypothesis.given(
+    ncols = st.integers(2, 8),
+    nrows = st.integers(2, 8),
+    pkts  = st.data(),
+  )
+  def test_hypothesis( s, ncols, nrows, pkts ):
+    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+
+    pkts_lst = pkts.draw(
+      st.lists( torus_pkt_strat( ncols, nrows ), max_size=100 ),
+      label= "pkts"
+    )
+
+    src_pkts = mk_src_pkts( ncols, nrows, pkts_lst )
+    dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
+    th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
+    s.run_sim( th, max_cycles=2000 )
