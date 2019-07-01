@@ -58,8 +58,8 @@ class BflyNetworkRTL( Component ):
             s.connect( s.channels[chl_id].send,
                        s.routers[(f+1)*s.r_rows+base+(gs+interval)%group_size].\
                                recv[k] )
-
             chl_id += 1
+      group_size = group_size / k_ary
 
     # Connect the router ports with Network Interfaces
     for i in range( s.num_routers ):

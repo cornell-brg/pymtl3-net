@@ -42,16 +42,16 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
       bf_dst = DstType(0)
       tmp = 0
       for i in range( n_fly ):
-        tmp = dst / (r_rows**(n_fly-i-1))
-        dst = dst % (r_rows**(n_fly-i-1))
+        tmp = dst / (k_ary**(n_fly-i-1))
+        dst = dst % (k_ary**(n_fly-i-1))
         bf_dst = DstType(bf_dst | DstType(tmp))
         if i != n_fly - 1:
-          if r_rows == 1:
+          if k_ary == 1:
             bf_dst = bf_dst * 2
           else:
-            bf_dst = bf_dst * r_rows
+            bf_dst = bf_dst * k_ary
 
-      pkt = PacketType( terminal_id, bf_dst, 1, test_vector[1][1])
+      pkt = PacketType( terminal_id, bf_dst, 0, test_vector[1][1])
     
       # Enable the network interface on specific router
       for i in range (num_terminals):
@@ -85,7 +85,6 @@ def test_vector_2ary_1fly( dump_vcd, test_verilog ):
   n_fly = 1
   num_routers = n_fly * ( k_ary ** ( n_fly - 1 ) )
   r_rows      = k_ary ** ( n_fly - 1 )
-#  BfPos = mk_bfly_pos( r_rows, n_fly )
   BflyPosition = mk_bfly_pos( k_ary, n_fly )
   BflyPacket   = mk_bfly_pkt( k_ary, n_fly )
   model = BflyNetworkRTL( BflyPacket, BflyPosition, k_ary, n_fly, 0 )
@@ -219,45 +218,69 @@ def run_sim( test_harness, max_cycles=100 ):
 #-------------------------------------------------------------------------
 # Test cases (specific for 4-ary 2-fly butterfly)
 #-------------------------------------------------------------------------
+#           src, dst, payload
+test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
+              (4, 11, 105), (5, 10, 106), (6,  9, 107), (7,  8, 108),
+              (8,  7, 109), (9,  6, 110), (10, 5, 111), (11, 4, 112),
+              (12, 3, 113), (13, 2, 114), (14, 1, 115), (15, 0, 116) ]
+
+src_packets  =  [ [],[],[],[],
+                  [],[],[],[],
+                  [],[],[],[],
+                  [],[],[],[] ]
+
+sink_packets =  [ [],[],[],[],
+                  [],[],[],[],
+                  [],[],[],[],
+                  [],[],[],[] ]
+
+def set_dst(k_ary, n_fly, vec_dst):
+
+  DstType = mk_bits( clog2( k_ary ) * n_fly )
+  bf_dst = DstType(0)
+  tmp = 0
+  dst = vec_dst
+  for i in range( n_fly ):
+    tmp = dst / (k_ary**(n_fly-i-1))
+    dst = dst % (k_ary**(n_fly-i-1))
+    bf_dst = DstType(bf_dst | DstType(tmp))
+    if i != n_fly - 1:
+      if k_ary == 1:
+        bf_dst = bf_dst * 2
+      else:
+        bf_dst = bf_dst * k_ary
+  return bf_dst
 
 def test_srcsink_4ary_2fly():
 
-  #           src, dst, payload
-  test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
-                (4, 11, 105), (5, 10, 106), (6,  9, 107), (7,  8, 108),
-                (8,  7, 109), (9,  6, 110), (10, 5, 111), (11, 4, 112),
-                (12, 3, 113), (13, 2, 114), (14, 1, 115), (15, 0, 116) ]
-  
-  src_packets  =  [ [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[] ]
-  
-  sink_packets =  [ [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[] ]
-  
   k_ary = 4
   n_fly = 2
   for (vec_src, vec_dst, payload) in test_msgs:
     PacketType  = mk_bfly_pkt( k_ary, n_fly )
-    r_rows = k_ary ** ( n_fly - 1 )
-    DstType = mk_bits( clog2( r_rows ) * n_fly )
-    bf_dst = DstType(0)
-    tmp = 0
-    dst = vec_dst
-    for i in range( n_fly ):
-      tmp = dst / (r_rows**(n_fly-i-1))
-      dst = dst % (r_rows**(n_fly-i-1))
-      bf_dst = DstType(bf_dst | DstType(tmp))
-      if i != n_fly - 1:
-        if r_rows == 1:
-          bf_dst = bf_dst * 2
-        else:
-          bf_dst = bf_dst * r_rows
+#    r_rows = k_ary ** ( n_fly - 1 )
+    bf_dst = set_dst( k_ary, n_fly, vec_dst)
+    pkt = PacketType( vec_src, bf_dst, 0, payload)
+    src_packets [vec_src].append( pkt )
+    sink_packets[vec_dst].append( pkt )
 
-    pkt = PacketType( vec_src, bf_dst, 1, payload)
+  th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets,
+                    0, 0, 0, 0 )
+
+  th.set_param( "top.dut.routers*.route_units*.construct", n_fly=n_fly )
+  th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
+  th.set_param( "top.dut.line_trace",  )
+
+
+  run_sim( th )
+
+def test_srcsink_2ary_4fly():
+
+  k_ary = 2
+  n_fly = 4
+  for (vec_src, vec_dst, payload) in test_msgs:
+    PacketType  = mk_bfly_pkt( k_ary, n_fly )
+    bf_dst = set_dst( k_ary, n_fly, vec_dst)
+    pkt = PacketType( vec_src, bf_dst, 0, payload)
     src_packets [vec_src].append( pkt )
     sink_packets[vec_dst].append( pkt )
 

@@ -406,19 +406,23 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
           elif opts.topology == "Butterfly":
             r_rows = k_ary ** ( n_fly - 1 )
-            DstType = mk_bits( clog2( r_rows ) * n_fly )
+#            DstType = mk_bits( clog2( r_rows ) * n_fly )
+            if r_rows == 1 or k_ary == 1:
+              DstType = mk_bits( n_fly )
+            else:
+              DstType = mk_bits( clog2( k_ary ) * n_fly )
             bf_dst = DstType(0)
             tmp = 0
             dst = dest
             for index in range( n_fly ):
-              tmp = dst / (r_rows**(n_fly-index-1))
-              dst = dst % (r_rows**(n_fly-index-1))
+              tmp = dst / (k_ary**(n_fly-index-1))
+              dst = dst % (k_ary**(n_fly-index-1))
               bf_dst = DstType(bf_dst | DstType(tmp))
               if index != n_fly - 1:
-                if r_rows == 1:
+                if k_ary == 1:
                   bf_dst = bf_dst * 2
                 else:
-                  bf_dst = bf_dst * r_rows
+                  bf_dst = bf_dst * k_ary
             pkt = PacketType( i, bf_dst, 0, 6, ncycles )
 
           src[i].append( pkt )
@@ -456,19 +460,23 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
           elif opts.topology == "Butterfly":
             r_rows = k_ary ** ( n_fly - 1 )
-            DstType = mk_bits( clog2( r_rows ) * n_fly )
+#            DstType = mk_bits( clog2( r_rows ) * n_fly )
+            if r_rows == 1 or k_ary == 1:
+              DstType = mk_bits( n_fly )
+            else:
+              DstType = mk_bits( clog2( k_ary ) * n_fly )
             bf_dst = DstType(0)
             tmp = 0
             dst = dest
             for index in range( n_fly ):
-              tmp = dst / (r_rows**(n_fly-index-1))
-              dst = dst % (r_rows**(n_fly-index-1))
+              tmp = dst / (k_ary**(n_fly-index-1))
+              dst = dst % (k_ary**(n_fly-index-1))
               bf_dst = DstType(bf_dst | DstType(tmp))
               if index != n_fly - 1:
-                if r_rows == 1:
+                if k_ary == 1:
                   bf_dst = bf_dst * 2
                 else:
-                  bf_dst = bf_dst * r_rows
+                  bf_dst = bf_dst * k_ary
             pkt = PacketType( i, bf_dst, 0, 6, INVALID_TIMESTAMP )
 
           src[i].append( pkt )
