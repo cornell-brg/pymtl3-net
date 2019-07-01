@@ -36,8 +36,9 @@ class DORYTorusRouteUnitRTL( Component ):
     s.pos  = InPort( PositionType )
 
     # Componets
-    s.out_dir       = Wire( mk_bits( clog2( s.num_outports ) ) )
-    s.give_ens      = Wire( mk_bits( s.num_outports ) )
+    s.out_dir       = Wire( Bits3        )
+    s.give_ens      = Wire( Bits5        )
+    s.turning       = Wire( Bits1        )
     s.north_dist    = Wire( ns_dist_type )
     s.south_dist    = Wire( ns_dist_type )
     s.west_dist     = Wire( we_dist_type )
@@ -67,12 +68,14 @@ class DORYTorusRouteUnitRTL( Component ):
         s.west_dist = s.pos.pos_x + ns_dist_type(1) + s.last_col_id - s.get.msg.dst_y
         s.east_dist = s.get.msg.dst_y - s.pos.pos_x
 
+
     # Routing logic
     @s.update
     def up_ru_routing():
 
       s.give_msg_wire = deepcopy( s.get.msg )
       s.out_dir = b3(0)
+      s.turning = b1(0)
 
       for i in range( s.num_outports ):
         s.give[i].rdy = b1(0)
@@ -85,8 +88,13 @@ class DORYTorusRouteUnitRTL( Component ):
         else:
           s.out_dir = WEST if s.west_dist < s.east_dist else EAST
 
+        # Turning logic
+        s.turning = ( s.get.msg.src_x==s.pos.pos_x & s.get.msg.src_y!=s.pos.pos_y ) & (s.out_dir == WEST | s.out_dir == EAST )
+
         # Dateline logic
-        if s.pos.pos_x == posx_type(0) and s.out_dir == WEST:
+        if s.turning:
+          s.give_msg_wire.vc_id = b1(0)
+        elif s.pos.pos_x == posx_type(0) and s.out_dir == WEST:
           s.give_msg_wire.vc_id = b1(1)
         elif s.pos.pos_x == s.last_col_id and s.out_dir == EAST:
           s.give_msg_wire.vc_id = b1(1)
@@ -109,11 +117,12 @@ class DORYTorusRouteUnitRTL( Component ):
     for i in range (s.num_outports):
       out_str[i] = "{}".format( s.give[i] )
 
-    return "{}({}){}".format(
+    return "{}({},{}){}".format(
       s.get,
       "N" if s.out_dir == NORTH else
       "S" if s.out_dir == SOUTH else
       "W" if s.out_dir == WEST  else
       "E",
+      "t" if s.turning else " ",
       "|".join( out_str ),
     )
