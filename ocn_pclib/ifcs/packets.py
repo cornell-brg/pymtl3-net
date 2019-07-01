@@ -133,9 +133,9 @@ def mk_mesh_pkt( mesh_wid=2, mesh_ht=2, opaque_nbits=8,
     def str_func( self ):
       return "({},{})>({},{}):{}:{}:{}".format(
         XType      ( self.src_x   ),
-        YType      ( self.src_x   ),
+        YType      ( self.src_y   ),
         XType      ( self.dst_x   ),
-        YType      ( self.dst_x   ),
+        YType      ( self.dst_y   ),
         OpqType    ( self.opaque  ),
         VcIdType   ( self.vc_id   ),
         PayloadType( self.payload ),
@@ -153,9 +153,9 @@ def mk_mesh_pkt( mesh_wid=2, mesh_ht=2, opaque_nbits=8,
     def str_func( self ):
       return "({},{})>({},{}):{}:{}".format(
         XType      ( self.src_x   ),
-        YType      ( self.src_x   ),
+        YType      ( self.src_y   ),
         XType      ( self.dst_x   ),
-        YType      ( self.dst_x   ),
+        YType      ( self.dst_y   ),
         OpqType    ( self.opaque  ),
         PayloadType( self.payload ),
       )
