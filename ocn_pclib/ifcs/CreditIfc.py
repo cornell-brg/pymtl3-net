@@ -37,7 +37,7 @@ class CreditRecvIfcRTL( Interface ):
     except AttributeError:
       s.trace_len = len( str(s.MsgType()) )
       trace_len = s.trace_len
-    return "{}|{}".format(
+    return "{}:{}".format(
       enrdy_to_str( s.msg, s.en, True, s.trace_len ),
       "".join( [ "$" if x else '.' for x in s.yum ] )
     )
@@ -60,7 +60,7 @@ class CreditSendIfcRTL( Interface ):
     except AttributeError:
       s.trace_len = len( str(s.MsgType()) )
       trace_len = s.trace_len
-    return "{}|{}".format(
+    return "{}:{}".format(
       enrdy_to_str( s.msg, s.en, True, s.trace_len ),
       "".join( [ "$" if s.yum[i] else '.' for i in range(s.nvcs) ] )
     )
