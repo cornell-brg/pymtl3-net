@@ -95,7 +95,8 @@ class DORYTorusRouteUnitRTL( Component ):
         # Dateline logic
         if s.turning:
           s.give_msg_wire.vc_id = b1(0)
-        elif s.pos.pos_x == posx_type(0) and s.out_dir == WEST:
+
+        if s.pos.pos_x == posx_type(0) and s.out_dir == WEST:
           s.give_msg_wire.vc_id = b1(1)
         elif s.pos.pos_x == s.last_col_id and s.out_dir == EAST:
           s.give_msg_wire.vc_id = b1(1)
