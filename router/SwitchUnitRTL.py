@@ -10,7 +10,7 @@ Author : Yanghui Ou, Cheng Tan
 from pymtl3 import *
 from pymtl3.stdlib.rtl import Mux
 from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
-from ocn_pclib.rtl.Encoder import Encoder
+from pymtl3.stdlib.rtl.Encoder import Encoder
 from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL, GiveIfcRTL
 
 class SwitchUnitRTL( Component ):
@@ -57,9 +57,7 @@ class SwitchUnitRTL( Component ):
     @s.update
     def up_get_en():
       for i in range( num_inports ):
-        # s.get_en[i] = s.get_rdy[i] & s.give.en & ( s.mux.sel==SelType(i) )
         s.get_en[i] = s.give.en & ( s.mux.sel==SelType(i) )
-#        print 'switch: set get_en[', i, ']=', s.get_en[i]
 
   # Line trace
 

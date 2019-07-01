@@ -1,11 +1,12 @@
-#=========================================================================
-# RingRouteRTL.py
-#=========================================================================
-# Ring network-on-chip router
-#
-# Author : Cheng Tan, Yanghui Ou
-#   Date : April 6, 2019
+"""
+=========================================================================
+RingRouteRTL.py
+=========================================================================
+Ring network-on-chip router
 
+Author : Yanghui Ou, Cheng Tan
+  Date : June 25, 2019
+"""
 from pymtl3 import *
 
 from ocn_pclib.ifcs.CreditIfc import CreditRecvIfcRTL, CreditSendIfcRTL

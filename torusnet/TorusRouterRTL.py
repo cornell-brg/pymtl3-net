@@ -1,15 +1,14 @@
-#=========================================================================
-# TorusRouterRTL.py
-#=========================================================================
-# Torus router RTL model.
-#
-# Author : Cheng Tan, Yanghui, Ou
-#   Date : June 23, 2019
+"""
+==========================================================================
+TorusRouterRTL.py
+==========================================================================
+Torus router RTL model.
 
+Author : Yanghui, Ou, Cheng Tan
+  Date : June 30, 2019
+"""
 from pymtl3                     import *
-from pymtl3.stdlib.ifcs         import SendIfcRTL, RecvIfcRTL
 from ocn_pclib.ifcs.CreditIfc   import CreditRecvIfcRTL, CreditSendIfcRTL
-from router.Router              import Router
 from router.SwitchUnitRTL       import SwitchUnitRTL
 from router.InputUnitCreditRTL  import InputUnitCreditRTL
 from router.OutputUnitCreditRTL import OutputUnitCreditRTL
@@ -17,14 +16,17 @@ from DORYTorusRouteUnitRTL      import DORYTorusRouteUnitRTL
 
 class TorusRouterRTL( Component ):
 
-  def construct( s, 
-          PacketType, 
-          PositionType,       
-          InputUnitType=InputUnitCreditRTL, 
-          RouteUnitType=DORYTorusRouteUnitRTL, 
-          SwitchUnitType=SwitchUnitRTL,
-          OutputUnitType=OutputUnitCreditRTL,
-          nvcs=2,
+  def construct( s,
+    PacketType,
+    PositionType,
+    InputUnitType=InputUnitCreditRTL,
+    RouteUnitType=DORYTorusRouteUnitRTL,
+    SwitchUnitType=SwitchUnitRTL,
+    OutputUnitType=OutputUnitCreditRTL,
+    ncols=2,
+    nrows=2,
+    nvcs=2,
+    credit_line=2,
   ):
 
     s.num_inports  = 5
@@ -40,10 +42,10 @@ class TorusRouterRTL( Component ):
 
     # Components
 
-    s.input_units  = [ InputUnitType( PacketType )
+    s.input_units  = [ InputUnitType( PacketType, nvcs=nvcs, credit_line=credit_line )
                       for _ in range( s.num_inports ) ]
 
-    s.route_units  = [ RouteUnitType( PacketType, PositionType )
+    s.route_units  = [ RouteUnitType( PacketType, PositionType, ncols, nrows )
                       for i in range( s.num_route_units ) ]
 
     s.switch_units = [ SwitchUnitType( PacketType, s.num_route_units )
@@ -55,7 +57,7 @@ class TorusRouterRTL( Component ):
     # Connection
 
     for i in range( s.num_inports ):
-      s.connect( s.recv[i],             s.input_units[i].recv )
+      s.connect( s.recv[i], s.input_units[i].recv )
       for j in range( s.nvcs ):
         ru_idx = i * s.nvcs + j
         s.connect( s.input_units[i].give[j], s.route_units[ru_idx].get  )
@@ -66,7 +68,6 @@ class TorusRouterRTL( Component ):
         s.connect( s.route_units[i].give[j], s.switch_units[j].get[i] )
 
     for j in range( s.num_outports ):
-#      s.connect( s.switch_units[j].send, s.output_units[j].recv )
       s.connect( s.switch_units[j].give, s.output_units[j].get )
       s.connect( s.output_units[j].send, s.send[j]              )
 
@@ -77,11 +78,11 @@ class TorusRouterRTL( Component ):
     out_trace = [ "" for _ in range( s.num_outports ) ]
 
     for i in range( s.num_inports ):
-      in_trace[i]  = "{}".format( s.recv[i].msg )
+      in_trace[i]  = "{}".format( s.recv[i] )
     for i in range( s.num_outports ):
-      out_trace[i] = "{}".format( s.send[i].msg )
+      out_trace[i] = "{}".format( s.send[i] )
 
-    return "{}({}){}".format(
+    return "{}_({})_{}".format(
       "|".join( in_trace ),
       s.pos,
       "|".join( out_trace )

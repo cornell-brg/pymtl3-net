@@ -1,24 +1,24 @@
-#=========================================================================
-# TorusRouterRTL_test.py
-#=========================================================================
-# Test for TorusRouterRTL
-#
-# Author : Cheng Tan
-#   Date : June 28, 2019
+"""
+==========================================================================
+TorusRouterRTL_test.py
+==========================================================================
+Tests for TorusRouterRTL.
 
-from pymtl3                         import *
-from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
-from ocn_pclib.test.net_sinks       import TestNetSinkRTL
-from ocn_pclib.ifcs.positions       import mk_mesh_pos
-from ocn_pclib.ifcs.packets         import mk_mesh_pkt
-from pymtl3.stdlib.test             import TestVectorSimulator
-from torusnet.TorusRouterRTL        import TorusRouterRTL
-from torusnet.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
-from test_helpers                   import dor_routing
-from pymtl3.passes.sverilog         import ImportPass, TranslationPass
-from pymtl3.passes                  import DynamicSim
-from ocn_pclib.ifcs.CreditIfc       import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
-from pymtl3.stdlib.ifcs             import SendIfcRTL, RecvIfcRTL
+Author : Yanghui Ou, Cheng Tan
+  Date : June 28, 2019
+"""
+import pytest
+from itertools import product
+
+from pymtl3 import *
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+
+from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from ocn_pclib.ifcs.positions import mk_mesh_pos
+from ocn_pclib.ifcs.packets import mk_mesh_pkt
+from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
+from torusnet.TorusRouterFL import TorusRouterFL
+from torusnet.TorusRouterRTL import TorusRouterRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -26,223 +26,114 @@ from pymtl3.stdlib.ifcs             import SendIfcRTL, RecvIfcRTL
 
 class TestHarness( Component ):
 
-  def construct( s, 
-                 MsgType       = None, 
-                 mesh_wid      = 2, 
-                 mesh_ht       = 2 , 
-                 pos_x         = 0,
-                 pos_y         = 0,
-                 src_msgs      = [], 
-                 sink_msgs     = [], 
-                 src_initial   = 0, 
-                 src_interval  = 0, 
-                 sink_initial  = 0, 
-                 sink_interval = 0,
-                 arrival_time  =[None, None, None, None, None]
-               ):
+  def construct( s,
+    PktType   = None,
+    src_msgs  = [],
+    sink_msgs = [],
+    ncols     = 2,
+    nrows     = 2 ,
+    pos_x     = 0,
+    pos_y     = 0,
+  ):
 
-    print "=" * 74
-    # print "src:", src_msgs
-    # print "sink:", sink_msgs
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = TorusRouterRTL( MsgType, MeshPos )
+    MeshPos = mk_mesh_pos( ncols, nrows )
 
-    s.srcs  = [ TestSrcRTL    ( MsgType, src_msgs[i],  src_initial,  src_interval  )
-                for i in range  ( s.dut.num_inports ) ]
-    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial, 
-                sink_interval ) for i in range ( s.dut.num_outports ) ]
-    for ss in sink_msgs:
-      for sss in ss:
-        print 'see sink: ', sss
-      print '---'
+    match_func = lambda a, b : a.src_x == b.src_x and a.src_y == b.src_y and \
+                               a.dst_y == b.dst_y and a.payload == b.payload
 
-    s.recv_adapters = [ RecvRTL2CreditSendRTL( MsgType, nvcs=2 ) 
-                      for _ in range( s.dut.num_inports  ) ]
-    s.send_adapters = [ CreditRecvRTL2SendRTL( MsgType, nvcs=2 ) 
-                      for _ in range( s.dut.num_outports ) ]
+    s.srcs  = [ TestSrcRTL( PktType, src_msgs[i] )
+                for i in range( 5 ) ]
+    s.dut   = TorusRouterRTL( PktType, MeshPos, ncols=ncols, nrows=nrows )
+    s.sinks = [ TestNetSinkRTL( PktType, sink_msgs[i], match_func=match_func )
+                for i in range( 5 ) ]
 
-    s.recv = [ RecvIfcRTL(MsgType) for _ in range(s.dut.num_inports )]
-    s.send = [ SendIfcRTL(MsgType) for _ in range(s.dut.num_outports)]
+    s.src_adapters  = [ RecvRTL2CreditSendRTL( PktType, nvcs=2 )
+                        for _ in range( 5 ) ]
+    s.sink_adapters = [ CreditRecvRTL2SendRTL( PktType, nvcs=2 )
+                        for _ in range( 5 ) ]
 
     # Connections
-
     for i in range ( s.dut.num_outports ):
-#      s.connect( s.srcs[i].send, s.recv[i]   )
-#      s.connect( s.send[i],  s.sinks[i].recv )
+      s.connect( s.srcs[i].send,          s.src_adapters[i].recv )
+      s.connect( s.src_adapters[i].send,  s.dut.recv[i]          )
 
-      s.connect( s.srcs[i].send,          s.recv_adapters[i].recv )
-      s.connect( s.recv_adapters[i].send, s.dut.recv[i]           )
+      s.connect( s.dut.send[i],           s.sink_adapters[i].recv )
+      s.connect( s.sink_adapters[i].send, s.sinks[i].recv         )
 
-      s.connect( s.dut.send[i],           s.send_adapters[i].recv )
-      s.connect( s.send_adapters[i].send, s.sinks[i].recv         )
-
-    #TODO: provide pos for router... 
     @s.update
     def up_pos():
       s.dut.pos = MeshPos( pos_x, pos_y )
 
   def done( s ):
-    srcs_done = 1
-    sinks_done = 1
-#    for i in range( s.dut.num_inports ):
-#      if s.srcs[i].done() == 0:
+    srcs_done = True
+    sinks_done = True
     for x in s.srcs:
-      if x.done() == 0:
-        srcs_done = 0
-#    for i in range( s.dut.num_outports ):
-#      if s.sinks[i].done() == 0:
+      if not x.done():
+        srcs_done = False
     for x in s.sinks:
-      if x.done() == 0:
-        sinks_done = 0
+      if not x.done():
+        sinks_done = False
     return srcs_done and sinks_done
 
   def line_trace( s ):
-    return "{}".format(
-      s.dut.line_trace(),
-      #'|'.join( [ s.sinks[i].line_trace() for i in range(5) ] ), 
-    )
+    return "{}".format( s.dut.line_trace() )
 
 #-------------------------------------------------------------------------
-# run_rtl_sim
+# mk_srcsink_pkts
 #-------------------------------------------------------------------------
+# A helper function that puts each packet in [lst] into corresponding
+# sources and sinks.
 
-def run_sim( test_harness, max_cycles=1000 ):
-
-  # Create a simulator
-  test_harness.elaborate()
-#  test_harness.dut.sverilog_translate = True
-#  test_harness.dut.sverilog_import = True
-#  test_harness.apply( TranslationPass() )
-#  test_harness = ImportPass()( test_harness )
-  test_harness.apply( SimpleSim )
-#  test_harness.apply( DynamicSim )
-  test_harness.sim_reset()
-
-  # Run simulation
-
-  ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
-  while not test_harness.done() and ncycles < max_cycles:
-    test_harness.tick()
-    ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
-
-  # Check timeout
-
-  assert ncycles < max_cycles
-
-  test_harness.tick()
-  test_harness.tick()
-  test_harness.tick()
+def mk_srcsink_pkts( pos_x, pos_y, ncols, nrows, lst ):
+  router = TorusRouterFL( pos_x, pos_y, ncols, nrows, dimension='y' )
+  src_pkts  = router.arrange_src_pkts( lst )
+  sink_pkts = router.route( src_pkts )
+  return src_pkts, sink_pkts
 
 #-------------------------------------------------------------------------
 # Test cases
 #-------------------------------------------------------------------------
 
-#              x,y,pl,dir
-test_msgs = [[(0,0,11,1),(0,0,12,1),(0,1,13,2),(2,1,14,3),(0,0,15,1)],
-             [(0,0,21,1),(0,2,22,0),(0,1,23,2),(2,1,24,3),(2,1,25,3)],
-             [(0,2,31,0),(0,0,32,1),(0,1,33,2),(1,1,34,4),(1,1,35,4)]
-            ]
-result_msgs = [[],[],[],[],[]]
+class TorusRouterRTL_Tests( object ):
 
-def ttest_normal_simple():
+  def run_sim( s, th, max_cycles=100 ):
+    # Create a simulator
+    th.apply( DynamicSim )
+    th.sim_reset()
 
-  src_packets = [[],[],[],[],[]]
-  for item in test_msgs:
-    for i in range( len( item ) ):
-      (dst_x,dst_y,payload,dir_out) = item[i]
-      PacketType = mk_mesh_pkt (4, 4)
-      pkt = PacketType (0, 0, dst_x, dst_y, 1, payload)
-      src_packets[i].append( pkt )
-      result_msgs[dir_out].append( pkt )
+    # Run simulation
+    ncycles = 0
+    print ""
+    print "{:3}:{}".format( ncycles, th.line_trace() )
+    while not th.done() and ncycles < max_cycles:
+      th.tick()
+      ncycles += 1
+      print "{:3}:{}".format( ncycles, th.line_trace() )
 
-  th = TestHarness( PacketType, 4, 4, 1, 1, src_packets, result_msgs, 0, 0, 0, 0 )
-  run_sim( th )
+    # Check timeout
+    assert ncycles < max_cycles
 
-def ttest_self_simple():
-  PacketType = mk_mesh_pkt(4, 4)
-  pkt = PacketType( 0, 0, 0, 0, 0, 0xdead )
-  src_pkts  = [ [], [], [], [], [pkt] ]
-  sink_pkts = [ [], [], [], [], [pkt] ]
-  th = TestHarness( PacketType, 4, 4, 0, 0, src_pkts, sink_pkts )
-  run_sim( th )
-
-# Failing test cases captured by hypothesis
-def test_h0():
-  pos_x = 0
-  pos_y = 0
-  mesh_wid = 2
-  mesh_ht  = 2
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht, nvcs=2 )
-  pkt0 = PacketType( 0, 0, 1, 0, 0, 0, 0x0 )
-  pkt1 = PacketType( 0, 1, 1, 0, 0, 0, 0x1 )
-  pkt2 = PacketType( 0, 1, 1, 0, 0, 0, 0x2 )
-  pkt3 = PacketType( 0, 1, 1, 0, 0, 0, 0x3 )
-  pkt4 = PacketType( 0, 1, 1, 0, 0, 0, 0x4 )
-  pkt5 = PacketType( 0, 1, 0, 1, 0, 0, 0x5 )
-  pkt6 = PacketType( 0, 1, 0, 1, 0, 0, 0x6 )
-  pkt7 = PacketType( 0, 1, 0, 0, 0, 0, 0x7 )
-#  src_pkts  = [ [pkt1,pkt2,pkt3], [pkt5], [pkt6], [pkt7], [pkt0,pkt4] ]
-#  sink_pkts = [ [pkt5,pkt6], [], [], [pkt0,pkt1,pkt2,pkt3,pkt4], [pkt7] ]
-  src_pkts  = [ [], [pkt5], [], [pkt7], [pkt0] ]
-  sink_pkts = [ [pkt5], [], [], [pkt0], [pkt7] ]
-  th = TestHarness( 
-    PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
-    src_pkts, sink_pkts
+  @pytest.mark.parametrize(
+    'pos_x, pos_y',
+    product( [ 0, 1, 2, 3 ], [ 0, 1, 2, 3 ] )
   )
-  run_sim( th )
+  def test_simple_4x4( s, pos_x, pos_y ):
+    ncols = 4
+    nrows = 4
 
-def ttest_h1():
-  pos_x, pos_y, mesh_wid, mesh_ht = 0, 0, 2, 2 
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
-  pkt0 = PacketType( 0, 0, 0, 1, 0, 0xdead )
-  src_pkts  = [ [],     [], [], [], [pkt0] ]
-  sink_pkts = [ [pkt0], [], [], [], []     ]
-  th = TestHarness( 
-    PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
-    src_pkts, sink_pkts
-  )
-  th.set_param( 
-    "top.dut.construct", 
-    RouteUnitType = DORYMeshRouteUnitRTL 
-  )
-  run_sim( th )
+    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
 
-def ttest_h2():
-  pos_x, pos_y, mesh_wid, mesh_ht = 0, 0, 2, 2 
-  PacketType( mesh_wid, mesh_ht )
-  pkt0 = PacketType( 0, 0, 1, 0, 0, 0xdead )
-  pkt1 = PacketType( 0, 1, 1, 0, 1, 0xbeef )
-  pkt2 = PacketType( 0, 1, 1, 0, 2, 0xcafe )
-              # N             S   W   E                   self
-  src_pkts  = [ [pkt1, pkt2], [], [], [],                 [pkt0] ]
-  sink_pkts = [ [],           [], [], [pkt1, pkt2, pkt0], []     ]
-  th = TestHarness( 
-    PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
-    src_pkts, sink_pkts
-  )
-  th.set_param( 
-    "top.dut.construct",
-    RouteUnitType = DORYMeshRouteUnitRTL
-  )
-  run_sim( th, 10 )
+    src_pkts, sink_pkts = mk_srcsink_pkts( pos_x, pos_y, ncols, nrows,[
+      #   src_x  y  dst_x  y  opq  vc  payload
+      Pkt(    0, 0,     1, 1,   0,  0, 0xfaceb00c ),
+      Pkt(    0, 0,     0, 0,   0,  0, 0xdeaddead ),
+      Pkt(    1, 0,     1, 0,   0,  0, 0xdeadface ),
+      Pkt(    0, 2,     3, 3,   0,  0, 0xdeadface ),
+    ])
 
-def ttest_h3():
-  pos_x, pos_y, mesh_wid, mesh_ht = 0, 1, 2, 2 
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
-  pkt0 = PacketType( 0, 1, 0, 0, 0, 0xdead )
-              # N   S   W   E   self
-  src_pkts  = [ [], [], [], [], [pkt0] ]
-  sink_pkts = [ [], [pkt0], [], [], [] ]
-  th = TestHarness( 
-    PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
-    src_pkts, sink_pkts
-  )
-  th.set_param( 
-    "top.dut.construct", 
-    RouteUnitType = DORYMeshRouteUnitRTL
-  )
-  run_sim( th, 10 )
-
+    th = TestHarness( Pkt, src_pkts, sink_pkts )
+    th.set_param( "top.construct",
+      ncols=ncols, nrows=nrows,
+      pos_x=pos_x, pos_y=pos_y,
+    )
+    s.run_sim( th )

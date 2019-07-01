@@ -14,10 +14,10 @@ from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL, GiveIfcRTL
 
 class RingRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType, num_outports, num_routers=4 ):
+  def construct( s, PacketType, PositionType, num_routers=4 ):
 
     # Constants
-    s.num_outports = num_outports
+    s.num_outports = 3
     s.num_routers  = num_routers
 
     id_type    = mk_bits( clog2( num_routers ) )
