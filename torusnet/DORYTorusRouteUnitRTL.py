@@ -89,7 +89,7 @@ class DORYTorusRouteUnitRTL( Component ):
           s.out_dir = WEST if s.west_dist < s.east_dist else EAST
 
         # Turning logic
-        s.turning = ( s.get.msg.src_x==s.pos.pos_x & s.get.msg.src_y!=s.pos.pos_y ) & (s.out_dir == WEST | s.out_dir == EAST )
+        s.turning = ( s.get.msg.src_x == s.pos.pos_x ) & ( s.get.msg.src_y != s.pos.pos_y ) & (s.out_dir == WEST | s.out_dir == EAST )
 
         # Dateline logic
         if s.turning:
