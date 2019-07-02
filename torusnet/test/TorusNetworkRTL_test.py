@@ -153,8 +153,8 @@ class Ringnet_Tests( object ):
   @hypothesis.settings( deadline=None, max_examples=20 )
   # @hypothesis.reproduce_failure('4.24.4', 'AAMDAQEAAAQAAA==') #(1:0)>(0:4)
   @hypothesis.given(
-    ncols = st.integers(2, 5),
-    nrows = st.integers(2, 5),
+    ncols = st.integers(2, 8),
+    nrows = st.integers(2, 8),
     pkts  = st.data(),
   )
   def test_hypothesis( s, ncols, nrows, pkts ):
