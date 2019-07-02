@@ -2,11 +2,9 @@
 ==========================================================================
 OutputUnitRTL.py
 ==========================================================================
-An Output unit of the router. Just one normal queue, no credit.
-Note that the interface is send/recv-based.
-Enabling parameter passing.
+RTL implementation of OutputUnit.
 
-Author : Cheng Tan, Yanghui Ou
+Author : Yanghui Ou, Cheng Tan
   Date : Feb 28, 2019
 """
 from pymtl3 import *
@@ -14,7 +12,7 @@ from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL
 from pymtl3.stdlib.rtl.queues import NormalQueueRTL
 
 class OutputUnitRTL( Component ):
-  def construct( s, PacketType, QueueType = None ):
+  def construct( s, PacketType, QueueType=None ):
 
     # Interface
     s.get  = GetIfcRTL ( PacketType )

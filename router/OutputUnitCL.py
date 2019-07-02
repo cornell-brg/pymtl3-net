@@ -1,11 +1,12 @@
-#=========================================================================
-# OutputUnitCL.py
-#=========================================================================
-# Cycle level implementation of output unit.
-#
-# Author : Cheng Tan, Yanghui Ou
-#   Date : Feb 28, 2019
+"""
+==========================================================================
+OutputUnitCL.py
+==========================================================================
+Cycle level implementation of output unit.
 
+Author : Yanghui Ou
+  Date : July 2, 2019
+"""
 from pymtl3 import *
 
 class OutputUnitCL( Component ):
@@ -17,9 +18,10 @@ class OutputUnitCL( Component ):
     s.send = NonBlockingCallerIfc( PacketType )
     s.QueueType = QueueType
 
-    # If no queue type is assigned
+    # If queue type is assigned
     if s.QueueType != None:
       # Component
+      # TODO: add type for QueueType when pymtl3 has that.
       s.queue = QueueType()
 
       @s.update
