@@ -11,27 +11,33 @@ from pymtl3 import *
 class OutputUnitCL( Component ):
 
   def construct( s, PacketType, QueueType = None ):
-    
+
     # Interface
-    s.recv = NonBlockingCalleeIfc( PacketType )
+    s.get  = NonBlockingCallerIfc( PacketType )
     s.send = NonBlockingCallerIfc( PacketType )
     s.QueueType = QueueType
 
     # If no queue type is assigned
     if s.QueueType != None:
       # Component
-      s.queue = QueueType( PacketType ) 
+      s.queue = QueueType()
 
-      s.connect( s.recv, s.queue.enq )
-  
       @s.update
-      def ou_up_send():
+      def up_ou_get_enq():
+        if s.get.rdy() and s.queue.enq.rdy():
+          s.queue.enq( s.get() )
+
+      @s.update
+      def up_ou_deq_send():
         if s.queue.deq.rdy() and s.send.rdy():
           s.send( s.queue.deq() )
 
     # No ouput queue
     else:
-      s.connect( s.recv, s.send )
+      @s.update
+      def up_ou_get_send():
+        if s.get.rdy() and s.send.rdy():
+          s.send( s.get() )
 
   def line_trace( s ):
-    return ""
+    return "{}(){}".format( s.get, s.send )
