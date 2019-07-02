@@ -67,7 +67,7 @@ class DORYTorusRouteUnitRTL( Component ):
         s.east_dist = s.last_col_id - s.pos.pos_x + ns_dist_type(1) + s.get.msg.dst_x
       else:
         s.west_dist = s.pos.pos_x + ns_dist_type(1) + s.last_col_id - s.get.msg.dst_x
-        s.east_dist = s.get.msg.dst_y - s.pos.pos_x
+        s.east_dist = s.get.msg.dst_x - s.pos.pos_x
 
     # Routing logic
     @s.update
