@@ -8,6 +8,7 @@
 
 from pymtl3             import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
+import copy
 
 class DTRBflyRouteUnitRTL( Component ):
 
@@ -19,11 +20,14 @@ class DTRBflyRouteUnitRTL( Component ):
     k_ary    = num_outports
     OutType  = mk_bits( clog2( s.num_outports ) )
     rows     = k_ary ** ( n_fly - 1 )
+    EnType  = mk_bits( s.num_outports )
     if rows == 1:
-      s.RowWidth = 1
+      RowWidth = 1
     else:
-      s.RowWidth = clog2( k_ary )
-    s.END = s.RowWidth
+      RowWidth = clog2( k_ary )
+    END = n_fly * RowWidth
+#    s.END = s.RowWidth * n_fly
+    BEGIN = END - RowWidth
 
     # Interface
 
@@ -40,7 +44,7 @@ class DTRBflyRouteUnitRTL( Component ):
     # Connections
 
     for i in range( s.num_outports ):
-      s.connect( s.get.msg,     s.give[i].msg )
+#      s.connect( s.get.msg,     s.give[i].msg )
       s.connect( s.give_ens[i], s.give[i].en  )
       s.connect( s.give_rdy[i], s.give[i].rdy )
     
@@ -51,25 +55,17 @@ class DTRBflyRouteUnitRTL( Component ):
       for i in range( s.num_outports ):
         s.give_rdy[i] = Bits1( 0 )
 
-      s.END =  s.RowWidth
-      for _ in range( n_fly - s.pos.stage - 1 ):
-        s.END = s.END + s.RowWidth
-
       if s.get.rdy:
         # TODO: or embed this into the pos/packet
-#        mod = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1)))
-#        div = k_ary**(n_fly-((int)(s.pos.pos))/(k_ary**(n_fly-1))-1)
-#        s.out_dir = ((int)(s.get.msg.dst_x) % mod) / div
-        s.out_dir = s.get.msg.dst[ s.END - s.RowWidth : s.END]
-#        print 'len: ', len(s.give_rdy)
-#        print 'range (end-rowwidth -> end): ', s.END - s.RowWidth, s.END
-#        print 'out_dir: ', s.out_dir, '; give_rdy size: ', s.num_outports
-#        print 'msg: ', s.get.msg
+        s.out_dir = s.get.msg.dst[ BEGIN : END]
         s.give_rdy[ s.out_dir ] = Bits1( 1 )
 
     @s.update
     def up_ru_get_en():
-      s.get.en = s.give_ens > OutType( 0 ) 
+      s.get.en = Bits1( s.give_ens > EnType( 0 ) )
+      if s.get.en:
+        s.give[s.out_dir].msg = (s.get.msg)
+        s.give[s.out_dir].msg.dst = (s.get.msg.dst << RowWidth)
 
   # Line trace
   def line_trace( s ):

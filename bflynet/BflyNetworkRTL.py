@@ -38,10 +38,16 @@ class BflyNetworkRTL( Component ):
     s.channels = [ ChannelRTL( PacketType, latency = chl_lat)
                      for _ in range( num_channels ) ]
 
-    s.pos      = [[ PositionType( r, n ) for r in range( s.r_rows )]
-                    for n in range( n_fly )]
+#    s.pos      = [[ PositionType( r, n ) for r in range( s.r_rows )]
+#                    for n in range( n_fly )]
+    s.pos      = [ PositionType( r%s.r_rows, r/s.r_rows )
+                 for r in range( s.num_routers )]
 
     # Connect s.routers together in Butterfly
+
+    for r in range( s.num_routers ):
+      s.connect( s.routers[r].pos.row,   s.pos[r].row   )
+      s.connect( s.routers[r].pos.stage, s.pos[r].stage )
 
     chl_id = 0
     terminal_id_recv = 0
@@ -77,12 +83,12 @@ class BflyNetworkRTL( Component ):
           s.connect(s.send[terminal_id_send], s.routers[i].send[j])
           terminal_id_send += 1
 
-    # FIXME: unable to connect a struct to a port.
-    @s.update
-    def up_pos():
-      for n in range( n_fly ):
-        for r in range( s.r_rows ):
-          s.routers[s.r_rows * n + r].pos = s.pos[n][r]
+#    # FIXME: unable to connect a struct to a port.
+#    @s.update
+#    def up_pos():
+#      for n in range( n_fly ):
+#        for r in range( s.r_rows ):
+#          s.routers[s.r_rows * n + r].pos = s.pos[n][r]
 
   def line_trace( s ):
     trace = [ "" for _ in range( s.num_terminals ) ]

@@ -15,8 +15,11 @@ from bflynet.BflyNetworkRTL        import BflyNetworkRTL
 from ocn_pclib.ifcs.packets        import *
 from ocn_pclib.ifcs.positions      import *
 
-from pymtl3.passes.sverilog import ImportPass, TranslationPass
+#from pymtl3.passes.sverilog import ImportPass, TranslationPass
+from pymtl3.passes.yosys import ImportPass, TranslationPass
 from pymtl3.passes import DynamicSim
+
+import copy
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -70,54 +73,18 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
      
   model.elaborate()
 #  model.sverilog_translate = True
+  model.yosys_translate = True
 #  model.sverilog_import = True
-#  model.apply( TranslationPass() )
-#  model = ImportPass()( test_harness )
+  model.yosys_import = True
+  model.apply( TranslationPass() )
+  model = ImportPass()( model )
 #  model.apply( SimpleSim )
 #  model.apply( DynamicSim )
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
   model.sim_reset()
 
-def ttest_vector_2ary_1fly( dump_vcd, test_verilog ):
-
-  k_ary = 2
-  n_fly = 1
-  num_routers = n_fly * ( k_ary ** ( n_fly - 1 ) )
-  r_rows      = k_ary ** ( n_fly - 1 )
-  BflyPosition = mk_bfly_pos( k_ary, n_fly )
-  BflyPacket   = mk_bfly_pkt( k_ary, n_fly )
-  model = BflyNetworkRTL( BflyPacket, BflyPosition, k_ary, n_fly, 0 )
-
-  model.set_param( "top.routers*.construct", 
-                   k_ary=k_ary )
-  model.set_param( "top.routers*.route_units*.construct", 
-                   n_fly=n_fly )
-  model.set_param( "top.routers*.input_units*.construct", 
-                   QueueType=NormalQueueRTL )
-
-  x = 'x'
-
-  # Specific for wire connection (link delay = 0) in 2x2 Torus topology
-  simple_2_test = [
-# terminal [packet]   arr_term   msg 
-  [  0,    [0,1001],     x,       x  ],
-  [  0,    [1,1002],     0,     1001 ],
-  [  0,    [1,1003],     1,     1002 ],
-  [  0,    [1,1004],     1,     1003 ],
-  [  0,    [0,1005],     1,     1004 ],
-  [  x,    [0,0000],     1,     1005 ],
-  [  x,    [0,0000],     x,       x  ],
-  [  x,    [0,0000],     x,       x  ],
-  [  x,    [0,0000],     x,       x  ],
-  [  x,    [0,0000],     x,       x  ],
-  [  x,    [0,0000],     x,       x  ],
-  [  x,    [0,0000],     x,       x  ],
-  ]
-
-  run_vector_test( model, BflyPacket, simple_2_test, k_ary, n_fly)
-
-def ttest_vector_2ary_2fly( dump_vcd, test_verilog ):
+def test_vector_2ary_2fly( dump_vcd, test_verilog ):
 
   k_ary = 2
   n_fly = 2
@@ -252,49 +219,7 @@ def set_dst(k_ary, n_fly, vec_dst):
         bf_dst = bf_dst * k_ary
   return bf_dst
 
-def ttest_srcsink_4ary_2fly():
-
-  k_ary = 4
-  n_fly = 2
-  for (vec_src, vec_dst, payload) in test_msgs:
-    PacketType  = mk_bfly_pkt( k_ary, n_fly )
-#    r_rows = k_ary ** ( n_fly - 1 )
-    bf_dst = set_dst( k_ary, n_fly, vec_dst)
-    pkt = PacketType( vec_src, bf_dst, 0, payload)
-    src_packets [vec_src].append( pkt )
-    sink_packets[vec_dst].append( pkt )
-
-  th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets,
-                    0, 0, 0, 0 )
-
-  th.set_param( "top.dut.routers*.route_units*.construct", n_fly=n_fly )
-  th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
-  th.set_param( "top.dut.line_trace",  )
-
-
-  run_sim( th )
-
-def ttest_srcsink_2ary_4fly():
-
-  k_ary = 2
-  n_fly = 4
-  for (vec_src, vec_dst, payload) in test_msgs:
-    PacketType  = mk_bfly_pkt( k_ary, n_fly )
-    bf_dst = set_dst( k_ary, n_fly, vec_dst)
-    pkt = PacketType( vec_src, bf_dst, 0, payload)
-    src_packets [vec_src].append( pkt )
-    sink_packets[vec_dst].append( pkt )
-
-  th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets, 
-                    0, 0, 0, 0 )
-
-  th.set_param( "top.dut.routers*.route_units*.construct", n_fly=n_fly )
-  th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
-  th.set_param( "top.dut.line_trace",  )
-
-  run_sim( th )
-
-def test_srcsink_4ary_3fly():
+def ttest_srcsink_4ary_3fly():
 
   k_ary = 4
   n_fly = 3
@@ -303,7 +228,9 @@ def test_srcsink_4ary_3fly():
     bf_dst = set_dst( k_ary, n_fly, vec_dst)
     pkt = PacketType( vec_src, bf_dst, 0, payload)
     src_packets [vec_src].append( pkt )
-    sink_packets[vec_dst].append( pkt )
+    sink_pkt = copy.deepcopy( pkt )
+    sink_pkt.dst = 0
+    sink_packets[vec_dst].append( sink_pkt )
 
   src_packets .extend( [ [] for _ in range (48) ] )
   sink_packets.extend( [ [] for _ in range (48) ] )
