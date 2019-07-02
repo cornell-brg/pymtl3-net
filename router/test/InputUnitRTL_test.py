@@ -1,19 +1,21 @@
-#=========================================================================
-# Tests for InputUnitGiveRTL 
-#=========================================================================
-#
-# Author: Yanghui Ou
-#   Date: Mar 24, 2019
+"""
+==========================================================================
+InputUnitRTL_test.py
+==========================================================================
+Test cases for InputUnitRTL.
 
+Author: Yanghui Ou
+  Date: Mar 24, 2019
+"""
 import pytest
 
-from pymtl3                    import *
-from pymtl3.passes.PassGroups  import SimpleSim
-from pymtl3.stdlib.test.test_srcs     import TestSrcRTL
-from pymtl3.stdlib.test.test_sinks    import TestSinkRTL
-from pymtl3.stdlib.test               import TestVectorSimulator
-from pymtl3.stdlib.rtl.queues         import NormalQueueRTL
-from router.InputUnitRTL      import InputUnitRTL 
+from pymtl3 import *
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.test.test_sinks import TestSinkRTL
+from pymtl3.stdlib.test import TestVectorSimulator
+from pymtl3.stdlib.rtl.queues import NormalQueueRTL, BypassQueueRTL, PipeQueueRTL
+
+from router.InputUnitRTL import InputUnitRTL
 
 #-------------------------------------------------------------------------
 # TestVectorSimulator test
@@ -40,20 +42,18 @@ def run_tv_test( dut, test_vectors ):
 
 def test_pipe_Bits():
 
-  B1  = mk_bits(1)
-  B32 = mk_bits(32)
   run_tv_test( InputUnitRTL( Bits32 ), [
     #  enq.en  enq.rdy enq.msg   deq.en  deq.rdy deq.msg
-    [  B1(1),  B1(1),  B32(123), B1(0),  B1(0),    '?'    ],
-    [  B1(1),  B1(1),  B32(345), B1(0),  B1(1),  B32(123) ],
-    [  B1(0),  B1(0),  B32(567), B1(0),  B1(1),  B32(123) ],
-    [  B1(0),  B1(0),  B32(567), B1(1),  B1(1),  B32(123) ],
-    [  B1(0),  B1(1),  B32(567), B1(1),  B1(1),  B32(345) ],
-    [  B1(1),  B1(1),  B32(567), B1(0),  B1(0),    '?'    ],
-    [  B1(1),  B1(1),  B32(0  ), B1(1),  B1(1),  B32(567) ],
-    [  B1(1),  B1(1),  B32(1  ), B1(1),  B1(1),  B32(0  ) ],
-    [  B1(1),  B1(1),  B32(2  ), B1(1),  B1(1),  B32(1  ) ],
-    [  B1(0),  B1(1),  B32(2  ), B1(1),  B1(1),  B32(2  ) ],
+    [  b1(1),  b1(1),  b32(123), b1(0),  b1(0),    '?'    ],
+    [  b1(1),  b1(1),  b32(345), b1(0),  b1(1),  b32(123) ],
+    [  b1(0),  b1(0),  b32(567), b1(0),  b1(1),  b32(123) ],
+    [  b1(0),  b1(0),  b32(567), b1(1),  b1(1),  b32(123) ],
+    [  b1(0),  b1(1),  b32(567), b1(1),  b1(1),  b32(345) ],
+    [  b1(1),  b1(1),  b32(567), b1(0),  b1(0),    '?'    ],
+    [  b1(1),  b1(1),  b32(0  ), b1(1),  b1(1),  b32(567) ],
+    [  b1(1),  b1(1),  b32(1  ), b1(1),  b1(1),  b32(0  ) ],
+    [  b1(1),  b1(1),  b32(2  ), b1(1),  b1(1),  b32(1  ) ],
+    [  b1(0),  b1(1),  b32(2  ), b1(1),  b1(1),  b32(2  ) ],
 ] )
 
 #-------------------------------------------------------------------------
@@ -62,13 +62,11 @@ def test_pipe_Bits():
 
 class TestHarness( Component ):
 
-  def construct( s, MsgType, src_msgs, sink_msgs, src_initial,
-                 src_interval, sink_initial, sink_interval,
-                 arrival_time=None ):
+  def construct( s, MsgType, src_msgs, sink_msgs ):
 
-    s.src  = TestSrcRTL   ( MsgType, src_msgs,  src_initial,  src_interval  )
-    s.sink = TestSinkRTL  ( MsgType, sink_msgs, sink_initial, sink_interval )
-    s.dut  = InputUnitRTL ( MsgType  )
+    s.src  = TestSrcRTL   ( MsgType, src_msgs )
+    s.dut  = InputUnitRTL ( MsgType )
+    s.sink = TestSinkRTL  ( MsgType, sink_msgs )
 
     # Connections
     s.connect( s.src.send,     s.dut.recv  )
@@ -87,52 +85,21 @@ class TestHarness( Component ):
     return s.src.done() and s.sink.done()
 
   def line_trace( s ):
-    return s.src.line_trace() + "-> | " + s.dut.line_trace() + \
-                               " | -> " + s.sink.line_trace()
-
-#-------------------------------------------------------------------------
-# run_rtl_sim
-#-------------------------------------------------------------------------
-
-def run_sim( test_harness, max_cycles=100 ):
-
-  # Set parameters
-
-  test_harness.set_param("top.dut.queue.construct", num_entries=2)
-  test_harness.set_param("top.dut.construct", QueueType=NormalQueueRTL)
-
-  # Create a simulator
-
-  test_harness.apply( SimpleSim )
-  test_harness.sim_reset()
-
-  # Run simulation
-
-  ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
-  while not test_harness.done() and ncycles < max_cycles:
-    test_harness.tick()
-    ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
-
-  # Check timeout
-
-  assert ncycles < max_cycles
-
-  test_harness.tick()
-  test_harness.tick()
-  test_harness.tick()
+    return "{} >>> {} >>> {}".format(
+      s.src.line_trace(),
+      s.dut.line_trace(),
+      s.sink.line_trace(),
+    )
 
 #-------------------------------------------------------------------------
 # Test cases
 #-------------------------------------------------------------------------
 
-test_msgs = [ Bits16( 4 ), Bits16( 1 ), Bits16( 2 ), Bits16( 3 ) ]
+from .InputUnitCL_test import InputUnitCL_Tests as BaseTests
 
-arrival_pipe   = [ 2, 3, 4, 5 ]
+class InputUnitRTL_Tests( BaseTests ):
 
-def test_normal2_simple():
-  th = TestHarness( Bits16, test_msgs, test_msgs, 0, 0, 0, 0,
-                    arrival_pipe )
-  run_sim( th )
+  @classmethod
+  def setup_class( cls ):
+    cls.TestHarness = TestHarness
+    cls.qtypes      = [ NormalQueueRTL, BypassQueueRTL, PipeQueueRTL ]
