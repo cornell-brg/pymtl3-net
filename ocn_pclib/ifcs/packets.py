@@ -239,7 +239,8 @@ def mk_bfly_pkt( k_ary=2, n_fly=2, nvcs=0, opaque_nbits=8, payload_nbits=32 ):
   if k_ary ** ( n_fly - 1 ) == 1:
     DstType = mk_bits( n_fly )
   else:
-    DstType = mk_bits( clog2( k_ary ** ( n_fly - 1 ) ) * n_fly )
+    DstType = mk_bits( clog2( k_ary ) * n_fly )
+#    DstType = mk_bits( clog2( k_ary ** ( n_fly - 1 ) ) * n_fly )
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
   new_name = "BflyPacket_{}_{}_{}_{}_{}".format(

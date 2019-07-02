@@ -230,8 +230,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 10
-NUM_SAMPLE_CYCLES   = 50 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 100
+NUM_SAMPLE_CYCLES   = 500 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
@@ -300,8 +300,6 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     MeshPos = mk_mesh_pos( net_width, net_height )
     PacketType = mk_mesh_pkt_timestamp( net_width, net_height, nvcs = 2,
             max_time = NUM_SAMPLE_CYCLES )
-    print 'routers: ', opts.routers, '; rows: ', opts.rows, '; wid: ', net_width,\
-            '; ht: ', net_height
     model = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
     # model.set_param('top.routers*.route_units*.construct', ncols=net_width )
     # model.set_param('top.routers*.route_units*.construct', nrows=net_height)

@@ -40,6 +40,6 @@ def mk_bfly_pos( k_ary=2, n_fly=2 ):
   new_name = "BflyPosition_{}_{}".format( k_ary, n_fly )
   new_class = mk_bit_struct( new_name,[
     ( 'row',   RrowType ),
-    ( 'stage', NflyType ),
+    ( 'stage', NflyType )
   ])
   return new_class

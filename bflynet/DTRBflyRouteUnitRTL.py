@@ -8,7 +8,7 @@
 
 from pymtl3             import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
-import copy
+from copy import deepcopy
 
 class DTRBflyRouteUnitRTL( Component ):
 
@@ -21,6 +21,7 @@ class DTRBflyRouteUnitRTL( Component ):
     OutType  = mk_bits( clog2( s.num_outports ) )
     rows     = k_ary ** ( n_fly - 1 )
     EnType  = mk_bits( s.num_outports )
+    DstType = mk_bits( clog2(k_ary) * n_fly )
     if rows == 1:
       RowWidth = 1
     else:
@@ -62,10 +63,11 @@ class DTRBflyRouteUnitRTL( Component ):
 
     @s.update
     def up_ru_get_en():
-      s.get.en = Bits1( s.give_ens > EnType( 0 ) )
-      if s.get.en:
-        s.give[s.out_dir].msg = (s.get.msg)
-        s.give[s.out_dir].msg.dst = (s.get.msg.dst << RowWidth)
+      s.get.en = s.give_ens>EnType(0)
+      for i in range( s.num_outports ):
+        s.give[i].msg = deepcopy( s.get.msg )
+      if s.get.rdy:
+        s.give[ s.out_dir ].msg.dst = DstType(s.get.msg.dst << RowWidth)
 
   # Line trace
   def line_trace( s ):

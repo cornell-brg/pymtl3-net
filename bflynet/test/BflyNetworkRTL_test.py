@@ -160,11 +160,12 @@ class TestHarness( Component ):
     r_rows = k_ary ** ( n_fly - 1 )
     BflyPos  = mk_bfly_pos( r_rows, n_fly )
     s.dut  = BflyNetworkRTL( MsgType, BflyPos, k_ary, n_fly, 0)
-
+    
+    match_func = lambda a,b : a.src==b.src and a.payload == b.payload and a.opaque == b.opaque
     s.srcs  = [ TestSrcRTL ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_terminals ) ]
     s.sinks = [ TestNetSinkRTL ( MsgType, sink_msgs[i], sink_initial,
-              sink_interval) 
+              sink_interval, match_func=match_func ) 
               for i in range ( s.dut.num_terminals ) ]
 
     # Connections

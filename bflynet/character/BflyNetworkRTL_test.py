@@ -60,6 +60,7 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
       for i in range (num_terminals):
         model.recv[i].en  = 0
       model.recv[terminal_id].msg = pkt
+#      model.recv[terminal_id].en  = Bits1( 1 )
       model.recv[terminal_id].en  = 1
 
     for i in range (num_terminals):
@@ -76,15 +77,16 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
   model.yosys_translate = True
 #  model.sverilog_import = True
   model.yosys_import = True
+#  model.dump_vcd = True
   model.apply( TranslationPass() )
   model = ImportPass()( model )
 #  model.apply( SimpleSim )
 #  model.apply( DynamicSim )
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
+#  model.sim_reset()
   sim.run_test()
-  model.sim_reset()
 
-def test_vector_2ary_2fly( dump_vcd, test_verilog ):
+def ttest_vector_2ary_2fly( dump_vcd, test_verilog ):
 
   k_ary = 2
   n_fly = 2
@@ -104,11 +106,11 @@ def test_vector_2ary_2fly( dump_vcd, test_verilog ):
   [  0,    [0,1001],     x,       x  ],
   [  0,    [2,1002],     x,       x  ],
   [  0,    [3,1003],     0,     1001 ],
-  [  x,    [0,0000],     2,     1002 ],
-  [  0,    [1,1004],     3,     1003 ],
-  [  0,    [0,1005],     x,       x  ],
-  [  x,    [0,0000],     1,     1004 ],
-  [  x,    [0,0000],     0,     1005 ],
+#  [  x,    [0,0000],     2,     1002 ],
+#  [  0,    [1,1004],     3,     1003 ],
+#  [  0,    [0,1005],     x,       x  ],
+#  [  x,    [0,0000],     1,     1004 ],
+#  [  x,    [0,0000],     0,     1005 ],
   ]
 
   run_vector_test( model, PacketType, simple_4_test, k_ary, n_fly )
@@ -123,16 +125,17 @@ class TestHarness( Component ):
                  arrival_time=None ):
 
     num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
-    num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
+    s.num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
     r_rows = k_ary ** ( n_fly - 1 )
     BflyPos  = mk_bfly_pos( r_rows, n_fly )
     s.dut  = BflyNetworkRTL( MsgType, BflyPos, k_ary, n_fly, 0)
+    match_func = lambda a,b : a.src==b.src and a.payload == b.payload and a.opaque == b.opaque
 
     s.srcs  = [ TestSrcRTL ( MsgType, src_msgs[i],  src_initial,  src_interval  )
-              for i in range ( s.dut.num_terminals ) ]
+              for i in range ( s.num_terminals ) ]
     s.sinks = [ TestNetSinkRTL ( MsgType, sink_msgs[i], sink_initial,
-              sink_interval) 
-              for i in range ( s.dut.num_terminals ) ]
+              sink_interval, match_func = match_func)
+              for i in range ( s.num_terminals ) ]
 
     # Connections
     for i in range ( s.dut.num_terminals ):
@@ -142,7 +145,7 @@ class TestHarness( Component ):
   def done( s ):
     srcs_done = 1
     sinks_done = 1
-    for i in range( s.dut.num_terminals ):
+    for i in range( s.num_terminals ):
       if s.srcs[i].done() == 0:
         srcs_done = 0
       if s.sinks[i].done() == 0:
@@ -161,7 +164,15 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Create a simulator
 
-  test_harness.apply( SimpleSim )
+  test_harness.elaborate()
+  test_harness.dut.yosys_translate = True
+  test_harness.dut.yosys_import = True
+  test_harness.dut.dump_vcd = True
+
+  test_harness.apply( TranslationPass() )
+  test_harness = ImportPass()( test_harness )
+
+  test_harness.apply( DynamicSim )
   test_harness.sim_reset()
 
   # Run simulation
@@ -181,7 +192,8 @@ def run_sim( test_harness, max_cycles=100 ):
   test_harness.tick()
   test_harness.tick()
   test_harness.tick()
-  test_harness.dut.elaborate_physical()
+  # generate the physical level geometry information
+#  test_harness.dut.elaborate_physical()
 
 #-------------------------------------------------------------------------
 # Test cases (specific for 4-ary 2-fly butterfly)
@@ -219,7 +231,7 @@ def set_dst(k_ary, n_fly, vec_dst):
         bf_dst = bf_dst * k_ary
   return bf_dst
 
-def ttest_srcsink_4ary_3fly():
+def test_srcsink_4ary_3fly():
 
   k_ary = 4
   n_fly = 3
@@ -228,9 +240,10 @@ def ttest_srcsink_4ary_3fly():
     bf_dst = set_dst( k_ary, n_fly, vec_dst)
     pkt = PacketType( vec_src, bf_dst, 0, payload)
     src_packets [vec_src].append( pkt )
-    sink_pkt = copy.deepcopy( pkt )
-    sink_pkt.dst = 0
-    sink_packets[vec_dst].append( sink_pkt )
+#    sink_pkt = copy.deepcopy( pkt )
+#    print 'generated: ', pkt, '; type(pkt.dst): ', type(pkt.dst)
+#    sink_pkt.dst = 0
+    sink_packets[vec_dst].append( pkt )
 
   src_packets .extend( [ [] for _ in range (48) ] )
   sink_packets.extend( [ [] for _ in range (48) ] )
