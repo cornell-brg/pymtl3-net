@@ -8,14 +8,14 @@
 
 from pymtl3 import *
 from directions import *
-from pymtl3.stdlib.cl.queues import BypassQueueCL 
+from pymtl3.stdlib.cl.queues import BypassQueueCL
 
 class MeshRouteUnitYDorCL( Component ):
 
   def construct( s, PacketType, PositionType ):
 
     # Local parameters
-    
+
     s.num_outports = 5
 
     # Interface
@@ -61,7 +61,7 @@ class MeshRouteUnitYDorCL( Component ):
       s.give[i].method.method = s.give_method
 
     for i in range( s.num_outports ):
-      s.add_constraints( 
+      s.add_constraints(
         M( s.get ) < U( ru_up_route ) < M( s.give[i] ),
       )
 
@@ -73,5 +73,4 @@ class MeshRouteUnitYDorCL( Component ):
     return ret
 
   def line_trace( s ):
-
     return "{}".format( s.pkt )

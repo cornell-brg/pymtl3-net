@@ -1,21 +1,22 @@
-#=========================================================================
-# MeshRouteUnitXDorCL.py
-#=========================================================================
-# Cycle level implementation of a X-DOR route unit.
-#
-# Author : Yanghui Ou
-#   Date : May 21, 2019
+"""
+==========================================================================
+MeshRouteUnitXDorCL.py
+==========================================================================
+Cycle level implementation of a X-DOR route unit.
 
+Author : Yanghui Ou
+  Date : May 21, 2019
+"""
 from pymtl3 import *
 from directions import *
-from pymtl3.stdlib.cl.queues import BypassQueueCL 
+from pymtl3.stdlib.cl.queues import BypassQueueCL
 
 class MeshRouteUnitXDorCL( Component ):
 
   def construct( s, PacketType, PositionType ):
 
     # Local parameters
-    
+
     s.num_outports = 5
 
     # Interface
@@ -61,7 +62,7 @@ class MeshRouteUnitXDorCL( Component ):
       s.give[i].method.method = s.give_method
 
     for i in range( s.num_outports ):
-      s.add_constraints( 
+      s.add_constraints(
         M( s.get ) < U( ru_up_route ) < M( s.give[i] ),
       )
 
