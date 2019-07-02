@@ -1,11 +1,12 @@
-#=========================================================================
-# SwitchUnitCL.py
-#=========================================================================
-# Cycle level implementation of a round robin switch unit.
-#
-# Author : Yanghui Ou
-#   Date : May 16, 2019
+"""
+==========================================================================
+SwitchUnitCL.py
+==========================================================================
+Cycle level implementation of a round robin switch unit.
 
+Author : Yanghui Ou
+  Date : May 16, 2019
+"""
 from pymtl3 import *
 
 class SwitchUnitCL( Component ):
@@ -19,25 +20,15 @@ class SwitchUnitCL( Component ):
     # Interface
 
     s.get  = [ NonBlockingCallerIfc( PacketType ) for _ in range( s.num_inports ) ]
-    s.send = NonBlockingCallerIfc( PacketType )
+    s.give.Type = PacketType
 
     # Components
 
     s.priority = [ i for i in range( s.num_inports ) ]
     s.msg = None
-    
-    @s.update
-    def up_su_arb_cl():
-      if s.send.rdy is not None:
-        if s.send.rdy() and s.any_ready():
-          for i in s.priority:
-            if s.get[i].rdy():
-              s.priority.append( s.priority.pop(i) )
-              s.send( s.get[i]() )
-              break
-    
+
     for i in range( s.num_inports ):
-      s.add_constraints( M( s.get[i] ) < U( up_su_arb_cl ) )
+      s.add_constraints( M( s.get[i] ) == M( s.give ) )
       # s.add_constraints( U( up_su_arb_cl ) < M( s.get[i].rdy ) )
       # s.add_constraints( M( s.get[i] ) < M( s.send ) )
 
@@ -48,9 +39,17 @@ class SwitchUnitCL( Component ):
         flag = flag or s.get[i].rdy()
     return flag
 
-  # TODO: CL line trace
+  @non_blocking( lambda s: s.any_ready() )
+  def give( s ):
+    for i in s.priority:
+      if s.get[i].rdy():
+        s.priority.append( s.priority.pop(i) )
+        return s.get[i]()
+
+  # CL line trace
   def line_trace( s ):
-    return "{}{}".format(
-      [ s.get[i].rdy() for i in range(s.num_inports) ],
-      s.priority
+    return "{}_({})_{}".format(
+      "|".join( [ str(s.get[i]) for i in range(s.num_inports) ] ),
+      s.priority,
+      s.give,
     )
