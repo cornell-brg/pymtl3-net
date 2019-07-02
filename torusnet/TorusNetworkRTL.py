@@ -106,8 +106,8 @@ class TorusNetworkRTL( Component ):
     in_trace  = [ str( s.recv[i] ) for i in range( s.num_terminals ) ]
     out_trace = [ str( s.send[i] ) for i in range( s.num_terminals ) ]
 
-    # return "{}_()_{}".format( "|".join( in_trace ), "|".join( out_trace ) )
-    return "{}".format( "|".join( out_trace ) )
+    return "{}_()_{}".format( "|".join( in_trace ), "|".join( out_trace ) )
+    # return "{}".format( "|".join( out_trace ) )
 
   def elaborate_physical( s ):
     # Initialize dimension for sub-modules.

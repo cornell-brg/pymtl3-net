@@ -85,7 +85,8 @@ class TorusRouterRTL( Component ):
     return "{}_({})_{}".format(
       "|".join( in_trace ),
       s.pos,
-      "|".join( out_trace )
+      # " I ".join([ "SU{}".format(i)+str( s.route_units[i].line_trace() ) for i in range(10) ]),
+      "|".join( out_trace ),
     )
 
   def elaborate_physical( s ):

@@ -74,10 +74,10 @@ def mk_src_pkts( ncols, nrows, lst ):
 
 @st.composite
 def torus_pkt_strat( draw, ncols, nrows ):
-  src_x = draw( st.integers(0, ncols-1) )
-  src_y = draw( st.integers(0, nrows-1) )
-  dst_x = draw( st.integers(0, ncols-1) )
-  dst_y = draw( st.integers(0, nrows-1) )
+  src_x = draw( st.integers(0, ncols-1), label="src_x" )
+  src_y = draw( st.integers(0, nrows-1), label="src_y" )
+  dst_x = draw( st.integers(0, ncols-1), label="dst_x" )
+  dst_y = draw( st.integers(0, nrows-1), label="dst_y" )
   payload = draw( st.sampled_from([ 0xdeadface, 0xfaceb00c, 0xdeadbabe ]) )
   Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
   return Pkt( src_x, src_y, dst_x, dst_y, 0, 0, payload )
@@ -113,28 +113,59 @@ class Ringnet_Tests( object ):
 
     src_pkts = mk_src_pkts( ncols, nrows, [
       #    src_x  y  dst_x  y   opq vc payload
-      Pkt(     0, 0,     1, 1,  0,  0, 0xfaceb00c ),
+      Pkt(     1, 0,     0, 1,  0,  0, 0xfaceb00c ),
       Pkt(     1, 1,     1, 0,  0,  0, 0xdeadface ),
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
     s.run_sim( th )
 
-  @hypothesis.settings( deadline=None )
+  def test_simple_3x3( s ):
+    ncols = 3
+    nrows = 3
+
+    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+
+    src_pkts = mk_src_pkts( ncols, nrows, [
+      #    src_x  y  dst_x  y   opq vc payload
+      Pkt(     1, 0,     0, 2,  0,  0, 0xfaceb00c ),
+      #Pkt(     1, 1,     1, 0,  0,  0, 0xdeadface ),
+    ])
+    dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
+    th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
+    s.run_sim( th )
+
+  def test_simple_5x5( s ):
+    ncols = 5
+    nrows = 5
+
+    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+
+    src_pkts = mk_src_pkts( ncols, nrows, [
+      #    src_x  y  dst_x  y   opq vc payload
+      Pkt(     1, 0,     0, 4,  0,  0, 0xfaceb00c ),
+      #Pkt(     1, 1,     1, 0,  0,  0, 0xdeadface ),
+    ])
+    dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
+    th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
+    s.run_sim( th )
+
+  @hypothesis.settings( deadline=None, max_examples=20 )
+  # @hypothesis.reproduce_failure('4.24.4', 'AAMDAQEAAAQAAA==') #(1:0)>(0:4)
   @hypothesis.given(
-    ncols = st.integers(2, 8),
-    nrows = st.integers(2, 8),
+    ncols = st.integers(2, 5),
+    nrows = st.integers(2, 5),
     pkts  = st.data(),
   )
   def test_hypothesis( s, ncols, nrows, pkts ):
     Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
 
     pkts_lst = pkts.draw(
-      st.lists( torus_pkt_strat( ncols, nrows ), max_size=100 ),
+      st.lists( torus_pkt_strat( ncols, nrows ), max_size=4 ),
       label= "pkts"
     )
 
     src_pkts = mk_src_pkts( ncols, nrows, pkts_lst )
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    s.run_sim( th, max_cycles=2000 )
+    s.run_sim( th, max_cycles=20 )

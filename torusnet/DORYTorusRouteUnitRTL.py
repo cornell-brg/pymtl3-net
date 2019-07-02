@@ -64,11 +64,10 @@ class DORYTorusRouteUnitRTL( Component ):
     def up_we_dist():
       if s.get.msg.dst_x < s.pos.pos_x:
         s.west_dist = s.pos.pos_x - s.get.msg.dst_x
-        s.east_dist = s.last_col_id - s.pos.pos_x + ns_dist_type(1) + s.get.msg.dst_y
+        s.east_dist = s.last_col_id - s.pos.pos_x + ns_dist_type(1) + s.get.msg.dst_x
       else:
-        s.west_dist = s.pos.pos_x + ns_dist_type(1) + s.last_col_id - s.get.msg.dst_y
+        s.west_dist = s.pos.pos_x + ns_dist_type(1) + s.last_col_id - s.get.msg.dst_x
         s.east_dist = s.get.msg.dst_y - s.pos.pos_x
-
 
     # Routing logic
     @s.update
@@ -119,12 +118,13 @@ class DORYTorusRouteUnitRTL( Component ):
     for i in range (s.num_outports):
       out_str[i] = "{}".format( s.give[i] )
 
-    return "{}({},{}){}".format(
+    return "{}({},{},{}<>{}){}".format(
       s.get,
       "N" if s.out_dir == NORTH else
       "S" if s.out_dir == SOUTH else
       "W" if s.out_dir == WEST  else
       "E",
       "t" if s.turning else " ",
+      s.west_dist, s.east_dist,
       "|".join( out_str ),
     )

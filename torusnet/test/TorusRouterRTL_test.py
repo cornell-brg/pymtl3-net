@@ -137,3 +137,25 @@ class TorusRouterRTL_Tests( object ):
       pos_x=pos_x, pos_y=pos_y,
     )
     s.run_sim( th )
+
+  @pytest.mark.parametrize(
+    'pos_x, pos_y',
+    product( [ 1 ], [ 4 ] )
+  )
+  def test_simple_5x5( s, pos_x, pos_y ):
+    ncols = 5
+    nrows = 5
+
+    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+
+    src_pkts, sink_pkts = mk_srcsink_pkts( pos_x, pos_y, ncols, nrows,[
+      #   src_x  y  dst_x  y  opq  vc  payload
+      Pkt(    1, 0,     0, 4,   0,  0, 0xfaceb00c ),
+    ])
+
+    th = TestHarness( Pkt, src_pkts, sink_pkts )
+    th.set_param( "top.construct",
+      ncols=ncols, nrows=nrows,
+      pos_x=pos_x, pos_y=pos_y,
+    )
+    s.run_sim( th )
