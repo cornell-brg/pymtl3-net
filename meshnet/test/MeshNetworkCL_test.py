@@ -22,19 +22,20 @@ from router.InputUnitCL       import InputUnitCL
 
 class TestHarness( Component ):
 
-  def construct( s, PktType, mesh_wid, mesh_ht, 
-                 src_msgs, sink_msgs, 
-                 src_initial, src_interval, 
+  def construct( s, PktType, mesh_wid, mesh_ht,
+                 src_msgs, sink_msgs,
+                 src_initial, src_interval,
                  sink_initial, sink_interval ):
 
     s.nrouters = mesh_wid * mesh_ht
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    match_func = lambda a, b : a==b
     s.dut = MeshNetworkCL( PktType, MeshPos, mesh_wid, mesh_ht, 0 )
 
     s.srcs  = [ TestSrcCL( PktType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range( s.nrouters ) ]
-    s.sinks = [ TestNetSinkCL( PktType, sink_msgs[i], sink_initial, sink_interval) 
+    s.sinks = [ TestNetSinkCL( PktType, sink_msgs[i], sink_initial, sink_interval, match_func=match_func)
                 for i in range( s.nrouters ) ]
 
     # Connections
@@ -94,7 +95,7 @@ def mk_src_sink_msgs( pkts, mesh_wid, mesh_ht ):
   nrouters = mesh_wid * mesh_ht
   src_msgs  = [ [] for _ in range( nrouters ) ]
   sink_msgs = [ [] for _ in range( nrouters ) ]
-  
+
   for pkt in pkts:
     src_id  = pkt.src_y * mesh_wid + pkt.src_x
     sink_id = pkt.dst_y * mesh_wid + pkt.dst_x
@@ -136,19 +137,19 @@ test_case_table = mk_test_case_table([
 
 @pytest.mark.parametrize( **test_case_table )
 def test_mesh_simple( test_params ):
-  PktType = mk_mesh_pkt( 
+  PktType = mk_mesh_pkt(
     mesh_wid=test_params.wid,
     mesh_ht =test_params.ht,
     nvcs=1,
   )
   pkt_list = test_params.msg_func( PktType, test_params.wid, test_params.ht )
   src_msgs, sink_msgs = mk_src_sink_msgs( pkt_list, test_params.wid, test_params.ht )
-  th = TestHarness( 
-    PktType, 
+  th = TestHarness(
+    PktType,
     test_params.wid,
     test_params.ht,
     src_msgs,
-    sink_msgs, 
+    sink_msgs,
     test_params.src_init,
     test_params.src_intv,
     test_params.sink_init,

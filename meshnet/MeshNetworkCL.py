@@ -12,7 +12,7 @@ from channel.ChannelCL import ChannelCL
 from MeshRouterCL      import MeshRouterCL
 
 class MeshNetworkCL( Component ):
-  def construct( s, PacketType, PositionType, 
+  def construct( s, PacketType, PositionType,
                  mesh_wid = 4, mesh_ht = 4, chl_lat = 0 ):
 
     # Constants
@@ -67,6 +67,7 @@ class MeshNetworkCL( Component ):
       # Connect the unused ports
       def dummy_rdy():
         return lambda : False
+
       # FIXME: this doesn't work!
       if i / mesh_wid == 0:
         print i, SOUTH
