@@ -6,7 +6,7 @@
 # Author : Yanghui Ou
 #   Date : Apr 30, 2019
 
-from meshnet.directions import * 
+from meshnet.directions import *
 
 def dor_routing( src_x, src_y, dst_x, dst_y,
                  pos_x, pos_y, dimension='x' ):
@@ -21,7 +21,7 @@ def dor_routing( src_x, src_y, dst_x, dst_y,
     if   src_x == pos_x: tsrc = SOUTH if src_y < pos_y else NORTH
     elif src_x < pos_x:  tsrc = WEST
     else:                tsrc = EAST
-      
+
   elif dimension.lower() == 'x':
     if   src_y == pos_y: tsrc = WEST if src_x < pos_x else EAST
     elif src_y < pos_y:  tsrc = SOUTH
@@ -35,7 +35,7 @@ def dor_routing( src_x, src_y, dst_x, dst_y,
     tsink = SELF
 
   elif dimension.lower() == 'y':
-    tsink = ( 
+    tsink = (
       NORTH if dst_y > pos_y else
       SOUTH if dst_y < pos_y else
       EAST  if dst_x > pos_x else
@@ -43,11 +43,11 @@ def dor_routing( src_x, src_y, dst_x, dst_y,
     )
 
   elif dimension.lower() == 'x':
-    tsink = ( 
+    tsink = (
       EAST  if dst_x > pos_x else
       WEST  if dst_x < pos_x else
       NORTH if dst_y > pos_y else
-      SOUTH 
+      SOUTH
     )
 
   else:

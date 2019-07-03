@@ -62,6 +62,6 @@ class MeshRouterCL( Router ):
       s.connect( s.output_units[j].send, s.send[j]              )
 
   def line_trace( s ):
-    return "{}".format(
-      "|".join( [ s.input_units[i].line_trace()  for i in range( s.num_inports) ] ),
-    )
+    in_trace  = "|".join([ str(s.recv[i]) for i in range(5) ])
+    out_trace = "|".join([ str(s.send[i]) for i in range(5) ])
+    return "{}_({})_{}".format( in_trace, s.pos, out_trace )

@@ -1,25 +1,26 @@
-#=========================================================================
-# MeshRouterCL_test.py
-#=========================================================================
-# Test for RouterCL
-#
-# Author : Yanghui Ou
-#   Date : May 21, 2019
+"""
+==========================================================================
+MeshRouterCL_test.py
+==========================================================================
+Test cases for MeshRouterCL.
 
+Author : Yanghui Ou
+  Date : May 21, 2019
+"""
+import pytest
 import hypothesis
 from hypothesis import strategies as st
+from itertools import product
 
 from pymtl3                        import *
 from pymtl3.stdlib.test.test_srcs  import TestSrcCL
-from pymtl3.stdlib.test.test_sinks import TestSinkCL
-#from ocn_pclib.test.net_sinks      import TestNetSinkCL
+from pymtl3.datatypes              import strategies as pst
+from ocn_pclib.test.net_sinks      import TestNetSinkCL as TestSinkCL
 from ocn_pclib.ifcs.positions      import mk_mesh_pos
 from ocn_pclib.ifcs.packets        import mk_mesh_pkt
+from meshnet.MeshRouterFL          import MeshRouterFL
 from meshnet.MeshRouterCL          import MeshRouterCL
 from meshnet.MeshRouteUnitXDorCL   import MeshRouteUnitXDorCL
-from router.InputUnitCL            import InputUnitCL
-
-from test_helpers import dor_routing
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -28,23 +29,27 @@ from test_helpers import dor_routing
 class TestHarness( Component ):
 
   def construct( s,
-    MsgType       = None,
-    mesh_wid      = 2,
-    mesh_ht       = 2 ,
-    pos_x         = 0,
-    pos_y         = 0,
-    src_msgs      = [],
-    sink_msgs     = [],
+    MsgType   = None,
+    src_msgs  = [],
+    sink_msgs = [],
+    mesh_wid  = 2,
+    mesh_ht   = 2 ,
+    pos_x     = 0,
+    pos_y     = 0,
   ):
 
     print "=" * 74
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    s.nrouters = mesh_wid * mesh_ht
+    match_func = lambda a, b : a.src_x == a.src_x and a.src_y == b.src_y and \
+                               a.dst_x == b.dst_x and a.dst_y == b.dst_y and \
+                               a.opaque == b.opaque and a.payload == b.payload
     s.dut = MeshRouterCL( MsgType, MeshPos )
 
     s.srcs  = [ TestSrcCL( MsgType, src_msgs[i] )
-                for i in range  ( s.dut.num_inports ) ]
-    s.sinks = [ TestSinkCL( MsgType, sink_msgs[i] )
-                for i in range ( s.dut.num_outports ) ]
+                for i in range(5) ]
+    s.sinks = [ TestSinkCL( MsgType, sink_msgs[i], match_func=match_func )
+                for i in range(5) ]
 
     # Connections
 
@@ -52,7 +57,6 @@ class TestHarness( Component ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
-    #TODO: provide pos for router...
     @s.update
     def up_pos():
       s.dut.pos = MeshPos( pos_x, pos_y )
@@ -69,162 +73,129 @@ class TestHarness( Component ):
     return srcs_done and sinks_done
 
   def line_trace( s ):
-    return "{}".format(
-      s.dut.line_trace(),
-    )
-
-#-------------------------------------------------------------------------
-# run_rtl_sim
-#-------------------------------------------------------------------------
-
-def run_sim( test_harness, max_cycles=100 ):
-
-  # Create a simulator
-
-  test_harness.elaborate()
-  test_harness.apply( SimpleSim )
-  test_harness.sim_reset()
-
-  # Run simulation
-
-  ncycles = 0
-  print ""
-  print "{:2}:{}".format( ncycles, test_harness.line_trace() )
-  while not test_harness.done() and ncycles < max_cycles:
-    test_harness.tick()
-    ncycles += 1
-    print "{:2}:{}".format( ncycles, test_harness.line_trace() )
-
-  # Check timeout
-
-  assert ncycles < max_cycles
-
-  test_harness.tick()
-  test_harness.tick()
-  test_harness.tick()
+    return "{}".format( s.dut.line_trace() )
 
 #-------------------------------------------------------------------------
 # Test cases
 #-------------------------------------------------------------------------
 
-TestPkt = mk_mesh_pkt( 4, 4 )
-
-def test_self_simple():
-  pkt = TestPkt( 0, 0, 0, 0, 0, 0xdead )
-  src_pkts  = [ [], [], [], [], [pkt] ]
-  sink_pkts = [ [], [], [], [], [pkt] ]
-  th = TestHarness( TestPkt, 4, 4, 0, 0, src_pkts, sink_pkts )
-  run_sim( th )
-
-# Failing test cases captured by hypothesis
-# def test_h0():
-#   pos_x = 0
-#   pos_y = 0
-#   mesh_wid = 2
-#   mesh_ht  = 2
-#   pkt0 = TestPkt( 0, 0, 1, 0, 0, 0xdead )
-#   pkt1 = TestPkt( 0, 1, 1, 0, 0, 0xbeef )
-#   src_pkts  = [ [pkt1], [], [], [],           [pkt0] ]
-#   sink_pkts = [ [],     [], [], [pkt0, pkt1], []     ]
-#   th = TestHarness(
-#     TestPkt, mesh_wid, mesh_ht, pos_x, pos_y,
-#     src_pkts, sink_pkts
-#   )
-#   run_sim( th )
-
-# def test_h1():
-#   pos_x, pos_y, mesh_wid, mesh_ht = 0, 0, 2, 2
-#   pkt0 = TestPkt( 0, 0, 0, 1, 0, 0xdead )
-#   src_pkts  = [ [],     [], [], [], [pkt0] ]
-#   sink_pkts = [ [pkt0], [], [], [], []     ]
-#   th = TestHarness(
-#     TestPkt, mesh_wid, mesh_ht, pos_x, pos_y,
-#     src_pkts, sink_pkts
-#   )
-#   run_sim( th )
-
-# def test_h2():
-#   pos_x, pos_y, mesh_wid, mesh_ht = 0, 0, 2, 2
-#   pkt0 = TestPkt( 0, 0, 1, 0, 0, 0xdead )
-#   pkt1 = TestPkt( 0, 1, 1, 0, 1, 0xbeef )
-#   pkt2 = TestPkt( 0, 1, 1, 0, 2, 0xcafe )
-#               # N             S   W   E                   self
-#   src_pkts  = [ [pkt1, pkt2], [], [], [],                 [pkt0] ]
-#   sink_pkts = [ [],           [], [], [pkt1, pkt2, pkt0], []     ]
-#   th = TestHarness(
-#     TestPkt, mesh_wid, mesh_ht, pos_x, pos_y,
-#     src_pkts, sink_pkts
-#   )
-#   run_sim( th, 10 )
-
-# def test_h3():
-#   pos_x, pos_y, mesh_wid, mesh_ht = 0, 1, 2, 2
-#   pkt0 = TestPkt( 0, 1, 0, 0, 0, 0xdead )
-#               # N   S   W   E   self
-#   src_pkts  = [ [], [], [], [], [pkt0] ]
-#   sink_pkts = [ [], [pkt0], [], [], [] ]
-#   th = TestHarness(
-#     TestPkt, mesh_wid, mesh_ht, pos_x, pos_y,
-#     src_pkts, sink_pkts
-#   )
-#   th.set_param(
-#     "top.dut.construct",
-#     RouteUnitType = DORYMeshRouteUnitRTL
-#   )
-#   run_sim( th, 10 )
-
-#-------------------------------------------------------------------------
-# Hypothesis test
-#-------------------------------------------------------------------------
-
 @st.composite
-def mesh_pkt_strat( draw, PktType, mesh_wid, mesh_ht, routing_algo, pos_x, pos_y ):
+def mesh_pkt_strat( draw, mesh_wid, mesh_ht, opaque_nbits=8, nvcs=1, payload_nbits=32 ):
   dst_x = draw( st.integers(0, mesh_wid-1) )
   dst_y = draw( st.integers(0, mesh_ht -1) )
   src_x = draw( st.integers(0, mesh_wid-1) )
   src_y = draw( st.integers(0, mesh_ht -1) )
-  opaque  = draw( st.integers(0, 4) )
+  opaque  = draw( pst.bits( opaque_nbits ) )
   payload = draw( st.sampled_from([ 0, 0xdeadbeef, 0xfaceb00c, 0xc001cafe ]) )
-  pkt = PktType( src_x, src_y, dst_x, dst_y, opaque, payload )
-  tsrc, tsink = dor_routing( src_x, src_y, dst_x, dst_y, pos_x, pos_y, routing_algo )
-  return tsrc, tsink, pkt
+  Pkt = mk_mesh_pkt( mesh_wid, mesh_ht, opaque_nbits, nvcs, payload_nbits )
+  if nvcs==1:
+    return Pkt( src_x, src_y, dst_x, dst_y, opaque, payload )
+  else:
+    return Pkt( src_x, src_y, dst_x, dst_y, opaque, 0, payload )
 
-@hypothesis.settings( deadline = None )
-@hypothesis.given(
-  mesh_wid   = st.integers(2, 16),
-  mesh_ht    = st.integers(2, 16),
-  routing    = st.sampled_from(['x']), # TODO: add y after implementing DorY route unit
-  pos_x      = st.data(),
-  pos_y      = st.data(),
-  pkts       = st.data(),
-  src_init   = st.integers(0, 20),
-  src_inter  = st.integers(0, 5 ),
-  sink_init  = st.integers(0, 20),
-  sink_inter = st.integers(0, 5 ),
-)
-def test_hypothesis( mesh_wid, mesh_ht, routing, pos_x, pos_y, pkts,
-    src_init, src_inter, sink_init, sink_inter ):
-  PktType = mk_mesh_pkt( mesh_wid, mesh_ht )
-  # Draw some numbers
-  pos_x = pos_x.draw( st.integers(0,mesh_wid-1), label="pos_x" )
-  pos_y = pos_y.draw( st.integers(0,mesh_wid-1), label="pos_y" )
-  msgs  = pkts.draw(
-    st.lists(
-      mesh_pkt_strat( PktType, mesh_wid, mesh_ht, routing, pos_x, pos_y ),
-      min_size = 1, max_size = 50
-    ),
-    label = "msgs"
+#-------------------------------------------------------------------------
+# Test cases
+#-------------------------------------------------------------------------
+
+class MeshRouterCL_Tests( object ):
+
+  @classmethod
+  def setup_class( s ):
+    s.TestHarness = TestHarness
+
+  def run_sim( s, th, max_cycles=100 ):
+    # Create a simulator
+    th.apply( DynamicSim )
+    th.sim_reset()
+
+    # Run simulation
+    ncycles = 0
+    print ""
+    print "{:3}:{}".format( ncycles, th.line_trace() )
+    while not th.done() and ncycles < max_cycles:
+      th.tick()
+      ncycles += 1
+      print "{:3}:{}".format( ncycles, th.line_trace() )
+
+    # Check timeout
+    assert ncycles < max_cycles
+
+  @pytest.mark.parametrize(
+    'pos_x, pos_y',
+    product( [ 0, 1, 2, 3 ], [ 0, 1, 2, 3 ] ),
   )
-  src_msgs  = [ [] for _ in range(5) ]
-  sink_msgs = [ [] for _ in range(5) ]
-  for src_id, sink_id, pkt in msgs:
-    src_msgs [ src_id  ].append( pkt )
-    sink_msgs[ sink_id ].append( pkt )
+  def test_simple4x4( s, pos_x, pos_y ):
+    mesh_wid = 4
+    mesh_ht  = 4
+    Pkt = mk_mesh_pkt( mesh_wid, mesh_ht )
+    router_fl = MeshRouterFL( pos_x, pos_y, dimension='x' )
+    src_pkts = router_fl.arrange_src_pkts([
+      #   src_x  y dst_x  y  opq payload
+      Pkt(    0, 0,    3, 3, 0,  0xdeaddead ),
+    ])
+    dst_pkts = router_fl.route( src_pkts )
+    th = s.TestHarness( Pkt, src_pkts, dst_pkts, mesh_wid, mesh_ht, pos_x, pos_y )
+    s.run_sim( th )
 
-  # Configure the test harness
-  th = TestHarness( PktType, mesh_wid, mesh_ht, pos_x, pos_y,
-                    src_msgs, sink_msgs,
-                    src_init, src_inter,
-                    sink_init, sink_inter )
-  # TODO: dimension
-  run_sim( th, 1000 )
+  # Failing test cases captured by hypothesis
+  def test_h0( s ):
+    pos_x = 0; pos_y = 0; mesh_wid = 2; mesh_ht = 2
+    Pkt = mk_mesh_pkt( mesh_wid, mesh_ht )
+    router_fl = MeshRouterFL( pos_x, pos_y, dimension='x' )
+    src_pkts = router_fl.arrange_src_pkts([
+      #   src_x  y dst_x  y  opq payload
+      Pkt(    0, 0,    1, 0, 0,  0xdeadbabe ),
+      Pkt(    0, 0,    1, 0, 0,  0xdeadface ),
+    ])
+    dst_pkts = router_fl.route( src_pkts )
+    th = s.TestHarness( Pkt, src_pkts, dst_pkts, mesh_wid, mesh_ht, pos_x, pos_y )
+    s.run_sim( th )
+
+  def test_h1( s ):
+    pos_x = 0; pos_y = 0; mesh_wid = 2; mesh_ht = 2
+    Pkt = mk_mesh_pkt( mesh_wid, mesh_ht )
+    router_fl = MeshRouterFL( pos_x, pos_y, dimension='x' )
+    src_pkts = router_fl.arrange_src_pkts([
+      #   src_x  y dst_x  y  opq payload
+      Pkt(    0, 0,    0, 1, 0,  0xdeadbabe ),
+    ])
+    dst_pkts = router_fl.route( src_pkts )
+    th = s.TestHarness( Pkt, src_pkts, dst_pkts, mesh_wid, mesh_ht, pos_x, pos_y )
+    s.run_sim( th )
+
+#-------------------------------------------------------------------------
+# Hypothesis test
+#-------------------------------------------------------------------------
+  @hypothesis.settings( deadline = None )
+  @hypothesis.given(
+    mesh_wid   = st.integers(2, 16),
+    mesh_ht    = st.integers(2, 16),
+    routing    = st.sampled_from(['x']), # TODO: add y after implementing DorY route unit
+    pos_x      = st.data(),
+    pos_y      = st.data(),
+    pkts       = st.data(),
+    src_init   = st.integers(0, 2 ),
+    src_inter  = st.integers(0, 5 ),
+    sink_init  = st.integers(0, 20),
+    sink_inter = st.integers(0, 5 ),
+  )
+  def test_hypothesis( s, mesh_wid, mesh_ht, routing, pos_x, pos_y, pkts,
+      src_init, src_inter, sink_init, sink_inter ):
+    # Draw some numbers
+    pos_x = pos_x.draw( st.integers(0,mesh_wid-1), label="pos_x" )
+    pos_y = pos_y.draw( st.integers(0,mesh_wid-1), label="pos_y" )
+    Pkt   = mk_mesh_pkt( mesh_wid, mesh_ht )
+    router_fl = MeshRouterFL( pos_x, pos_y, dimension='x' )
+    msgs  = pkts.draw(
+      st.lists( mesh_pkt_strat( mesh_wid, mesh_ht ), min_size = 1, max_size = 50 ),
+      label = "msgs"
+    )
+    src_pkts = router_fl.arrange_src_pkts( msgs )
+    dst_pkts = router_fl.route( src_pkts )
+    th = s.TestHarness( Pkt, src_pkts, dst_pkts, mesh_wid, mesh_ht, pos_x, pos_y )
+    th.set_param( "top.src*.construct", initial_delay=src_init, interval_delay=src_init )
+    th.set_param( "top.sink*.construct", initial_delay=sink_init, interval_delay=sink_init )
+    s.run_sim( th, max_cycles=5000 )
+
+
+
