@@ -122,13 +122,36 @@ def simple_msg( PktType, mesh_wid=2, mesh_ht=2 ):
     ( 1,    0,    1,    1,    0x01, 0x0020  ),
   ])
 
+def simple_4x4( PktType, mesh_wid=2, mesh_ht=2 ):
+  return mk_pkt_list( PktType, [
+  #   src_x src_y dst_x dst_y opq   payload
+    ( 0,    0,    0,    1,    0x00, 0x0010  ),
+    ( 1,    0,    1,    1,    0x01, 0x0020  ),
+    ( 3,    2,    1,    1,    0x02, 0x0020  ),
+    ( 1,    0,    1,    1,    0x03, 0x0020  ),
+    ( 1,    3,    2,    1,    0x04, 0x0020  ),
+    ( 3,    3,    1,    0,    0x05, 0x0020  ),
+  ])
+
+def simple_8x8( PktType, mesh_wid=2, mesh_ht=2 ):
+  return mk_pkt_list( PktType, [
+  #   src_x src_y dst_x dst_y opq   payload
+    ( 0,    0,    0,    1,    0x00, 0x0010  ),
+    ( 1,    0,    1,    1,    0x01, 0x0020  ),
+    ( 3,    2,    1,    1,    0x02, 0x0020  ),
+    ( 1,    0,    1,    1,    0x03, 0x0020  ),
+    ( 1,    3,    2,    1,    0x04, 0x0020  ),
+    ( 3,    5,    1,    0,    0x05, 0x0020  ),
+  ])
 #-------------------------------------------------------------------------
 # test case table
 #-------------------------------------------------------------------------
 
 test_case_table = mk_test_case_table([
   (            "msg_func    wid  ht  src_init src_intv sink_init sink_intv"),
-  ["simle_msg", simple_msg, 2,   2,  0,       0,       0,        0         ],
+  ["simle2x2", simple_msg, 2,   2,  0,       0,       0,        0         ],
+  ["simle4x4", simple_4x4, 4,   4,  0,       0,       0,        0         ],
+  ["simle8x8", simple_8x8, 8,   8,  0,       0,       0,        0         ],
 ])
 
 #-------------------------------------------------------------------------
