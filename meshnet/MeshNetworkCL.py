@@ -7,6 +7,7 @@
 #   Date : May 21, 2019
 
 from pymtl3            import *
+from pymtl3.stdlib.cl.queues import BypassQueueCL
 from directions        import *
 from channel.ChannelCL import ChannelCL
 from MeshRouterCL      import MeshRouterCL
@@ -70,19 +71,15 @@ class MeshNetworkCL( Component ):
 
       # FIXME: this doesn't work!
       if i / mesh_wid == 0:
-        print i, SOUTH
         s.routers[i].send[SOUTH].rdy.method = dummy_rdy()
 
       if i / mesh_wid == mesh_ht - 1:
-        print i, NORTH
         s.routers[i].send[NORTH].rdy.method = dummy_rdy()
 
       if i % mesh_wid == 0:
-        print i, WEST
         s.routers[i].send[WEST].rdy.method = dummy_rdy()
 
       if i % mesh_wid == mesh_wid - 1:
-        print i, EAST
         s.routers[i].send[EAST].rdy.method = dummy_rdy()
 
     # FIXME: unable to connect a struct to a port.
@@ -95,3 +92,25 @@ class MeshNetworkCL( Component ):
 
   def line_trace( s ):
     return "|".join( [ s.routers[i].line_trace() for i in range(s.num_routers) ] )
+
+class WrappedMeshNetCL( Component ):
+
+  def construct( s,
+    PacketType,
+    PositionType,
+    mesh_wid=4,
+    mesh_ht=4,
+    chl_lat = 0
+  ):
+    s.nterminals = mesh_ht * mesh_wid
+    s.recv = [ NonBlockingCalleeIfc( PacketType )  for _ in range( s.nterminals ) ]
+    s.give = [ NonBlockingCalleeIfc( PacketType )  for _ in range( s.nterminals ) ]
+    s.net = MeshNetworkCL( PacketType, PositionType, mesh_wid, mesh_ht, chl_lat )
+    s.out_q = [ BypassQueueCL( num_entries=1 ) for _ in range( s.nterminals ) ]
+    for i in range( s.nterminals ):
+      s.connect( s.recv[i], s.net.recv[i] )
+      s.connect( s.net.send[i], s.out_q[i].enq )
+      s.connect( s.out_q[i].deq, s.give[i] )
+
+  def line_trace( s ):
+    return s.net.line_trace()
