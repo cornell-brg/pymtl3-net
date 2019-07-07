@@ -139,8 +139,8 @@ class TestHarness( Component ):
 
     # Connections
     for i in range ( s.dut.num_terminals ):
-      s.connect( s.srcs[i].send, s.dut.recv[i]   )
-      s.connect( s.dut.send[i],  s.sinks[i].recv )
+      s.connect( s.srcs[i].send, s.dut.recvxx[i]   )
+      s.connect( s.dut.sendxx[i],  s.sinks[i].recv )
 
   def done( s ):
     srcs_done = 1
@@ -170,7 +170,7 @@ def run_sim( test_harness, max_cycles=100 ):
   test_harness.dut.dump_vcd = True
 
   test_harness.apply( TranslationPass() )
-  test_harness = ImportPass()( test_harness )
+#  test_harness = ImportPass()( test_harness )
 
   test_harness.apply( DynamicSim )
   test_harness.sim_reset()
@@ -193,7 +193,7 @@ def run_sim( test_harness, max_cycles=100 ):
   test_harness.tick()
   test_harness.tick()
   # generate the physical level geometry information
-#  test_harness.dut.elaborate_physical()
+  #test_harness.dut.elaborate_physical()
 
 #-------------------------------------------------------------------------
 # Test cases (specific for 4-ary 2-fly butterfly)
@@ -248,12 +248,69 @@ def test_srcsink_4ary_3fly():
   src_packets .extend( [ [] for _ in range (48) ] )
   sink_packets.extend( [ [] for _ in range (48) ] )
 
-  th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets, 
+  th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets,
                     0, 0, 0, 0 )
 
   th.set_param( "top.dut.routers*.route_units*.construct", n_fly=n_fly )
   th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
   th.set_param( "top.dut.line_trace",  )
+
+  # insert queues into the long channel in critical path
+
+  critical_channels = [
+      2,
+      3,
+      6,
+      7,
+      10,
+      11,
+      14,
+      15,
+      18,
+      22,
+      26,
+      30,
+      34,
+      38,
+      42,
+      46,
+      49,
+      50,
+      53,
+      54,
+      57,
+      58,
+      61,
+      62,
+      66,
+      67,
+      70,
+      74,
+      77,
+      78,
+      82,
+      83,
+      86,
+      90,
+      93,
+      94,
+      98,
+      99,
+      102,
+      106,
+      109,
+      110,
+      114,
+      115,
+      118,
+      122,
+      125,
+      126,
+  ]
+  print 'critical channel: ', critical_channels
+  print 'len: {}', len(critical_channels)
+  for chl_id in critical_channels:
+    th.set_param( "top.dut.channels[{}].construct".format(chl_id), latency=1 )
 
   run_sim( th )
 

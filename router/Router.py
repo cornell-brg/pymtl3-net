@@ -76,4 +76,4 @@ class Router( Component ):
 
   def elaborate_physical( s ):
     s.dim.w = 50
-    s.dim.h = 50
+    s.dim.h = 150

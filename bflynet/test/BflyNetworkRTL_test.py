@@ -271,8 +271,8 @@ def test_srcsink_4ary_2fly():
   th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
   th.set_param( "top.dut.line_trace",  )
 
-
   run_sim( th )
+  th.dut.elaborate_physical()
 
 def test_srcsink_2ary_4fly():
 
