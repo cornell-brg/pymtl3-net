@@ -95,23 +95,23 @@ def test_srcsink_torus4x4():
                 (4, 11, 105), (5, 10, 106), (6,  9, 107), (7,  8, 108),
                 (8,  7, 109), (9,  6, 110), (10, 5, 111), (11, 4, 112),
                 (12, 3, 113), (13, 2, 114), (14, 1, 115), (15, 0, 116) ]
-  
+
   src_packets  =  [ [],[],[],[],
                     [],[],[],[],
                     [],[],[],[],
                     [],[],[],[] ]
-  
+
   sink_packets =  [ [],[],[],[],
                     [],[],[],[],
                     [],[],[],[],
                     [],[],[],[] ]
-  
+
   # note that need to yield one/two cycle for reset
   arrival_pipes = [[4], [4], [4], [4],
                    [4], [4], [4], [4],
                    [4], [4], [4], [4],
                    [4], [4], [4], [4]]
-  
+
   mesh_wid = 4
   mesh_ht  = 4
   for (src, dst, payload) in test_msgs:
@@ -119,7 +119,7 @@ def test_srcsink_torus4x4():
     src_packets [src].append( pkt )
     sink_packets[dst].append( pkt )
 
-  th = TestHarness( Packet, mesh_wid, mesh_ht, src_packets, sink_packets, 
+  th = TestHarness( Packet, mesh_wid, mesh_ht, src_packets, sink_packets,
                     0, 0, 0, 0, arrival_pipes )
 
   run_sim( th )

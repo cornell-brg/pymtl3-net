@@ -27,3 +27,16 @@ def ringnet_fl( src_pkts ):
       # TODO: change vc_id?
       dst_pkts[ int(pkt.dst) ].append( pkt )
   return dst_pkts
+
+class RingNetworkFL( Component ):
+  def construct( s, nterminals ):
+    s.recv = [ RecvIfcFL( method=s.recv_ ) for _ in range( nterminals ) ]
+    s.send = [ SendIfcFL() for _ in range( nterminals ) ]
+
+    s.out_q = [ QueueFL() for _ in range( nterminals ) ]
+
+    for i in range( nterminals ):
+      s.connect( s.out_q.send, s.send )
+
+  def recv_( s, pkt ):
+    s.out_q[ int(pkt.dst) ].enq( pkt )

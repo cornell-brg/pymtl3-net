@@ -1,113 +1,21 @@
-#=========================================================================
-# MeshNetworkFL_test.py
-#=========================================================================
-# Test for NetworkRTL
-#
-# Author : Cheng Tan
-#   Date : May 19, 2019
+"""
+==========================================================================
+MeshNetworkFL_test.py
+==========================================================================
+Test for NetworkFL
 
-import tempfile
-from pymtl3                   import *
-from pymtl3.stdlib.rtl.queues import *
-from pymtl3.stdlib.rtl.enrdy_queues import *
-from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
-from pymtl3.stdlib.test.test_sinks  import TestSinkRTL
-from pymtl3.stdlib.test             import TestVectorSimulator
-from ocn_pclib.ifcs.Packet          import Packet, mk_pkt
-from ocn_pclib.ifcs.Position        import *
-from meshnet.MeshNetworkFL          import MeshNetworkFL
-# from ocn_pclib.draw               import *
-
-#-------------------------------------------------------------------------
-# Test Vector
-#-------------------------------------------------------------------------
-def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
- 
-  def tv_in( model, test_vector ):
-    num_routers = mesh_wid * mesh_ht
-
-    for i in range( num_routers ):
-      model.recv[i].rdy = 0
-      model.recv[i].msg = None
-
-    if test_vector[0] != 'x':
-      router_id = test_vector[0]
-      pkt = mk_pkt( router_id % mesh_wid, router_id / mesh_wid,
-                  test_vector[1][0], test_vector[1][1], 1, test_vector[1][2])
-    
-      model.recv[router_id].rdy = 1
-      model.recv[router_id].msg = pkt
-
-  def tv_out( model, test_vector ):
-    if test_vector[2] != 'x':
-#      print 'index: ', test_vector[2], '; payload: ', model.send[test_vector[2]].msg, '; test_vector:', test_vector[3]
-      assert model.send[test_vector[2]].msg.payload == test_vector[3]
-     
-  sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
-  sim.run_test()
-
-def test_vector_mesh2x2( dump_vcd, test_verilog ):
-
-  mesh_wid = 2
-  mesh_ht  = 2
-  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = MeshNetworkFL( Packet, mesh_wid, mesh_ht )
-
-  num_routers = mesh_wid * mesh_ht 
-  num_inports = 5
-
-  x = 'x'
-
-  # Specific for wire connection (link delay = 0) in 2x2 Mesh topology
-  simple_2_2_test = [
-#  router   [packet]   arr_router  msg 
-  [  0,    [1,0,1001],     1,     1001 ],
-  [  0,    [1,1,1002],     3,     1002 ],
-  [  0,    [0,1,1003],     2,     1003 ],
-  [  0,    [0,1,1004],     2,     1004 ],
-  [  0,    [1,0,1005],     1,     1005 ],
-  [  2,    [0,0,1006],     0,     1006 ],
-  [  1,    [0,1,1007],     2,     1007 ],
-  [  2,    [1,1,1008],     3,     1008 ],
-  [  x,    [0,0,0000],     x,       x  ],
-  ]
-
-  # dt = DrawGraph()
-  # model.set_draw_graph( dt )
-  run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
-
-def ttest_vector_mesh4x4( dump_vcd, test_verilog ):
-
-  mesh_wid = 4
-  mesh_ht  = 4
-  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  model = MeshNetworkFL( Packet, MeshPos, mesh_wid, mesh_ht )
-
-  num_routers = mesh_wid * mesh_ht 
-  num_inports = 5
-  for r in range (num_routers):
-    for i in range (num_inports):
-      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-      path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
-      model.set_param(path_qt, NormalQueueRTL)
-      model.set_param(path_ru, DORYMeshRouteUnitRTL)
-
-  x = 'x'
-  # Specific for wire connection (link delay = 0) in 4x4 Mesh topology
-  simple_4_4_test = [
-#  router   [packet]   arr_router  msg 
-  [  0,    [1,0,1001],     x,       x  ],
-  [  0,    [1,1,1002],     x,       x  ],
-  [  0,    [0,1,1003],     1,     1001 ],
-  [  0,    [0,1,1004],     x,       x  ],
-  [  0,    [1,0,1005],     4,     1003 ],
-  ]
-
-  # dt = DrawGraph()
-  # model.set_draw_graph( dt )
-  run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
-
-  # dt.draw_topology( model.routers, model.channels )
+Author : Yanghui Ou
+  Date : May 19, 2019
+"""
+import pytest
+from pymtl3                    import *
+from pymtl3.stdlib.test               import mk_test_case_table
+from pymtl3.stdlib.test.test_srcs     import TestSrcCL
+from ocn_pclib.test.net_sinks import TestNetSinkCL
+from ocn_pclib.ifcs.packets   import mk_mesh_pkt
+from ocn_pclib.ifcs.positions import mk_mesh_pos
+from meshnet.MeshNetworkFL    import WrappedMeshNetFL
+from router.InputUnitCL       import InputUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -115,37 +23,38 @@ def ttest_vector_mesh4x4( dump_vcd, test_verilog ):
 
 class TestHarness( Component ):
 
-  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs, 
-                 src_initial, src_interval, sink_initial, sink_interval,
-                 arrival_time=None ):
+  def construct( s, PktType, mesh_wid, mesh_ht,
+                 src_msgs, sink_msgs,
+                 src_initial, src_interval,
+                 sink_initial, sink_interval ):
+
+    s.nrouters = mesh_wid * mesh_ht
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = MeshNetworkFL( MsgType, MeshPos, mesh_wid, mesh_ht )
+    match_func = lambda a, b : a==b
+    s.dut = WrappedMeshNetFL( PktType, mesh_wid, mesh_ht )
 
-    s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
-              for i in range ( s.dut.num_routers ) ]
-    if arrival_time != None:
-      s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval, arrival_time[i]) for i in range ( s.dut.num_routers ) ]
-    else:
-      s.sinks = [ TestSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval) for i in range ( s.dut.num_routers ) ]
+    s.srcs  = [ TestSrcCL( PktType, src_msgs[i],  src_initial,  src_interval  )
+                for i in range( s.nrouters ) ]
+    s.sinks = [ TestNetSinkCL( PktType, sink_msgs[i], sink_initial, sink_interval, match_func=match_func)
+                for i in range( s.nrouters ) ]
 
     # Connections
-    for i in range ( s.dut.num_routers ):
+    for i in range ( s.nrouters ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
   def done( s ):
     srcs_done = 1
     sinks_done = 1
-    for i in range( s.dut.num_routers ):
+    for i in range( s.nrouters ):
       if s.srcs[i].done() == 0:
         srcs_done = 0
-    for i in range( s.dut.num_routers ):
+    for i in range( s.nrouters ):
       if s.sinks[i].done() == 0:
         sinks_done = 0
     return srcs_done and sinks_done
+
   def line_trace( s ):
     return s.dut.line_trace()
 
@@ -156,6 +65,7 @@ class TestHarness( Component ):
 def run_sim( test_harness, max_cycles=100 ):
 
   # Create a simulator
+  test_harness.elaborate()
 
   test_harness.apply( SimpleSim )
   test_harness.sim_reset()
@@ -164,11 +74,11 @@ def run_sim( test_harness, max_cycles=100 ):
 
   ncycles = 0
   print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
+  print "{:2}:{}".format( ncycles, test_harness.line_trace() )
   while not test_harness.done() and ncycles < max_cycles:
     test_harness.tick()
     ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
+    print "{:2}:{}".format( ncycles, test_harness.line_trace() )
 
   # Check timeout
 
@@ -179,50 +89,94 @@ def run_sim( test_harness, max_cycles=100 ):
   test_harness.tick()
 
 #-------------------------------------------------------------------------
-# Test cases (specific for 4x4 mesh)
+# Helper functions
 #-------------------------------------------------------------------------
 
-def ttest_srcsink_mesh4x4_():
+def mk_src_sink_msgs( pkts, mesh_wid, mesh_ht ):
+  nrouters = mesh_wid * mesh_ht
+  src_msgs  = [ [] for _ in range( nrouters ) ]
+  sink_msgs = [ [] for _ in range( nrouters ) ]
 
-  #           src, dst, payload
-  test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
-                (4, 11, 105), (5, 10, 106), (6,  9, 107), (7,  8, 108),
-                (8,  7, 109), (9,  6, 110), (10, 5, 111), (11, 4, 112),
-                (12, 3, 113), (13, 2, 114), (14, 1, 115), (15, 0, 116) ]
-  
-  src_packets  =  [ [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[] ]
-  
-  sink_packets =  [ [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[] ]
-  
-  # note that need to yield one/two cycle for reset
-  arrival_pipes = [[8], [6], [6], [8],
-                   [6], [4], [4], [6], 
-                   [6], [4], [4], [6], 
-                   [8], [6], [6], [8]]
+  for pkt in pkts:
+    src_id  = pkt.src_y * mesh_wid + pkt.src_x
+    sink_id = pkt.dst_y * mesh_wid + pkt.dst_x
+    src_msgs [ src_id ].append( pkt )
+    sink_msgs[ sink_id ].append( pkt )
 
-  mesh_wid = 4
-  mesh_ht  = 4
-  for (src, dst, payload) in test_msgs:
-    pkt = mk_pkt( src%mesh_wid, src/mesh_wid, dst%mesh_wid, dst/mesh_wid, 1, payload )
-    src_packets [src].append( pkt )
-    sink_packets[dst].append( pkt )
+  return src_msgs, sink_msgs
 
-  th = TestHarness( Packet, mesh_wid, mesh_ht, src_packets, sink_packets, 
-                    0, 0, 0, 0, arrival_pipes )
-  run_sim( th )
+def mk_pkt_list( PktType, lst ):
+  ret = []
+  for m in lst:
+    src_x, src_y, dst_x, dst_y, opq, payload = m[0], m[1], m[2], m[3], m[4], m[5]
+    ret.append( PktType( src_x, src_y, dst_x, dst_y, opq, payload ) )
+  return ret
 
-def ttest_srcsink_mesh2x2():
+#-------------------------------------------------------------------------
+# Test cases
+#-------------------------------------------------------------------------
 
-  pkt = mk_pkt( 0, 0, 1, 1, 0, 0xfaceb00c )
+def simple_msg( PktType, mesh_wid=2, mesh_ht=2 ):
+  return mk_pkt_list( PktType, [
+  #   src_x src_y dst_x dst_y opq   payload
+    ( 0,    0,    0,    1,    0x00, 0x0010  ),
+    ( 1,    0,    1,    1,    0x01, 0x0020  ),
+  ])
 
-  src_packets  = [ [ pkt ], [], [], [] ]
-  sink_packets = [ [], [], [], [ pkt ] ]
+def simple_4x4( PktType, mesh_wid=2, mesh_ht=2 ):
+  return mk_pkt_list( PktType, [
+  #   src_x src_y dst_x dst_y opq   payload
+    ( 0,    0,    0,    1,    0x00, 0x0010  ),
+    ( 1,    0,    1,    1,    0x01, 0x0020  ),
+    ( 3,    2,    1,    1,    0x02, 0x0020  ),
+    ( 1,    0,    1,    1,    0x03, 0x0020  ),
+    ( 1,    3,    2,    1,    0x04, 0x0020  ),
+    ( 3,    3,    1,    0,    0x05, 0x0020  ),
+  ])
 
-  th = TestHarness( Packet, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
+def simple_8x8( PktType, mesh_wid=2, mesh_ht=2 ):
+  return mk_pkt_list( PktType, [
+  #   src_x src_y dst_x dst_y opq   payload
+    ( 0,    0,    0,    1,    0x00, 0x0010  ),
+    ( 1,    0,    1,    1,    0x01, 0x0020  ),
+    ( 3,    2,    1,    1,    0x02, 0x0020  ),
+    ( 1,    0,    1,    1,    0x03, 0x0020  ),
+    ( 1,    3,    2,    1,    0x04, 0x0020  ),
+    ( 3,    5,    1,    0,    0x05, 0x0020  ),
+  ])
+#-------------------------------------------------------------------------
+# test case table
+#-------------------------------------------------------------------------
+
+test_case_table = mk_test_case_table([
+  (            "msg_func    wid  ht  src_init src_intv sink_init sink_intv"),
+  ["simle2x2", simple_msg, 2,   2,  0,       0,       0,        0         ],
+  ["simle4x4", simple_4x4, 4,   4,  0,       0,       0,        0         ],
+  ["simle8x8", simple_8x8, 8,   8,  0,       0,       0,        0         ],
+])
+
+#-------------------------------------------------------------------------
+# run test
+#-------------------------------------------------------------------------
+
+@pytest.mark.parametrize( **test_case_table )
+def test_mesh_simple( test_params ):
+  PktType = mk_mesh_pkt(
+    mesh_wid=test_params.wid,
+    mesh_ht =test_params.ht,
+    nvcs=1,
+  )
+  pkt_list = test_params.msg_func( PktType, test_params.wid, test_params.ht )
+  src_msgs, sink_msgs = mk_src_sink_msgs( pkt_list, test_params.wid, test_params.ht )
+  th = TestHarness(
+    PktType,
+    test_params.wid,
+    test_params.ht,
+    src_msgs,
+    sink_msgs,
+    test_params.src_init,
+    test_params.src_intv,
+    test_params.sink_init,
+    test_params.sink_intv,
+  )
   run_sim( th )

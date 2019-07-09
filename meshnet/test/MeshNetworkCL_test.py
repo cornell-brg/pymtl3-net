@@ -1,11 +1,12 @@
-#=========================================================================
-# MeshNetworkCL_test.py
-#=========================================================================
-# Test for NetworkCL
-#
-# Author : Yanghui Ou
-#   Date : May 19, 2019
+"""
+==========================================================================
+MeshNetworkCL_test.py
+==========================================================================
+Test for NetworkCL
 
+Author : Yanghui Ou
+  Date : May 19, 2019
+"""
 import pytest
 from pymtl3                    import *
 from pymtl3.stdlib.test               import mk_test_case_table

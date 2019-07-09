@@ -1,52 +1,74 @@
-#=========================================================================
-# MeshNetworkFL.py
-#=========================================================================
-# Mesh network implementation in FL modeling (magic crossbar).
-#
-# Author : Cheng Tan
-#   Date : Mar 20, 2019
+"""
+==========================================================================
+MeshNetworkFL.py
+==========================================================================
+Functional level implementation of a mesh network.
 
-from pymtl3                   import *
-from pymtl3.stdlib.ifcs              import RecvIfcRTL
-from pymtl3.stdlib.ifcs              import SendIfcRTL
+Author : Yanghui Ou
+  Date : July 6, 2019
+"""
+from pymtl3                  import *
+from pymtl3.stdlib.ifcs      import RecvIfcRTL
+from pymtl3.stdlib.ifcs      import SendIfcRTL
+from collections import deque
 from directions              import *
-from ocn_pclib.ifcs.Packet   import *
-from ocn_pclib.ifcs.Position import *
 
 class MeshNetworkFL( Component ):
   def construct( s, PacketType, mesh_wid = 4, mesh_ht = 4 ):
 
-    # Constants
-
-    s.num_routers = mesh_wid * mesh_ht
-    s.num_terminals = s.num_routers
+    # Local Parameters
+    s.mesh_wid   = mesh_wid
+    s.mesh_ht    = mesh_ht
+    s.ntermimals = mesh_wid * mesh_ht
 
     # Interface
-
-    s.recv = [ RecvIfcRTL(PacketType) for _ in range( s.num_terminals ) ]
-    s.send = [ SendIfcRTL(PacketType) for _ in range( s.num_terminals ) ]
+    s.recv = [ NonBlockingCalleeIfc( PacketType )
+               for _ in range( s.ntermimals ) ]
+    s.give = [ NonBlockingCalleeIfc( PacketType )
+               for _ in range( s.ntermimals ) ]
 
     # Components
+    s.give_queue = [ deque() for _ in range( s.ntermimals  ) ]
 
-    s.send_queue = [ [] for _ in range( s.num_terminals ) ]
+    # Assign method to method ports
+    for i in range( s.ntermimals ):
+      s.give[i].method.method = s.give_queue[i].popleft
+      s.recv[i].method.method = s.recv_
 
-    @s.update
-    def routing():
-      for i in range( s.num_terminals ):
-        if s.recv[i].rdy != 0:
-          dst = s.recv[i].msg.dst_y * mesh_wid + s.recv[i].msg.dst_x
-          s.send_queue[dst].append( s.recv[i].msg )
+    for i in range( s.ntermimals ):
+      s.recv[i].rdy.method    = lambda s: True
+      s.give[i].rdy.method    = lambda s: len( s.give_queue[i] ) > 0
 
-      # Clear up send[] each time
-      for i in range( s.num_terminals ):
-        s.send[i].msg = None
-
-      for i in range( s.num_terminals ):
-        if len( s.send_queue[i] ) != 0:
-          s.send[i].msg = s.send_queue[i].pop( 0 )
+  def recv_( s, pkt ):
+    dst_id = pkt.dst_x + pkt.dst_y * s.mesh_wid
+    s.give_queue[ dst_id ].append( pkt )
 
   def line_trace( s ):
-    trace = [ "" for _ in range( s.num_terminals ) ]
-    for i in range( s.num_terminals ):
-      trace[i] += str(s.send[i].msg)
-    return "|".join( trace )
+    in_trace  = [ str( s.recv ) for _ in range( s.ntermimals ) ]
+    out_trace = [ str( s.give ) for _ in range( s.ntermimals ) ]
+    return "{}_()_{}".join( "|".join( in_trace ), "|".join( out_trace ) )
+
+class WrappedMeshNetFL( Component ):
+
+  def construct( s, PacketType, mesh_wid = 4, mesh_ht = 4 ):
+
+    # Local Parameters
+    s.mesh_wid   = mesh_wid
+    s.mesh_ht    = mesh_ht
+    s.ntermimals = mesh_wid * mesh_ht
+
+    s.recv = [ NonBlockingCalleeIfc( PacketType )
+               for _ in range( s.ntermimals ) ]
+    s.send = [ NonBlockingCallerIfc( PacketType )
+               for _ in range( s.ntermimals ) ]
+
+    s.net = MeshNetworkFL( PacketType, mesh_wid, mesh_ht )
+
+    @s.update
+    def up_give_send():
+      for i in range( s.ntermimals ):
+        if s.net.give[i].rdy() and s.send[i].rdy():
+          s.send[i]( s.net.give[i]() )
+
+  def line_trace( s ):
+    return s.net.line_trace()

@@ -34,17 +34,17 @@ from pymtl3.passes import DynamicSim
 
 class TestHarness( Component ):
 
-  def construct( s, 
-                 MsgType       = None, 
-                 mesh_wid      = 2, 
-                 mesh_ht       = 2 , 
+  def construct( s,
+                 MsgType       = None,
+                 mesh_wid      = 2,
+                 mesh_ht       = 2 ,
                  pos_x         = 0,
                  pos_y         = 0,
-                 src_msgs      = [], 
-                 sink_msgs     = [], 
-                 src_initial   = 0, 
-                 src_interval  = 0, 
-                 sink_initial  = 0, 
+                 src_msgs      = [],
+                 sink_msgs     = [],
+                 src_initial   = 0,
+                 src_interval  = 0,
+                 sink_initial  = 0,
                  sink_interval = 0,
                  arrival_time  =[None, None, None, None, None]
                ):
@@ -53,12 +53,12 @@ class TestHarness( Component ):
     # print "src:", src_msgs
     # print "sink:", sink_msgs
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = InputUnitRTL, 
+    s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = InputUnitRTL,
         RouteUnitType = DORYMeshRouteUnitRTL )
 
     s.srcs  = [ TestSrcRTL    ( MsgType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range  ( s.dut.num_inports ) ]
-    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial, 
+    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial,
                 sink_interval ) for i in range ( s.dut.num_outports ) ]
 
     # Connections
@@ -67,7 +67,7 @@ class TestHarness( Component ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
-    #TODO: provide pos for router... 
+    #TODO: provide pos for router...
     @s.update
     def up_pos():
       s.dut.pos = MeshPos( pos_x, pos_y )
@@ -90,7 +90,7 @@ class TestHarness( Component ):
   def line_trace( s ):
     return "{}".format(
       s.dut.line_trace(),
-      #'|'.join( [ s.sinks[i].line_trace() for i in range(5) ] ), 
+      #'|'.join( [ s.sinks[i].line_trace() for i in range(5) ] ),
     )
 
 #-------------------------------------------------------------------------
@@ -177,30 +177,30 @@ def test_h0():
   pkt7 = PacketType( 0, 1, 0, 0, 0, 0xbee7 )
   src_pkts  = [ [pkt1,pkt2,pkt3], [pkt5], [pkt6], [pkt7], [pkt0,pkt4] ]
   sink_pkts = [ [pkt5,pkt6], [], [], [pkt0, pkt1,pkt2,pkt3,pkt4], [pkt7] ]
-  th = TestHarness( 
+  th = TestHarness(
     PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
     src_pkts, sink_pkts
   )
   run_sim( th )
 
 def ttest_h1():
-  pos_x, pos_y, mesh_wid, mesh_ht = 0, 0, 2, 2 
+  pos_x, pos_y, mesh_wid, mesh_ht = 0, 0, 2, 2
   PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
   pkt0 = PacketType( 0, 0, 0, 1, 0, 0xdead )
   src_pkts  = [ [],     [], [], [], [pkt0] ]
   sink_pkts = [ [pkt0], [], [], [], []     ]
-  th = TestHarness( 
+  th = TestHarness(
     PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
     src_pkts, sink_pkts
   )
-  th.set_param( 
-    "top.dut.construct", 
-    RouteUnitType = DORYMeshRouteUnitRTL 
+  th.set_param(
+    "top.dut.construct",
+    RouteUnitType = DORYMeshRouteUnitRTL
   )
   run_sim( th )
 
 def ttest_h2():
-  pos_x, pos_y, mesh_wid, mesh_ht = 0, 0, 2, 2 
+  pos_x, pos_y, mesh_wid, mesh_ht = 0, 0, 2, 2
   PacketType( mesh_wid, mesh_ht )
   pkt0 = PacketType( 0, 0, 1, 0, 0, 0xdead )
   pkt1 = PacketType( 0, 1, 1, 0, 1, 0xbeef )
@@ -208,29 +208,29 @@ def ttest_h2():
               # N             S   W   E                   self
   src_pkts  = [ [pkt1, pkt2], [], [], [],                 [pkt0] ]
   sink_pkts = [ [],           [], [], [pkt1, pkt2, pkt0], []     ]
-  th = TestHarness( 
+  th = TestHarness(
     PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
     src_pkts, sink_pkts
   )
-  th.set_param( 
+  th.set_param(
     "top.dut.construct",
     RouteUnitType = DORYMeshRouteUnitRTL
   )
   run_sim( th, 10 )
 
 def ttest_h3():
-  pos_x, pos_y, mesh_wid, mesh_ht = 0, 1, 2, 2 
+  pos_x, pos_y, mesh_wid, mesh_ht = 0, 1, 2, 2
   PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
   pkt0 = PacketType( 0, 1, 0, 0, 0, 0xdead )
               # N   S   W   E   self
   src_pkts  = [ [], [], [], [], [pkt0] ]
   sink_pkts = [ [], [pkt0], [], [], [] ]
-  th = TestHarness( 
+  th = TestHarness(
     PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
     src_pkts, sink_pkts
   )
-  th.set_param( 
-    "top.dut.construct", 
+  th.set_param(
+    "top.dut.construct",
     RouteUnitType = DORYMeshRouteUnitRTL
   )
   run_sim( th, 10 )
@@ -248,9 +248,9 @@ def ttest_h3():
 #   opaque  = draw( st.integers(0, 4) )
 #   payload = draw( st.sampled_from([ 0, 0xdeadbeef, 0xfaceb00c, 0xc001cafe ]) )
 #   pkt = mk_pkt( src_x, src_y, dst_x, dst_y, opaque, payload )
-#   tsrc, tsink = dor_routing( src_x, src_y, dst_x, dst_y, pos_x, pos_y, routing_algo ) 
+#   tsrc, tsink = dor_routing( src_x, src_y, dst_x, dst_y, pos_x, pos_y, routing_algo )
 #   return tsrc, tsink, pkt
-# 
+#
 # @hypothesis.settings( deadline = None )
 # @hypothesis.given(
 #   mesh_wid   = st.integers(2, 16),
@@ -264,15 +264,15 @@ def ttest_h3():
 #   sink_init  = st.integers(0, 20),
 #   sink_inter = st.integers(0, 5 ),
 # )
-# def test_hypothesis( mesh_wid, mesh_ht, routing, pos_x, pos_y, pkts, 
+# def test_hypothesis( mesh_wid, mesh_ht, routing, pos_x, pos_y, pkts,
 #     src_init, src_inter, sink_init, sink_inter ):
 #   # Draw some numbers
 #   pos_x = pos_x.draw( st.integers(0,mesh_wid-1), label="pos_x" )
 #   pos_y = pos_y.draw( st.integers(0,mesh_wid-1), label="pos_y" )
-#   msgs  = pkts.draw( 
-#     st.lists( 
-#       mesh_pkt_strat(mesh_wid, mesh_ht, routing, pos_x, pos_y), 
-#       min_size = 1, max_size = 50 
+#   msgs  = pkts.draw(
+#     st.lists(
+#       mesh_pkt_strat(mesh_wid, mesh_ht, routing, pos_x, pos_y),
+#       min_size = 1, max_size = 50
 #     ),
 #     label = "msgs"
 #   )
@@ -281,14 +281,14 @@ def ttest_h3():
 #   for src_id, sink_id, pkt in msgs:
 #     src_msgs [ src_id  ].append( pkt )
 #     sink_msgs[ sink_id ].append( pkt )
-# 
+#
 #   # Configure the test harness
 #   # TODO: add delays
-#   th = TestHarness( Packet, mesh_wid, mesh_ht, pos_x, pos_y, 
+#   th = TestHarness( Packet, mesh_wid, mesh_ht, pos_x, pos_y,
 #                     src_msgs, sink_msgs,
 #                     src_init, src_inter,
 #                     sink_init, sink_inter )
-#   th.set_param( "top.dut.construct", 
+#   th.set_param( "top.dut.construct",
 #     RouteUnitType = DORXMeshRouteUnitRTL if routing=='x' else DORYMeshRouteUnitRTL,
 #     InputUnitType = InputUnitRTL
 #   )
