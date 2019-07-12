@@ -7,26 +7,24 @@
 #   Date : Mar 10, 2019
 
 import hypothesis
-from hypothesis import strategies as st
-
-from pymtl3                        import *
-from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
-from ocn_pclib.test.net_sinks      import TestNetSinkRTL
-from ocn_pclib.ifcs.positions      import mk_mesh_pos
-from ocn_pclib.ifcs.packets         import  mk_mesh_pkt
-from pymtl3.stdlib.test            import TestVectorSimulator
+from hypothesis                   import strategies as st
+from pymtl3                       import *
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from ocn_pclib.test.net_sinks     import TestNetSinkRTL
+from ocn_pclib.ifcs.positions     import mk_mesh_pos
+from ocn_pclib.ifcs.packets       import mk_mesh_pkt
+from ocn_pclib.ifcs.flits         import mk_mesh_flit
+from pymtl3.stdlib.test           import TestVectorSimulator
 from meshnet.MeshRouterRTL        import MeshRouterRTL
 from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from router.ULVCUnitRTL           import ULVCUnitRTL
 from router.InputUnitRTL          import InputUnitRTL
-from router.OutputUnitRTL          import OutputUnitRTL
-from router.SwitchUnitRTL          import SwitchUnitRTL
-
-from test_helpers import dor_routing
-
-from pymtl3.passes.sverilog import ImportPass, TranslationPass
-from pymtl3.passes import DynamicSim
+from router.OutputUnitRTL         import OutputUnitRTL
+from router.SwitchUnitRTL         import SwitchUnitRTL
+from test_helpers                 import dor_routing
+from pymtl3.passes.sverilog       import ImportPass, TranslationPass
+from pymtl3.passes                import DynamicSim
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -55,11 +53,13 @@ class TestHarness( Component ):
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = InputUnitRTL,
         RouteUnitType = DORYMeshRouteUnitRTL )
+    match_func = lambda a, b : a.src_x == b.src_x and a.src_y == b.src_y and \
+                               a.dst_y == b.dst_y and a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL    ( MsgType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range  ( s.dut.num_inports ) ]
     s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial,
-                sink_interval ) for i in range ( s.dut.num_outports ) ]
+                match_func=match_func ) for i in range ( s.dut.num_outports ) ]
 
     # Connections
 
@@ -166,19 +166,20 @@ def test_h0():
   pos_y = 0
   mesh_wid = 2
   mesh_ht  = 2
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
-  pkt0 = PacketType( 0, 0, 1, 0, 0, 0xbee0 )
-  pkt1 = PacketType( 0, 1, 1, 0, 0, 0xbee1 )
-  pkt2 = PacketType( 0, 1, 1, 0, 0, 0xbee2 )
-  pkt3 = PacketType( 0, 1, 1, 0, 0, 0xbee3 )
-  pkt4 = PacketType( 0, 1, 1, 0, 0, 0xbee4 )
-  pkt5 = PacketType( 0, 1, 0, 1, 0, 0xbee5 )
-  pkt6 = PacketType( 0, 1, 0, 1, 0, 0xbee6 )
-  pkt7 = PacketType( 0, 1, 0, 0, 0, 0xbee7 )
-  src_pkts  = [ [pkt1,pkt2,pkt3], [pkt5], [pkt6], [pkt7], [pkt0,pkt4] ]
-  sink_pkts = [ [pkt5,pkt6], [], [], [pkt0, pkt1,pkt2,pkt3,pkt4], [pkt7] ]
+  FlitType = mk_mesh_flit( mesh_wid, mesh_ht )
+  pkt0 = FlitType( 0, 0, 1, 0, 0, 0, 0xbee0 )
+  pkt1 = FlitType( 0, 1, 1, 0, 0, 0, 0xbee1 )
+  pkt2 = FlitType( 0, 1, 1, 0, 0, 0, 0xbee2 )
+  pkt3 = FlitType( 0, 1, 1, 0, 0, 0, 0xbee3 )
+  pkt4 = FlitType( 0, 1, 1, 0, 0, 0, 0xbee4 )
+  pkt5 = FlitType( 0, 1, 0, 1, 0, 0, 0xbee5 )
+  pkt6 = FlitType( 0, 1, 0, 1, 0, 0, 0xbee6 )
+  pkt7 = FlitType( 0, 1, 0, 0, 0, 0, 0xbee7 )
+  pkt8 = FlitType( 0, 0, 1, 0, 1, 0, 0xdea0 )
+  src_pkts  = [ [pkt1,pkt2,pkt3], [pkt5], [pkt6], [pkt7], [pkt0,pkt8,pkt4] ]
+  sink_pkts = [ [pkt5,pkt6], [], [], [pkt0,pkt1,pkt8,pkt2,pkt3,pkt4], [pkt7] ]
   th = TestHarness(
-    PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
+    FlitType, mesh_wid, mesh_ht, pos_x, pos_y,
     src_pkts, sink_pkts
   )
   run_sim( th )
