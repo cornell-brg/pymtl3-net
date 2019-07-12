@@ -149,6 +149,6 @@ def test_openloop():
 
 def test_pyh2():
   # sv_q = QueueVRTL()
-  sv_q = NormalQueueRTL( Bits32, num_entries=2 )
+  sv_q = QueueVRTL()
   cl_q = NormalQueueCL( num_entries=2 )
   run_pyh2( sv_q, cl_q )
