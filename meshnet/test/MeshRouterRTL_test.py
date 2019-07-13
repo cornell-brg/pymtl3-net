@@ -18,7 +18,7 @@ from pymtl3.stdlib.test           import TestVectorSimulator
 from meshnet.MeshRouterRTL        import MeshRouterRTL
 from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
-from router.ULVCUnitRTL           import ULVCUnitRTL
+from meshnet.DORYMeshFlitRouteUnitRTL import DORYMeshFlitRouteUnitRTL
 from router.InputUnitRTL          import InputUnitRTL
 from router.OutputUnitRTL         import OutputUnitRTL
 from router.SwitchUnitRTL         import SwitchUnitRTL
@@ -52,9 +52,8 @@ class TestHarness( Component ):
     # print "sink:", sink_msgs
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = InputUnitRTL,
-        RouteUnitType = DORYMeshRouteUnitRTL )
-    match_func = lambda a, b : a.src_x == b.src_x and a.src_y == b.src_y and \
-                               a.dst_y == b.dst_y and a.payload == b.payload
+        RouteUnitType = DORYMeshFlitRouteUnitRTL )
+    match_func = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL    ( MsgType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range  ( s.dut.num_inports ) ]
@@ -166,20 +165,21 @@ def test_h0():
   pos_y = 0
   mesh_wid = 2
   mesh_ht  = 2
-  FlitType = mk_mesh_flit( mesh_wid, mesh_ht )
-  pkt0 = FlitType( 0, 0, 1, 0, 0, 0, 0xbee0 )
-  pkt1 = FlitType( 0, 1, 1, 0, 0, 0, 0xbee1 )
-  pkt2 = FlitType( 0, 1, 1, 0, 0, 0, 0xbee2 )
-  pkt3 = FlitType( 0, 1, 1, 0, 0, 0, 0xbee3 )
-  pkt4 = FlitType( 0, 1, 1, 0, 0, 0, 0xbee4 )
-  pkt5 = FlitType( 0, 1, 0, 1, 0, 0, 0xbee5 )
-  pkt6 = FlitType( 0, 1, 0, 1, 0, 0, 0xbee6 )
-  pkt7 = FlitType( 0, 1, 0, 0, 0, 0, 0xbee7 )
-  pkt8 = FlitType( 0, 0, 1, 0, 1, 0, 0xdea0 )
+  HeadFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 0 )
+  BodyFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 1 )
+  pkt0 = HeadFlitType( 0, 0, 1, 0, 0, 0, 0xbee0 )
+  pkt1 = HeadFlitType( 0, 1, 1, 0, 0, 0, 0xbee1 )
+  pkt2 = HeadFlitType( 0, 1, 1, 0, 0, 0, 0xbee2 )
+  pkt3 = HeadFlitType( 0, 1, 1, 0, 0, 0, 0xbee3 )
+  pkt4 = HeadFlitType( 0, 1, 1, 0, 0, 0, 0xbee4 )
+  pkt5 = HeadFlitType( 0, 1, 0, 1, 0, 0, 0xbee5 )
+  pkt6 = HeadFlitType( 0, 1, 0, 1, 0, 0, 0xbee6 )
+  pkt7 = HeadFlitType( 0, 1, 0, 0, 0, 0, 0xbee7 )
+  pkt8 = BodyFlitType( 1, 0, 0xdea0 )
   src_pkts  = [ [pkt1,pkt2,pkt3], [pkt5], [pkt6], [pkt7], [pkt0,pkt8,pkt4] ]
   sink_pkts = [ [pkt5,pkt6], [], [], [pkt0,pkt1,pkt8,pkt2,pkt3,pkt4], [pkt7] ]
   th = TestHarness(
-    FlitType, mesh_wid, mesh_ht, pos_x, pos_y,
+    HeadFlitType, mesh_wid, mesh_ht, pos_x, pos_y,
     src_pkts, sink_pkts
   )
   run_sim( th )
