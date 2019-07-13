@@ -165,22 +165,48 @@ def test_h0():
   pos_y = 0
   mesh_wid = 2
   mesh_ht  = 2
-  pktType = mk_mesh_pkt( mesh_wid, mesh_ht )
-  HeadFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 0 )
-  BodyFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 1 )
-  pkt0 = HeadFlitType( 0, 0, 1, 0, 0, 0, 0xbee0 )
-  pkt1 = HeadFlitType( 0, 1, 1, 0, 0, 0, 0xbee1 )
-  pkt2 = HeadFlitType( 0, 1, 1, 0, 0, 0, 0xbee2 )
-  pkt3 = HeadFlitType( 0, 1, 1, 0, 0, 0, 0xbee3 )
-  pkt4 = HeadFlitType( 0, 1, 1, 0, 0, 0, 0xbee4 )
-  pkt5 = HeadFlitType( 0, 1, 0, 1, 0, 0, 0xbee5 )
-  pkt6 = HeadFlitType( 0, 1, 0, 1, 0, 0, 0xbee6 )
-  pkt7 = HeadFlitType( 0, 1, 0, 0, 0, 0, 0xbee7 )
-  pkt8 = BodyFlitType( 1, 0, 0xdea0 )
-  pkt9 = pktType( 0, 1, 0, 0, 1, 0x6969 )
-  flits = flitisize_mesh_flit( pkt9, mesh_wid, mesh_ht )
-  src_pkts  = [ [pkt1,pkt2,pkt3], [pkt5], [pkt6], [pkt7]+flits, [pkt0,pkt8,pkt4] ]
-  sink_pkts = [ [pkt5,pkt6], [], [], [pkt0,pkt1,pkt8,pkt2,pkt3,pkt4], [pkt7]+flits ]
+  opaque_nbits = 1
+  nvcs = 1
+  payload_nbits = 16
+
+  flit_size = 32
+  PktType = mk_mesh_pkt( mesh_wid, mesh_ht, opaque_nbits, nvcs, payload_nbits )
+  HeadFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 0, 
+                 opaque_nbits, nvcs, total_flit_nbits=flit_size )
+#  BodyFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 1 )
+  pkt0 = PktType( 0, 0, 1, 0, 0, 0xbee0 )
+  pkt1 = PktType( 0, 1, 1, 0, 0, 0xbee1 )
+  pkt2 = PktType( 0, 1, 1, 0, 0, 0xbee2 )
+  pkt3 = PktType( 0, 1, 1, 0, 0, 0xbee3 )
+  pkt4 = PktType( 0, 1, 1, 0, 0, 0xbee4 )
+  pkt5 = PktType( 0, 1, 0, 1, 0, 0xbee5 )
+  pkt6 = PktType( 0, 1, 0, 1, 0, 0xbee6 )
+  pkt7 = PktType( 0, 1, 0, 0, 0, 0xbee7 )
+  pkt8 = PktType( 0, 1, 0, 0, 0, 0x6969 )
+  flits0 = flitisize_mesh_flit( pkt0, mesh_wid, mesh_ht, 
+           opaque_nbits, nvcs, payload_nbits, flit_size )
+  flits1 = flitisize_mesh_flit( pkt1, mesh_wid, mesh_ht, 
+           opaque_nbits, nvcs, payload_nbits, flit_size )
+  flits2 = flitisize_mesh_flit( pkt2, mesh_wid, mesh_ht, 
+           opaque_nbits, nvcs, payload_nbits, flit_size )
+  flits3 = flitisize_mesh_flit( pkt3, mesh_wid, mesh_ht, 
+           opaque_nbits, nvcs, payload_nbits, flit_size )
+  flits4 = flitisize_mesh_flit( pkt4, mesh_wid, mesh_ht, 
+           opaque_nbits, nvcs, payload_nbits, flit_size )
+  flits5 = flitisize_mesh_flit( pkt5, mesh_wid, mesh_ht, 
+           opaque_nbits, nvcs, payload_nbits, flit_size )
+  flits6 = flitisize_mesh_flit( pkt6, mesh_wid, mesh_ht, 
+           opaque_nbits, nvcs, payload_nbits, flit_size )
+  flits7 = flitisize_mesh_flit( pkt7, mesh_wid, mesh_ht, 
+           opaque_nbits, nvcs, payload_nbits, flit_size )
+  flits8 = flitisize_mesh_flit( pkt8, mesh_wid, mesh_ht, 
+           opaque_nbits, nvcs, payload_nbits, flit_size )
+
+#  src_pkts  = [ [pkt1,pkt2,pkt3], [pkt5], [pkt6], [pkt7]+flits, [pkt0,pkt8,pkt4] ]
+#  sink_pkts = [ [pkt5,pkt6], [], [], [pkt0,pkt1,pkt8,pkt2,pkt3,pkt4], [pkt7]+flits ]
+  src_pkts  = [flits1+flits2+flits3, flits5, flits6, flits7, flits0+flits8+flits4]
+  sink_pkts = [flits5+flits6, [], [], flits0+flits1+flits2+flits3+flits4, flits7+flits8]
+
   th = TestHarness(
     HeadFlitType, mesh_wid, mesh_ht, pos_x, pos_y,
     src_pkts, sink_pkts

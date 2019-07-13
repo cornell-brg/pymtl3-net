@@ -20,10 +20,12 @@ from router.InputUnitRTL           import InputUnitRTL
 
 from ocn_pclib.ifcs.positions      import mk_mesh_pos
 from ocn_pclib.ifcs.packets        import mk_mesh_pkt
+from ocn_pclib.ifcs.flits          import mk_mesh_flit, flitisize_mesh_flit
 
 from pymtl3.passes.sverilog import ImportPass, TranslationPass
 from pymtl3.passes import DynamicSim
 
+from meshnet.DORYMeshFlitRouteUnitRTL import DORYMeshFlitRouteUnitRTL
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
@@ -150,15 +152,18 @@ class TestHarness( Component ):
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.num_routers = mesh_wid * mesh_ht
     s.dut = MeshNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 0)
+    match_func = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_routers ) ]
     if arrival_time != None:
       s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval, arrival_time[i]) for i in range ( s.dut.num_routers ) ]
+                sink_interval, arrival_time[i], match_func=match_func) 
+                for i in range ( s.dut.num_routers ) ]
     else:
       s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval) for i in range ( s.dut.num_routers ) ]
+                sink_interval, match_func=match_func) 
+                for i in range ( s.dut.num_routers ) ]
 
     # Connections
     for i in range ( s.dut.num_routers ):
@@ -267,13 +272,25 @@ def test_srcsink_mesh4x4():
 def test_srcsink_mesh2x2():
 
   mesh_wid = mesh_ht = 2
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
+
+  opaque_nbits = 1
+  nvcs = 1
+  payload_nbits = 32
+
+  flit_size = 16
+
+  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht, opaque_nbits, nvcs, payload_nbits )
+  FlitType = mk_mesh_flit( mesh_wid, mesh_ht, 0,
+                 opaque_nbits, nvcs, total_flit_nbits=flit_size )
 #  pkt = mk_pkt( 0, 0, 1, 1, 0, 0xfaceb00c )
-  pkt = PacketType( 0, 0, 1, 1, 0, 0xfaceb00c )
+  pkt  = PacketType( 0, 0, 1, 1, 0, 0xface )
+  flits = flitisize_mesh_flit( pkt, mesh_wid, mesh_ht,
+         opaque_nbits, nvcs, payload_nbits, flit_size )
 
-  src_packets  = [ [ pkt ], [], [], [] ]
-  sink_packets = [ [], [], [], [ pkt ] ]
+  src_packets  = [ flits, [], [], [] ]
+  sink_packets = [ [], [], [], flits ]
 
-  th = TestHarness( PacketType, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
+  th = TestHarness( FlitType, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
+  th.set_param( "top.dut.routers*.construct", RouteUnitType=DORYMeshFlitRouteUnitRTL )
   run_sim( th )
 
