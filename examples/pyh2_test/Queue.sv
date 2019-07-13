@@ -42,10 +42,10 @@ module Queue
       count   <= 'd0;
     end
     else begin
-      deq_ptr <= ~deq_en ? deq_ptr : deq_ptr == last_idx? 'd0 : deq_ptr + 'd1;
+      deq_ptr <= ~deq_en ? deq_ptr : deq_ptr == last_idx? 'd0 : deq_ptr;
       enq_ptr <= ~enq_en ? enq_ptr : enq_ptr == last_idx? 'd0 : enq_ptr + 'd1;
-      count <= ( enq_en & ~deq_en ) ? count + 'd1 :
-               ( deq_en & ~enq_en ) ? count - 'd1 : count;
+      count <= enq_en & ~deq_en ? count + 'd1 :
+               deq_en & ~enq_en ? count - 'd1 : count;
     end
   end
 

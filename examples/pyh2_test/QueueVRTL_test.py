@@ -9,6 +9,9 @@ Author : Yanghui Ou
 """
 from __future__ import absolute_import, division, print_function
 
+import hypothesis
+from hypothesis import strategies as st
+
 from pymtl3 import *
 from pymtl3.dsl import Placeholder
 from pymtl3.passes import GenDAGPass, OpenLoopCLPass
@@ -21,10 +24,15 @@ from pymtl3.stdlib.test.test_srcs import TestSrcCL
 from pymtl3.stdlib.test.pyh2.stateful import run_pyh2
 from pymtl3.stdlib.test.pyh2.RTL2CLWrapper import RTL2CLWrapper
 from .QueueVRTL import Queue, QueueVRTL
+from .QueueFL import QueueFL
+from .utils import print_header
 
 
 def test_import_direct():
-  top = Queue()
+  top = Queue({
+    "data_width"  : 16,
+    "num_entries" : 8,
+  })
   top.elaborate()
   top.sverilog_import = True
   top.sverilog_import_path = "../Queue.sv"
@@ -96,7 +104,6 @@ def run_sim( th, max_cycles=100 ):
   th.sim_reset()
 
   print("")
-  print( "SCHEDULE:", th._sched.schedule )
   ncycles = 0
   print("{:2}:{}".format( ncycles, th.line_trace() ))
   while not th.done() and ncycles < max_cycles:
@@ -134,10 +141,8 @@ def test_openloop():
   dut.apply( GenDAGPass() )
   dut.apply( OpenLoopCLPass() )
   dut.lock_in_simulation()
-  dut.tick()
-  dut.tick()
   dut.sim_reset()
-  dut.tick()
+
   assert dut.enq.rdy()
   dut.enq( 0x1111 )
   assert dut.enq.rdy()
@@ -147,8 +152,10 @@ def test_openloop():
 # PyH2 test
 #-------------------------------------------------------------------------
 
-def test_pyh2():
-  # sv_q = QueueVRTL()
-  sv_q = QueueVRTL()
-  cl_q = NormalQueueCL( num_entries=2 )
-  run_pyh2( sv_q, cl_q )
+@hypothesis.settings( deadline=None )
+@hypothesis.given(
+  num_entries = st.integers(1, 16)
+)
+def test_pyh2( num_entries ):
+  print_header( "num_entries = {}".format( num_entries ) )
+  run_pyh2( QueueVRTL( Bits16, num_entries ), QueueFL( num_entries ) )
