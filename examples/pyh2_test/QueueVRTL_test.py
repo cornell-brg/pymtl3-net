@@ -28,113 +28,43 @@ from .QueueFL import QueueFL
 from .utils import print_header
 
 
-def test_import_direct():
-  top = Queue({
-    "data_width"  : 16,
-    "num_entries" : 8,
-  })
-  top.elaborate()
-  top.sverilog_import = True
-  top.sverilog_import_path = "../Queue.sv"
-  top = ImportPass()( top )
-
-def test_import_wrap():
-  top = QueueVRTL()
-  top.elaborate()
-  top.q.sverilog_import = True
-  top.q.sverilog_import_path = "../Queue.sv"
-  top = ImportPass()( top )
-
 #-------------------------------------------------------------------------
-# TestHarness
+# Ad-hoc test
 #-------------------------------------------------------------------------
 
-class TestHarness( Component ):
+def test_adhoc():
+  dut = QueueVRTL( Bits16, num_entries=2 )
+  dut.elaborate()
+  dut = ImportPass()( dut )
+  dut.elaborate()
+  dut.apply( SimulationPass )
+  dut.sim_reset()
 
-  def construct( s, MsgType, QType, src_msgs, sink_msgs ):
+  # Tick until ready to enq
+  while not dut.enq.rdy:
+    dut.tick()
 
-    s.src  = TestSrcCL ( MsgType, src_msgs )
-    s.dut  = QType()
-    s.sink = TestSinkRTL( MsgType, sink_msgs )
+  # Enq a message
+  dut.enq.en  = b1(1)
+  dut.enq.msg = b16(0xface)
+  dut.tick()
 
-    s.connect( s.src.send, s.dut.enq   )
-    s.connect( s.dut.deq,  s.sink.recv )
+  # Tick until ready to deq
+  dut.enq.en = b1(0)
+  while not dut.deq.rdy:
+    dut.tick()
 
-  def done( s ):
-    return s.src.done() and s.sink.done()
-
-  def line_trace( s ):
-    return "{} ({}) {}".format(
-      s.src.line_trace(), s.dut.line_trace(), s.sink.line_trace() )
-
-class TestHarnessWrapped( Component ):
-
-  def construct( s, MsgType, QType, src_msgs, sink_msgs ):
-
-    s.src  = TestSrcCL( MsgType, src_msgs )
-    s.dut  = RTL2CLWrapper( QType(), { 'enq': None, 'deq': None } )
-    s.sink = TestSinkCL( MsgType, sink_msgs )
-
-    s.connect( s.src.send, s.dut.enq   )
-
-    @s.update
-    def up_deq_recv():
-      if s.dut.deq.rdy() and s.sink.recv.rdy():
-        s.sink.recv( s.dut.deq() )
-
-  def done( s ):
-    return s.src.done() and s.sink.done()
-
-  def line_trace( s ):
-    return "{} ({}) {}".format(
-      s.src.line_trace(), s.dut.line_trace(), s.sink.line_trace() )
-
+  # Deq a message
+  dut.deq.en = b1(1)
+  assert dut.deq.msg == 0xface
 
 #-------------------------------------------------------------------------
-# run_sim
+# Openloop test
 #-------------------------------------------------------------------------
-
-def run_sim( th, max_cycles=100 ):
-
-  # Create a simulator
-  th.elaborate()
-  th = ImportPass()( th )
-  th.elaborate()
-  th.apply( SimulationPass )
-  th.sim_reset()
-
-  print("")
-  ncycles = 0
-  print("{:2}:{}".format( ncycles, th.line_trace() ))
-  while not th.done() and ncycles < max_cycles:
-    th.tick()
-    ncycles += 1
-    print("{:2}:{}".format( ncycles, th.line_trace() ))
-
-  # Check timeout
-  assert ncycles < max_cycles
-
-  th.tick()
-  th.tick()
-  th.tick()
-
-#-------------------------------------------------------------------------
-# Test cases
-#-------------------------------------------------------------------------
-
-def test_simple():
-  test_msgs = [ b32(4), b32(1), b32(2), b32(3), b32(4), b32(5) ]
-  th = TestHarness( Bits32, QueueVRTL, test_msgs, test_msgs )
-  run_sim( th )
-
-def test_simple_wrapped():
-  test_msgs = [ b32(4), b32(1), b32(2), b32(3), b32(4), b32(5) ]
-  th = TestHarnessWrapped( Bits32, QueueVRTL, test_msgs, test_msgs )
-  run_sim( th )
 
 def test_openloop():
   print()
-  dut = RTL2CLWrapper( QueueVRTL(), { 'enq': None, 'deq': None } )
+  dut = RTL2CLWrapper( QueueVRTL(), { 'enq': Bits16, 'deq': Bits16 } )
   dut.elaborate()
   dut = ImportPass()( dut )
   dut.elaborate()
@@ -144,18 +74,21 @@ def test_openloop():
   dut.sim_reset()
 
   assert dut.enq.rdy()
-  dut.enq( 0x1111 )
+  dut.enq( 0xbabe )
   assert dut.enq.rdy()
-  dut.enq( 0x2222 )
+  dut.enq( 0xface )
+
+  assert dut.deq.rdy()
+  assert dut.deq() == 0xbabe
+  assert dut.deq.rdy()
+  assert dut.deq() == 0xface
 
 #-------------------------------------------------------------------------
 # PyH2 test
 #-------------------------------------------------------------------------
 
 @hypothesis.settings( deadline=None )
-@hypothesis.given(
-  num_entries = st.integers(1, 8)
-)
+@hypothesis.given( num_entries = st.integers(1, 8) )
 def test_pyh2( num_entries ):
   print_header( "num_entries = {}".format( num_entries ) )
   run_pyh2( QueueVRTL( Bits16, num_entries ), QueueFL( num_entries ) )
