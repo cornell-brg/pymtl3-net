@@ -140,7 +140,7 @@ class TorusRouterRTL_Tests( object ):
 
   @pytest.mark.parametrize(
     'pos_x, pos_y',
-    product( [ 1 ], [ 4 ] )
+    product( [ 0, 1, 2, 3, 4, 5 ], [ 0, 1, 2, 3, 4, 5 ] )
   )
   def test_simple_5x5( s, pos_x, pos_y ):
     ncols = 5
