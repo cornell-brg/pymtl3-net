@@ -2,7 +2,8 @@
 ==========================================================================
 QueueFL.py
 ==========================================================================
-A functional level queue.
+A functional level queue. It can be used as the reference model for the
+Verilog queue.
 
 Author : Yanghui Ou
   Date : July 12, 2019

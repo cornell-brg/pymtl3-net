@@ -64,7 +64,10 @@ def test_adhoc():
 
 def test_openloop():
   print()
-  dut = RTL2CLWrapper( QueueVRTL(), { 'enq': Bits16, 'deq': Bits16 } )
+  dut = RTL2CLWrapper(
+    QueueVRTL( Bits16, num_entries=2 ), 
+    { 'enq': Bits16, 'deq': Bits16 },
+  )
   dut.elaborate()
   dut = ImportPass()( dut )
   dut.elaborate()
@@ -74,9 +77,9 @@ def test_openloop():
   dut.sim_reset()
 
   assert dut.enq.rdy()
-  dut.enq( 0xbabe )
+  dut.enq( b16(0xbabe) )
   assert dut.enq.rdy()
-  dut.enq( 0xface )
+  dut.enq( b16(0xface) )
 
   assert dut.deq.rdy()
   assert dut.deq() == 0xbabe
