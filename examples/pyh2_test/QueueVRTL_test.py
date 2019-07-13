@@ -65,7 +65,7 @@ def test_adhoc():
 def test_openloop():
   print()
   dut = RTL2CLWrapper(
-    QueueVRTL( Bits16, num_entries=2 ), 
+    QueueVRTL( Bits16, num_entries=2 ),
     { 'enq': Bits16, 'deq': Bits16 },
   )
   dut.elaborate()
@@ -91,7 +91,7 @@ def test_openloop():
 #-------------------------------------------------------------------------
 
 @hypothesis.settings( deadline=None )
-@hypothesis.given( num_entries = st.integers(1, 8) )
+@hypothesis.given( num_entries = st.integers(1, 16) )
 def test_pyh2( num_entries ):
   print_header( "num_entries = {}".format( num_entries ) )
   run_pyh2( QueueVRTL( Bits16, num_entries ), QueueFL( num_entries ) )

@@ -29,8 +29,8 @@ class Queue( Placeholder, Component ):
     s.sverilog_import_path = "../Queue.sv"
 
     # Local parameter
-    CountType = mk_bits( clog2( import_params["num_entries"]+1 ) )
-    EntryType = mk_bits( import_params["data_width"] )
+    CountType = mk_bits( clog2( import_params["p_num_entries"]+1 ) )
+    EntryType = mk_bits( import_params["p_data_width"] )
 
     # Interface
     s.count   =  OutPort( CountType  )
@@ -56,8 +56,8 @@ class QueueVRTL( Component ):
     s.count = OutPort  ( mk_bits( clog2( num_entries+1 ) ) )
 
     s.q = Queue({
-      "data_width"  : EntryType.nbits,
-      "num_entries" : num_entries,
+      "p_data_width"  : EntryType.nbits,
+      "p_num_entries" : num_entries,
     })
 
     s.connect( s.enq.en,  s.q.enq_en  )
