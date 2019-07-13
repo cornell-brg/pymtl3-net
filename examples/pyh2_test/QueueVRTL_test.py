@@ -154,7 +154,7 @@ def test_openloop():
 
 @hypothesis.settings( deadline=None )
 @hypothesis.given(
-  num_entries = st.integers(1, 16)
+  num_entries = st.integers(1, 8)
 )
 def test_pyh2( num_entries ):
   print_header( "num_entries = {}".format( num_entries ) )
