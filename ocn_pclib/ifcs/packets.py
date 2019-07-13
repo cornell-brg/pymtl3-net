@@ -13,7 +13,7 @@ from pymtl3 import *
 # Generic packet
 #=========================================================================
 
-def mk_generic_pkt( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=32 ):
+def mk_generic_pkt( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=16 ):
 
   IdType = mk_bits( clog2( nrouters ) )
   OpqType = mk_bits( opaque_nbits )
