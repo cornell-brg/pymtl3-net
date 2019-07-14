@@ -285,7 +285,7 @@ def test_srcsink_mesh2x2():
 #  pkt = mk_pkt( 0, 0, 1, 1, 0, 0xfaceb00c )
   pkt  = PacketType( 0, 0, 1, 1, 0, 0xface )
   flits = flitisize_mesh_flit( pkt, mesh_wid, mesh_ht,
-         opaque_nbits, nvcs, payload_nbits, flit_size )
+          opaque_nbits, nvcs, payload_nbits, flit_size )
 
   src_packets  = [ flits, [], [], [] ]
   sink_packets = [ [], [], [], flits ]

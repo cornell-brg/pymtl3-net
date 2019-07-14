@@ -22,7 +22,9 @@ def mk_mesh_flit( mesh_wid=2, mesh_ht=2, fl_type=0, opaque_nbits=1,
   TpType      = mk_bits( 2 )
   OpqType     = mk_bits( opaque_nbits )
 
-  new_name = "MeshFlit_type{}_nbits{}_nvcs{}".format(
+  new_name = "MeshFlit_{}x{}_type{}_nbits{}_nvcs{}".format(
+    mesh_wid,
+    mesh_ht,
     fl_type,
     total_flit_nbits,
     nvcs
@@ -114,15 +116,93 @@ def mk_mesh_flit( mesh_wid=2, mesh_ht=2, fl_type=0, opaque_nbits=1,
   return new_class
 
 #=========================================================================
+# cmesh flit
+#=========================================================================
+
+def mk_cmesh_flit( mesh_wid=2, mesh_ht=2, inports=8, outports=8,
+                   fl_type=0, opaque_nbits=1, 
+                   nvcs=1, total_flit_nbits=32 ):
+
+  assert mesh_wid > 0 and mesh_ht > 0
+  XType       = mk_bits(clog2( mesh_wid )) if mesh_wid != 1 else mk_bits(1)
+  YType       = mk_bits(clog2( mesh_ht  )) if mesh_ht  != 1 else mk_bits(1)
+  TerType     = mk_bits( clog2( outports - 4 ) )
+  TpType      = mk_bits( 2 )
+  OpqType     = mk_bits( opaque_nbits )
+
+  new_name = "CMeshFlit_{}x{}_{}x{}_type{}_nbits{}_nvcs{}".format(
+    mesh_wid,
+    mesh_ht,
+    inports,
+    outports,
+    fl_type,
+    total_flit_nbits,
+    nvcs
+  )
+
+  if nvcs > 1:
+    VcIdType = mk_bits( clog2( nvcs ) )
+    # for HEAD flit:
+    if fl_type == 0:
+      PayloadType = mk_bits(total_flit_nbits-
+                    clog2(mesh_wid)-clog2(mesh_ht)-2-opaque_nbits-clog2(nvcs))
+      new_class = mk_bit_struct( new_name,[
+        ( 'src_x',   XType       ),
+        ( 'src_y',   YType       ),
+        ( 'dst_x',   XType       ),
+        ( 'dst_y',   YType       ),
+        ( 'dst_ter', TerType     ),
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'vc_id',   VcIdType    ),
+        ( 'payload', PayloadType ),
+      ])
+    # for BODY, TAIL flits:
+    else:
+      PayloadType = mk_bits(total_flit_nbits-2-opaque_nbits-clog2(nvcs))
+      new_class = mk_bit_struct( new_name,[
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'vc_id',   VcIdType    ),
+        ( 'payload', PayloadType ),
+      ])
+
+  else:
+    # for HEAD flit:
+    if fl_type == 0:
+      PayloadType = mk_bits(total_flit_nbits-\
+                    clog2(mesh_wid)-clog2(mesh_ht)-2-opaque_nbits)
+      new_class = mk_bit_struct( new_name,[
+        ( 'src_x',   XType       ),
+        ( 'src_y',   YType       ),
+        ( 'dst_x',   XType       ),
+        ( 'dst_y',   YType       ),
+        ( 'dst_ter', TerType     ),
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'payload', PayloadType ),
+      ])
+
+    # for BODY, TAIL flit:
+    else:
+      PayloadType = mk_bits( total_flit_nbits-2-opaque_nbits )
+      new_class = mk_bit_struct( new_name,[
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'payload', PayloadType ),
+      ])
+  return new_class
+
+#=========================================================================
 # flitisize packet into mesh flits
 #=========================================================================
 
-def flitisize_mesh_flit( pkt, mesh_wid=2, mesh_ht=2, 
-                         opaque_nbits=1, nvcs=1, pkt_payload_nbits=16, fl_size=32 ):
+def flitisize_mesh_flit( pkt, mesh_wid=2, mesh_ht=2, opaque_nbits=1, nvcs=1, 
+                         pkt_payload_nbits=16, fl_size=32 ):
 
-  HeadFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 0, total_flit_nbits=fl_size)
-  BodyFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 1, total_flit_nbits=fl_size)
-  TailFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 2, total_flit_nbits=fl_size)
+#  HeadFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 0, total_flit_nbits=fl_size)
+#  BodyFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 1, total_flit_nbits=fl_size)
+#  TailFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 2, total_flit_nbits=fl_size)
 
   HEAD_CTRL_SIZE = clog2(mesh_wid + mesh_ht + 4 + nvcs) + opaque_nbits
   BODY_CTRL_SIZE = clog2(4 + nvcs) + opaque_nbits
@@ -144,6 +224,58 @@ def flitisize_mesh_flit( pkt, mesh_wid=2, mesh_ht=2,
   else:
     head_flit = HeadFlitType( pkt.src_x, pkt.src_y, pkt.dst_x, pkt.dst_y, 
                               fl_type=0, opaque=0, payload=0 )
+
+    flits.append( head_flit )
+    PktPayloadType = mk_bits( pkt_payload_nbits )
+    pkt_payload = PktPayloadType( pkt.payload )
+    while current_payload_filled < pkt_payload_nbits:
+      LOWER = current_payload_filled
+      UPPER = current_payload_filled + fl_body_payload_nbits
+      if UPPER > pkt_payload_nbits:
+        UPPER = pkt_payload_nbits
+      body_flit = BodyFlitType( fl_type=1, opaque=0, 
+                  payload=pkt_payload[ LOWER : UPPER ] )
+      current_payload_filled += fl_body_payload_nbits
+      flits.append( body_flit )
+
+  return flits
+
+#=========================================================================
+# flitisize packet into cmesh flits
+#=========================================================================
+
+def flitisize_cmesh_flit( pkt, mesh_wid=2, mesh_ht=2, 
+                          inports=8, outports=8,
+                          opaque_nbits=1, nvcs=1,
+                          pkt_payload_nbits=16, fl_size=32 ):
+
+#  HeadFlitType = mk_cmesh_flit( mesh_wid, mesh_ht, inports, outports,
+#                                0, total_flit_nbits=fl_size)
+#  BodyFlitType = mk_cmesh_flit( mesh_wid, mesh_ht, inports, outports,
+#                                1, total_flit_nbits=fl_size)
+#  TailFlitType = mk_cmesh_flit( mesh_wid, mesh_ht, inports, outports,
+#                                2, total_flit_nbits=fl_size)
+
+  HEAD_CTRL_SIZE = clog2(mesh_wid + mesh_ht + outports + 4 + nvcs) + opaque_nbits
+  BODY_CTRL_SIZE = clog2(4 + nvcs) + opaque_nbits
+  fl_head_payload_nbits = fl_size - HEAD_CTRL_SIZE
+  fl_body_payload_nbits = fl_size - BODY_CTRL_SIZE
+
+  HeadFlitType = mk_cmesh_flit( mesh_wid, mesh_ht, inports, outports, fl_type=0,
+                 opaque_nbits=opaque_nbits, nvcs=nvcs, total_flit_nbits=fl_size )
+  BodyFlitType = mk_cmesh_flit( mesh_wid, mesh_ht, inports, outports, fl_type=1,
+                 opaque_nbits=opaque_nbits, nvcs=nvcs, total_flit_nbits=fl_size )
+
+  current_payload_filled = 0
+  head_flit = None
+  flits = []
+  if pkt_payload_nbits <= fl_head_payload_nbits:
+    head_flit = HeadFlitType( pkt.src_x, pkt.src_y, pkt.dst_x, pkt.dst_y,
+                              pkt.dst_ter, fl_type=0, opaque=0, payload=pkt.payload )
+    flits.append( head_flit )
+  else:
+    head_flit = HeadFlitType( pkt.src_x, pkt.src_y, pkt.dst_x, pkt.dst_y,
+                              pkt.dst_ter, fl_type=0, opaque=0, payload=0 )
 
     flits.append( head_flit )
     PktPayloadType = mk_bits( pkt_payload_nbits )
