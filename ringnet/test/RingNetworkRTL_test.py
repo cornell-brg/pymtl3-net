@@ -12,6 +12,7 @@ from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from ocn_pclib.test.net_sinks import TestNetSinkRTL
 
 from ocn_pclib.ifcs.packets import mk_ring_pkt
+from ocn_pclib.ifcs.flits   import *
 from ocn_pclib.ifcs.positions import mk_ring_pos
 from ringnet.RingNetworkRTL import RingNetworkRTL
 from ..RingNetworkFL import ringnet_fl
@@ -126,3 +127,23 @@ class Ringnet_Tests( object ):
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
     s.run_sim( th )
+
+  def test_simple_flit( s ):
+    nterminals = 4
+    opaque_nbits = 1
+    nvcs = 2
+    payload_nbits = 32
+    flit_size = 16
+
+    PktType = mk_ring_pkt( nterminals, opaque_nbits, nvcs, 
+              payload_nbits )
+    FlitType = mk_ring_flit( nterminals, opaque_nbits, nvcs, 
+               flit_size )
+    pkt = PktType( 3,  0,  0,  0, 0xfaceb00c )
+    flits    = flitisize_ring_flit( pkt, nterminals, opaque_nbits, nvcs,
+               payload_nbits, flit_size )
+    src_pkts = mk_src_pkts( nterminals, flits )
+    dst_pkts = ringnet_fl( src_pkts )
+    th = TestHarness( FlitType, nterminals, src_pkts, dst_pkts )
+    s.run_sim( th )
+

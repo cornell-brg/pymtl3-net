@@ -169,7 +169,6 @@ def test_srcsink_mesh2x2():
   opaque_nbits = 1
   nvcs = 1
   payload_nbits = 32
-
   flit_size = 16
 
   PacketType = mk_cmesh_pkt(  mesh_wid, mesh_ht, inports, outports,

@@ -266,6 +266,78 @@ def mk_bfly_flit( k_ary=2, n_fly=2, fl_type=0, opaque_nbits=1, nvcs=0,
   return new_class
 
 #=========================================================================
+# ring flit
+#=========================================================================
+
+def mk_ring_flit( nrouters=4, fl_type=0, opaque_nbits=1, 
+                  nvcs=1, total_flit_nbits=32 ):
+
+  IdType = mk_bits( clog2( nrouters ) )
+  TpType      = mk_bits( 2 )
+  OpqType     = mk_bits( opaque_nbits )
+
+  new_name = "RingFlit_{}_type{}_nbits{}_nvcs{}".format(
+    nrouters,
+    fl_type,
+    total_flit_nbits,
+    nvcs
+  )
+
+  if nvcs > 1:
+    VcIdType = mk_bits( clog2( nvcs ) )
+    # for HEAD flit:
+    if fl_type == 0:
+      PayloadType = mk_bits(total_flit_nbits-
+                    clog2(nrouters)-2-opaque_nbits-clog2(nvcs))
+      new_class = mk_bit_struct( new_name,[
+        ( 'src',     IdType       ),
+        ( 'dst',     IdType       ),
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'payload', PayloadType ),
+        ( 'vc_id',   VcIdType    ),
+      ])
+    # for BODY, TAIL flits:
+    else:
+      PayloadType = mk_bits(total_flit_nbits-
+                    clog2(nrouters)-2-opaque_nbits-clog2(nvcs))
+      new_class = mk_bit_struct( new_name,[
+        ( 'src',     IdType       ),
+        ( 'dst',     IdType       ),
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'payload', PayloadType ),
+        ( 'vc_id',   VcIdType    ),
+      ])
+  else:
+    # for HEAD flit:
+    if fl_type == 0:
+      PayloadType = mk_bits(total_flit_nbits-
+                    clog2(nrouters)-2-opaque_nbits)
+      new_class = mk_bit_struct( new_name,[
+        ( 'src',     IdType       ),
+        ( 'dst',     IdType       ),
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'payload', PayloadType ),
+      ])
+
+    # for BODY, TAIL flit:
+    else:
+#      PayloadType = mk_bits( total_flit_nbits-2-opaque_nbits )
+      PayloadType = mk_bits(total_flit_nbits-
+                    clog2(nrouters)-2-opaque_nbits)
+      new_class = mk_bit_struct( new_name,[
+        ( 'src',     IdType       ),
+        ( 'dst',     IdType       ),
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'payload', PayloadType ),
+      ])
+  return new_class
+
+
+#=========================================================================
 # flitisize packet into mesh flits
 #=========================================================================
 
@@ -377,6 +449,50 @@ def flitisize_bfly_flit( pkt, k_ary=2, n_fly=2,
   HeadFlitType = mk_bfly_flit( k_ary, n_fly, fl_type=0,
                  opaque_nbits=opaque_nbits, nvcs=nvcs, total_flit_nbits=fl_size )
   BodyFlitType = mk_bfly_flit( k_ary, n_fly, fl_type=1,
+                 opaque_nbits=opaque_nbits, nvcs=nvcs, total_flit_nbits=fl_size )
+
+  current_payload_filled = 0
+  head_flit = None
+  flits = []
+  if pkt_payload_nbits <= fl_head_payload_nbits:
+    head_flit = HeadFlitType( pkt.src, pkt.dst, fl_type=0, opaque=0, 
+                              payload=pkt.payload )
+    flits.append( head_flit )
+  else:
+    head_flit = HeadFlitType( pkt.src, pkt.dst, fl_type=0, opaque=0, 
+                              payload=0 )
+
+    flits.append( head_flit )
+    PktPayloadType = mk_bits( pkt_payload_nbits )
+    pkt_payload = PktPayloadType( pkt.payload )
+    while current_payload_filled < pkt_payload_nbits:
+      LOWER = current_payload_filled
+      UPPER = current_payload_filled + fl_body_payload_nbits
+      if UPPER > pkt_payload_nbits:
+        UPPER = pkt_payload_nbits
+      body_flit = BodyFlitType( pkt.src, pkt.dst, fl_type=1, opaque=0, 
+                  payload=pkt_payload[ LOWER : UPPER ] )
+      current_payload_filled += fl_body_payload_nbits
+      flits.append( body_flit )
+
+  return flits
+
+#=========================================================================
+# flitisize packet into Bfly flits
+#=========================================================================
+
+def flitisize_ring_flit( pkt, nrouters, opaque_nbits=1, nvcs=1,
+                         pkt_payload_nbits=16, fl_size=32 ):
+  
+  HEAD_CTRL_SIZE = clog2( nrouters ) * 2 + 2 + opaque_nbits + clog2( nvcs )
+  BODY_CTRL_SIZE = clog2( nrouters ) * 2 + 2 + opaque_nbits + clog2( nvcs )
+#  BODY_CTRL_SIZE = 2 + opaque_nbits + clog2(nvcs)
+  fl_head_payload_nbits = fl_size - HEAD_CTRL_SIZE
+  fl_body_payload_nbits = fl_size - BODY_CTRL_SIZE
+
+  HeadFlitType = mk_ring_flit( nrouters, fl_type=0,
+                 opaque_nbits=opaque_nbits, nvcs=nvcs, total_flit_nbits=fl_size )
+  BodyFlitType = mk_ring_flit( nrouters, fl_type=1,
                  opaque_nbits=opaque_nbits, nvcs=nvcs, total_flit_nbits=fl_size )
 
   current_payload_filled = 0

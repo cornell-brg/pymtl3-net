@@ -63,7 +63,7 @@ def mk_generic_pkt( nrouters=4, nvcs=2, opaque_nbits=8, payload_nbits=16 ):
 # ring packet
 #=========================================================================
 
-def mk_ring_pkt( nrouters=4, opaque_nbits=8, nvcs=2, payload_nbits=32 ):
+def mk_ring_pkt( nrouters=4, opaque_nbits=1, nvcs=2, payload_nbits=32 ):
 
   IdType = mk_bits( clog2( nrouters ) )
   OpqType = mk_bits( opaque_nbits )
