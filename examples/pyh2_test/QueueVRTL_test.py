@@ -13,16 +13,11 @@ import hypothesis
 from hypothesis import strategies as st
 
 from pymtl3 import *
-from pymtl3.dsl import Placeholder
-from pymtl3.passes import GenDAGPass, OpenLoopCLPass
+from pymtl3.passes import GenDAGPass, OpenLoopCLPass as AutoTickSimPass
 from pymtl3.passes.sverilog import ImportPass
-from pymtl3.stdlib.cl.queues import NormalQueueCL
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
-from pymtl3.stdlib.ifcs import DeqIfcRTL, EnqIfcRTL
-from pymtl3.stdlib.test.test_sinks import TestSinkCL, TestSinkRTL
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
 from pymtl3.stdlib.test.pyh2.stateful import run_pyh2
 from pymtl3.stdlib.test.pyh2.RTL2CLWrapper import RTL2CLWrapper
+
 from .QueueVRTL import Queue, QueueVRTL
 from .QueueFL import QueueFL
 from .utils import print_header
@@ -36,7 +31,6 @@ def test_adhoc():
   dut = QueueVRTL( Bits16, num_entries=2 )
   dut.elaborate()
   dut = ImportPass()( dut )
-  dut.elaborate()
   dut.apply( SimulationPass )
   dut.sim_reset()
 
@@ -62,7 +56,7 @@ def test_adhoc():
 # Openloop test
 #-------------------------------------------------------------------------
 
-def test_openloop():
+def test_auto_tick():
   print()
   dut = RTL2CLWrapper(
     QueueVRTL( Bits16, num_entries=2 ),
@@ -70,9 +64,8 @@ def test_openloop():
   )
   dut.elaborate()
   dut = ImportPass()( dut )
-  dut.elaborate()
   dut.apply( GenDAGPass() )
-  dut.apply( OpenLoopCLPass() )
+  dut.apply( AutoTickSimPass() )
   dut.lock_in_simulation()
   dut.sim_reset()
 
