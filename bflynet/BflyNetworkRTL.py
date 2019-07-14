@@ -29,8 +29,8 @@ class BflyNetworkRTL( Component ):
 
     # Interface
 
-    s.recvxx = [ RecvIfcRTL(PacketType) for _ in range(s.num_terminals)]
-    s.sendxx = [ SendIfcRTL(PacketType) for _ in range(s.num_terminals)]
+    s.recv = [ RecvIfcRTL(PacketType) for _ in range(s.num_terminals)]
+    s.send = [ SendIfcRTL(PacketType) for _ in range(s.num_terminals)]
 
     # Components
 
@@ -113,12 +113,12 @@ class BflyNetworkRTL( Component ):
     for i in range( s.num_routers ):
       if i < s.r_rows:
         for j in range( k_ary ):
-          s.connect(s.recvxx[terminal_id_recv], s.routers[i].recv[j])
+          s.connect(s.recv[terminal_id_recv], s.routers[i].recv[j])
           terminal_id_recv += 1
 
       if i >= s.num_routers - s.r_rows:
         for j in range( k_ary ):
-          s.connect(s.sendxx[terminal_id_send], s.routers[i].send[j])
+          s.connect(s.send[terminal_id_send], s.routers[i].send[j])
           terminal_id_send += 1
 
 #    # FIXME: unable to connect a struct to a port.
@@ -131,7 +131,7 @@ class BflyNetworkRTL( Component ):
   def line_trace( s ):
     trace = [ "" for _ in range( s.num_terminals ) ]
     for i in range( s.num_terminals ):
-      trace[i] += s.sendxx[i].line_trace()
+      trace[i] += s.send[i].line_trace()
     return "|".join( trace )
 
   def elaborate_physical( s ):

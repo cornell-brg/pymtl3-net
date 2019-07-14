@@ -53,11 +53,13 @@ class TestHarness( Component ):
     s.dut = CMeshRouterRTL( MsgType, MeshPos, inports, outports, 
                             InputUnitType = InputUnitRTL, 
                             RouteUnitType = DORYCMeshRouteUnitRTL )
+    match_func = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL    ( MsgType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range  ( s.dut.num_inports ) ]
     s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial, 
-                sink_interval ) for i in range ( s.dut.num_outports ) ]
+                sink_interval, match_func=match_func ) 
+                for i in range ( s.dut.num_outports ) ]
 
     # Connections
 
@@ -99,10 +101,10 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Create a simulator
   test_harness.elaborate()
-  test_harness.dut.sverilog_translate = True
-  test_harness.dut.sverilog_import = True
-  test_harness.apply( TranslationPass() )
-  test_harness = ImportPass()( test_harness )
+#  test_harness.dut.sverilog_translate = True
+#  test_harness.dut.sverilog_import = True
+#  test_harness.apply( TranslationPass() )
+#  test_harness = ImportPass()( test_harness )
 #  test_harness.apply( SimpleSim )
   test_harness.apply( DynamicSim )
   test_harness.sim_reset()

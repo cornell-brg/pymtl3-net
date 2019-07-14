@@ -221,7 +221,7 @@ def mk_cmesh_pkt( mesh_wid=2, mesh_ht=2,
 # Butterfly packet
 #=========================================================================
 
-def mk_bfly_pkt( k_ary=2, n_fly=2, nvcs=0, opaque_nbits=8, payload_nbits=32 ):
+def mk_bfly_pkt( k_ary=2, n_fly=2, nvcs=0, opaque_nbits=1, payload_nbits=32 ):
 
   IdType   = mk_bits( clog2( k_ary ** n_fly ) )
 #  if k_ary == 1:

@@ -175,7 +175,7 @@ def test_srcsink_mesh2x2():
   PacketType = mk_cmesh_pkt(  mesh_wid, mesh_ht, inports, outports,
                               opaque_nbits, nvcs, payload_nbits )
   FlitType   = mk_cmesh_flit( mesh_wid, mesh_ht, inports, outports, 0,
-                              opaque_nbits, nvcs, total_flit_nbits=flit_size )
+                              opaque_nbits, total_flit_nbits=flit_size, nvcs=nvcs )
   pkt = PacketType( 0, 0, 1, 1, 1, 0, 0xface )
   flits = flitisize_cmesh_flit( pkt, mesh_wid, mesh_ht, inports, outports,
           opaque_nbits, nvcs, payload_nbits, flit_size )

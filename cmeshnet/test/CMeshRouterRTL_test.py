@@ -14,7 +14,6 @@ from ocn_pclib.ifcs.packets         import *
 from pymtl3.stdlib.test             import TestVectorSimulator
 from cmeshnet.CMeshRouterRTL        import CMeshRouterRTL
 from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
-from router.ULVCUnitRTL             import ULVCUnitRTL
 from router.InputUnitRTL            import InputUnitRTL
 from test_helpers                   import dor_routing
 
@@ -89,11 +88,12 @@ class TestHarness( Component ):
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.dut = CMeshRouterRTL( MsgType, MeshPos, 8, 8, 
                             RouteUnitType = DORYCMeshRouteUnitRTL )
+    match_func = lambda a, b : a.payload == b.payload
 
-    s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
+    s.srcs  = [ TestSrcRTL ( MsgType, src_msgs[i], src_initial, src_interval )
               for i in range ( 8 ) ]
-    s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial, sink_interval ) 
-              for i in range ( 8 ) ]
+    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial, 
+              sink_interval, match_func=match_func ) for i in range ( 8 ) ]
 
     # Connections
 

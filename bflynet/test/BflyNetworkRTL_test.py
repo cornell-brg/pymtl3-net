@@ -13,10 +13,12 @@ from ocn_pclib.test.net_sinks      import TestNetSinkRTL
 from pymtl3.stdlib.test            import TestVectorSimulator
 from bflynet.BflyNetworkRTL        import BflyNetworkRTL
 from ocn_pclib.ifcs.packets        import *
+from ocn_pclib.ifcs.flits          import *
 from ocn_pclib.ifcs.positions      import *
 
 from pymtl3.passes.sverilog import ImportPass, TranslationPass
 from pymtl3.passes import DynamicSim
+from bflynet.DTRBflyFlitRouteUnitRTL import DTRBflyFlitRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -161,7 +163,7 @@ class TestHarness( Component ):
     BflyPos  = mk_bfly_pos( r_rows, n_fly )
     s.dut  = BflyNetworkRTL( MsgType, BflyPos, k_ary, n_fly, 0)
     
-    match_func = lambda a,b : a.src==b.src and a.payload == b.payload and a.opaque == b.opaque
+    match_func = lambda a,b : a.payload == b.payload and a.opaque == b.opaque
     s.srcs  = [ TestSrcRTL ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_terminals ) ]
     s.sinks = [ TestNetSinkRTL ( MsgType, sink_msgs[i], sink_initial,
@@ -220,20 +222,10 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases (specific for 4-ary 2-fly butterfly)
 #-------------------------------------------------------------------------
 #           src, dst, payload
-test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
-              (4, 11, 105), (5, 10, 106), (6,  9, 107), (7,  8, 108),
-              (8,  7, 109), (9,  6, 110), (10, 5, 111), (11, 4, 112),
-              (12, 3, 113), (13, 2, 114), (14, 1, 115), (15, 0, 116) ]
-
-src_packets  =  [ [],[],[],[],
-                  [],[],[],[],
-                  [],[],[],[],
-                  [],[],[],[] ]
-
-sink_packets =  [ [],[],[],[],
-                  [],[],[],[],
-                  [],[],[],[],
-                  [],[],[],[] ]
+test_msgs = [ (0,15,0xcdab101), (1,14,0xabcd102), (2,13,0xbcda103), (3,12,0xdcba104),
+              (4,11,0xcdab105), (5,10,0xabcd106), (6, 9,0xbcda107), (7, 8,0xdcba108),
+              (8, 7,0xcdab109), (9, 6,0xabcd110), (10,5,0xbcda111), (11,4,0xdcba112),
+              (12,3,0xcdab113), (13,2,0xabcd114), (14,1,0xbcda115), (15,0,0xdcba116) ]
 
 def set_dst(k_ary, n_fly, vec_dst):
 
@@ -253,7 +245,15 @@ def set_dst(k_ary, n_fly, vec_dst):
   return bf_dst
 
 def test_srcsink_4ary_2fly():
-
+  src_packets  =  [ [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[] ]
+  
+  sink_packets =  [ [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[] ]
   k_ary = 4
   n_fly = 2
   for (vec_src, vec_dst, payload) in test_msgs:
@@ -275,22 +275,41 @@ def test_srcsink_4ary_2fly():
   th.dut.elaborate_physical()
 
 def test_srcsink_2ary_4fly():
-
+  src_flits  =  [ [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[] ]
+  
+  sink_flits =  [ [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[],
+                    [],[],[],[] ]
   k_ary = 2
   n_fly = 4
+  opaque_nbits = 1
+  nvcs = 1
+  payload_nbits = 32
+  flit_size = 16
+  FlitType = mk_bfly_flit( k_ary, n_fly, 0,
+             opaque_nbits, total_flit_nbits=flit_size, nvcs=nvcs )
   for (vec_src, vec_dst, payload) in test_msgs:
-    PacketType  = mk_bfly_pkt( k_ary, n_fly )
+    PacketType  = mk_bfly_pkt( k_ary, n_fly, nvcs, opaque_nbits, payload_nbits )
     bf_dst = set_dst( k_ary, n_fly, vec_dst)
     pkt = PacketType( vec_src, bf_dst, 0, payload)
-    src_packets [vec_src].append( pkt )
-    sink_packets[vec_dst].append( pkt )
+    flits = flitisize_bfly_flit( pkt, k_ary, n_fly,
+            opaque_nbits, nvcs, payload_nbits, flit_size )
+    src_flits [vec_src] += flits
+    sink_flits[vec_dst] += flits 
+#    src_packets [vec_src].append( pkt )
+#    sink_packets[vec_dst].append( pkt )
 
-  th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets, 
+  th = TestHarness( FlitType, k_ary, n_fly, src_flits, sink_flits, 
                     0, 0, 0, 0 )
 
   th.set_param( "top.dut.routers*.route_units*.construct", n_fly=n_fly )
   th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
-  th.set_param( "top.dut.line_trace",  )
+  th.set_param( "top.dut.routers*.construct", RouteUnitType=DTRBflyFlitRouteUnitRTL )
+#  th.set_param( "top.dut.line_trace",  )
 
 
   run_sim( th )

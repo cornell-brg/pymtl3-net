@@ -172,7 +172,7 @@ def test_h0():
   flit_size = 32
   PktType = mk_mesh_pkt( mesh_wid, mesh_ht, opaque_nbits, nvcs, payload_nbits )
   HeadFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 0, 
-                 opaque_nbits, nvcs, total_flit_nbits=flit_size )
+                 opaque_nbits, total_flit_nbits=flit_size, nvcs=nvcs )
 #  BodyFlitType = mk_mesh_flit( mesh_wid, mesh_ht, 1 )
   pkt0 = PktType( 0, 0, 1, 0, 0, 0xbee0 )
   pkt1 = PktType( 0, 1, 1, 0, 0, 0xbee1 )

@@ -1,18 +1,18 @@
 #=========================================================================
-# DTRBfRouteUnitRTL.py
+# DTRBflyFlitRouteUnitRTL.py
 #=========================================================================
-# A butterfly route unit with get/give interface.
+# A butterfly route unit supporting flit.
 #
-# Author : Yanghui Ou, Cheng Tan
-#   Date : April 6, 2019
+# Author : Cheng Tan
+#   Date : July 14, 2019
 
 from pymtl3             import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 from copy import deepcopy
 
-class DTRBflyRouteUnitRTL( Component ):
+class DTRBflyFlitRouteUnitRTL( Component ):
 
-  def construct( s, PacketType, PositionType, num_outports, n_fly = 3 ):
+  def construct( s, MsgType, PositionType, num_outports, n_fly = 3 ):
 
     # Constants 
 
@@ -31,8 +31,8 @@ class DTRBflyRouteUnitRTL( Component ):
 
     # Interface
 
-    s.get  = GetIfcRTL( PacketType )
-    s.give = [ GiveIfcRTL(PacketType ) for _ in range ( s.num_outports ) ]
+    s.get  = GetIfcRTL( MsgType )
+    s.give = [ GiveIfcRTL(MsgType ) for _ in range ( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Componets
@@ -58,7 +58,7 @@ class DTRBflyRouteUnitRTL( Component ):
       if s.get.rdy:
         s.out_dir = s.get.msg.dst[ BEGIN : END]
         s.give_rdy[ s.out_dir ] = Bits1( 1 )
-
+        
     @s.update
     def up_ru_get_en():
       s.get.en = s.give_ens>EnType(0)

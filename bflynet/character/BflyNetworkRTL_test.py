@@ -139,8 +139,8 @@ class TestHarness( Component ):
 
     # Connections
     for i in range ( s.dut.num_terminals ):
-      s.connect( s.srcs[i].send, s.dut.recvxx[i]   )
-      s.connect( s.dut.sendxx[i],  s.sinks[i].recv )
+      s.connect( s.srcs[i].send, s.dut.recv[i]   )
+      s.connect( s.dut.send[i],  s.sinks[i].recv )
 
   def done( s ):
     srcs_done = 1
