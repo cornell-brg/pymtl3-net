@@ -47,7 +47,6 @@ module Queue
       count   <= 'd0;
     end
     else begin
-      // TODO: separate comb logic
       deq_ptr <= deq_ptr_next;
       enq_ptr <= enq_ptr_next;
       count   <= count_next;

@@ -58,15 +58,15 @@ class QueueVRTL( Component ):
     s.q = Queue({
       "p_data_width"  : EntryType.nbits,
       "p_num_entries" : num_entries,
-    })
-
-    s.connect( s.enq.en,  s.q.enq_en  )
-    s.connect( s.enq.rdy, s.q.enq_rdy )
-    s.connect( s.enq.msg, s.q.enq_msg )
-    s.connect( s.deq.en,  s.q.deq_en  )
-    s.connect( s.deq.rdy, s.q.deq_rdy )
-    s.connect( s.deq.msg, s.q.deq_msg )
-    s.connect( s.count,   s.q.count   )
+    })(
+      enq_en  = s.enq.en,
+      enq_rdy = s.enq.rdy,
+      enq_msg = s.enq.msg,
+      deq_en  = s.deq.en,
+      deq_rdy = s.deq.rdy,
+      deq_msg = s.deq.msg,
+      count   = s.count,
+    )
 
   def line_trace( s ):
     return "{}({}){}".format( s.enq, s.count, s.deq )
