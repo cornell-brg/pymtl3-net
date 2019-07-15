@@ -363,12 +363,18 @@ def flitisize_mesh_flit( pkt, mesh_wid=2, mesh_ht=2, opaque_nbits=1, nvcs=1,
                               fl_type=0, opaque=0, payload=pkt.payload )
     flits.append( head_flit )
   else:
-    head_flit = HeadFlitType( pkt.src_x, pkt.src_y, pkt.dst_x, pkt.dst_y, 
-                              fl_type=0, opaque=0, payload=0 )
-
-    flits.append( head_flit )
     PktPayloadType = mk_bits( pkt_payload_nbits )
     pkt_payload = PktPayloadType( pkt.payload )
+    LOWER = current_payload_filled
+    UPPER = current_payload_filled + fl_head_payload_nbits
+    if UPPER > pkt_payload_nbits:
+      UPPER = pkt_payload_nbits
+    head_flit = HeadFlitType( pkt.src_x, pkt.src_y, pkt.dst_x, pkt.dst_y, 
+                              fl_type=0, opaque=0, 
+                              payload=pkt_payload[ LOWER : UPPER ] )
+    current_payload_filled += fl_head_payload_nbits
+
+    flits.append( head_flit )
     while current_payload_filled < pkt_payload_nbits:
       LOWER = current_payload_filled
       UPPER = current_payload_filled + fl_body_payload_nbits
@@ -409,8 +415,16 @@ def flitisize_cmesh_flit( pkt, mesh_wid=2, mesh_ht=2,
                               pkt.dst_ter, fl_type=0, opaque=0, payload=pkt.payload )
     flits.append( head_flit )
   else:
+    PktPayloadType = mk_bits( pkt_payload_nbits )
+    pkt_payload = PktPayloadType( pkt.payload )
+    LOWER = current_payload_filled
+    UPPER = current_payload_filled + fl_head_payload_nbits
+    if UPPER > pkt_payload_nbits:
+      UPPER = pkt_payload_nbits
     head_flit = HeadFlitType( pkt.src_x, pkt.src_y, pkt.dst_x, pkt.dst_y,
-                              pkt.dst_ter, fl_type=0, opaque=0, payload=0 )
+                              pkt.dst_ter, fl_type=0, opaque=0,
+                              payload=pkt_payload[ LOWER : UPPER ] )
+    current_payload_filled += fl_head_payload_nbits
 
     flits.append( head_flit )
     PktPayloadType = mk_bits( pkt_payload_nbits )
@@ -459,8 +473,15 @@ def flitisize_bfly_flit( pkt, k_ary=2, n_fly=2,
                               payload=pkt.payload )
     flits.append( head_flit )
   else:
+    PktPayloadType = mk_bits( pkt_payload_nbits )
+    pkt_payload = PktPayloadType( pkt.payload )
+    LOWER = current_payload_filled
+    UPPER = current_payload_filled + fl_head_payload_nbits
+    if UPPER > pkt_payload_nbits:
+      UPPER = pkt_payload_nbits
     head_flit = HeadFlitType( pkt.src, pkt.dst, fl_type=0, opaque=0, 
-                              payload=0 )
+                              payload=pkt_payload[ LOWER : UPPER ] )
+    current_payload_filled += fl_head_payload_nbits
 
     flits.append( head_flit )
     PktPayloadType = mk_bits( pkt_payload_nbits )
@@ -503,8 +524,15 @@ def flitisize_ring_flit( pkt, nrouters, opaque_nbits=1, nvcs=1,
                               payload=pkt.payload )
     flits.append( head_flit )
   else:
+    PktPayloadType = mk_bits( pkt_payload_nbits )
+    pkt_payload = PktPayloadType( pkt.payload )
+    LOWER = current_payload_filled
+    UPPER = current_payload_filled + fl_head_payload_nbits
+    if UPPER > pkt_payload_nbits:
+      UPPER = pkt_payload_nbits
     head_flit = HeadFlitType( pkt.src, pkt.dst, fl_type=0, opaque=0, 
-                              payload=0 )
+                              payload=pkt_payload[ LOWER : UPPER ] )
+    current_payload_filled += fl_head_payload_nbits
 
     flits.append( head_flit )
     PktPayloadType = mk_bits( pkt_payload_nbits )
