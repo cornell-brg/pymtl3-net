@@ -7,15 +7,15 @@
 #   Date : July 1, 2019
 
 import hypothesis
-from hypothesis import strategies as st
-
-from pymtl3 import *
+from hypothesis                   import strategies as st
+from pymtl3                       import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-from ocn_pclib.test.net_sinks import TestNetSinkRTL
-from ocn_pclib.ifcs.packets import mk_mesh_pkt
-from ocn_pclib.ifcs.positions import mk_mesh_pos
-from torusnet.TorusNetworkRTL import TorusNetworkRTL
-from torusnet.TorusNetworkFL import torusnet_fl
+from ocn_pclib.test.net_sinks     import TestNetSinkRTL
+from ocn_pclib.ifcs.flits         import *
+from ocn_pclib.ifcs.packets       import mk_mesh_pkt
+from ocn_pclib.ifcs.positions     import mk_mesh_pos
+from torusnet.TorusNetworkRTL     import TorusNetworkRTL
+from torusnet.TorusNetworkFL      import torusnet_fl
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -86,7 +86,7 @@ def torus_pkt_strat( draw, ncols, nrows ):
 # Test cases
 #=========================================================================
 
-class Ringnet_Tests( object ):
+class TorusNetwork_Tests( object ):
 
   def run_sim( s, th, max_cycles=200 ):
     th.elaborate()
@@ -104,6 +104,31 @@ class Ringnet_Tests( object ):
 
     # Check timeout
     assert ncycles < max_cycles
+
+  def test_simple_flit( s ):
+
+    ncols = 2
+    nrows = 2
+    opaque_nbits = 1
+    nvcs = 2
+    payload_nbits = 32
+    flit_size = 16
+
+    PktType  = mk_mesh_pkt ( ncols, nrows, opaque_nbits, 
+                             nvcs, payload_nbits )
+    FlitType = mk_mesh_flit( ncols, nrows, 0, opaque_nbits,
+                             nvcs, flit_size )
+    #           src_x  y dst_x y opq vc  payload
+    pkt0 = PktType( 1, 0,   0, 1, 0,  0, 0xfaceb00c )
+    pkt1 = PktType( 1, 1,   1, 0, 0,  0, 0xdeadface )
+    flits0 = flitisize_mesh_flit( pkt0, ncols, nrows,
+             opaque_nbits, nvcs, payload_nbits, flit_size )
+    flits1 = flitisize_mesh_flit( pkt1, ncols, nrows,
+             opaque_nbits, nvcs, payload_nbits, flit_size )
+    src_pkts = mk_src_pkts( ncols, nrows, flits0+flits1 ) 
+    dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
+    th = TestHarness( FlitType, ncols, nrows, src_pkts, dst_pkts )
+    s.run_sim( th )
 
   def test_simple( s ):
     ncols = 2

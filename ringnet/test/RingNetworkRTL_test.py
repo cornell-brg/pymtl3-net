@@ -66,7 +66,7 @@ def mk_src_pkts( nterminals, lst ):
 # Test cases
 #=========================================================================
 
-class Ringnet_Tests( object ):
+class RingNetwork_Tests( object ):
 
   @classmethod
   def setup_class( cls ):

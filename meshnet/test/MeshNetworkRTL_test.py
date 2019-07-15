@@ -7,25 +7,23 @@
 #   Date : Mar 20, 2019
 
 import tempfile
-from pymtl3                        import *
-from pymtl3.stdlib.rtl.queues      import NormalQueueRTL
-from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
-from ocn_pclib.test.net_sinks      import TestNetSinkRTL
-from pymtl3.stdlib.test            import TestVectorSimulator
-from meshnet.MeshNetworkRTL        import MeshNetworkRTL
-from meshnet.DORYMeshRouteUnitRTL  import DORYMeshRouteUnitRTL
-from meshnet.DORXMeshRouteUnitRTL  import DORXMeshRouteUnitRTL
-from meshnet.TestMeshRouteUnitRTL  import TestMeshRouteUnitRTL
-from router.InputUnitRTL           import InputUnitRTL
-
-from ocn_pclib.ifcs.positions      import mk_mesh_pos
-from ocn_pclib.ifcs.packets        import mk_mesh_pkt
-from ocn_pclib.ifcs.flits          import mk_mesh_flit, flitisize_mesh_flit
-
-from pymtl3.passes.sverilog import ImportPass, TranslationPass
-from pymtl3.passes import DynamicSim
-
+from pymtl3                           import *
+from pymtl3.stdlib.rtl.queues         import NormalQueueRTL
+from pymtl3.stdlib.test.test_srcs     import TestSrcRTL
+from ocn_pclib.test.net_sinks         import TestNetSinkRTL
+from pymtl3.stdlib.test               import TestVectorSimulator
+from meshnet.MeshNetworkRTL           import MeshNetworkRTL
+from meshnet.DORYMeshRouteUnitRTL     import DORYMeshRouteUnitRTL
+from meshnet.DORXMeshRouteUnitRTL     import DORXMeshRouteUnitRTL
+from meshnet.TestMeshRouteUnitRTL     import TestMeshRouteUnitRTL
+from router.InputUnitRTL              import InputUnitRTL
+from ocn_pclib.ifcs.positions         import mk_mesh_pos
+from ocn_pclib.ifcs.packets           import mk_mesh_pkt
+from ocn_pclib.ifcs.flits             import mk_mesh_flit, flitisize_mesh_flit
+from pymtl3.passes.sverilog           import ImportPass, TranslationPass
+from pymtl3.passes                    import DynamicSim
 from meshnet.DORYMeshFlitRouteUnitRTL import DORYMeshFlitRouteUnitRTL
+
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
