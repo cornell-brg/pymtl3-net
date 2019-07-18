@@ -212,11 +212,8 @@ def mk_bfly_flit( k_ary=2, n_fly=2, fl_type=0, opaque_nbits=1, nvcs=0,
       ])
     # for BODY, TAIL flits:
     else:
-      PayloadType = mk_bits(total_flit_nbits-
-                    clog2(k_ary**n_fly)-dst_nbits-2-opaque_nbits-clog2(nvcs))
+      PayloadType = mk_bits(total_flit_nbits-2-opaque_nbits-clog2(nvcs))
       new_class = mk_bit_struct( new_name,[
-        ( 'src',     IdType      ),
-        ( 'dst',     DstType     ),
         ( 'fl_type', TpType      ),
         ( 'opaque',  OpqType     ),
         ( 'payload', PayloadType ),
@@ -455,7 +452,7 @@ def flitisize_bfly_flit( pkt, k_ary=2, n_fly=2,
   else:
     dst_nbits = clog2( k_ary ) * n_fly
   HEAD_CTRL_SIZE = clog2(k_ary**n_fly)+dst_nbits+2+opaque_nbits+clog2(nvcs)
-  BODY_CTRL_SIZE = clog2(k_ary**n_fly)+dst_nbits+2+opaque_nbits+clog2(nvcs)
+  BODY_CTRL_SIZE = 2+opaque_nbits+clog2(nvcs)
 #  BODY_CTRL_SIZE = 2 + opaque_nbits + clog2(nvcs)
   fl_head_payload_nbits = fl_size - HEAD_CTRL_SIZE
   fl_body_payload_nbits = fl_size - BODY_CTRL_SIZE
@@ -491,15 +488,18 @@ def flitisize_bfly_flit( pkt, k_ary=2, n_fly=2,
       UPPER = current_payload_filled + fl_body_payload_nbits
       if UPPER > pkt_payload_nbits:
         UPPER = pkt_payload_nbits
-      body_flit = BodyFlitType( pkt.src, pkt.dst, fl_type=1, opaque=0, 
+      body_flit = BodyFlitType( fl_type=1, opaque=0, 
                   payload=pkt_payload[ LOWER : UPPER ] )
       current_payload_filled += fl_body_payload_nbits
       flits.append( body_flit )
+    flits[-1].fl_type = 2
+    if len(flits) == 1:
+      flits[0].fl_type = 3
 
   return flits
 
 #=========================================================================
-# flitisize packet into Bfly flits
+# flitisize packet into ring flits
 #=========================================================================
 
 def flitisize_ring_flit( pkt, nrouters, opaque_nbits=1, nvcs=1,
@@ -546,5 +546,8 @@ def flitisize_ring_flit( pkt, nrouters, opaque_nbits=1, nvcs=1,
                   payload=pkt_payload[ LOWER : UPPER ] )
       current_payload_filled += fl_body_payload_nbits
       flits.append( body_flit )
+    flits[-1].fl_type = 2
+    if len(flits) == 1:
+      flits[0].fl_type = 3
 
   return flits

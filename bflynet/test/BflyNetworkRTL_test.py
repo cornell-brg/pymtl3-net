@@ -197,7 +197,7 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Create a simulator
 
-  test_harness.apply( SimpleSim )
+  test_harness.apply( DynamicSim )
   test_harness.sim_reset()
 
   # Run simulation
@@ -226,6 +226,8 @@ test_msgs = [ (0,15,0xcdab101), (1,14,0xabcd102), (2,13,0xbcda103), (3,12,0xdcba
               (4,11,0xcdab105), (5,10,0xabcd106), (6, 9,0xbcda107), (7, 8,0xdcba108),
               (8, 7,0xcdab109), (9, 6,0xabcd110), (10,5,0xbcda111), (11,4,0xdcba112),
               (12,3,0xcdab113), (13,2,0xabcd114), (14,1,0xbcda115), (15,0,0xdcba116) ]
+
+#test_msgs = [ (0,15,0xcdab10115), (1,14,0xabcd10214) ]
 
 def set_dst(k_ary, n_fly, vec_dst):
 
@@ -273,44 +275,3 @@ def test_srcsink_4ary_2fly():
 
   run_sim( th )
   th.dut.elaborate_physical()
-
-def test_srcsink_2ary_4fly():
-  src_flits  =  [ [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[] ]
-  
-  sink_flits =  [ [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[],
-                    [],[],[],[] ]
-  k_ary = 2
-  n_fly = 4
-  opaque_nbits = 1
-  nvcs = 1
-  payload_nbits = 32
-  flit_size = 16
-  FlitType = mk_bfly_flit( k_ary, n_fly, 0,
-             opaque_nbits, total_flit_nbits=flit_size, nvcs=nvcs )
-  for (vec_src, vec_dst, payload) in test_msgs:
-    PacketType  = mk_bfly_pkt( k_ary, n_fly, nvcs, opaque_nbits, payload_nbits )
-    bf_dst = set_dst( k_ary, n_fly, vec_dst)
-    pkt = PacketType( vec_src, bf_dst, 0, payload)
-    flits = flitisize_bfly_flit( pkt, k_ary, n_fly,
-            opaque_nbits, nvcs, payload_nbits, flit_size )
-    src_flits [vec_src] += flits
-    sink_flits[vec_dst] += flits 
-#    src_packets [vec_src].append( pkt )
-#    sink_packets[vec_dst].append( pkt )
-
-  th = TestHarness( FlitType, k_ary, n_fly, src_flits, sink_flits, 
-                    0, 0, 0, 0 )
-
-  th.set_param( "top.dut.routers*.route_units*.construct", n_fly=n_fly )
-  th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
-  th.set_param( "top.dut.routers*.construct", RouteUnitType=DTRBflyFlitRouteUnitRTL )
-#  th.set_param( "top.dut.line_trace",  )
-
-
-  run_sim( th )
-

@@ -34,6 +34,7 @@ class DTRBflyFlitRouteUnitRTL( Component ):
     s.get  = GetIfcRTL( MsgType )
     s.give = [ GiveIfcRTL(MsgType ) for _ in range ( s.num_outports ) ]
     s.pos  = InPort( PositionType )
+    s.out_ocp = [ InPort( Bits1 ) for _ in range( s.num_outports ) ]
 
     # Componets
 
@@ -51,13 +52,16 @@ class DTRBflyFlitRouteUnitRTL( Component ):
     # Routing logic
     @s.update
     def up_ru_routing():
-#      s.out_dir = OutType( 0 )
       for i in range( s.num_outports ):
         s.give_rdy[i] = Bits1( 0 )
 
       if s.get.rdy:
-        s.out_dir = s.get.msg.dst[ BEGIN : END]
-        s.give_rdy[ s.out_dir ] = Bits1( 1 )
+        if s.get.msg.fl_type == 0:
+          s.out_dir = s.get.msg.dst[ BEGIN : END]
+          if s.out_ocp[ s.out_dir ] == 0:
+            s.give_rdy[ s.out_dir ] = Bits1( 1 )
+        else:
+          s.give_rdy[ s.out_dir ] = Bits1( 1 )
         
     @s.update
     def up_ru_get_en():
@@ -65,7 +69,8 @@ class DTRBflyFlitRouteUnitRTL( Component ):
       for i in range( s.num_outports ):
         s.give[i].msg = deepcopy( s.get.msg )
       if s.get.rdy:
-        s.give[ s.out_dir ].msg.dst = DstType(s.get.msg.dst << RowWidth)
+        if s.get.msg.fl_type == 0:
+          s.give[ s.out_dir ].msg.dst = DstType(s.get.msg.dst << RowWidth)
 
   # Line trace
   def line_trace( s ):
