@@ -85,6 +85,6 @@ def test_auto_tick():
 
 @hypothesis.settings( deadline=None )
 @hypothesis.given( num_entries = st.integers(1, 16) )
-def test_pyh2( num_entries ):
+def ttest_pyh2( num_entries ):
   print_header( "num_entries = {}".format( num_entries ) )
   run_pyh2( QueueVRTL( Bits16, num_entries ), QueueFL( num_entries ) )
