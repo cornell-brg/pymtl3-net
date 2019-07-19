@@ -12,7 +12,7 @@ from copy import deepcopy
 
 class DTRBflyFlitRouteUnitRTL( Component ):
 
-  def construct( s, MsgType, num_outports, n_fly = 3 ):
+  def construct( s, MsgType, PositionType, num_outports, n_fly = 3 ):
 
     # Constants 
 
@@ -33,6 +33,7 @@ class DTRBflyFlitRouteUnitRTL( Component ):
 
     s.get  = GetIfcRTL( MsgType )
     s.give = [ GiveIfcRTL(MsgType ) for _ in range ( s.num_outports ) ]
+    s.pos  = InPort( PositionType )
     s.out_ocp = [ InPort( Bits1 ) for _ in range( s.num_outports ) ]
 
     # Componets

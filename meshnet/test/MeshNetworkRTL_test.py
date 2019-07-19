@@ -267,7 +267,7 @@ def test_srcsink_mesh4x4():
                     0, 0, 0, 0, arrival_pipes )
   run_sim( th )
 
-def test_srcsink_mesh2x2():
+def test_srcsink_mesh2x2_flit():
 
   mesh_wid = mesh_ht = 2
 

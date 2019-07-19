@@ -32,51 +32,72 @@ def mk_mesh_flit( mesh_wid=2, mesh_ht=2, fl_type=0, opaque_nbits=1,
 
   if nvcs > 1:
     VcIdType = mk_bits( clog2( nvcs ) )
-    PayloadType = mk_bits(total_flit_nbits-
-                  clog2(mesh_wid)-clog2(mesh_ht)-2-opaque_nbits-clog2(nvcs))
-    def str_func( self ):
-      return "({},{})>({},{}):{}:{}:{}:{}".format(
-        XType      ( self.src_x   ),
-        YType      ( self.src_y   ),
-        XType      ( self.dst_x   ),
-        YType      ( self.dst_y   ),
-        TpType     ( self.fl_type ),
-        OpqType    ( self.opaque  ),
-        PayloadType( self.payload ),
-        VcIdType   ( self.vc_id   ),
-      )
-    new_class = mk_bit_struct( new_name,[
-      ( 'src_x',   XType       ),
-      ( 'src_y',   YType       ),
-      ( 'dst_x',   XType       ),
-      ( 'dst_y',   YType       ),
-      ( 'fl_type', TpType      ),
-      ( 'opaque',  OpqType     ),
-      ( 'payload', PayloadType ),
-      ( 'vc_id',   VcIdType    ),
-    ], str_func )
+    # for HEAD flit:
+    if fl_type == 0:
+      PayloadType = mk_bits(total_flit_nbits-
+                    clog2(mesh_wid)-clog2(mesh_ht)-2-opaque_nbits-clog2(nvcs))
+      def str_func( self ):
+        return "({},{})>({},{}):{}:{}:{}:{}".format(
+          XType      ( self.src_x   ),
+          YType      ( self.src_y   ),
+          XType      ( self.dst_x   ),
+          YType      ( self.dst_y   ),
+          TpType     ( self.fl_type ),
+          OpqType    ( self.opaque  ),
+          PayloadType( self.payload ),
+          VcIdType   ( self.vc_id   ),
+        )
+      new_class = mk_bit_struct( new_name,[
+        ( 'src_x',   XType       ),
+        ( 'src_y',   YType       ),
+        ( 'dst_x',   XType       ),
+        ( 'dst_y',   YType       ),
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'payload', PayloadType ),
+        ( 'vc_id',   VcIdType    ),
+      ], str_func )
+    # for BODY, TAIL flits:
+    else:
+      PayloadType = mk_bits(total_flit_nbits-2-opaque_nbits-clog2(nvcs))
+      new_class = mk_bit_struct( new_name,[
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'payload', PayloadType ),
+        ( 'vc_id',   VcIdType    ),
+      ] )
   else:
-    PayloadType = mk_bits(total_flit_nbits-\
-                  clog2(mesh_wid)-clog2(mesh_ht)-2-opaque_nbits)
-    def str_func( self ):
-      return "({},{})>({},{}):T{}:{}:{}".format(
-        XType      ( self.src_x   ),
-        YType      ( self.src_y   ),
-        XType      ( self.dst_x   ),
-        YType      ( self.dst_y   ),
-        TpType     ( self.fl_type ),
-        OpqType    ( self.opaque  ),
-        PayloadType( self.payload ),
-      )
-    new_class = mk_bit_struct( new_name,[
-      ( 'src_x',   XType       ),
-      ( 'src_y',   YType       ),
-      ( 'dst_x',   XType       ),
-      ( 'dst_y',   YType       ),
-      ( 'fl_type', TpType      ),
-      ( 'opaque',  OpqType     ),
-      ( 'payload', PayloadType ),
-    ], str_func )
+    # for HEAD flit:
+    if fl_type == 0:
+      PayloadType = mk_bits(total_flit_nbits-\
+                    clog2(mesh_wid)-clog2(mesh_ht)-2-opaque_nbits)
+      def str_func( self ):
+        return "({},{})>({},{}):T{}:{}:{}".format(
+          XType      ( self.src_x   ),
+          YType      ( self.src_y   ),
+          XType      ( self.dst_x   ),
+          YType      ( self.dst_y   ),
+          TpType     ( self.fl_type ),
+          OpqType    ( self.opaque  ),
+          PayloadType( self.payload ),
+        )
+      new_class = mk_bit_struct( new_name,[
+        ( 'src_x',   XType       ),
+        ( 'src_y',   YType       ),
+        ( 'dst_x',   XType       ),
+        ( 'dst_y',   YType       ),
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'payload', PayloadType ),
+      ], str_func )
+    # for BODY, TAIL flits:
+    else:
+      PayloadType = mk_bits(total_flit_nbits-2-opaque_nbits-clog2(nvcs))
+      new_class = mk_bit_struct( new_name,[
+        ( 'fl_type', TpType      ),
+        ( 'opaque',  OpqType     ),
+        ( 'payload', PayloadType ),
+      ] )
   return new_class
 
 #=========================================================================
@@ -123,14 +144,8 @@ def mk_cmesh_flit( mesh_wid=2, mesh_ht=2, inports=8, outports=8,
       ])
     # for BODY, TAIL flits:
     else:
-      PayloadType = mk_bits(total_flit_nbits-
-                    clog2(mesh_wid)-clog2(mesh_ht)-2-opaque_nbits-clog2(nvcs))
+      PayloadType = mk_bits(total_flit_nbits-2-opaque_nbits-clog2(nvcs))
       new_class = mk_bit_struct( new_name,[
-        ( 'src_x',   XType       ),
-        ( 'src_y',   YType       ),
-        ( 'dst_x',   XType       ),
-        ( 'dst_y',   YType       ),
-        ( 'dst_ter', TerType     ),
         ( 'fl_type', TpType      ),
         ( 'opaque',  OpqType     ),
         ( 'payload', PayloadType ),
@@ -151,18 +166,10 @@ def mk_cmesh_flit( mesh_wid=2, mesh_ht=2, inports=8, outports=8,
         ( 'opaque',  OpqType     ),
         ( 'payload', PayloadType ),
       ])
-
     # for BODY, TAIL flit:
     else:
-#      PayloadType = mk_bits( total_flit_nbits-2-opaque_nbits )
-      PayloadType = mk_bits(total_flit_nbits-\
-                    clog2(mesh_wid)-clog2(mesh_ht)-2-opaque_nbits)
+      PayloadType = mk_bits( total_flit_nbits-2-opaque_nbits )
       new_class = mk_bit_struct( new_name,[
-        ( 'src_x',   XType       ),
-        ( 'src_y',   YType       ),
-        ( 'dst_x',   XType       ),
-        ( 'dst_y',   YType       ),
-        ( 'dst_ter', TerType     ),
         ( 'fl_type', TpType      ),
         ( 'opaque',  OpqType     ),
         ( 'payload', PayloadType ),
@@ -246,15 +253,11 @@ def mk_bfly_flit( k_ary=2, n_fly=2, fl_type=0, opaque_nbits=1, nvcs=0,
       PayloadType = mk_bits(total_flit_nbits-2-opaque_nbits)
       def str_func( self ):
         return "{}:{}:{}".format(
-#          IdType     ( self.src   ),
-#          DstType    ( self.dst   ),
           TpType     ( self.fl_type ),
           OpqType    ( self.opaque  ),
           PayloadType( self.payload ),
         )
       new_class = mk_bit_struct( new_name,[
-#        ( 'src',     IdType      ),
-#        ( 'dst',     DstType     ),
         ( 'fl_type', TpType      ),
         ( 'opaque',  OpqType     ),
         ( 'payload', PayloadType ),
@@ -295,11 +298,8 @@ def mk_ring_flit( nrouters=4, fl_type=0, opaque_nbits=1,
       ])
     # for BODY, TAIL flits:
     else:
-      PayloadType = mk_bits(total_flit_nbits-
-                    clog2(nrouters)-2-opaque_nbits-clog2(nvcs))
+      PayloadType = mk_bits(total_flit_nbits-2-opaque_nbits-clog2(nvcs))
       new_class = mk_bit_struct( new_name,[
-        ( 'src',     IdType       ),
-        ( 'dst',     IdType       ),
         ( 'fl_type', TpType      ),
         ( 'opaque',  OpqType     ),
         ( 'payload', PayloadType ),
@@ -320,18 +320,13 @@ def mk_ring_flit( nrouters=4, fl_type=0, opaque_nbits=1,
 
     # for BODY, TAIL flit:
     else:
-#      PayloadType = mk_bits( total_flit_nbits-2-opaque_nbits )
-      PayloadType = mk_bits(total_flit_nbits-
-                    clog2(nrouters)-2-opaque_nbits)
+      PayloadType = mk_bits( total_flit_nbits-2-opaque_nbits )
       new_class = mk_bit_struct( new_name,[
-        ( 'src',     IdType       ),
-        ( 'dst',     IdType       ),
         ( 'fl_type', TpType      ),
         ( 'opaque',  OpqType     ),
         ( 'payload', PayloadType ),
       ])
   return new_class
-
 
 #=========================================================================
 # flitisize packet into mesh flits
@@ -341,8 +336,7 @@ def flitisize_mesh_flit( pkt, mesh_wid=2, mesh_ht=2, opaque_nbits=1, nvcs=1,
                          pkt_payload_nbits=16, fl_size=32 ):
 
   HEAD_CTRL_SIZE = clog2(mesh_wid + mesh_ht + 4 + nvcs) + opaque_nbits
-  BODY_CTRL_SIZE = clog2(mesh_wid + mesh_ht + 4 + nvcs) + opaque_nbits
-#  BODY_CTRL_SIZE = clog2(4 + nvcs) + opaque_nbits
+  BODY_CTRL_SIZE = clog2(4 + nvcs) + opaque_nbits
   fl_head_payload_nbits = fl_size - HEAD_CTRL_SIZE
   fl_body_payload_nbits = fl_size - BODY_CTRL_SIZE
 
@@ -376,8 +370,8 @@ def flitisize_mesh_flit( pkt, mesh_wid=2, mesh_ht=2, opaque_nbits=1, nvcs=1,
       UPPER = current_payload_filled + fl_body_payload_nbits
       if UPPER > pkt_payload_nbits:
         UPPER = pkt_payload_nbits
-      body_flit = BodyFlitType( pkt.src_x, pkt.src_y, pkt.dst_x, pkt.dst_y,
-                  fl_type=1, opaque=0, payload=pkt_payload[ LOWER : UPPER ] )
+      body_flit = BodyFlitType( fl_type=1, opaque=0, 
+                  payload=pkt_payload[ LOWER : UPPER ] )
       current_payload_filled += fl_body_payload_nbits
       flits.append( body_flit )
 
@@ -393,8 +387,7 @@ def flitisize_cmesh_flit( pkt, mesh_wid=2, mesh_ht=2,
                           pkt_payload_nbits=16, fl_size=32 ):
 
   HEAD_CTRL_SIZE = clog2(mesh_wid + mesh_ht + outports + 4 + nvcs) + opaque_nbits
-  BODY_CTRL_SIZE = clog2(mesh_wid + mesh_ht + outports + 4 + nvcs) + opaque_nbits
-#  BODY_CTRL_SIZE = clog2(4 + nvcs) + opaque_nbits
+  BODY_CTRL_SIZE = clog2(4 + nvcs) + opaque_nbits
   fl_head_payload_nbits = fl_size - HEAD_CTRL_SIZE
   fl_body_payload_nbits = fl_size - BODY_CTRL_SIZE
 
@@ -430,8 +423,7 @@ def flitisize_cmesh_flit( pkt, mesh_wid=2, mesh_ht=2,
       UPPER = current_payload_filled + fl_body_payload_nbits
       if UPPER > pkt_payload_nbits:
         UPPER = pkt_payload_nbits
-      body_flit = BodyFlitType( pkt.src_x, pkt.src_y, pkt.dst_x, pkt.dst_y,
-                  pkt.dst_ter, fl_type=1, opaque=0, 
+      body_flit = BodyFlitType( fl_type=1, opaque=0, 
                   payload=pkt_payload[ LOWER : UPPER ] )
       current_payload_filled += fl_body_payload_nbits
       flits.append( body_flit )
@@ -452,7 +444,6 @@ def flitisize_bfly_flit( pkt, k_ary=2, n_fly=2,
     dst_nbits = clog2( k_ary ) * n_fly
   HEAD_CTRL_SIZE = clog2(k_ary**n_fly)+dst_nbits+2+opaque_nbits+clog2(nvcs)
   BODY_CTRL_SIZE = 2+opaque_nbits+clog2(nvcs)
-#  BODY_CTRL_SIZE = 2 + opaque_nbits + clog2(nvcs)
   fl_head_payload_nbits = fl_size - HEAD_CTRL_SIZE
   fl_body_payload_nbits = fl_size - BODY_CTRL_SIZE
 
@@ -476,7 +467,7 @@ def flitisize_bfly_flit( pkt, k_ary=2, n_fly=2,
     if UPPER > pkt_payload_nbits:
       UPPER = pkt_payload_nbits
     head_flit = HeadFlitType( pkt.src, pkt.dst, fl_type=0, opaque=0, 
-                              payload=pkt_payload[ LOWER : UPPER ] )
+                payload=pkt_payload[ LOWER : UPPER ] )
     current_payload_filled += fl_head_payload_nbits
 
     flits.append( head_flit )
@@ -505,8 +496,7 @@ def flitisize_ring_flit( pkt, nrouters, opaque_nbits=1, nvcs=1,
                          pkt_payload_nbits=16, fl_size=32 ):
   
   HEAD_CTRL_SIZE = clog2( nrouters ) * 2 + 2 + opaque_nbits + clog2( nvcs )
-  BODY_CTRL_SIZE = clog2( nrouters ) * 2 + 2 + opaque_nbits + clog2( nvcs )
-#  BODY_CTRL_SIZE = 2 + opaque_nbits + clog2(nvcs)
+  BODY_CTRL_SIZE = 2 + opaque_nbits + clog2(nvcs)
   fl_head_payload_nbits = fl_size - HEAD_CTRL_SIZE
   fl_body_payload_nbits = fl_size - BODY_CTRL_SIZE
 
@@ -541,7 +531,7 @@ def flitisize_ring_flit( pkt, nrouters, opaque_nbits=1, nvcs=1,
       UPPER = current_payload_filled + fl_body_payload_nbits
       if UPPER > pkt_payload_nbits:
         UPPER = pkt_payload_nbits
-      body_flit = BodyFlitType( pkt.src, pkt.dst, fl_type=1, opaque=0, 
+      body_flit = BodyFlitType( fl_type=1, opaque=0, 
                   payload=pkt_payload[ LOWER : UPPER ] )
       current_payload_filled += fl_body_payload_nbits
       flits.append( body_flit )
