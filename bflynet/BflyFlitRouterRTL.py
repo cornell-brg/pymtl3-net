@@ -1,5 +1,5 @@
 #=========================================================================
-# BfFlitRouteRTL.py
+# BflyFlitRouteRTL.py
 #=========================================================================
 # Butterfly network-on-chip router (flit-based)
 #
@@ -7,12 +7,12 @@
 #   Date : July 19, 2019
 
 from pymtl3 import *
-from router.Router        import Router
-from router.InputUnitRTL  import InputUnitRTL
-from router.SwitchUnitRTL import SwitchUnitRTL
+from router.Router            import Router
+from router.InputUnitRTL      import InputUnitRTL
+from router.SwitchUnitRTL     import SwitchUnitRTL
 from router.SwitchUnitFlitRTL import SwitchUnitFlitRTL
-from router.OutputUnitRTL import OutputUnitRTL
-from DTRBflyRouteUnitRTL  import DTRBflyRouteUnitRTL
+from router.OutputUnitRTL     import OutputUnitRTL
+from DTRBflyRouteUnitRTL      import DTRBflyRouteUnitRTL
 from DTRBflyFlitRouteUnitRTL  import DTRBflyFlitRouteUnitRTL
 
 class BflyFlitRouterRTL( Router ):

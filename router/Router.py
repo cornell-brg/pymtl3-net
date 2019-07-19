@@ -31,7 +31,7 @@ class Router( Component ):
     s.input_units  = [ InputUnitType( PacketType )
                       for _ in range( s.num_inports ) ]
 
-    s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports )
+    s.route_units  = [ RouteUnitType( PacketType, s.num_outports )
                       for i in range( s.num_inports ) ]
 
     s.switch_units = [ SwitchUnitType( PacketType, s.num_inports )
@@ -45,7 +45,6 @@ class Router( Component ):
     for i in range( s.num_inports ):
       s.connect( s.recv[i],             s.input_units[i].recv )
       s.connect( s.input_units[i].give, s.route_units[i].get  )
-      s.connect( s.pos,                 s.route_units[i].pos  )
 
     for i in range( s.num_inports ):
       for j in range( s.num_outports ):

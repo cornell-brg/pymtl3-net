@@ -243,19 +243,18 @@ def mk_bfly_flit( k_ary=2, n_fly=2, fl_type=0, opaque_nbits=1, nvcs=0,
 
     # for BODY, TAIL flit:
     else:
-      PayloadType = mk_bits(total_flit_nbits-
-                    clog2(k_ary**n_fly)-dst_nbits-2-opaque_nbits)
+      PayloadType = mk_bits(total_flit_nbits-2-opaque_nbits)
       def str_func( self ):
-        return "({})>({}):{}:{}:{}".format(
-          IdType     ( self.src   ),
-          DstType    ( self.dst   ),
+        return "{}:{}:{}".format(
+#          IdType     ( self.src   ),
+#          DstType    ( self.dst   ),
           TpType     ( self.fl_type ),
           OpqType    ( self.opaque  ),
           PayloadType( self.payload ),
         )
       new_class = mk_bit_struct( new_name,[
-        ( 'src',     IdType      ),
-        ( 'dst',     DstType     ),
+#        ( 'src',     IdType      ),
+#        ( 'dst',     DstType     ),
         ( 'fl_type', TpType      ),
         ( 'opaque',  OpqType     ),
         ( 'payload', PayloadType ),

@@ -100,8 +100,6 @@ test_msgs = [ (0,15,0xcdab101), (1,14,0xabcd102), (2,13,0xbcda103), (3,12,0xdcba
               (8, 7,0xcdab109), (9, 6,0xabcd110), (10,5,0xbcda111), (11,4,0xdcba112),
               (12,3,0xcdab113), (13,2,0xabcd114), (14,1,0xbcda115), (15,0,0xdcba116) ]
 
-#test_msgs = [ (0,15,0xcdab10115), (1,14,0xabcd10214) ]
-
 def set_dst(k_ary, n_fly, vec_dst):
 
   DstType = mk_bits( clog2( k_ary ) * n_fly )
