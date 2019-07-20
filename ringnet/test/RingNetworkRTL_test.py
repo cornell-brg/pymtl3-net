@@ -17,6 +17,8 @@ from ocn_pclib.ifcs.positions import mk_ring_pos
 from ringnet.RingNetworkRTL import RingNetworkRTL
 from ..RingNetworkFL import ringnet_fl
 
+from ringnet.RingFlitRouteUnitRTL import RingFlitRouteUnitRTL
+
 from copy import deepcopy
 
 #-------------------------------------------------------------------------
@@ -29,11 +31,13 @@ class TestHarness( Component ):
 
     s.num_routers = num_routers
     RingPos = mk_ring_pos( num_routers )
+    match_func = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL( MsgType, src_msgs[i] )
               for i in range( num_routers ) ]
     s.dut   = RingNetworkRTL( MsgType, RingPos, num_routers, 0)
-    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i] )
+    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], 
+              match_func = match_func )
               for i in range( num_routers ) ]
 
     # Connections
@@ -58,8 +62,14 @@ class TestHarness( Component ):
 
 def mk_src_pkts( nterminals, lst ):
   src_pkts = [ [] for _ in range( nterminals ) ]
+  src = 0
   for pkt in lst:
-    src_pkts[ int(pkt.src) ].append( pkt )
+    if hasattr(pkt, 'fl_type'):
+      if pkt.fl_type == 0:
+        src = pkt.src
+    else:
+      src = pkt.src
+    src_pkts[ src ].append( pkt )
   return src_pkts
 
 #=========================================================================
@@ -137,13 +147,19 @@ class RingNetwork_Tests( object ):
 
     PktType = mk_ring_pkt( nterminals, opaque_nbits, nvcs, 
               payload_nbits )
-    FlitType = mk_ring_flit( nterminals, opaque_nbits, nvcs, 
+    FlitType = mk_ring_flit( nterminals, 0, opaque_nbits, nvcs, 
                flit_size )
     pkt = PktType( 3,  0,  0,  0, 0xfaceb00c )
     flits    = flitisize_ring_flit( pkt, nterminals, opaque_nbits, nvcs,
                payload_nbits, flit_size )
-    src_pkts = mk_src_pkts( nterminals, flits )
-    dst_pkts = ringnet_fl( src_pkts )
+#    src_pkts = mk_src_pkts( nterminals, flits )
+#    dst_pkts = ringnet_fl( src_pkts )
+    for f in flits:
+      print '&&& ', f
+    src_pkts = [ [], [], [], flits ]
+    dst_pkts = [ flits, [], [], [] ]
     th = TestHarness( FlitType, nterminals, src_pkts, dst_pkts )
+    th.set_param( "top.dut.routers*.construct", 
+                  RouteUnitType=RingFlitRouteUnitRTL)
     s.run_sim( th )
 

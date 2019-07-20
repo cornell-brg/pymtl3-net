@@ -22,10 +22,16 @@ def ringnet_fl( src_pkts ):
   nterminals = len( src_pkts )
   dst_pkts = [ [] for _ in range( nterminals ) ]
 
+  dst = 0
   for packets in src_pkts:
     for pkt in packets:
       # TODO: change vc_id?
-      dst_pkts[ int(pkt.dst) ].append( pkt )
+      if hasattr(pkt, 'fl_type'):
+        if pkt.fl_type == 0:
+          dst = pkt.dst
+      else:
+        dst = pkt.dst
+      dst_pkts[ dst ].append( pkt )
   return dst_pkts
 
 class RingNetworkFL( Component ):
