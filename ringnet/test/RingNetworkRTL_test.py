@@ -152,14 +152,9 @@ class RingNetwork_Tests( object ):
     pkt = PktType( 3,  0,  0,  0, 0xfaceb00c )
     flits    = flitisize_ring_flit( pkt, nterminals, opaque_nbits, nvcs,
                payload_nbits, flit_size )
-#    src_pkts = mk_src_pkts( nterminals, flits )
-#    dst_pkts = ringnet_fl( src_pkts )
-    for f in flits:
-      print '&&& ', f
-    src_pkts = [ [], [], [], flits ]
-    dst_pkts = [ flits, [], [], [] ]
-    th = TestHarness( FlitType, nterminals, src_pkts, dst_pkts )
+    src_flits = [ [], [], [], flits ]
+    dst_flits = [ flits, [], [], [] ]
+    th = TestHarness( FlitType, nterminals, src_flits, dst_flits )
     th.set_param( "top.dut.routers*.construct", 
                   RouteUnitType=RingFlitRouteUnitRTL)
     s.run_sim( th )
-

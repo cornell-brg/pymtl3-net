@@ -7,15 +7,16 @@
 #   Date : July 1, 2019
 
 import hypothesis
-from hypothesis                   import strategies as st
-from pymtl3                       import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-from ocn_pclib.test.net_sinks     import TestNetSinkRTL
-from ocn_pclib.ifcs.flits         import *
-from ocn_pclib.ifcs.packets       import mk_mesh_pkt
-from ocn_pclib.ifcs.positions     import mk_mesh_pos
-from torusnet.TorusNetworkRTL     import TorusNetworkRTL
-from torusnet.TorusNetworkFL      import torusnet_fl
+from hypothesis                         import strategies as st
+from pymtl3                             import *
+from pymtl3.stdlib.test.test_srcs       import TestSrcRTL
+from ocn_pclib.test.net_sinks           import TestNetSinkRTL
+from ocn_pclib.ifcs.flits               import *
+from ocn_pclib.ifcs.packets             import mk_mesh_pkt
+from ocn_pclib.ifcs.positions           import mk_mesh_pos
+from torusnet.TorusNetworkRTL           import TorusNetworkRTL
+from torusnet.TorusNetworkFL            import torusnet_fl
+from torusnet.DORYTorusFlitRouteUnitRTL import DORYTorusFlitRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -27,8 +28,7 @@ class TestHarness( Component ):
 
     s.nrouters = ncols * nrows
     MeshPos = mk_mesh_pos( ncols, nrows )
-    match_func = lambda a, b : a.src_x == b.src_x and a.src_y == b.src_y and \
-                               a.dst_y == b.dst_y and a.payload == b.payload
+    match_func = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL   ( PktType, src_msgs[i] )
                 for i in range ( s.nrouters ) ]
@@ -125,9 +125,11 @@ class TorusNetwork_Tests( object ):
              opaque_nbits, nvcs, payload_nbits, flit_size )
     flits1 = flitisize_mesh_flit( pkt1, ncols, nrows,
              opaque_nbits, nvcs, payload_nbits, flit_size )
-    src_pkts = mk_src_pkts( ncols, nrows, flits0+flits1 ) 
-    dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
-    th = TestHarness( FlitType, ncols, nrows, src_pkts, dst_pkts )
+    src_flits = [ [], flits0, [], flits1 ]
+    dst_flits = [ [], flits1, flits0, [] ]
+    th = TestHarness( FlitType, ncols, nrows, src_flits, dst_flits )
+    th.set_param( "top.dut.routers*.construct", 
+                  RouteUnitType=DORYTorusFlitRouteUnitRTL )
     s.run_sim( th )
 
   def test_simple( s ):
