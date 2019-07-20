@@ -22,6 +22,7 @@ class RingRouterRTL( Router ):
   def construct( s,
     PacketType,
     PositionType,
+    num_routers,
     InputUnitType=InputUnitCreditRTL,
     RouteUnitType=RingRouteUnitRTL,
     SwitchUnitType=SwitchUnitRTL,
@@ -46,21 +47,21 @@ class RingRouterRTL( Router ):
     # Components
 
     s.input_units  = [ InputUnitType( PacketType, nvcs=nvcs, credit_line=credit_line )
-                      for _ in range( s.num_inports ) ]
+                       for _ in range( s.num_inports ) ]
 
-    s.route_units  = [ RouteUnitType( PacketType, PositionType, s.num_outports )
-                      for i in range( s.num_route_units ) ]
+    s.route_units  = [ RouteUnitType( PacketType, PositionType, num_routers )
+                       for i in range( s.num_route_units ) ]
 
     s.switch_units = [ SwitchUnitType( PacketType, s.num_route_units )
-                      for _ in range( s.num_outports ) ]
+                       for _ in range( s.num_outports ) ]
 
     s.output_units = [ OutputUnitType( PacketType )
-                      for _ in range( s.num_outports ) ]
+                       for _ in range( s.num_outports ) ]
 
     # Connection
 
     for i in range( s.num_inports ):
-      s.connect( s.recv[i],             s.input_units[i].recv )
+      s.connect( s.recv[i], s.input_units[i].recv )
       for j in range( s.nvcs ):
         ru_idx = i * s.nvcs + j
         s.connect( s.input_units[i].give[j], s.route_units[ru_idx].get )
@@ -72,7 +73,7 @@ class RingRouterRTL( Router ):
 
     for j in range( s.num_outports ):
       s.connect( s.switch_units[j].give, s.output_units[j].get )
-      s.connect( s.output_units[j].send, s.send[j]              )
+      s.connect( s.output_units[j].send, s.send[j]             )
 
   # Line trace
 

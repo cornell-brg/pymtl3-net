@@ -33,13 +33,13 @@ class RingNetworkRTL( Component ):
     s.send = [ SendIfcRTL(PacketType) for _ in range(s.num_routers)]
 
     # Components
-    s.routers    = [ RingRouterRTL( PacketType, PositionType, nvcs=nvcs )
-                     for i in range( s.num_routers ) ]
+    s.routers    = [ RingRouterRTL( PacketType, PositionType, num_routers, nvcs=nvcs )
+                     for i in range( num_routers ) ]
 
-    s.recv_adapters = [ RecvRTL2CreditSendRTL( PacketType, nvcs=nvcs, credit_line=credit_line )
-                        for _ in range( s.num_routers ) ]
-    s.send_adapters = [ CreditRecvRTL2SendRTL( PacketType, nvcs=nvcs, credit_line=credit_line )
-                        for _ in range( s.num_routers ) ]
+    s.recv_adp = [ RecvRTL2CreditSendRTL( PacketType, nvcs=nvcs, credit_line=credit_line )
+                        for _ in range( num_routers ) ]
+    s.send_adp = [ CreditRecvRTL2SendRTL( PacketType, nvcs=nvcs, credit_line=credit_line )
+                        for _ in range( num_routers ) ]
 
     # Connect s.routers together in ring
 
@@ -50,11 +50,11 @@ class RingNetworkRTL( Component ):
 
       # Connect the self port (with Network Interface)
 
-      s.connect( s.recv[i],               s.recv_adapters[i].recv )
-      s.connect( s.recv_adapters[i].send, s.routers[i].recv[SELF] )
+      s.connect( s.recv[i],               s.recv_adp[i].recv )
+      s.connect( s.recv_adp[i].send, s.routers[i].recv[SELF] )
 
-      s.connect( s.routers[i].send[SELF], s.send_adapters[i].recv )
-      s.connect( s.send_adapters[i].send, s.send[i]               )
+      s.connect( s.routers[i].send[SELF], s.send_adp[i].recv )
+      s.connect( s.send_adp[i].send, s.send[i]               )
 
     # FIXME: unable to connect a struct to a port.
     @s.update

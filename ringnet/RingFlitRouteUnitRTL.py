@@ -4,7 +4,7 @@ RingFlitRouteUnitRTL.py
 ==========================================================================
 A ring route unit to deliver flits.
 
-Author : Yanghui Ou, Cheng Tan
+Author : Cheng Tan, Yanghui Ou
   Date : July 19, 2019
 """
 from copy import deepcopy
@@ -59,7 +59,6 @@ class RingFlitRouteUnitRTL( Component ):
     @s.update
     def up_ru_routing():
 
-      s.out_dir = 0
       s.give_msg_wire = deepcopy( s.get.msg )
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
