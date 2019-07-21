@@ -21,9 +21,10 @@ class DORYCMeshFlitRouteUnitRTL( Component ):
 
     # Interface
 
-    s.get  = GetIfcRTL( MsgType )
-    s.give = [ GiveIfcRTL (MsgType) for _ in range ( s.num_outports ) ]
-    s.pos  = InPort( PositionType )
+    s.get     = GetIfcRTL( MsgType )
+    s.give    = [ GiveIfcRTL (MsgType) for _ in range ( s.num_outports ) ]
+    s.pos     = InPort( PositionType )
+    s.out_ocp = [ InPort( Bits1 ) for _ in range( s.num_outports ) ]
 
     # Componets
 
@@ -48,20 +49,25 @@ class DORYCMeshFlitRouteUnitRTL( Component ):
       if s.get.rdy:
         if s.get.msg.fl_type == 0:
           if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
-            s.give_rdy[Bits3(4)+s.get.msg.dst_ter] = Bits1(1)
-            s.out_dir = 4 + s.get.msg.dst_ter
+            if s.out_ocp[4] == 0:
+              s.give_rdy[Bits3(4)+s.get.msg.dst_ter] = Bits1(1)
+              s.out_dir = 4 + s.get.msg.dst_ter
           elif s.get.msg.dst_y < s.pos.pos_y:
-            s.give_rdy[1] = Bits1(1)
-            s.out_dir = 1
+            if s.out_ocp[1] == 0:
+              s.give_rdy[1] = Bits1(1)
+              s.out_dir = 1
           elif s.get.msg.dst_y > s.pos.pos_y:
-            s.give_rdy[0] = Bits1(1)
-            s.out_dir = 0
+            if s.out_ocp[0] == 0:
+              s.give_rdy[0] = Bits1(1)
+              s.out_dir = 0
           elif s.get.msg.dst_x < s.pos.pos_x:
-            s.give_rdy[2] = Bits1(1)
-            s.out_dir = 2
+            if s.out_ocp[2] == 0:
+              s.give_rdy[2] = Bits1(1)
+              s.out_dir = 2
           else:
-            s.give_rdy[3] = Bits1(1)
-            s.out_dir = 3
+            if s.out_ocp[3] == 0:
+              s.give_rdy[3] = Bits1(1)
+              s.out_dir = 3
         else:
           s.give_rdy[s.out_dir] = Bits1(1)
 

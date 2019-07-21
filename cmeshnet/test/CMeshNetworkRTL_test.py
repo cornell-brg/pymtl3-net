@@ -21,7 +21,6 @@ from meshnet.DORYMeshRouteUnitRTL   import DORYMeshRouteUnitRTL
 from meshnet.DORXMeshRouteUnitRTL   import DORXMeshRouteUnitRTL
 from cmeshnet.DORXCMeshRouteUnitRTL import DORXCMeshRouteUnitRTL
 from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
-from cmeshnet.DORYCMeshFlitRouteUnitRTL import DORYCMeshFlitRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -102,7 +101,8 @@ class TestHarness( Component ):
 
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.dut = CMeshNetworkRTL( MsgType, MeshPos, mesh_wid, mesh_ht, 2, 0)
-    match_func = lambda a, b : a.payload == b.payload
+    match_func = lambda a, b : a.payload == b.payload and a.dst_x == b.dst_x and\
+                               a.dst_y == b.dst_y
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_terminals ) ]
@@ -169,20 +169,14 @@ def test_srcsink_mesh2x2():
   opaque_nbits = 1
   nvcs = 1
   payload_nbits = 32
-  flit_size = 16
 
   PacketType = mk_cmesh_pkt(  mesh_wid, mesh_ht, inports, outports,
                               opaque_nbits, nvcs, payload_nbits )
-  FlitType   = mk_cmesh_flit( mesh_wid, mesh_ht, inports, outports, 0,
-                              opaque_nbits, total_flit_nbits=flit_size, nvcs=nvcs )
   pkt = PacketType( 0, 0, 1, 1, 1, 0, 0xface )
-  flits = flitisize_cmesh_flit( pkt, mesh_wid, mesh_ht, inports, outports,
-          opaque_nbits, nvcs, payload_nbits, flit_size )
 
-  src_packets  = [ flits, [], [], [], [], [], [], [] ]
-  sink_packets = [ [], [], [], [], [], [], [], flits ]
+  src_packets  = [ [pkt], [], [], [], [], [], [], [] ]
+  sink_packets = [ [], [], [], [], [], [], [], [pkt] ]
 
-  th = TestHarness( FlitType, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
-  th.set_param( "top.dut.routers*.construct", RouteUnitType=DORYCMeshFlitRouteUnitRTL )
+  th = TestHarness( PacketType, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
 
   run_sim( th )
