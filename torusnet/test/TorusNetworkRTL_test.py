@@ -16,7 +16,6 @@ from ocn_pclib.ifcs.packets             import mk_mesh_pkt
 from ocn_pclib.ifcs.positions           import mk_mesh_pos
 from torusnet.TorusNetworkRTL           import TorusNetworkRTL
 from torusnet.TorusNetworkFL            import torusnet_fl
-from torusnet.DORYTorusFlitRouteUnitRTL import DORYTorusFlitRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -104,33 +103,6 @@ class TorusNetwork_Tests( object ):
 
     # Check timeout
     assert ncycles < max_cycles
-
-  def test_simple_flit( s ):
-
-    ncols = 2
-    nrows = 2
-    opaque_nbits = 1
-    nvcs = 2
-    payload_nbits = 32
-    flit_size = 16
-
-    PktType  = mk_mesh_pkt ( ncols, nrows, opaque_nbits, 
-                             nvcs, payload_nbits )
-    FlitType = mk_mesh_flit( ncols, nrows, 0, opaque_nbits,
-                             nvcs, flit_size )
-    #           src_x  y dst_x y opq vc  payload
-    pkt0 = PktType( 1, 0,   0, 1, 0,  0, 0xfaceb00c )
-    pkt1 = PktType( 1, 1,   1, 0, 0,  0, 0xdeadface )
-    flits0 = flitisize_mesh_flit( pkt0, ncols, nrows,
-             opaque_nbits, nvcs, payload_nbits, flit_size )
-    flits1 = flitisize_mesh_flit( pkt1, ncols, nrows,
-             opaque_nbits, nvcs, payload_nbits, flit_size )
-    src_flits = [ [], flits0, [], flits1 ]
-    dst_flits = [ [], flits1, flits0, [] ]
-    th = TestHarness( FlitType, ncols, nrows, src_flits, dst_flits )
-    th.set_param( "top.dut.routers*.construct", 
-                  RouteUnitType=DORYTorusFlitRouteUnitRTL )
-    s.run_sim( th )
 
   def test_simple( s ):
     ncols = 2

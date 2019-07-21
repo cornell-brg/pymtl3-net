@@ -31,9 +31,10 @@ class DORYTorusFlitRouteUnitRTL( Component ):
     s.last_col_id = we_dist_type( ncols-1 )
 
     # Interface
-    s.get  = GetIfcRTL( MsgType )
-    s.give = [ GiveIfcRTL (MsgType) for _ in range ( s.num_outports ) ]
-    s.pos  = InPort( PositionType )
+    s.get     = GetIfcRTL( MsgType )
+    s.give    = [ GiveIfcRTL (MsgType) for _ in range ( s.num_outports ) ]
+    s.pos     = InPort( PositionType )
+    s.out_ocp = [ InPort( Bits1 ) for _ in range( s.num_outports ) ]
 
     # Componets
     s.out_dir       = Wire( Bits3        )
@@ -83,31 +84,36 @@ class DORYTorusFlitRouteUnitRTL( Component ):
 
       if s.get.rdy:
         if s.give_msg_wire.fl_type == 0:
+          tmp_out = 0
           if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
-            s.out_dir = SELF
+            tmp_out = SELF
           elif s.get.msg.dst_y != s.pos.pos_y:
-            s.out_dir = NORTH if s.north_dist < s.south_dist else SOUTH
+            tmp_out = NORTH if s.north_dist < s.south_dist else SOUTH
           else:
-            s.out_dir = WEST if s.west_dist < s.east_dist else EAST
+            tmp_out = WEST if s.west_dist < s.east_dist else EAST
+
+          if s.out_ocp[tmp_out] == 0:
+            s.out_dir = tmp_out 
   
           # Turning logic
           s.turning = ( s.get.msg.src_x == s.pos.pos_x ) & ( s.get.msg.src_y != s.pos.pos_y ) & ( s.out_dir == WEST | s.out_dir == EAST )
 
         # Dateline logic
-        if s.turning:
-          s.give_msg_wire.vc_id = b1(0)
-
-        if s.pos.pos_x == posx_type(0) and s.out_dir == WEST:
-          s.give_msg_wire.vc_id = b1(1)
-        elif s.pos.pos_x == s.last_col_id and s.out_dir == EAST:
-          s.give_msg_wire.vc_id = b1(1)
-        elif s.pos.pos_y == posy_type(0) and s.out_dir == SOUTH:
-          s.give_msg_wire.vc_id = b1(1)
-        elif s.pos.pos_y == s.last_col_id and s.out_dir == NORTH:
-          s.give_msg_wire.vc_id = b1(1)
-
-        s.give[ s.out_dir ].rdy = b1(1)
-        # s.give[ s.out_dir ].msg = s.give_msg_wire
+        if s.give_msg_wire.fl_type != 0 or s.out_ocp[s.out_dir] == 0:
+          if s.turning:
+            s.give_msg_wire.vc_id = b1(0)
+  
+          if s.pos.pos_x == posx_type(0) and s.out_dir == WEST:
+            s.give_msg_wire.vc_id = b1(1)
+          elif s.pos.pos_x == s.last_col_id and s.out_dir == EAST:
+            s.give_msg_wire.vc_id = b1(1)
+          elif s.pos.pos_y == posy_type(0) and s.out_dir == SOUTH:
+            s.give_msg_wire.vc_id = b1(1)
+          elif s.pos.pos_y == s.last_col_id and s.out_dir == NORTH:
+            s.give_msg_wire.vc_id = b1(1)
+  
+          s.give[ s.out_dir ].rdy = b1(1)
+#          s.give[ s.out_dir ].msg = s.give_msg_wire
 
     @s.update
     def up_ru_get_en():

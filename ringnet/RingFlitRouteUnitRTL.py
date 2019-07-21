@@ -77,7 +77,7 @@ class RingFlitRouteUnitRTL( Component ):
           if s.out_ocp[tmp_out] == 0:
             s.out_dir = tmp_out
 
-        if s.give_msg_wire.fl_type != 0 or s.out_ocp[tmp_out] == 0:
+        if s.give_msg_wire.fl_type != 0 or s.out_ocp[s.out_dir] == 0:
           if s.pos == s.last_idx and s.out_dir == RIGHT:
             s.give_msg_wire.vc_id = b1(1)
           elif s.pos == id_type(0) and s.out_dir == LEFT:
