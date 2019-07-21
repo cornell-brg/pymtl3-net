@@ -26,9 +26,10 @@ class RingFlitRouteUnitRTL( Component ):
 
     # Interface
 
-    s.get  = GetIfcRTL( PacketType )
-    s.give = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
-    s.pos  = InPort( PositionType )
+    s.get     = GetIfcRTL( PacketType )
+    s.give    = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
+    s.pos     = InPort( PositionType )
+    s.out_ocp = [ InPort( Bits1 ) for _ in range( s.num_outports ) ]
 
     # Componets
 
@@ -65,20 +66,25 @@ class RingFlitRouteUnitRTL( Component ):
 
       if s.get.rdy:
         if s.give_msg_wire.fl_type == 0:
+          tmp_out = 0
           if s.pos == s.get.msg.dst:
-            s.out_dir = SELF
+            tmp_out = SELF
           elif s.left_dist < s.right_dist:
-            s.out_dir = LEFT
+            tmp_out = LEFT
           else:
-            s.out_dir = RIGHT
+            tmp_out = RIGHT
 
-        if s.pos == s.last_idx and s.out_dir == RIGHT:
-          s.give_msg_wire.vc_id = b1(1)
-        elif s.pos == id_type(0) and s.out_dir == LEFT:
-          s.give_msg_wire.vc_id = b1(1)
+          if s.out_ocp[tmp_out] == 0:
+            s.out_dir = tmp_out
 
-        s.give[ s.out_dir ].rdy = b1(1)
-        s.give[ s.out_dir ].msg = s.give_msg_wire
+        if s.give_msg_wire.fl_type != 0 or s.out_ocp[tmp_out] == 0:
+          if s.pos == s.last_idx and s.out_dir == RIGHT:
+            s.give_msg_wire.vc_id = b1(1)
+          elif s.pos == id_type(0) and s.out_dir == LEFT:
+            s.give_msg_wire.vc_id = b1(1)
+  
+          s.give[ s.out_dir ].rdy = b1(1)
+          s.give[ s.out_dir ].msg = s.give_msg_wire
 
     @s.update
     def up_ru_get_en():
