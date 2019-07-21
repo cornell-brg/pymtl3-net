@@ -1,5 +1,5 @@
 #=========================================================================
-# MeshRouteUnitYDorCL.py
+# DORYMeshRouteUnitCL.py
 #=========================================================================
 # Cycle level implementation of a Y-DOR route unit.
 #
@@ -10,7 +10,7 @@ from pymtl3 import *
 from directions import *
 from pymtl3.stdlib.cl.queues import BypassQueueCL
 
-class MeshRouteUnitYDorCL( Component ):
+class DORYMeshRouteUnitCL( Component ):
 
   def construct( s, PacketType, PositionType ):
 

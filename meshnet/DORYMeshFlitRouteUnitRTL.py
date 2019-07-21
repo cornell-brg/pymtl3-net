@@ -20,9 +20,10 @@ class DORYMeshFlitRouteUnitRTL( Component ):
 
     # Interface
 
-    s.get  = GetIfcRTL( MsgType )
-    s.give = [ GiveIfcRTL (MsgType) for _ in range ( s.num_outports ) ]
-    s.pos  = InPort( PositionType )
+    s.get     = GetIfcRTL( MsgType )
+    s.give    = [ GiveIfcRTL (MsgType) for _ in range ( s.num_outports ) ]
+    s.pos     = InPort( PositionType )
+    s.out_ocp = [ InPort( Bits1 ) for _ in range( s.num_outports ) ]
 
     # Componets
 
@@ -54,25 +55,30 @@ class DORYMeshFlitRouteUnitRTL( Component ):
       if s.get.rdy:
         if s.get.msg.fl_type == 0:
           if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
-  #          s.give[SELF].rdy = Bits1(1)
-            s.give[4].rdy = Bits1(1)
-            s.out_dir = Bits3( 4 )
+            if s.out_ocp[4] == 0:
+              # s.give[SELF].rdy = Bits1(1)
+              s.give[4].rdy = Bits1(1)
+              s.out_dir = Bits3( 4 )
           elif s.get.msg.dst_y < s.pos.pos_y:
-  #          s.give[SOUTH].rdy = Bits1(1)
-            s.give[1].rdy = Bits1(1)
-            s.out_dir = Bits3( 1 )
+            if s.out_ocp[1] == 0:
+              # s.give[SOUTH].rdy = Bits1(1)
+              s.give[1].rdy = Bits1(1)
+              s.out_dir = Bits3( 1 )
           elif s.get.msg.dst_y > s.pos.pos_y:
-  #          s.give[NORTH].rdy = Bits1(1)
-            s.give[0].rdy = Bits1(1)
-            s.out_dir = Bits3( 0 )
+            if s.out_ocp[0] == 0:
+              # s.give[NORTH].rdy = Bits1(1)
+              s.give[0].rdy = Bits1(1)
+              s.out_dir = Bits3( 0 )
           elif s.get.msg.dst_x < s.pos.pos_x:
-  #          s.give[WEST].rdy = Bits1(1)
-            s.give[2].rdy = Bits1(1)
-            s.out_dir = Bits3( 2 )
+            if s.out_ocp[2] == 0:
+              # s.give[WEST].rdy = Bits1(1)
+              s.give[2].rdy = Bits1(1)
+              s.out_dir = Bits3( 2 )
           else:
-  #          s.give[EAST].rdy = Bits1(1)
-            s.give[3].rdy = Bits1(1)
-            s.out_dir = Bits3( 3 )
+            if s.out_ocp[3] == 0:
+              # s.give[EAST].rdy = Bits1(1)
+              s.give[3].rdy = Bits1(1)
+              s.out_dir = Bits3( 3 )
         else:
           s.give[s.out_dir].rdy = Bits1(1)
 

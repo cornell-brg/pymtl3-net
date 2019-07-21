@@ -31,9 +31,9 @@ class DTRBflyFlitRouteUnitRTL( Component ):
 
     # Interface
 
-    s.get  = GetIfcRTL( MsgType )
-    s.give = [ GiveIfcRTL(MsgType ) for _ in range ( s.num_outports ) ]
-    s.pos  = InPort( PositionType )
+    s.get     = GetIfcRTL( MsgType )
+    s.give    = [ GiveIfcRTL(MsgType ) for _ in range ( s.num_outports ) ]
+    s.pos     = InPort( PositionType )
     s.out_ocp = [ InPort( Bits1 ) for _ in range( s.num_outports ) ]
 
     # Componets
@@ -57,8 +57,9 @@ class DTRBflyFlitRouteUnitRTL( Component ):
 
       if s.get.rdy:
         if s.get.msg.fl_type == 0:
-          s.out_dir = s.get.msg.dst[ BEGIN : END]
-          if s.out_ocp[ s.out_dir ] == 0:
+          tmp_out = s.get.msg.dst[ BEGIN : END]
+          if s.out_ocp[ tmp_out ] == 0:
+            s.out_dir = tmp_out
             s.give_rdy[ s.out_dir ] = Bits1( 1 )
         else:
           s.give_rdy[ s.out_dir ] = Bits1( 1 )

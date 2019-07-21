@@ -1,8 +1,8 @@
 """
 =========================================================================
-SwitchUnitFlitRTL.py
+FlitSwitchUnitRTL.py
 =========================================================================
-A switch unit with GetIfcRTL and SendIfcRTL.
+Flit-based switch unit.
 
 Author : Cheng Tan
   Date : July 19, 2019
@@ -13,7 +13,7 @@ from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
 from pymtl3.stdlib.rtl.Encoder import Encoder
 from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL, GiveIfcRTL
 
-class SwitchUnitFlitRTL( Component ):
+class FlitSwitchUnitRTL( Component ):
 
   def construct( s, PacketType, num_inports=5 ):
 

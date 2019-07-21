@@ -266,29 +266,3 @@ def test_srcsink_mesh4x4():
   th = TestHarness( PacketType, mesh_wid, mesh_ht, src_packets, sink_packets, 
                     0, 0, 0, 0, arrival_pipes )
   run_sim( th )
-
-def test_srcsink_mesh2x2_flit():
-
-  mesh_wid = mesh_ht = 2
-
-  opaque_nbits = 1
-  nvcs = 1
-  payload_nbits = 32
-
-  flit_size = 16
-
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht, opaque_nbits, nvcs, payload_nbits )
-  FlitType = mk_mesh_flit( mesh_wid, mesh_ht, 0,
-                 opaque_nbits, total_flit_nbits=flit_size, nvcs=nvcs )
-#  pkt = mk_pkt( 0, 0, 1, 1, 0, 0xfaceb00c )
-  pkt  = PacketType( 0, 0, 1, 1, 0, 0xface )
-  flits = flitisize_mesh_flit( pkt, mesh_wid, mesh_ht,
-          opaque_nbits, nvcs, payload_nbits, flit_size )
-
-  src_packets  = [ flits, [], [], [] ]
-  sink_packets = [ [], [], [], flits ]
-
-  th = TestHarness( FlitType, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
-  th.set_param( "top.dut.routers*.construct", RouteUnitType=DORYMeshFlitRouteUnitRTL )
-  run_sim( th )
-

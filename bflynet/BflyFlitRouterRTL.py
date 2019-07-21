@@ -9,8 +9,7 @@
 from pymtl3 import *
 from router.Router            import Router
 from router.InputUnitRTL      import InputUnitRTL
-from router.SwitchUnitRTL     import SwitchUnitRTL
-from router.SwitchUnitFlitRTL import SwitchUnitFlitRTL
+from router.FlitSwitchUnitRTL import FlitSwitchUnitRTL
 from router.OutputUnitRTL     import OutputUnitRTL
 from DTRBflyRouteUnitRTL      import DTRBflyRouteUnitRTL
 from DTRBflyFlitRouteUnitRTL  import DTRBflyFlitRouteUnitRTL
@@ -20,7 +19,7 @@ class BflyFlitRouterRTL( Router ):
   def construct( s, PacketType, PositionType, 
                  k_ary = 2, InputUnitType = InputUnitRTL, 
                  RouteUnitType = DTRBflyFlitRouteUnitRTL,
-                 SwitchUnitType = SwitchUnitFlitRTL ):
+                 SwitchUnitType = FlitSwitchUnitRTL ):
     
     super( BflyFlitRouterRTL, s ).construct(
       PacketType, PositionType, k_ary, k_ary, InputUnitType, RouteUnitType,

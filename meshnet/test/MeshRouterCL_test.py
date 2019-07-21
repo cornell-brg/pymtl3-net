@@ -20,7 +20,7 @@ from ocn_pclib.ifcs.positions      import mk_mesh_pos
 from ocn_pclib.ifcs.packets        import mk_mesh_pkt
 from meshnet.MeshRouterFL          import MeshRouterFL
 from meshnet.MeshRouterCL          import MeshRouterCL
-from meshnet.MeshRouteUnitXDorCL   import MeshRouteUnitXDorCL
+from meshnet.DORXMeshRouteUnitCL   import DORXMeshRouteUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -170,7 +170,7 @@ class MeshRouterCL_Tests( object ):
   @hypothesis.given(
     mesh_wid   = st.integers(2, 16),
     mesh_ht    = st.integers(2, 16),
-    routing    = st.sampled_from(['x']), # TODO: add y after implementing DorY route unit
+    routing    = st.sampled_from(['x']), # TODO: add y after implementing DORY route unit
     pos_x      = st.data(),
     pos_y      = st.data(),
     pkts       = st.data(),

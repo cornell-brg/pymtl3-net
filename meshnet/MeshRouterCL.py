@@ -12,7 +12,7 @@ from router.Router         import Router
 from router.InputUnitCL    import InputUnitCL
 from router.SwitchUnitCL   import SwitchUnitCL
 from router.OutputUnitCL   import OutputUnitCL
-from MeshRouteUnitXDorCL   import MeshRouteUnitXDorCL
+from DORXMeshRouteUnitCL   import DORXMeshRouteUnitCL
 
 class MeshRouterCL( Router ):
 
@@ -20,7 +20,7 @@ class MeshRouterCL( Router ):
     PacketType,
     PositionType,
     InputUnitType  = InputUnitCL,
-    RouteUnitType  = MeshRouteUnitXDorCL,
+    RouteUnitType  = DORXMeshRouteUnitCL,
     SwitchUnitType = SwitchUnitCL,
     OutputUnitType = OutputUnitCL,
   ):

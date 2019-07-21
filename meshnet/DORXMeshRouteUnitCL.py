@@ -1,6 +1,6 @@
 """
 ==========================================================================
-MeshRouteUnitXDorCL.py
+DORXMeshRouteUnitCL.py
 ==========================================================================
 Cycle level implementation of a X-DOR route unit.
 
@@ -11,7 +11,7 @@ from pymtl3 import *
 from directions import *
 from pymtl3.stdlib.cl.queues import BypassQueueCL
 
-class MeshRouteUnitXDorCL( Component ):
+class DORXMeshRouteUnitCL( Component ):
 
   def construct( s, PacketType, PositionType ):
 
