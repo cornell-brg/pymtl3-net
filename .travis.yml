@@ -13,7 +13,7 @@ python:
  - "2.7"
 
 env:
- - CONFIG="-xv --tb=short"
+ - CONFIG="-v --tb=short"
 
 #------------------------------------------------------------------------
 # install dependencies
