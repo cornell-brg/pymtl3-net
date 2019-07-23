@@ -1,12 +1,13 @@
-#=========================================================================
-# RingRouterCL.py
-#=========================================================================
-# Ring network-on-chip router
-#
-# Author : Yanghui Ou
-#   Date : May 16, 2019
+"""
+=========================================================================
+RingRouterCL.py
+=========================================================================
+Ring network-on-chip router
 
-from pymtl import *
+Author : Yanghui Ou
+  Date : May 16, 2019
+"""
+from pymtl3 import *
 from router.Router       import Router
 from router.InputUnitCL  import InputUnitCL
 from router.SwitchUnitCL import SwitchUnitCL

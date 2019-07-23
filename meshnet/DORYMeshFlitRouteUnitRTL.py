@@ -14,7 +14,7 @@ class DORYMeshFlitRouteUnitRTL( Component ):
 
   def construct( s, MsgType, PositionType, num_outports = 5 ):
 
-    # Constants 
+    # Constants
 
     s.num_outports = num_outports
 
@@ -28,18 +28,18 @@ class DORYMeshFlitRouteUnitRTL( Component ):
     # Componets
 
     s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
-    s.give_ens = Wire( mk_bits( s.num_outports ) ) 
+    s.give_ens = Wire( mk_bits( s.num_outports ) )
 
     # Connections
 
     for i in range( s.num_outports ):
       s.connect( s.get.msg,     s.give[i].msg )
       s.connect( s.give_ens[i], s.give[i].en  )
-    
+
     # Routing logic
     @s.update
     def up_ru_routing():
- 
+
 #      s.out_dir = Bits3(0)
 #      s.give[NORTH].rdy = Bits1(0)
 #      s.give[SOUTH].rdy = Bits1(0)
@@ -84,12 +84,12 @@ class DORYMeshFlitRouteUnitRTL( Component ):
 
     @s.update
     def up_ru_get_en():
-      s.get.en = s.give_ens > Bits5(0) 
+      s.get.en = s.give_ens > Bits5(0)
 
   # Line trace
   def line_trace( s ):
 
     out_str = [ "" for _ in range( s.num_outports ) ]
     for i in range (s.num_outports):
-      out_str[i] = "{}".format( s.give[i] ) 
+      out_str[i] = "{}".format( s.give[i] )
     return "{}({}){}".format( s.get, "|".join( out_str ) )

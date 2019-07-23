@@ -149,7 +149,7 @@ class TorusNetwork_Tests( object ):
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
     s.run_sim( th )
 
-  @hypothesis.settings( deadline=None, max_examples=20 )
+  @hypothesis.settings( deadline=None, max_examples=5 )
   # @hypothesis.reproduce_failure('4.24.4', 'AAMDAQEAAAQAAA==') #(1:0)>(0:4)
   @hypothesis.given(
     ncols = st.integers(2, 8),

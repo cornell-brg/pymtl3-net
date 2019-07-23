@@ -1,11 +1,12 @@
-#=========================================================================
-# RingNetworkCL.py
-#=========================================================================
-# Cycle level ring network implementation.
-#
-# Author : Yanghui Ou
-#   Date : May 19, 2019
+"""
+=========================================================================
+RingNetworkCL.py
+=========================================================================
+Cycle level ring network implementation.
 
+Author : Yanghui Ou
+  Date : May 19, 2019
+"""
 from pymtl3 import *
 from directions import *
 from RingRouterCL import RingRouterCL
@@ -22,8 +23,8 @@ class RingNetworkCL( Component ):
 
     # Interface
 
-    s.recv       = [ GuardedCalleeIfc() for _ in range(s.num_terminals) ]
-    s.send       = [ GuardedCallerIfc() for _ in range(s.num_terminals) ]
+    s.recv = [ NonBlockingCalleeIfc() for _ in range(s.num_terminals) ]
+    s.send = [ NonBlockingCallerIfc() for _ in range(s.num_terminals) ]
 
     # Components
 
