@@ -11,7 +11,6 @@ from hypothesis                         import strategies as st
 from pymtl3                             import *
 from pymtl3.stdlib.test.test_srcs       import TestSrcRTL
 from ocn_pclib.test.net_sinks           import TestNetSinkRTL
-from ocn_pclib.ifcs.flits               import *
 from ocn_pclib.ifcs.packets             import mk_mesh_pkt
 from ocn_pclib.ifcs.positions           import mk_mesh_pos
 from torusnet.TorusNetworkRTL           import TorusNetworkRTL
