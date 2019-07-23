@@ -8,11 +8,12 @@
 
 import pytest
 
-from pymtl import *
-from pclib.test.test_srcs import TestSrcCL
-from pclib.test.test_sinks import TestSinkCL
-from pclib.cl.queues import NormalQueueCL
-from channel.ChannelCL import ChannelCL
+from pymtl3 import *
+from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from pymtl3.stdlib.test.test_sinks import TestSinkCL
+from pymtl3.stdlib.cl.queues import NormalQueueCL
+
+from ..ChannelCL import ChannelCL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -47,7 +48,7 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Create a simulator
 
-  test_harness.apply( SimpleSim )
+  test_harness.apply( DynamicSim )
   test_harness.sim_reset()
 
 

@@ -6,6 +6,8 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 20, 2019
 
+import random
+
 from pymtl3                        import *
 from pymtl3.stdlib.rtl.queues      import NormalQueueRTL
 from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
@@ -19,14 +21,12 @@ from router.InputUnitRTL           import InputUnitRTL
 from ocn_pclib.ifcs.positions      import mk_mesh_pos
 from ocn_pclib.ifcs.packets        import mk_mesh_pkt
 from pymtl3.passes.sverilog        import ImportPass, TranslationPass
-from pymtl3.passes                 import DynamicSim
-import random
 
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
 def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
- 
+
   def tv_in( model, test_vector ):
     num_routers = mesh_wid * mesh_ht
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
@@ -88,7 +88,7 @@ def test_mesh2x1( dump_vcd, test_verilog ):
   mesh_wid = 2
   mesh_ht  = 1
   MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  num_routers = mesh_wid * mesh_ht 
+  num_routers = mesh_wid * mesh_ht
   num_inports = 5
   PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
   model = MeshNetworkRTL( PacketType, MeshPos, mesh_wid, mesh_ht, 0 )
@@ -97,7 +97,7 @@ def test_mesh2x1( dump_vcd, test_verilog ):
 
   # Specific for wire connection (link delay = 0) in 2x2 Mesh topology
   simple_2_2_test = [
-#  router   [packet]   arr_router  msg 
+#  router   [packet]   arr_router  msg
   [  0,    [1,0,1001],     x,       x  ],
   [  1,    [0,0,1002],     x,       x  ],
   [  0,    [1,0,1003],     1,     1001 ],

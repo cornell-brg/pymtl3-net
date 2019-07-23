@@ -7,9 +7,10 @@
 #   Date : May 19, 2019
 
 import pytest
-from pymtl                    import *
-from pclib.test               import mk_test_case_table
-from pclib.test.test_srcs     import TestSrcCL
+
+from pymtl3 import *
+from pymtl3.stdlib.test import mk_test_case_table
+from pymtl3.stdlib.test.test_srcs import TestSrcCL
 from ocn_pclib.test.net_sinks import TestNetSinkCL
 from ocn_pclib.ifcs.packets   import mk_ring_pkt
 from ocn_pclib.ifcs.positions import mk_ring_pos
@@ -22,9 +23,9 @@ from router.InputUnitCL       import InputUnitCL
 
 class TestHarness( Component ):
 
-  def construct( s, PktType, nrouters, 
-                 src_msgs, sink_msgs, 
-                 src_initial, src_interval, 
+  def construct( s, PktType, nrouters,
+                 src_msgs, sink_msgs,
+                 src_initial, src_interval,
                  sink_initial, sink_interval ):
 
     s.nrouters = nrouters
@@ -34,7 +35,7 @@ class TestHarness( Component ):
 
     s.srcs  = [ TestSrcCL( src_msgs[i],  src_initial,  src_interval  )
                 for i in range ( s.nrouters ) ]
-    s.sinks = [ TestNetSinkCL( sink_msgs[i], sink_initial, sink_interval) 
+    s.sinks = [ TestNetSinkCL( sink_msgs[i], sink_initial, sink_interval)
                 for i in range ( s.nrouters ) ]
 
     # Connections
@@ -92,7 +93,7 @@ def run_sim( test_harness, max_cycles=100 ):
 def mk_src_sink_msgs( pkts, nrouters ):
   src_msgs  = [ [] for _ in range( nrouters ) ]
   sink_msgs = [ [] for _ in range( nrouters ) ]
-  
+
   for pkt in pkts:
     src_id  = pkt.src
     sink_id = pkt.dst
@@ -134,17 +135,17 @@ test_case_table = mk_test_case_table([
 
 @pytest.mark.parametrize( **test_case_table )
 def test_ring_simple( test_params ):
-  PktType = mk_ring_pkt( 
+  PktType = mk_ring_pkt(
     nrouters=test_params.nrouters,
     nvcs=2,
   )
   pkt_list = test_params.msg_func( PktType, test_params.nrouters )
   src_msgs, sink_msgs = mk_src_sink_msgs( pkt_list, test_params.nrouters )
-  th = TestHarness( 
-    PktType, 
+  th = TestHarness(
+    PktType,
     test_params.nrouters,
     src_msgs,
-    sink_msgs, 
+    sink_msgs,
     test_params.src_init,
     test_params.src_intv,
     test_params.sink_init,

@@ -6,15 +6,10 @@
 # Author : Yanghui Ou
 #   Date : May 19, 2019
 
-from pymtl import *
+from pymtl3 import *
 from directions import *
 from RingRouterCL import RingRouterCL
 from channel.ChannelCL import ChannelCL
-from pclib.ifcs.GuardedIfc import (
-  GuardedCallerIfc,
-  GuardedCalleeIfc,
-  guarded_ifc
-)
 
 class RingNetworkCL( Component ):
   def construct( s, PacketType, PositionType, nrouters=4, chl_lat=0 ):
@@ -62,6 +57,6 @@ class RingNetworkCL( Component ):
         s.routers[r].pos = PositionType( r )
 
   def line_trace( s ):
-    return "|".join( 
-      [ s.routers[i].line_trace() for i in range( s.num_terminals ) ] 
+    return "|".join(
+      [ s.routers[i].line_trace() for i in range( s.num_terminals ) ]
     )

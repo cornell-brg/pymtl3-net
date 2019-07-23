@@ -26,7 +26,7 @@ import copy
 #-------------------------------------------------------------------------
 
 def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
- 
+
   def tv_in( model, test_vector ):
 
     num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
@@ -55,7 +55,7 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
             bf_dst = bf_dst * k_ary
 
       pkt = PacketType( terminal_id, bf_dst, 0, test_vector[1][1])
-    
+
       # Enable the network interface on specific router
       for i in range (num_terminals):
         model.recv[i].en  = 0
@@ -71,7 +71,7 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
       assert model.send[test_vector[2]].msg.payload == test_vector[3]
 #    for i in range(model.num_terminals):
 #      print 'msg: ', model.send[test_vector[2]].msg.payload, '; vec: ', test_vector[3]
-     
+
   model.elaborate()
 #  model.sverilog_translate = True
   model.yosys_translate = True

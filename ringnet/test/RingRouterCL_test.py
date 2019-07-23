@@ -9,8 +9,8 @@
 import hypothesis
 from hypothesis import strategies as st
 
-from pymtl                    import *
-from pclib.test.test_srcs     import TestSrcCL
+from pymtl3 import *
+from pymtl3.stdlib.test.test_srcs     import TestSrcCL
 from ocn_pclib.test.net_sinks import TestNetSinkCL
 from ocn_pclib.ifcs.positions import mk_ring_pos
 from ocn_pclib.ifcs.packets   import mk_ring_pkt

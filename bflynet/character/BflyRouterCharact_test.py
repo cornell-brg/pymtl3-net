@@ -30,17 +30,17 @@ random.seed( 'deadbeef' )
 
 class TestHarness( Component ):
 
-  def construct( s, 
-                 MsgType       = None, 
+  def construct( s,
+                 MsgType       = None,
                  k_ary         = 2,
                  n_fly         = 2,
                  pos_r         = 0,
                  pos_f         = 0,
-                 src_msgs      = [], 
-                 sink_msgs     = [], 
-                 src_initial   = 0, 
-                 src_interval  = 0, 
-                 sink_initial  = 0, 
+                 src_msgs      = [],
+                 sink_msgs     = [],
+                 src_initial   = 0,
+                 src_interval  = 0,
+                 sink_initial  = 0,
                  sink_interval = 0,
                  arrival_time  =[None, None, None, None, None]
                ):
@@ -69,7 +69,7 @@ class TestHarness( Component ):
       s.connect( s.srcs[i].send, s.dut.recv[i]   )
       s.connect( s.dut.send[i],  s.sinks[i].recv )
 
-    #TODO: provide pos for router... 
+    #TODO: provide pos for router...
     @s.update
     def up_pos():
       s.dut.pos = BflyPos( pos_r, pos_f )
@@ -92,7 +92,7 @@ class TestHarness( Component ):
   def line_trace( s ):
     return "{}".format(
       s.dut.line_trace(),
-      #'|'.join( [ s.sinks[i].line_trace() for i in range(5) ] ), 
+      #'|'.join( [ s.sinks[i].line_trace() for i in range(5) ] ),
     )
 
 #-------------------------------------------------------------------------
@@ -175,7 +175,7 @@ def test_random():
   pos_row = 1
   pos_fly = 0
 
-  th = TestHarness( PacketType, k_ary, n_fly, pos_row, pos_fly, 
+  th = TestHarness( PacketType, k_ary, n_fly, pos_row, pos_fly,
                     src_packets, sink_packets, 0, 0, 0, 0 )
 
   th.set_param( "top.dut.route_units*.construct", n_fly=n_fly )

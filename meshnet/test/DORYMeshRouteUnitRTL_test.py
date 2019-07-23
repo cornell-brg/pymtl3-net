@@ -6,24 +6,21 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 25, 2019
 
-from pymtl3                        import *
-from pymtl3.stdlib.test                   import TestVectorSimulator
-#from ocn_pclib.ifcs.Packet        import *
-from ocn_pclib.ifcs.Flit          import *
-from ocn_pclib.ifcs.Position      import mk_mesh_pos
-from ocn_pclib.ifcs.packets       import mk_mesh_pkt
-from pymtl3.passes.PassGroups      import SimpleSim
-from pymtl3.stdlib.test.test_srcs         import TestSrcRTL
-from pymtl3.stdlib.test.test_sinks        import TestSinkRTL
-from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL 
-from pymtl3.passes.VcdGenerationPass import VcdGenerationPass
+from pymtl3 import *
+from pymtl3.stdlib.test import TestVectorSimulator
+from ocn_pclib.ifcs.positions import mk_mesh_pos
+from ocn_pclib.ifcs.packets import mk_mesh_pkt
+from pymtl3.passes.PassGroups import SimpleSim
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.test.test_sinks import TestSinkRTL
+from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # Driver function for TestVectorSimulator
 #-------------------------------------------------------------------------
 
 def run_test( model, mesh_wid, mesh_ht, router_pos, test_vectors ):
- 
+
   def tv_in( model, test_vector ):
 
     dst_x   = test_vector[0]
@@ -48,7 +45,7 @@ def run_test( model, mesh_wid, mesh_ht, router_pos, test_vectors ):
       if test_vector[6][i]:
         assert model.give[i].msg.opaque  == test_vector[2]
         assert model.give[i].msg.payload == test_vector[3]
-  
+
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
 
   sim.run_test()
@@ -69,7 +66,7 @@ def test_route_unit():
   # Test for Y-DOR routing algorithm
 
   run_test( model, mesh_wid, mesh_ht, MeshPos( 0, 0 ), [
-   # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en 
+   # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en
    [   1,     1,     1,       9,      0,     0,    [0,0,0,0,0],  [0,0,0,0,0] ],
    [   0,     1,     1,       7,      1,     1,    [1,0,0,0,0],  [1,0,0,0,0] ],
    [   1,     0,     1,       3,      0,     1,    [0,0,0,1,0],  [0,0,0,0,0] ],
@@ -90,7 +87,7 @@ def test_route_unit3x3():
   # Test for Y-DOR routing algorithm
 
   run_test( model, mesh_wid, mesh_ht, MeshPos( 1, 1 ), [
-   # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en 
+   # dst_x  dst_y  opaque  payload get_en get_rdy   give_rdy       give_en
    [   1,     1,     1,       9,      0,     1,    [0,0,0,0,1],  [0,0,0,0,0] ],
    [   0,     1,     1,       7,      0,     1,    [0,0,1,0,0],  [0,0,0,0,0] ],
    [   1,     0,     1,       3,      0,     1,    [0,1,0,0,0],  [0,0,0,0,0] ],
@@ -111,7 +108,7 @@ class TestHarness( Component ):
 
     mesh_wid = 4
     mesh_ht  = 4
-  
+
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.dut = DORYMeshRouteUnitRTL( MsgType, MeshPos )
     s.dut.pos = MeshPos( 1, 1 )
@@ -186,20 +183,20 @@ def run_sim( test_harness, max_cycles=100 ):
 #-------------------------------------------------------------------------
 
 #               x,y,pl,dir
-test_msgs   = [(0,0,101,0), (0,2,102,1), (0,1,103,2), (2,1,104,3), 
+test_msgs   = [(0,0,101,0), (0,2,102,1), (0,1,103,2), (2,1,104,3),
                (1,1,105,4), (1,1,106,4)]
 result_msgs = [ [], [], [], [], [] ]
 
 arrival_time = [ [1], [2], [3], [4], [5,6] ]
 
 # def test_normal_simple():
-# 
+#
 #   src_packets = []
 #   for ( dst_x, dst_y, payload, dir_out ) in test_msgs:
 #     pkt = mk_pkt (0, 0, dst_x, dst_y, 1, payload)
 #     src_packets.append( pkt )
 #     result_msgs[dir_out].append ( pkt )
-# 
+#
 #   th = TestHarness( Packet, src_packets, result_msgs, 0, 0, 0, 0,
 #                     arrival_time )
 #   run_sim( th )

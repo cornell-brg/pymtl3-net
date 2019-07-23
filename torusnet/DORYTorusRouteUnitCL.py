@@ -6,24 +6,19 @@
 # Author : Cheng Tan
 #   Date : May 20, 2019
 
-from pymtl                 import *
-from directions            import *
-from pclib.ifcs.GuardedIfc import (
-  GuardedCallerIfc,
-  GuardedCalleeIfc,
-  guarded_ifc
-)
+from pymtl3 import *
+from directions import *
 
 class DORYTorusRouteUnitCL( Component ):
 
-  def construct( s, 
-                 PacketType, 
-                 PositionType, 
-                 num_outports, 
-                 cols=2, 
+  def construct( s,
+                 PacketType,
+                 PositionType,
+                 num_outports,
+                 cols=2,
                  rows=2 ):
 
-    # Constants 
+    # Constants
     s.num_outports = num_outports
     s.cols = cols
     s.rows = rows
@@ -33,14 +28,14 @@ class DORYTorusRouteUnitCL( Component ):
 #    s.get  = GetIfcRTL( PacketType )
 #    s.give = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
 
-    s.get  = GuardedCallerIfc()
-    s.give = [ GuardedCalleeIfc() for _ in range ( s.num_outports ) ]
+    s.get  = NonBlockingCallerIfc()
+    s.give = [ NonBlockingCalleeIfc() for _ in range ( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Componets
 
 #    s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
-#    s.give_ens = Wire( mk_bits( s.num_outports ) ) 
+#    s.give_ens = Wire( mk_bits( s.num_outports ) )
 
     s.rdy_lst = [ False for _ in range( s.num_outports ) ]
     s.msg     = None
@@ -94,7 +89,7 @@ class DORYTorusRouteUnitCL( Component ):
       s.add_constraints(
         M( s.get ) < U( up_ru_routing ) < M( s.give[i] ),
       )
- 
+
   def give_method( s ):
     assert s.msg is not None
     ret = s.msg
@@ -107,6 +102,6 @@ class DORYTorusRouteUnitCL( Component ):
 
     out_str = [ "" for _ in range( s.num_outports ) ]
     for i in range (s.num_outports):
-      out_str[i] = "{}".format( s.give[i] ) 
+      out_str[i] = "{}".format( s.give[i] )
 
     return "{}{}".format( s.get, "|".join( out_str ) )

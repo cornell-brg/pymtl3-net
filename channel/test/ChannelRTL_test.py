@@ -8,12 +8,11 @@
 
 import pytest
 
-from pymtl                    import *
-from pclib.test.test_srcs    import TestSrcRTL
-from pclib.test.test_sinks   import TestSinkRTL
-from pymtl.passes.PassGroups import SimpleSim
+from pymtl3 import *
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.test.test_sinks import TestSinkRTL
 
-from ocn_pclib.rtl.queues     import NormalQueueRTL
+from pymtl3.stdlib.rtl.queues import NormalQueueRTL
 
 from channel.ChannelRTL import ChannelRTL
 
@@ -60,7 +59,7 @@ def test_pipe_Bits():
     [  B1(1),  B1(1),  B32(456), B1(1),  B1(1),  B32(345) ],
     [  B1(0),  B1(1),  B32(567), B1(0),  B1(0),  B32(456) ],
   ]
-   
+
   test_vector_2 = [
     # recv.en recv.rdy recv.msg send.rdy send.en send.msg
     [  B1(1),  B1(1),  B32(123), B1(0),  B1(0),    '?'    ],
@@ -112,7 +111,7 @@ def run_sim( test_harness, max_cycles=100 ):
 
   # Create a simulator
 
-  test_harness.apply( SimpleSim )
+  test_harness.apply( DynamicSim )
   test_harness.sim_reset()
 
 

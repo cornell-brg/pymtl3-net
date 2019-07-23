@@ -12,7 +12,7 @@ from pymtl3.stdlib.cl.queues import NormalQueueCL
 class ChannelCL( Component ):
 
   def construct( s,
-                 PacketType, 
+                 PacketType,
                  QueueType = NormalQueueCL,
                  latency = 0 ):
 
@@ -21,7 +21,7 @@ class ChannelCL( Component ):
     s.recv = NonBlockingCalleeIfc()
     s.send = NonBlockingCallerIfc()
     s.QueueType = QueueType
-    
+
     # Constants
 
     s.latency = latency
@@ -34,7 +34,7 @@ class ChannelCL( Component ):
 
     else:
       s.queues = [ QueueType( size=2 ) for i in range( s.latency ) ]
-      
+
       s.connect( s.recv, s.queues[0].enq )
 
       @s.update
