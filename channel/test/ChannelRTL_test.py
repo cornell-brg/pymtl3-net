@@ -16,7 +16,7 @@ from pymtl3.stdlib.rtl.queues import NormalQueueRTL
 
 from channel.ChannelRTL import ChannelRTL
 
-from pclib.test import TestVectorSimulator
+from pymtl3.stdlib.test import TestVectorSimulator
 
 #-------------------------------------------------------------------------
 # TestHarness
