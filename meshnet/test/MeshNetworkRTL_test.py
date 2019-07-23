@@ -20,8 +20,6 @@ from router.InputUnitRTL              import InputUnitRTL
 from ocn_pclib.ifcs.positions         import mk_mesh_pos
 from ocn_pclib.ifcs.packets           import mk_mesh_pkt
 from pymtl3.passes.sverilog           import ImportPass, TranslationPass
-from pymtl3.passes                    import DynamicSim
-from meshnet.DORYMeshFlitRouteUnitRTL import DORYMeshFlitRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # Test Vector

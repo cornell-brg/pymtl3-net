@@ -17,7 +17,6 @@ from pymtl3.stdlib.test               import TestVectorSimulator
 from meshnet.MeshRouterRTL            import MeshRouterRTL
 from meshnet.DORXMeshRouteUnitRTL     import DORXMeshRouteUnitRTL
 from meshnet.DORYMeshRouteUnitRTL     import DORYMeshRouteUnitRTL
-from meshnet.DORYMeshFlitRouteUnitRTL import DORYMeshFlitRouteUnitRTL
 from router.InputUnitRTL              import InputUnitRTL
 from router.OutputUnitRTL             import OutputUnitRTL
 from router.SwitchUnitRTL             import SwitchUnitRTL
@@ -51,7 +50,7 @@ class TestHarness( Component ):
     # print "sink:", sink_msgs
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = InputUnitRTL,
-        RouteUnitType = DORYMeshFlitRouteUnitRTL )
+        RouteUnitType = DORYMeshRouteUnitRTL )
     match_func = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL    ( MsgType, src_msgs[i],  src_initial,  src_interval  )
