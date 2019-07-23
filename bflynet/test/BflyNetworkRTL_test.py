@@ -13,19 +13,16 @@ from ocn_pclib.test.net_sinks      import TestNetSinkRTL
 from pymtl3.stdlib.test            import TestVectorSimulator
 from bflynet.BflyNetworkRTL        import BflyNetworkRTL
 from ocn_pclib.ifcs.packets        import *
-from ocn_pclib.ifcs.flits          import *
 from ocn_pclib.ifcs.positions      import *
 
 from pymtl3.passes.sverilog import ImportPass, TranslationPass
 from pymtl3.passes import DynamicSim
-from bflynet.DTRBflyFlitRouteUnitRTL import DTRBflyFlitRouteUnitRTL
-
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
 
 def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
- 
+
   def tv_in( model, test_vector ):
 
     num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
@@ -54,7 +51,7 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
             bf_dst = bf_dst * k_ary
 
       pkt = PacketType( terminal_id, bf_dst, 0, test_vector[1][1])
-    
+
       # Enable the network interface on specific router
       for i in range (num_terminals):
         model.recv[i].en  = 0
@@ -69,7 +66,7 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
       assert model.send[test_vector[2]].msg.payload == test_vector[3]
 #    for i in range(model.num_terminals):
 #      print 'msg: ', model.send[test_vector[2]].msg.payload, '; vec: ', test_vector[3]
-     
+
   model.elaborate()
 #  model.sverilog_translate = True
 #  model.sverilog_import = True
@@ -91,18 +88,18 @@ def test_vector_2ary_1fly( dump_vcd, test_verilog ):
   BflyPacket   = mk_bfly_pkt( k_ary, n_fly )
   model = BflyNetworkRTL( BflyPacket, BflyPosition, k_ary, n_fly, 0 )
 
-  model.set_param( "top.routers*.construct", 
+  model.set_param( "top.routers*.construct",
                    k_ary=k_ary )
-  model.set_param( "top.routers*.route_units*.construct", 
+  model.set_param( "top.routers*.route_units*.construct",
                    n_fly=n_fly )
-  model.set_param( "top.routers*.input_units*.construct", 
+  model.set_param( "top.routers*.input_units*.construct",
                    QueueType=NormalQueueRTL )
 
   x = 'x'
 
   # Specific for wire connection (link delay = 0) in 2x2 Torus topology
   simple_2_test = [
-# terminal [packet]   arr_term   msg 
+# terminal [packet]   arr_term   msg
   [  0,    [0,1001],     x,       x  ],
   [  0,    [1,1002],     0,     1001 ],
   [  0,    [1,1003],     1,     1002 ],
@@ -162,12 +159,12 @@ class TestHarness( Component ):
     r_rows = k_ary ** ( n_fly - 1 )
     BflyPos  = mk_bfly_pos( r_rows, n_fly )
     s.dut  = BflyNetworkRTL( MsgType, BflyPos, k_ary, n_fly, 0)
-    
+
     match_func = lambda a,b : a.payload == b.payload and a.opaque == b.opaque
     s.srcs  = [ TestSrcRTL ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_terminals ) ]
     s.sinks = [ TestNetSinkRTL ( MsgType, sink_msgs[i], sink_initial,
-              sink_interval, match_func=match_func ) 
+              sink_interval, match_func=match_func )
               for i in range ( s.dut.num_terminals ) ]
 
     # Connections
@@ -251,7 +248,7 @@ def test_srcsink_4ary_2fly():
                     [],[],[],[],
                     [],[],[],[],
                     [],[],[],[] ]
-  
+
   sink_packets =  [ [],[],[],[],
                     [],[],[],[],
                     [],[],[],[],

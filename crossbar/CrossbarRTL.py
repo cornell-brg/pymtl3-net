@@ -6,18 +6,18 @@
 # Author : Cheng Tan
 #   Date : April 6, 2019
 
-from pymtl                  import *
-from pclib.ifcs.SendRecvIfc import *
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
 from router.InputUnitRTL    import InputUnitRTL
 from router.SwitchUnitRTL   import SwitchUnitRTL
 from router.OutputUnitRTL   import OutputUnitRTL
 from CrossbarRouteUnitRTL   import CrossbarRouteUnitRTL
 
 class CrossbarRTL( Component ):
-  def construct( s, PacketType, num_terminals=4, 
-                 InputUnitType  = InputUnitRTL, 
-                 RouteUnitType  = CrossbarRouteUnitRTL, 
-                 SwitchUnitType = SwitchUnitRTL, 
+  def construct( s, PacketType, num_terminals=4,
+                 InputUnitType  = InputUnitRTL,
+                 RouteUnitType  = CrossbarRouteUnitRTL,
+                 SwitchUnitType = SwitchUnitRTL,
                  OutputUnitType = OutputUnitRTL ):
 
     # Constants

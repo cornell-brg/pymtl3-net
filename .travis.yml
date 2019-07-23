@@ -1,0 +1,65 @@
+#=========================================================================
+# TravisCI Setup
+#=========================================================================
+
+#------------------------------------------------------------------------
+# language and build matrix
+#------------------------------------------------------------------------
+
+dist: xenial
+language: python
+# Use Python 2.7 at the moment
+python:
+ - "2.7"
+
+env:
+ - CONFIG="-v --tb=short"
+
+#------------------------------------------------------------------------
+# install dependencies
+#------------------------------------------------------------------------
+
+install:
+
+ # Install packages
+ - sudo apt-get install -y graphviz
+
+ # Install verilator
+ - wget https://github.com/cornell-brg/verilator-travisci-cache/raw/master/verilator-travis-4.008.tar.gz
+ - tar -C ${HOME} -xzf verilator-travis-4.008.tar.gz
+ - export VERILATOR_ROOT=${HOME}/verilator
+ - export PATH=${VERILATOR_ROOT}/bin:${PATH}
+ - export PYMTL_VERILATOR_INCLUDE_DIR=${VERILATOR_ROOT}/share/verilator/include
+ - verilator --version
+
+ # Install PyMTL3
+ - pip install pymtl3
+
+ # Install Python requirements
+ - pip install --upgrade pip setuptools twine
+ - pip install --requirement requirements.txt
+ - pip list
+
+#------------------------------------------------------------------------
+# test runner
+#------------------------------------------------------------------------
+
+script:
+ # We don't apply any format tools for now.
+ # - futurize --write --stage1 ./pymtl3 &> /dev/null
+ # - autoflake --in-place --remove-duplicate-keys .
+ # - pyupgrade --keep-percent-format $(find . -name '*.py')
+ # - isort --apply --recursive ./pymtl3
+ # - flake8 --select=F --ignore=F401,F405,F403,F811,F821,F841
+ # - git diff --exit-code
+ # - python --version | grep "Python 3" && futurize --write --stage2 ./pymtl3 &> /dev/null || true
+ - mkdir -p build
+ - cd build
+ - py.test --cov-report xml --cov=pymtl3 ../ $CONFIG
+
+#-------------------------------------------------------------------------
+# after success
+#-------------------------------------------------------------------------
+
+after_success:
+  - codecov

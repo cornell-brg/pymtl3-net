@@ -3,19 +3,13 @@
 #=========================================================================
 # Cycle level Torus network implementation.
 #
-# Author : Cheng Tan
+# Author : Yanghui Ou
 #   Date : Mar 21, 2019
 
-from pymtl                  import *
+from pymtl3 import *
 from directions             import *
-from pclib.ifcs.SendRecvIfc import *
 from TorusRouterCL          import TorusRouterCL
 from channel.ChannelCL      import ChannelCL
-from pclib.ifcs.GuardedIfc import (
-  GuardedCallerIfc,
-  GuardedCalleeIfc,
-  guarded_ifc
-)
 
 class TorusNetworkCL( Component ):
   def construct( s, PacketType, PositionType, mesh_wid=4, mesh_ht=4, chl_lat=0 ):
@@ -30,8 +24,8 @@ class TorusNetworkCL( Component ):
 
     # Interface
 
-    s.recv       = [ GuardedCalleeIfc() for _ in range(s.num_terminals) ]
-    s.send       = [ GuardedCallerIfc() for _ in range(s.num_terminals) ]
+    s.recv       = [ NonBlockingCallee() for _ in range(s.num_terminals) ]
+    s.send       = [ NonBlockingCaller() for _ in range(s.num_terminals) ]
 
     # Components
 
@@ -50,17 +44,17 @@ class TorusNetworkCL( Component ):
       s.connect(s.channels[chl_id].send, s.routers[(i-mesh_ht+
           s.num_routers)%s.num_routers].recv[NORTH])
       chl_id += 1
- 
+
       s.connect(s.routers[i].send[NORTH], s.channels[chl_id].recv)
       s.connect(s.channels[chl_id].send, s.routers[
           (i+mesh_ht+s.num_routers)%s.num_routers].recv[SOUTH])
       chl_id += 1
- 
+
       s.connect(s.routers[i].send[WEST],  s.channels[chl_id].recv)
       s.connect(s.channels[chl_id].send, s.routers[
           i-(i%mesh_wid-(i-1)%mesh_wid)].recv[EAST])
       chl_id += 1
- 
+
       s.connect(s.routers[i].send[EAST],  s.channels[chl_id].recv)
       s.connect(s.channels[chl_id].send, s.routers[
           i+(i+1)%mesh_wid-i%mesh_wid].recv[WEST])
@@ -83,29 +77,6 @@ class TorusNetworkCL( Component ):
       trace[i] += s.routers[i].line_trace()
     return "|".join( trace )
 
-#  def line_trace( s ):
-#    trace = ''
-#    for r in range(s.num_routers):
-#      trace += '\n({},{})|'.format(s.routers[r].pos.pos_x, s.routers[r].pos.pos_y)
-#      for i in range(s.routers[r].num_inports):
-#        if isinstance(s.routers[r].recv[i].msg, int):
-#          trace += '|{}'.format(s.routers[r].recv[i].msg)
-#        else:
-#          trace += '|{}:{}->({},{})'.format( i, 
-#                s.routers[r].recv[i].msg.payload, 
-#                s.routers[r].recv[i].msg.dst_x,
-#                s.routers[r].recv[i].msg.dst_y)
-#      trace += '\n out: '
-#      for i in range(s.routers[r].num_outports):
-#        if isinstance(s.routers[r].recv[i].msg, int):
-#          trace += '|{}'.format(s.routers[r].recv[i].msg)
-#        else:
-#          trace += '|{}:{}->({},{})'.format( i, 
-#                s.routers[r].send[i].msg.payload, 
-#                s.routers[r].send[i].msg.dst_x,
-#                s.routers[r].send[i].msg.dst_y)
-#    return trace
-    
   def elaborate_physical( s ):
     # Initialize dimension for sub-modules.
     BOUNDARY = 10

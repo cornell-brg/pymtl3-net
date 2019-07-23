@@ -15,7 +15,6 @@ from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
 from ocn_pclib.test.net_sinks       import TestNetSinkRTL
 from pymtl3.stdlib.test             import TestVectorSimulator
 from ocn_pclib.ifcs.packets         import *
-from ocn_pclib.ifcs.flits           import *
 from ocn_pclib.ifcs.positions       import *
 from meshnet.DORYMeshRouteUnitRTL   import DORYMeshRouteUnitRTL
 from meshnet.DORXMeshRouteUnitRTL   import DORXMeshRouteUnitRTL
@@ -26,7 +25,7 @@ from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
 # Test Vector
 #-------------------------------------------------------------------------
 def run_vector_test( model, PacketType, test_vectors, mesh_wid, mesh_ht ):
- 
+
   def tv_in( model, test_vector ):
     num_routers = mesh_wid * mesh_ht
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
@@ -34,9 +33,9 @@ def run_vector_test( model, PacketType, test_vectors, mesh_wid, mesh_ht ):
     if test_vector[0] != 'x':
       router_id = test_vector[0]
       pkt = PacketType( router_id % mesh_wid, router_id / mesh_wid,
-            test_vector[1][0], test_vector[1][1], test_vector[2], 1, 
+            test_vector[1][0], test_vector[1][1], test_vector[2], 1,
             test_vector[1][2] )
-    
+
       # Enable the network interface on specific router
       for i in range (num_routers):
         model.recv[i].en  = 0
@@ -49,7 +48,7 @@ def run_vector_test( model, PacketType, test_vectors, mesh_wid, mesh_ht ):
   def tv_out( model, test_vector ):
     if test_vector[3] != 'x':
       assert model.send[test_vector[3]*4].msg.payload == test_vector[4]
-     
+
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
   model.sim_reset()
@@ -76,7 +75,7 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
 
   # Specific for wire connection (link delay = 0) in 2x2 Mesh topology
   simple_2_2_test = [
-#  router   [packet]    tmnl ar_router  msg 
+#  router   [packet]    tmnl ar_router  msg
   [  0,    [1,0,1001],    0,    x,       x  ],
   [  0,    [1,1,1002],    0,    x,       x  ],
   [  0,    [0,1,1003],    0,    1,     1001 ],
@@ -95,7 +94,7 @@ def test_vector_mesh2x2( dump_vcd, test_verilog ):
 
 class TestHarness( Component ):
 
-  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs, 
+  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs,
                  src_initial, src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
@@ -107,7 +106,7 @@ class TestHarness( Component ):
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_terminals ) ]
     s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval, match_func=match_func) 
+                sink_interval, match_func=match_func)
                 for i in range ( s.dut.num_terminals ) ]
 
     # Connections

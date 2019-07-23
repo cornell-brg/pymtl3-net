@@ -1,16 +1,16 @@
-#=========================================================================
-# RingNetworkRTL_test.py
-#=========================================================================
-# Test for RingNetworkRTL
-#
-# Author : Yanghui Ou, Cheng Tan
-#   Date : June 28, 2019
+"""
+=========================================================================
+RingNetworkRTL_test.py
+=========================================================================
+Test for RingNetworkRTL
 
+Author : Yanghui Ou, Cheng Tan
+  Date : June 28, 2019
+"""
 from pymtl3                       import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from ocn_pclib.test.net_sinks     import TestNetSinkRTL
 from ocn_pclib.ifcs.packets       import mk_ring_pkt
-from ocn_pclib.ifcs.flits         import *
 from ocn_pclib.ifcs.positions     import mk_ring_pos
 from ringnet.RingNetworkRTL       import RingNetworkRTL
 from ..RingNetworkFL              import ringnet_fl
@@ -31,7 +31,7 @@ class TestHarness( Component ):
     s.srcs  = [ TestSrcRTL( MsgType, src_msgs[i] )
               for i in range( num_routers ) ]
     s.dut   = RingNetworkRTL( MsgType, RingPos, num_routers, 0)
-    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], 
+    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i],
               match_func = match_func )
               for i in range( num_routers ) ]
 

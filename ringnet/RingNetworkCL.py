@@ -1,20 +1,16 @@
-#=========================================================================
-# RingNetworkCL.py
-#=========================================================================
-# Cycle level ring network implementation.
-#
-# Author : Yanghui Ou
-#   Date : May 19, 2019
+"""
+=========================================================================
+RingNetworkCL.py
+=========================================================================
+Cycle level ring network implementation.
 
-from pymtl import *
+Author : Yanghui Ou
+  Date : May 19, 2019
+"""
+from pymtl3 import *
 from directions import *
 from RingRouterCL import RingRouterCL
 from channel.ChannelCL import ChannelCL
-from pclib.ifcs.GuardedIfc import (
-  GuardedCallerIfc,
-  GuardedCalleeIfc,
-  guarded_ifc
-)
 
 class RingNetworkCL( Component ):
   def construct( s, PacketType, PositionType, nrouters=4, chl_lat=0 ):
@@ -27,8 +23,8 @@ class RingNetworkCL( Component ):
 
     # Interface
 
-    s.recv       = [ GuardedCalleeIfc() for _ in range(s.num_terminals) ]
-    s.send       = [ GuardedCallerIfc() for _ in range(s.num_terminals) ]
+    s.recv = [ NonBlockingCalleeIfc() for _ in range(s.num_terminals) ]
+    s.send = [ NonBlockingCallerIfc() for _ in range(s.num_terminals) ]
 
     # Components
 
@@ -62,6 +58,6 @@ class RingNetworkCL( Component ):
         s.routers[r].pos = PositionType( r )
 
   def line_trace( s ):
-    return "|".join( 
-      [ s.routers[i].line_trace() for i in range( s.num_terminals ) ] 
+    return "|".join(
+      [ s.routers[i].line_trace() for i in range( s.num_terminals ) ]
     )
