@@ -21,12 +21,10 @@ from ..ChannelCL import ChannelCL
 
 class TestHarness( Component ):
 
-  def construct( s, MsgType, src_msgs, sink_msgs, src_initial,
-                 src_interval, sink_initial, sink_interval,
-                 arrival_time=None ):
+  def construct( s, MsgType, src_msgs, sink_msgs ):
 
-    s.src  = TestSrcCL ( src_msgs,  src_initial,  src_interval  )
-    s.sink = TestSinkCL( sink_msgs, sink_initial, sink_interval )
+    s.src  = TestSrcCL ( MsgType, src_msgs  )
+    s.sink = TestSinkCL( MsgType, sink_msgs )
     s.dut  = ChannelCL ( MsgType, latency=1 )
 
     # Connections
@@ -74,8 +72,8 @@ def run_sim( test_harness, max_cycles=100 ):
 # Test cases
 #-------------------------------------------------------------------------
 
-test_msgs = [ Bits16( 4 ), Bits16( 1 ), Bits16( 2 ), Bits16( 3 ) ]
+test_msgs = [ b16(4), b16(1), b16(2), b16(3) ]
 
 def test_chnl_simple():
-  th = TestHarness( Bits16, test_msgs, test_msgs, 0, 0, 0, 0 )
+  th = TestHarness( Bits16, test_msgs, test_msgs )
   run_sim( th )
