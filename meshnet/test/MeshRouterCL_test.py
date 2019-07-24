@@ -38,7 +38,6 @@ class TestHarness( Component ):
     pos_y     = 0,
   ):
 
-    print "=" * 74
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.nrouters = mesh_wid * mesh_ht
     match_func = lambda a, b : a.src_x == a.src_x and a.src_y == b.src_y and \
@@ -54,8 +53,8 @@ class TestHarness( Component ):
     # Connections
 
     for i in range ( s.dut.num_outports ):
-      s.connect( s.srcs[i].send, s.dut.recv[i]   )
-      s.connect( s.dut.send[i],  s.sinks[i].recv )
+      s.srcs[i].send //= s.dut.recv[i]
+      s.dut.send[i]  //= s.sinks[i].recv
 
     @s.update
     def up_pos():
@@ -110,12 +109,12 @@ class MeshRouterCL_Tests( object ):
 
     # Run simulation
     ncycles = 0
-    print ""
-    print "{:3}:{}".format( ncycles, th.line_trace() )
+    print()
+    print( "{:3}:{}".format( ncycles, th.line_trace() ))
     while not th.done() and ncycles < max_cycles:
       th.tick()
       ncycles += 1
-      print "{:3}:{}".format( ncycles, th.line_trace() )
+      print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
     # Check timeout
     assert ncycles < max_cycles
@@ -196,6 +195,3 @@ class MeshRouterCL_Tests( object ):
     th.set_param( "top.src*.construct", initial_delay=src_init, interval_delay=src_init )
     th.set_param( "top.sink*.construct", initial_delay=sink_init, interval_delay=sink_init )
     s.run_sim( th, max_cycles=5000 )
-
-
-

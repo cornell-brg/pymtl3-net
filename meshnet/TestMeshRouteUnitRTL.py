@@ -1,14 +1,15 @@
-#=========================================================================
-# DORYRouteUnitRTL.py
-#=========================================================================
-# A DOR route unit with get/give interface.
-#
-# Author : Yanghui Ou, Cheng Tan
-#   Date : Mar 25, 2019
+"""
+=========================================================================
+DORYRouteUnitRTL.py
+=========================================================================
+A DOR route unit with get/give interface.
 
-from pymtl3      import *
+Author : Yanghui Ou, Cheng Tan
+  Date : Mar 25, 2019
+"""
+from pymtl3             import *
+from .directions        import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
-from directions import *
 
 class TestMeshRouteUnitRTL( Component ):
 
@@ -32,8 +33,8 @@ class TestMeshRouteUnitRTL( Component ):
     # Connections
 
     for i in range( s.num_outports ):
-      s.connect( s.get.msg,     s.give[i].msg )
-      s.connect( s.give_ens[i], s.give[i].en  )
+      s.get.msg     //= s.give[i].msg
+      s.give_ens[i] //= s.give[i].en
     
     # Routing logic
     @s.update

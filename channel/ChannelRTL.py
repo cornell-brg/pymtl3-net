@@ -30,12 +30,12 @@ class ChannelRTL( Component ):
                    for _ in range( s.latency ) ]
 
       # Connections
-      s.connect( s.recv.rdy, s.queues[0].enq.rdy )
+      s.recv.rdy //= s.queues[0].enq.rdy
 
       @s.update
       def process():
         s.queues[0].enq.msg = s.recv.msg
-        s.queues[0].enq.en = s.recv.en and s.queues[0].enq.rdy
+        s.queues[0].enq.en  = s.recv.en and s.queues[0].enq.rdy
         for i in range(s.latency - 1):
           s.queues[i+1].enq.msg = s.queues[i].deq.msg
           s.queues[i+1].enq.en  = s.queues[i].deq.rdy and s.queues[i+1].enq.rdy
@@ -46,7 +46,7 @@ class ChannelRTL( Component ):
         s.queues[s.latency-1].deq.en   = s.send.en
 
     else:
-      s.connect(s.recv, s.send)
+      s.recv //= s.send
 
   def line_trace( s ):
     if s.QueueType != None and s.latency != 0:

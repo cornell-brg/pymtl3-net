@@ -27,12 +27,12 @@ class ChannelCL( Component ):
     # Channel queue placement
 
     if s.latency == 0:
-      s.connect( s.recv, s.send )
+      s.recv //= s.send
 
     else:
       s.queues = [ QueueType( num_entries=2 ) for i in range( s.latency ) ]
 
-      s.connect( s.recv, s.queues[0].enq )
+      s.recv //= s.queues[0].enq
 
       @s.update
       def chnl_up_send():

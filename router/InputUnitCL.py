@@ -25,8 +25,8 @@ class InputUnitCL( Component ):
 
     # Connections
 
-    s.connect( s.recv,          s.queue.enq )
-    s.connect( s.queue.deq,     s.give      )
+    s.recv      //= s.queue.enq
+    s.queue.deq //= s.give
 
   def line_trace( s ):
     return "{}(){}".format( s.recv, s.give )

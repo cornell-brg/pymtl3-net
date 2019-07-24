@@ -7,12 +7,12 @@ Cycle level implementation of MeshRouter.
 Author : Yanghui Ou
   Date : May 16, 2019
 """
-from pymtl3 import *
-from router.Router         import Router
-from router.InputUnitCL    import InputUnitCL
-from router.SwitchUnitCL   import SwitchUnitCL
-from router.OutputUnitCL   import OutputUnitCL
-from DORXMeshRouteUnitCL   import DORXMeshRouteUnitCL
+from pymtl3               import *
+from router.Router        import Router
+from router.InputUnitCL   import InputUnitCL
+from router.SwitchUnitCL  import SwitchUnitCL
+from router.OutputUnitCL  import OutputUnitCL
+from .DORXMeshRouteUnitCL import DORXMeshRouteUnitCL
 
 class MeshRouterCL( Router ):
 
@@ -49,17 +49,17 @@ class MeshRouterCL( Router ):
     # Connection
 
     for i in range( s.num_inports ):
-      s.connect( s.recv[i],             s.input_units[i].recv )
-      s.connect( s.input_units[i].give, s.route_units[i].get  )
-      s.connect( s.pos,                 s.route_units[i].pos  )
+      s.recv[i]             //= s.input_units[i].recv
+      s.input_units[i].give //= s.route_units[i].get
+      s.pos                 //= s.route_units[i].pos
 
     for i in range( s.num_inports ):
       for j in range( s.num_outports ):
-        s.connect( s.route_units[i].give[j], s.switch_units[j].get[i] )
+        s.route_units[i].give[j] //= s.switch_units[j].get[i]
 
     for j in range( s.num_outports ):
-      s.connect( s.switch_units[j].give, s.output_units[j].get )
-      s.connect( s.output_units[j].send, s.send[j]              )
+      s.switch_units[j].give //= s.output_units[j].get
+      s.output_units[j].send //= s.send[j]
 
   def line_trace( s ):
     in_trace  = "|".join([ str(s.recv[i]) for i in range(5) ])

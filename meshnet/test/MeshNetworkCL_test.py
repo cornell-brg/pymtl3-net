@@ -8,14 +8,14 @@ Author : Yanghui Ou
   Date : May 19, 2019
 """
 import pytest
-from pymtl3                    import *
-from pymtl3.stdlib.test               import mk_test_case_table
-from pymtl3.stdlib.test.test_srcs     import TestSrcCL
-from ocn_pclib.test.net_sinks import TestNetSinkCL
-from ocn_pclib.ifcs.packets   import mk_mesh_pkt
-from ocn_pclib.ifcs.positions import mk_mesh_pos
-from meshnet.MeshNetworkCL    import MeshNetworkCL
-from router.InputUnitCL       import InputUnitCL
+from pymtl3                       import *
+from pymtl3.stdlib.test           import mk_test_case_table
+from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from ocn_pclib.test.net_sinks     import TestNetSinkCL
+from ocn_pclib.ifcs.packets       import mk_mesh_pkt
+from ocn_pclib.ifcs.positions     import mk_mesh_pos
+from meshnet.MeshNetworkCL        import MeshNetworkCL
+from router.InputUnitCL           import InputUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -41,8 +41,8 @@ class TestHarness( Component ):
 
     # Connections
     for i in range ( s.nrouters ):
-      s.connect( s.srcs[i].send, s.dut.recv[i]   )
-      s.connect( s.dut.send[i],  s.sinks[i].recv )
+      s.srcs[i].send //= s.dut.recv[i]
+      s.dut.send[i]  //= s.sinks[i].recv
 
   def done( s ):
     srcs_done = 1
@@ -73,12 +73,12 @@ def run_sim( test_harness, max_cycles=100 ):
   # Run simulation
 
   ncycles = 0
-  print ""
-  print "{:2}:{}".format( ncycles, test_harness.line_trace() )
+  print()
+  print( "{:2}:{}".format( ncycles, test_harness.line_trace() ))
   while not test_harness.done() and ncycles < max_cycles:
     test_harness.tick()
     ncycles += 1
-    print "{:2}:{}".format( ncycles, test_harness.line_trace() )
+    print( "{:2}:{}".format( ncycles, test_harness.line_trace() ))
 
   # Check timeout
 

@@ -7,8 +7,8 @@ RTL implementation of OutputUnit.
 Author : Yanghui Ou, Cheng Tan
   Date : Feb 28, 2019
 """
-from pymtl3 import *
-from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL
+from pymtl3                   import *
+from pymtl3.stdlib.ifcs       import GetIfcRTL, SendIfcRTL
 from pymtl3.stdlib.rtl.queues import NormalQueueRTL
 
 class OutputUnitRTL( Component ):
@@ -27,8 +27,8 @@ class OutputUnitRTL( Component ):
       s.queue = QueueType( PacketType )
 
       # Connections
-      s.connect( s.get.msg,       s.queue.enq.msg )
-      s.connect( s.queue.deq.msg, s.send.msg      )
+      s.get.msg       //= s.queue.enq.msg
+      s.queue.deq.msg //= s.send.msg
 
       @s.update
       def up_get_deq():
@@ -43,7 +43,7 @@ class OutputUnitRTL( Component ):
     # No ouput queue
     else:
 
-      s.connect( s.get.msg, s.send.msg )
+      s.get.msg //= s.send.msg
 
       @s.update
       def up_get_send():

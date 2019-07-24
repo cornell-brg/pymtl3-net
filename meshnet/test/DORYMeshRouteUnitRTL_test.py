@@ -37,19 +37,19 @@ class TestHarness( Component ):
                 for i in range ( s.dut.num_outports ) ]
 
     # Connections
-    s.connect( s.src.send.msg, s.dut.get.msg )
+    s.src.send.msg //= s.dut.get.msg
 
     for i in range ( s.dut.num_outports ):
-      s.connect( s.dut.give[i].msg, s.sinks[i].recv.msg )
+      s.dut.give[i].msg //= s.sinks[i].recv.msg
 
     @s.update
     def up_give_en():
       for i in range (s.dut.num_outports):
         if s.dut.give[i].rdy and s.sinks[i].recv.rdy:
-          s.dut.give[i].en  = 1
+          s.dut.give[i].en   = 1
           s.sinks[i].recv.en = 1
         else:
-          s.dut.give[i].en  = 0
+          s.dut.give[i].en   = 0
           s.sinks[i].recv.en = 0
 
     # FIXME: connect send to get
@@ -78,16 +78,15 @@ def run_sim( test_harness, max_cycles=100 ):
   test_harness.apply( SimpleSim )
   test_harness.sim_reset()
 
-
   # Run simulation
 
   ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
+  print()
+  print( "{}:{}".format( ncycles, test_harness.line_trace() ))
   while not test_harness.done() and ncycles < max_cycles:
     test_harness.tick()
     ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
+    print( "{}:{}".format( ncycles, test_harness.line_trace() ))
 
   # Check timeout
 

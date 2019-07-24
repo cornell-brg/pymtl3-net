@@ -7,8 +7,8 @@ Functional level implementation of mesh router.
 Author : Yanghui Ou
   Date : July 3, 2019
 """
-from pymtl3 import *
-from directions import *
+from pymtl3      import *
+from .directions import *
 
 class MeshRouterFL( object ):
 
