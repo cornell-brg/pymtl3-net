@@ -1,17 +1,18 @@
-#=========================================================================
-# BfRouteRTL.py
-#=========================================================================
-# Butterfly network-on-chip router
-#
-# Author : Cheng Tan, Yanghui Ou
-#   Date : April 6, 2019
+"""
+=========================================================================
+BfRouteRTL.py
+=========================================================================
+Butterfly network-on-chip router
 
+Author : Cheng Tan, Yanghui Ou
+  Date : April 6, 2019
+"""
 from pymtl3 import *
 from router.Router        import Router
 from router.InputUnitRTL  import InputUnitRTL
 from router.SwitchUnitRTL import SwitchUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
-from DTRBflyRouteUnitRTL  import DTRBflyRouteUnitRTL
+from .DTRBflyRouteUnitRTL import DTRBflyRouteUnitRTL
 
 class BflyRouterRTL( Router ):
 

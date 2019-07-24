@@ -41,7 +41,7 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
       bf_dst = DstType(0)
       tmp = 0
       for i in range( n_fly ):
-        tmp = dst / (k_ary**(n_fly-i-1))
+        tmp = dst // (k_ary**(n_fly-i-1))
         dst = dst % (k_ary**(n_fly-i-1))
         bf_dst = DstType(bf_dst | DstType(tmp))
         if i != n_fly - 1:
@@ -169,8 +169,8 @@ class TestHarness( Component ):
 
     # Connections
     for i in range ( s.dut.num_terminals ):
-      s.connect( s.srcs[i].send, s.dut.recv[i]   )
-      s.connect( s.dut.send[i],  s.sinks[i].recv )
+      s.srcs[i].send //= s.dut.recv[i]
+      s.dut.send[i]  //= s.sinks[i].recv
 
   def done( s ):
     srcs_done = 1
@@ -200,12 +200,12 @@ def run_sim( test_harness, max_cycles=100 ):
   # Run simulation
 
   ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
+  print()
+  print( "{}:{}".format( ncycles, test_harness.line_trace() ))
   while not test_harness.done() and ncycles < max_cycles:
     test_harness.tick()
     ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
+    print( "{}:{}".format( ncycles, test_harness.line_trace() ))
 
   # Check timeout
 
@@ -233,7 +233,7 @@ def set_dst(k_ary, n_fly, vec_dst):
   tmp = 0
   dst = vec_dst
   for i in range( n_fly ):
-    tmp = dst / (k_ary**(n_fly-i-1))
+    tmp = dst // (k_ary**(n_fly-i-1))
     dst = dst % (k_ary**(n_fly-i-1))
     bf_dst = DstType(bf_dst | DstType(tmp))
     if i != n_fly - 1:
