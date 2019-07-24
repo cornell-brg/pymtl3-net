@@ -1,11 +1,12 @@
-#=========================================================================
-# CMeshRouterRTL_test.py
-#=========================================================================
-# Test for CMeshRouterRTL
-#
-# Author : Cheng Tan, Yanghui Ou
-#   Date : April 16, 2019
+"""
+=========================================================================
+ CMeshRouterRTL_test.py
+=========================================================================
+ Test for CMeshRouterRTL
 
+ Author : Cheng Tan, Yanghui Ou
+   Date : April 16, 2019
+"""
 from pymtl3                         import *
 from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
 from ocn_pclib.test.net_sinks       import TestNetSinkRTL
@@ -31,7 +32,7 @@ def run_vector_test( model, PacketType, test_vectors,
 
     for i in range( model.num_outports ):
       if model.recv[i].rdy and test_vector[3][i]:
-        pkt = PacketType( 0, 0, test_vector[0][i]%4, test_vector[0][i]/4, 
+        pkt = PacketType( 0, 0, test_vector[0][i]%4, test_vector[0][i]//4, 
                       test_vector[1], 1, test_vector[2][i] )
   
         model.recv[i].msg = pkt
@@ -98,8 +99,8 @@ class TestHarness( Component ):
     # Connections
 
     for i in range ( s.dut.num_outports ):
-      s.connect( s.srcs[i].send, s.dut.recv[i]   )
-      s.connect( s.dut.send[i],  s.sinks[i].recv )
+      s.srcs[i].send //= s.dut.recv[i]
+      s.dut.send[i]  //= s.sinks[i].recv
 
     @s.update
     def up_pos():
@@ -130,16 +131,15 @@ def run_sim( test_harness, max_cycles=100 ):
   test_harness.apply( SimpleSim )
   test_harness.sim_reset()
 
-
   # Run simulation
 
   ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
+  print()
+  print( "{}:{}".format( ncycles, test_harness.line_trace() ))
   while not test_harness.done() and ncycles < max_cycles:
     test_harness.tick()
     ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
+    print( "{}:{}".format( ncycles, test_harness.line_trace() ))
 
   # Check timeout
 
