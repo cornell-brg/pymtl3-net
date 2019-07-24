@@ -9,15 +9,14 @@ Author: Yanghui Ou
 """
 import pytest
 import hypothesis
-from hypothesis import strategies as st
-
-from pymtl3 import *
-from pymtl3.passes.PassGroups import SimpleSim
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from hypothesis                    import strategies as st
+from pymtl3                        import *
+from pymtl3.passes.PassGroups      import SimpleSim
+from pymtl3.stdlib.test.test_srcs  import TestSrcCL
 from pymtl3.stdlib.test.test_sinks import TestSinkCL
-from pymtl3.stdlib.cl.queues import NormalQueueCL, BypassQueueCL, PipeQueueCL
-from pymtl3.datatypes import strategies as pst
-from router.InputUnitCL import InputUnitCL
+from pymtl3.stdlib.cl.queues       import NormalQueueCL, BypassQueueCL, PipeQueueCL
+from pymtl3.datatypes              import strategies as pst
+from router.InputUnitCL            import InputUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -32,7 +31,7 @@ class TestHarness( Component ):
     s.dut  = InputUnitCL( MsgType )
 
     # Connections
-    s.connect( s.src.send,     s.dut.recv  )
+    s.src.send //= s.dut.recv
 
     @s.update
     def up_give_en():
@@ -69,12 +68,12 @@ class InputUnitCL_Tests( object ):
     # Run simulation
 
     ncycles = 0
-    print ""
-    print "{:3}:{}".format( ncycles, th.line_trace() )
+    print()
+    print( "{:3}:{}".format( ncycles, th.line_trace() ))
     while not th.done() and ncycles < max_cycles:
       th.tick()
       ncycles += 1
-      print "{:3}:{}".format( ncycles, th.line_trace() )
+      print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
     # Check timeout
     assert ncycles < max_cycles

@@ -27,10 +27,10 @@ class InputUnitStrFwdRTL( Component ):
     
     # Connections
 
-    s.connect( s.recv,          s.queue.enq )
-    s.connect( s.queue.deq.msg, s.give.msg  )
-    s.connect( s.queue.deq.en,  s.give.en   )
-    s.connect( s.queue.deq.rdy, s.give.rdy  )
+    s.recv          //= s.queue.enq
+    s.queue.deq.msg //= s.give.msg
+    s.queue.deq.en  //= s.give.en
+    s.queue.deq.rdy //= s.give.rdy
 
   def line_trace( s ):
     return "{}({}){}".format( s.recv, s.queue.count, s.give )

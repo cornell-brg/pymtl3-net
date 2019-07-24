@@ -34,9 +34,9 @@ class TestHarness( Component ):
     s.sink  = TestSinkCL( MsgType, sink_msgs )
 
     # Connections
-    s.connect( s.src.send,  s.src_q.enq )
-    s.connect( s.src_q.deq, s.dut.get   )
-    s.connect( s.dut.send, s.sink.recv  )
+    s.src.send  //= s.src_q.enq
+    s.src_q.deq //= s.dut.get
+    s.dut.send  //= s.sink.recv
 
   def done( s ):
     return s.src.done() and s.sink.done()

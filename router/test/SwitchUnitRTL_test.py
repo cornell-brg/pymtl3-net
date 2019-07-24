@@ -7,12 +7,11 @@ Test for SwitchUnitRTL.
  Author : Yanghui Ou, Cheng Tan
    Date : June 22, 2019
 """
-from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from pymtl3                        import *
+from pymtl3.stdlib.test.test_srcs  import TestSrcCL
 from pymtl3.stdlib.test.test_sinks import TestSinkCL
-
-from ocn_pclib.ifcs.packets import mk_generic_pkt
-from router.SwitchUnitRTL import SwitchUnitRTL
+from ocn_pclib.ifcs.packets        import mk_generic_pkt
+from router.SwitchUnitRTL          import SwitchUnitRTL
 
 #-------------------------------------------------------------------------
 # Test cases

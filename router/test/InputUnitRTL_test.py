@@ -8,14 +8,12 @@ Author: Yanghui Ou
   Date: Mar 24, 2019
 """
 import pytest
-
-from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3                        import *
+from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
 from pymtl3.stdlib.test.test_sinks import TestSinkRTL
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL, BypassQueueRTL, PipeQueueRTL
-
-from router.InputUnitRTL import InputUnitRTL
+from pymtl3.stdlib.test            import TestVectorSimulator
+from pymtl3.stdlib.rtl.queues      import NormalQueueRTL, BypassQueueRTL, PipeQueueRTL
+from router.InputUnitRTL           import InputUnitRTL
 
 #-------------------------------------------------------------------------
 # TestVectorSimulator test
@@ -69,8 +67,8 @@ class TestHarness( Component ):
     s.sink = TestSinkRTL  ( MsgType, sink_msgs )
 
     # Connections
-    s.connect( s.src.send,     s.dut.recv  )
-    s.connect( s.dut.give.msg, s.sink.recv.msg )
+    s.src.send     //= s.dut.recv
+    s.dut.give.msg //= s.sink.recv.msg
 
     @s.update
     def up_give_en():
