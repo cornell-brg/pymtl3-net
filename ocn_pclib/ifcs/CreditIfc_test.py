@@ -34,9 +34,9 @@ class TestHarness( Component ):
     s.sink_adapter = CreditRecvRTL2SendRTL( Type, nvcs=2, credit_line=credit_line, QType=NormalQueueRTL )
     s.sink = TestNetSinkRTL( Type, sink_msgs )
 
-    s.connect( s.src.send,          s.src_adapter.recv  )
-    s.connect( s.src_adapter.send,  s.sink_adapter.recv )
-    s.connect( s.sink_adapter.send, s.sink.recv         )
+    s.src.send          //= s.src_adapter.recv
+    s.src_adapter.send  //= s.sink_adapter.recv
+    s.sink_adapter.send //= s.sink.recv
 
   def line_trace( s ):
     return "{} > {} > {} > {}".format(
@@ -51,7 +51,7 @@ class TestHarness( Component ):
 
   def run_sim( s, max_cycles=50 ):
     # Run simulation
-    print("")
+    print()
     ncycles = 0
     s.sim_reset()
     print("{:3}: {}".format( ncycles, s.line_trace() ))
