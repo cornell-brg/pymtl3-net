@@ -153,8 +153,8 @@ class TestNetSinkRTL( Component ):
                                arrival_time, match_func )
     s.adapter = RecvRTL2SendCL( MsgType )
 
-    s.connect( s.recv,         s.adapter.recv )
-    s.connect( s.adapter.send, s.sink.recv    )
+    s.recv         //= s.adapter.recv
+    s.adapter.send //= s.sink.recv
 
   def done( s ):
     return s.sink.done()

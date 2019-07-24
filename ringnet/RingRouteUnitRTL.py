@@ -7,9 +7,9 @@ A ring route unit with get/give interface.
 Author : Yanghui Ou, Cheng Tan
   Date : April 6, 2019
 """
-from copy import deepcopy
-from pymtl3          import *
-from directions      import *
+from copy               import deepcopy
+from pymtl3             import *
+from .directions        import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL, GiveIfcRTL
 
 class RingRouteUnitRTL( Component ):
@@ -42,7 +42,7 @@ class RingRouteUnitRTL( Component ):
     # Connections
 
     for i in range( s.num_outports ):
-      s.connect( s.give_ens[i], s.give[i].en  )
+      s.give_ens[i] //= s.give[i].en
 
     # Routing logic
     @s.update

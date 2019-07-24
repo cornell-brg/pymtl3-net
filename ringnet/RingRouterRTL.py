@@ -7,15 +7,13 @@ Ring network-on-chip router
 Author : Yanghui Ou, Cheng Tan
   Date : June 25, 2019
 """
-from pymtl3 import *
-
-from ocn_pclib.ifcs.CreditIfc import CreditRecvIfcRTL, CreditSendIfcRTL
-from router.Router import Router
-from router.SwitchUnitRTL import SwitchUnitRTL
-from router.InputUnitCreditRTL import InputUnitCreditRTL
+from pymtl3                     import *
+from ocn_pclib.ifcs.CreditIfc   import CreditRecvIfcRTL, CreditSendIfcRTL
+from router.Router              import Router
+from router.SwitchUnitRTL       import SwitchUnitRTL
+from router.InputUnitCreditRTL  import InputUnitCreditRTL
 from router.OutputUnitCreditRTL import OutputUnitCreditRTL
-
-from RingRouteUnitRTL import RingRouteUnitRTL
+from .RingRouteUnitRTL          import RingRouteUnitRTL
 
 class RingRouterRTL( Router ):
 
@@ -61,19 +59,19 @@ class RingRouterRTL( Router ):
     # Connection
 
     for i in range( s.num_inports ):
-      s.connect( s.recv[i], s.input_units[i].recv )
+      s.recv[i] //= s.input_units[i].recv
       for j in range( s.nvcs ):
         ru_idx = i * s.nvcs + j
-        s.connect( s.input_units[i].give[j], s.route_units[ru_idx].get )
-        s.connect( s.pos,                    s.route_units[ru_idx].pos  )
+        s.input_units[i].give[j] //= s.route_units[ru_idx].get
+        s.pos                    //= s.route_units[ru_idx].pos
 
     for i in range( s.num_route_units ):
       for j in range( s.num_outports ):
-        s.connect( s.route_units[i].give[j], s.switch_units[j].get[i] )
+        s.route_units[i].give[j] //= s.switch_units[j].get[i]
 
     for j in range( s.num_outports ):
-      s.connect( s.switch_units[j].give, s.output_units[j].get )
-      s.connect( s.output_units[j].send, s.send[j]             )
+      s.switch_units[j].give //= s.output_units[j].get
+      s.output_units[j].send //= s.send[j]
 
   # Line trace
 
