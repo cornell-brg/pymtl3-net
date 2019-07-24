@@ -7,9 +7,8 @@ FL route unit that implements dimension order routing.
 Author : Yanghui Ou
   Date : June 30, 2019
 """
-from pymtl3 import *
-from directions import *
-
+from pymtl3          import *
+from .directions     import *
 from .RouteUnitDorFL import RouteUnitDorFL
 
 class TorusRouterFL( object ):
@@ -19,7 +18,7 @@ class TorusRouterFL( object ):
     s.pos_y = pos_y
     s.ncols = ncols
     s.nrows = nrows
-    s.dimension   = dimension
+    s.dimension  = dimension
     s.route_unit = RouteUnitDorFL( pos_x, pos_y, ncols, nrows, dimension='y' )
 
   #-----------------------------------------------------------------------

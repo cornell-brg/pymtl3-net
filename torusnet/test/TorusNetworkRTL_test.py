@@ -7,14 +7,14 @@
 #   Date : July 1, 2019
 
 import hypothesis
-from hypothesis                         import strategies as st
-from pymtl3                             import *
-from pymtl3.stdlib.test.test_srcs       import TestSrcRTL
-from ocn_pclib.test.net_sinks           import TestNetSinkRTL
-from ocn_pclib.ifcs.packets             import mk_mesh_pkt
-from ocn_pclib.ifcs.positions           import mk_mesh_pos
-from torusnet.TorusNetworkRTL           import TorusNetworkRTL
-from torusnet.TorusNetworkFL            import torusnet_fl
+from hypothesis                   import strategies as st
+from pymtl3                       import *
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from ocn_pclib.test.net_sinks     import TestNetSinkRTL
+from ocn_pclib.ifcs.packets       import mk_mesh_pkt
+from ocn_pclib.ifcs.positions     import mk_mesh_pos
+from torusnet.TorusNetworkRTL     import TorusNetworkRTL
+from torusnet.TorusNetworkFL      import torusnet_fl
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -36,8 +36,8 @@ class TestHarness( Component ):
 
     # Connections
     for i in range ( s.nrouters ):
-      s.connect( s.srcs[i].send, s.dut.recv[i]   )
-      s.connect( s.dut.send[i],  s.sinks[i].recv )
+      s.srcs[i].send //= s.dut.recv[i]
+      s.dut.send[i]  //= s.sinks[i].recv
 
   def done( s ):
     srcs_done  = True
@@ -93,12 +93,12 @@ class TorusNetwork_Tests( object ):
 
     # Run simulation
     ncycles = 0
-    print ""
-    print "{:3}:{}".format( ncycles, th.line_trace() )
+    print()
+    print( "{:3}:{}".format( ncycles, th.line_trace() ))
     while not th.done() and ncycles < max_cycles:
       th.tick()
       ncycles += 1
-      print "{:3}:{}".format( ncycles, th.line_trace() )
+      print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
     # Check timeout
     assert ncycles < max_cycles
