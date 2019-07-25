@@ -1,7 +1,7 @@
 """
-=========================================================================
+==========================================================================
 CMeshNetworkRTL.py
-=========================================================================
+==========================================================================
 CMesh network implementation.
 
 Author : Cheng Tan
@@ -14,7 +14,7 @@ from channel.ChannelRTL             import ChannelRTL
 from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 class CMeshNetworkRTL( Component ):
-  def construct( s, PacketType, PositionType, 
+  def construct( s, PacketType, PositionType,
                  mesh_wid = 4, mesh_ht = 4, num_nodes_each = 4, chl_lat = 0 ):
 
     # Constants
@@ -32,7 +32,8 @@ class CMeshNetworkRTL( Component ):
     s.send = [ SendIfcRTL(PacketType) for _ in range( s.num_terminals ) ]
 
     # Components
-    s.routers  = [ CMeshRouterRTL( PacketType, PositionType, num_inports, 
+
+    s.routers  = [ CMeshRouterRTL( PacketType, PositionType, num_inports,
                  num_outports ) for i in range( s.num_routers ) ]
 
     s.channels = [ ChannelRTL( PacketType, latency = chl_lat)
@@ -63,12 +64,11 @@ class CMeshNetworkRTL( Component ):
         chl_id += 1
 
       # Connect the self port (with Network Interface)
-      
+
       for j in range( num_nodes_each ):
-        s.recv[ i * num_nodes_each + j ] //=\
-          s.routers[ i ].recv[ 4 + j ]
-        s.send[ i * num_nodes_each + j ] //=\
-                   s.routers[ i ].send[ 4 + j ]
+        ifc_idx = i * num_nodes_each + j
+        s.recv[ ifc_idx ] //= s.routers[ i ].recv[ 4 + j ]
+        s.send[ ifc_idx ] //= s.routers[ i ].send[ 4 + j ]
 
       # Connect the unused ports
 
