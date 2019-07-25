@@ -34,8 +34,10 @@ class InputUnitCreditRTL( Component ):
                   for _ in range( nvcs ) ]
 
     for i in range( nvcs ):
-      s.connect( s.buffers[i].enq.msg, s.recv.msg )
-      s.connect( s.buffers[i].deq,     s.give[i]  )
+#      s.connect( s.buffers[i].enq.msg, s.recv.msg )
+#      s.connect( s.buffers[i].deq,     s.give[i]  )
+      s.buffers[i].enq.msg //= s.recv.msg
+      s.buffers[i].deq     //= s.give[i]
 
     @s.update
     def up_enq():

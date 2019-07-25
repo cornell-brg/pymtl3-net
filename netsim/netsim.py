@@ -65,8 +65,8 @@ import sys
 import argparse
 import re
 
-from collections             import deque
-from random                  import seed, randint
+from collections import deque
+from random      import seed, randint
 
 sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
 os.system(sim_dir)
@@ -79,13 +79,10 @@ while sim_dir:
   sim_dir = os.path.dirname(sim_dir)
   os.system(sim_dir)
 
-from pymtl3                   import *
-
 #from meshnet.MeshNetworkFL    import MeshNetworkFL
-
-from meshnet.MeshNetworkCL    import MeshNetworkCL
-
 #from crossbar.CrossbarRTL     import CrossbarRTL
+from pymtl3                   import *
+from meshnet.MeshNetworkCL    import MeshNetworkCL
 from ringnet.RingNetworkRTL   import RingNetworkRTL
 from meshnet.MeshNetworkRTL   import MeshNetworkRTL
 from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
@@ -525,7 +522,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     # advance simulation
 
     if trace:
-      print "{:3}:{}".format( ncycles, model.line_trace() )
+      print( "{:3}:{}".format( ncycles, model.line_trace() ))
 
     model.tick()
     ncycles += 1

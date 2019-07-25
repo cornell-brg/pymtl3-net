@@ -40,29 +40,29 @@ class TorusNetworkCL( Component ):
     chl_id  = 0
     for i in range (s.num_routers):
       # Connect s.routers together in Torus
-      s.connect(s.routers[i].send[SOUTH], s.channels[chl_id].recv)
-      s.connect(s.channels[chl_id].send, s.routers[(i-mesh_ht+
-          s.num_routers)%s.num_routers].recv[NORTH])
+      s.routers[i].send[SOUTH] //= s.channels[chl_id].recv
+      s.channels[chl_id].send  //= s.routers[(i-mesh_ht+\
+          s.num_routers)%s.num_routers].recv[NORTH]
       chl_id += 1
 
-      s.connect(s.routers[i].send[NORTH], s.channels[chl_id].recv)
-      s.connect(s.channels[chl_id].send, s.routers[
-          (i+mesh_ht+s.num_routers)%s.num_routers].recv[SOUTH])
+      s.routers[i].send[NORTH] //= s.channels[chl_id].recv
+      s.channels[chl_id].send  //= s.routers[\
+          (i+mesh_ht+s.num_routers)%s.num_routers].recv[SOUTH]
       chl_id += 1
 
-      s.connect(s.routers[i].send[WEST],  s.channels[chl_id].recv)
-      s.connect(s.channels[chl_id].send, s.routers[
+      s.routers[i].send[WEST] //= s.channels[chl_id].recv
+      s.channels[chl_id].send //= s.routers[\
           i-(i%mesh_wid-(i-1)%mesh_wid)].recv[EAST])
       chl_id += 1
 
-      s.connect(s.routers[i].send[EAST],  s.channels[chl_id].recv)
-      s.connect(s.channels[chl_id].send, s.routers[
+      s.routers[i].send[EAST] //= s.channels[chl_id].recv
+      s.channels[chl_id].send //= s.routers[\
           i+(i+1)%mesh_wid-i%mesh_wid].recv[WEST])
       chl_id += 1
 
       # Connect the self port (with Network Interface)
-      s.connect(s.recv[i], s.routers[i].recv[SELF])
-      s.connect(s.send[i], s.routers[i].send[SELF])
+      s.recv[i] //= s.routers[i].recv[SELF]
+      s.send[i] //= s.routers[i].send[SELF]
 
     @s.update
     def up_pos():
@@ -87,4 +87,3 @@ class TorusNetworkCL( Component ):
 
     s.dim.w = 2 * BOUNDARY + s.mesh_wid * ( r.dim.w + s.channels[0].dim.w )
     s.dim.h = 2 * BOUNDARY + s.mesh_ht  * ( r.dim.h + s.channels[0].dim.w )
-

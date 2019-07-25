@@ -7,12 +7,11 @@ Author: Yanghui Ou
   Date: July 2, 2019
 """
 import pytest
-from pymtl3 import *
+from pymtl3                       import *
 from pymtl3.stdlib.test.test_srcs import TestSrcCL
-from pymtl3.stdlib.cl.queues import BypassQueueCL
-from ocn_pclib.test.net_sinks import TestNetSinkCL as TestSinkCL
-
-from router.SwitchUnitCL import SwitchUnitCL
+from pymtl3.stdlib.cl.queues      import BypassQueueCL
+from ocn_pclib.test.net_sinks     import TestNetSinkCL as TestSinkCL
+from router.SwitchUnitCL          import SwitchUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -30,8 +29,8 @@ class TestHarness( Component ):
 
     # Connections
     for i in range( 5 ):
-      s.connect( s.src[i].send,  s.src_q[i].enq )
-      s.connect( s.src_q[i].deq, s.dut.get[i]   )
+      s.src[i].send  //= s.src_q[i].enq
+      s.src_q[i].deq //= s.dut.get[i]
 
     @s.update
     def up_give_recv():
@@ -67,12 +66,12 @@ class SwitchUnitCL_Tests( object ):
     # Run simulation
 
     ncycles = 0
-    print ""
-    print "{:3}:{}".format( ncycles, th.line_trace() )
+    print()
+    print( "{:3}:{}".format( ncycles, th.line_trace() ))
     while not th.done() and ncycles < max_cycles:
       th.tick()
       ncycles += 1
-      print "{:3}:{}".format( ncycles, th.line_trace() )
+      print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
     # Check timeout
     assert ncycles < max_cycles

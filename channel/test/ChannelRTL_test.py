@@ -31,8 +31,8 @@ class TestHarness( Component ):
     s.dut  = ChannelRTL( MsgType )
 
     # Connections
-    s.connect( s.src.send, s.dut.recv  )
-    s.connect( s.dut.send, s.sink.recv )
+    s.src.send //= s.dut.recv
+    s.dut.send //= s.sink.recv
 
   def done( s ):
     return s.src.done() and s.sink.done()
@@ -56,12 +56,12 @@ def run_sim( test_harness, max_cycles=100 ):
   # Run simulation
 
   ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
+  print()
+  print( "{}:{}".format( ncycles, test_harness.line_trace() ))
   while not test_harness.done() and ncycles < max_cycles:
     test_harness.tick()
     ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
+    print( "{}:{}".format( ncycles, test_harness.line_trace() ))
 
   # Check timeout
 

@@ -6,11 +6,11 @@
 # Author : Yanghui Ou
 #   Date : May 21, 2019
 
-from pymtl3            import *
+from pymtl3                  import *
 from pymtl3.stdlib.cl.queues import BypassQueueCL
-from directions        import *
-from channel.ChannelCL import ChannelCL
-from MeshRouterCL      import MeshRouterCL
+from .directions             import *
+from channel.ChannelCL       import ChannelCL
+from .MeshRouterCL           import MeshRouterCL
 
 class MeshNetworkCL( Component ):
   def construct( s, PacketType, PositionType,
@@ -40,40 +40,40 @@ class MeshNetworkCL( Component ):
 
     chl_id  = 0
     for i in range( s.num_routers ):
-      if i / mesh_wid > 0:
-        s.connect( s.routers[i].send[SOUTH], s.channels[chl_id].recv )
-        s.connect( s.channels[chl_id].send, s.routers[i-mesh_wid].recv[NORTH] )
+      if i // mesh_wid > 0:
+        s.routers[i].send[SOUTH] //= s.channels[chl_id].recv
+        s.channels[chl_id].send  //= s.routers[i-mesh_wid].recv[NORTH]
         chl_id += 1
 
-      if i / mesh_wid < mesh_ht - 1:
-        s.connect( s.routers[i].send[NORTH], s.channels[chl_id].recv )
-        s.connect( s.channels[chl_id].send, s.routers[i+mesh_wid].recv[SOUTH] )
+      if i // mesh_wid < mesh_ht - 1:
+        s.routers[i].send[NORTH] //= s.channels[chl_id].recv
+        s.channels[chl_id].send  //= s.routers[i+mesh_wid].recv[SOUTH]
         chl_id += 1
 
       if i % mesh_wid > 0:
-        s.connect( s.routers[i].send[WEST], s.channels[chl_id].recv )
-        s.connect( s.channels[chl_id].send, s.routers[i-1].recv[EAST] )
+        s.routers[i].send[WEST] //= s.channels[chl_id].recv
+        s.channels[chl_id].send //= s.routers[i-1].recv[EAST]
         chl_id += 1
 
       if i % mesh_wid < mesh_wid - 1:
-        s.connect( s.routers[i].send[EAST], s.channels[chl_id].recv )
-        s.connect( s.channels[chl_id].send, s.routers[i+1].recv[WEST] )
+        s.routers[i].send[EAST] //= s.channels[chl_id].recv
+        s.channels[chl_id].send //= s.routers[i+1].recv[WEST]
         chl_id += 1
 
       # Connect the self port (with Network Interface)
 
-      s.connect(s.recv[i], s.routers[i].recv[SELF])
-      s.connect(s.send[i], s.routers[i].send[SELF])
+      s.recv[i] //= s.routers[i].recv[SELF]
+      s.send[i] //= s.routers[i].send[SELF]
 
       # Connect the unused ports
       def dummy_rdy():
         return lambda : False
 
       # FIXME: this doesn't work!
-      if i / mesh_wid == 0:
+      if i // mesh_wid == 0:
         s.routers[i].send[SOUTH].rdy.method = dummy_rdy()
 
-      if i / mesh_wid == mesh_ht - 1:
+      if i // mesh_wid == mesh_ht - 1:
         s.routers[i].send[NORTH].rdy.method = dummy_rdy()
 
       if i % mesh_wid == 0:
@@ -108,9 +108,9 @@ class WrappedMeshNetCL( Component ):
     s.net = MeshNetworkCL( PacketType, PositionType, mesh_wid, mesh_ht, chl_lat )
     s.out_q = [ BypassQueueCL( num_entries=1 ) for _ in range( s.nterminals ) ]
     for i in range( s.nterminals ):
-      s.connect( s.recv[i], s.net.recv[i] )
-      s.connect( s.net.send[i], s.out_q[i].enq )
-      s.connect( s.out_q[i].deq, s.give[i] )
+      s.recv[i]      //= s.net.recv[i]
+      s.net.send[i]  //= s.out_q[i].enq
+      s.out_q[i].deq //= s.give[i]
 
   def line_trace( s ):
     return s.net.line_trace()

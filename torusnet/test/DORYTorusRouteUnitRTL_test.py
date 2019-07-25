@@ -8,16 +8,15 @@ Author : Yanghui Ou
   Date : June 28, 2019
 """
 import pytest
-from itertools import product
-
-from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-from pymtl3.stdlib.rtl.queues import BypassQueueRTL
-from ocn_pclib.ifcs.positions import mk_mesh_pos
-from ocn_pclib.ifcs.packets import mk_mesh_pkt
-from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from itertools                      import product
+from pymtl3                         import *
+from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
+from pymtl3.stdlib.rtl.queues       import BypassQueueRTL
+from ocn_pclib.ifcs.positions       import mk_mesh_pos
+from ocn_pclib.ifcs.packets         import mk_mesh_pkt
+from ocn_pclib.test.net_sinks       import TestNetSinkRTL
 from torusnet.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
-from torusnet.RouteUnitDorFL import RouteUnitDorFL
+from torusnet.RouteUnitDorFL        import RouteUnitDorFL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -41,11 +40,11 @@ class TestHarness( Component ):
                 for i in range ( outports ) ]
 
     # Connections
-    s.connect( s.src.send,  s.src_q.enq )
-    s.connect( s.src_q.deq, s.dut.get   )
+    s.src.send  //= s.src_q.enq
+    s.src_q.deq //= s.dut.get
 
     for i in range ( s.dut.num_outports ):
-      s.connect( s.dut.give[i].msg, s.sinks[i].recv.msg )
+      s.dut.give[i].msg //= s.sinks[i].recv.msg
 
     @s.update
     def up_give_en():
@@ -98,12 +97,12 @@ class RouteUnitDorRTL_Tests( object ):
 
     # Run simulation
     ncycles = 0
-    print ""
-    print "{:3}:{}".format( ncycles, th.line_trace() )
+    print()
+    print( "{:3}:{}".format( ncycles, th.line_trace() ))
     while not th.done() and ncycles < max_cycles:
       th.tick()
       ncycles += 1
-      print "{:3}:{}".format( ncycles, th.line_trace() )
+      print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
     # Check timeout
     assert ncycles < max_cycles

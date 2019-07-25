@@ -1,13 +1,14 @@
-#=========================================================================
-# CMeshNetworkRTL_test.py
-#=========================================================================
-# Test for CMeshNetworkRTL
-#
-# Author : Cheng Tan, Yanghui Ou
-#   Date : April 16, 2019
+"""
+=========================================================================
+CMeshNetworkRTL_test.py
+=========================================================================
+Test for CMeshNetworkRTL
 
+Author : Cheng Tan, Yanghui Ou
+  Date : April 16, 2019
+"""
 import tempfile
-from pymtl3                          import *
+from pymtl3                         import *
 from meshnet.MeshNetworkRTL         import MeshNetworkRTL
 from cmeshnet.CMeshNetworkRTL       import CMeshNetworkRTL
 from pymtl3.stdlib.rtl.queues       import NormalQueueRTL
@@ -111,8 +112,8 @@ class TestHarness( Component ):
 
     # Connections
     for i in range ( s.dut.num_terminals ):
-      s.connect( s.srcs[i].send, s.dut.recv[i]   )
-      s.connect( s.dut.send[i],  s.sinks[i].recv )
+      s.srcs[i].send //= s.dut.recv[i]
+      s.dut.send[i]  //= s.sinks[i].recv
 
   def done( s ):
     srcs_done = 1
@@ -141,12 +142,12 @@ def run_sim( test_harness, max_cycles=100 ):
   # Run simulation
 
   ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
+  print()
+  print( "{}:{}".format( ncycles, test_harness.line_trace() ))
   while not test_harness.done() and ncycles < max_cycles:
     test_harness.tick()
     ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
+    print( "{}:{}".format( ncycles, test_harness.line_trace() ))
 
   # Check timeout
 

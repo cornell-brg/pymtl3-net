@@ -1,13 +1,14 @@
-#=========================================================================
-# DORYCMeshRouteUnitRTL.py
-#=========================================================================
-# A DOR-Y route unit with get/give interface for CMesh.
-#
-# Author : Yanghui Ou, Cheng Tan
-#   Date : Mar 25, 2019
+"""
+=========================================================================
+DORYCMeshRouteUnitRTL.py
+=========================================================================
+A DOR-Y route unit with get/give interface for CMesh.
 
-from pymtl3     import *
-from directions import *
+Author : Yanghui Ou, Cheng Tan
+  Date : Mar 25, 2019
+"""
+from pymtl3             import *
+from .directions        import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 
 class DORYCMeshRouteUnitRTL( Component ):
@@ -33,9 +34,9 @@ class DORYCMeshRouteUnitRTL( Component ):
     # Connections
 
     for i in range( s.num_outports ):
-      s.connect( s.get.msg,     s.give[i].msg )
-      s.connect( s.give_ens[i], s.give[i].en  )
-      s.connect( s.give_rdy[i], s.give[i].rdy )
+      s.get.msg     //= s.give[i].msg
+      s.give_ens[i] //= s.give[i].en
+      s.give_rdy[i] //= s.give[i].rdy
     
     # Routing logic
     @s.update

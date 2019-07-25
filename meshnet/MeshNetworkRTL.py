@@ -1,15 +1,16 @@
-#=========================================================================
-# MeshNetworkRTL.py
-#=========================================================================
-# Mesh network implementation.
-#
-# Author : Cheng Tan
-#   Date : Mar 10, 2019
+"""
+=========================================================================
+MeshNetworkRTL.py
+=========================================================================
+Mesh network implementation.
 
+Author : Cheng Tan
+  Date : Mar 10, 2019
+"""
 from pymtl3                         import *
-from directions                     import *
+from .directions                    import *
 from channel.ChannelRTL             import ChannelRTL
-from MeshRouterRTL                  import MeshRouterRTL
+from .MeshRouterRTL                 import MeshRouterRTL
 from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 class MeshNetworkRTL( Component ):
@@ -18,10 +19,10 @@ class MeshNetworkRTL( Component ):
 
     # Constants
 
-    s.num_routers = mesh_wid * mesh_ht
+    s.num_routers   = mesh_wid * mesh_ht
     s.num_terminals = s.num_routers
-    num_channels  = (mesh_ht*(mesh_wid-1)+mesh_wid*(mesh_ht-1)) * 2
-    chl_lat       =  0
+    num_channels    = (mesh_ht*(mesh_wid-1)+mesh_wid*(mesh_ht-1)) * 2
+    chl_lat         =  0
 
     # Interface
 
@@ -38,65 +39,65 @@ class MeshNetworkRTL( Component ):
 
 #    s.pos      = [ PositionType( r % mesh_wid, r / mesh_wid)
 #                 for r in range( mesh_wid * mesh_ht )]
-    XYType = mk_bits( clog2( mesh_wid ) )
+    XYType  = mk_bits( clog2( mesh_wid ) )
     s.pos_x = [ InPort(XYType) for _ in range( s.num_routers )]
     s.pos_y = [ InPort(XYType) for _ in range( s.num_routers )]
 
     for r in range( s.num_routers ):
-      s.connect( s.pos_x[r], s.routers[r].pos.pos_x )
-      s.connect( s.pos_y[r], s.routers[r].pos.pos_y )
+      s.pos_x[r] //= s.routers[r].pos.pos_x
+      s.pos_y[r] //= s.routers[r].pos.pos_y
 
 
     # Connect s.routers together in Mesh
 
     chl_id  = 0
     for i in range( s.num_routers ):
-      if i / mesh_wid > 0:
-        s.connect( s.routers[i].send[SOUTH], s.channels[chl_id].recv )
-        s.connect( s.channels[chl_id].send, s.routers[i-mesh_wid].recv[NORTH] )
+      if i // mesh_wid > 0:
+        s.routers[i].send[SOUTH] //= s.channels[chl_id].recv
+        s.channels[chl_id].send  //= s.routers[i-mesh_wid].recv[NORTH]
         chl_id += 1
 
-      if i / mesh_wid < mesh_ht - 1:
-        s.connect( s.routers[i].send[NORTH], s.channels[chl_id].recv )
-        s.connect( s.channels[chl_id].send, s.routers[i+mesh_wid].recv[SOUTH] )
+      if i // mesh_wid < mesh_ht - 1:
+        s.routers[i].send[NORTH] //= s.channels[chl_id].recv
+        s.channels[chl_id].send  //= s.routers[i+mesh_wid].recv[SOUTH]
         chl_id += 1
 
       if i % mesh_wid > 0:
-        s.connect( s.routers[i].send[WEST], s.channels[chl_id].recv )
-        s.connect( s.channels[chl_id].send, s.routers[i-1].recv[EAST] )
+        s.routers[i].send[WEST] //= s.channels[chl_id].recv
+        s.channels[chl_id].send //= s.routers[i-1].recv[EAST]
         chl_id += 1
 
       if i % mesh_wid < mesh_wid - 1:
-        s.connect( s.routers[i].send[EAST], s.channels[chl_id].recv )
-        s.connect( s.channels[chl_id].send, s.routers[i+1].recv[WEST] )
+        s.routers[i].send[EAST] //= s.channels[chl_id].recv
+        s.channels[chl_id].send //= s.routers[i+1].recv[WEST]
         chl_id += 1
 
       # Connect the self port (with Network Interface)
 
-      s.connect(s.recv[i], s.routers[i].recv[SELF])
-      s.connect(s.send[i], s.routers[i].send[SELF])
+      s.recv[i] //= s.routers[i].recv[SELF]
+      s.send[i] //= s.routers[i].send[SELF]
 
       # Connect the unused ports
 
-      if i / mesh_wid == 0:
-        s.connect( s.routers[i].send[SOUTH].rdy,         0 )
-        s.connect( s.routers[i].recv[SOUTH].en,          0 )
-        s.connect( s.routers[i].recv[SOUTH].msg.payload, 0 )
+      if i // mesh_wid == 0:
+        s.routers[i].send[SOUTH].rdy         //= 0
+        s.routers[i].recv[SOUTH].en          //= 0
+        s.routers[i].recv[SOUTH].msg.payload //= 0
 
-      if i / mesh_wid == mesh_ht - 1:
-        s.connect( s.routers[i].send[NORTH].rdy,         0 )
-        s.connect( s.routers[i].recv[NORTH].en,          0 )
-        s.connect( s.routers[i].recv[NORTH].msg.payload, 0 )
+      if i // mesh_wid == mesh_ht - 1:
+        s.routers[i].send[NORTH].rdy         //= 0
+        s.routers[i].recv[NORTH].en          //= 0
+        s.routers[i].recv[NORTH].msg.payload //= 0
 
       if i % mesh_wid == 0:
-        s.connect( s.routers[i].send[WEST].rdy,          0 )
-        s.connect( s.routers[i].recv[WEST].en,           0 )
-        s.connect( s.routers[i].recv[WEST].msg.payload,  0 )
+        s.routers[i].send[WEST].rdy          //= 0
+        s.routers[i].recv[WEST].en           //= 0
+        s.routers[i].recv[WEST].msg.payload  //= 0
 
       if i % mesh_wid == mesh_wid - 1:
-        s.connect( s.routers[i].send[EAST].rdy,          0 )
-        s.connect( s.routers[i].recv[EAST].en,           0 )
-        s.connect( s.routers[i].recv[EAST].msg.payload,  0 )
+        s.routers[i].send[EAST].rdy          //= 0
+        s.routers[i].recv[EAST].en           //= 0
+        s.routers[i].recv[EAST].msg.payload  //= 0
 
     # FIXME: unable to connect a struct to a port.
 #    @s.update

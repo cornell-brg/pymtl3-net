@@ -69,8 +69,8 @@ class TestHarness( Component ):
     s.sink = TestSinkRTL  ( MsgType, sink_msgs )
 
     # Connections
-    s.connect( s.src.send,     s.dut.recv  )
-    s.connect( s.dut.give.msg, s.sink.recv.msg )
+    s.src.send     //= s.dut.recv
+    s.dut.give.msg //= s.sink.recv.msg
 
     @s.update
     def up_give_en():

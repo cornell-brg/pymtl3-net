@@ -9,7 +9,7 @@ Author : Yanghui Ou
 """
 
 from pymtl3 import *
-from Counter import Counter
+from .Counter import Counter
 
 def test_simple():
   print
@@ -21,32 +21,32 @@ def test_simple():
   dut.load = b4(0)
 
   dut.sim_reset()
-  print dut.line_trace()
+  print( dut.line_trace() )
   dut.incr = b1(1)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(10)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(11)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(12)
 
   dut.decr = b1(1)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(12)
 
   dut.incr = b1(0)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(11)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(10)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(9)
 
 def test_load():
@@ -59,33 +59,33 @@ def test_load():
   dut.load = b4(0)
 
   dut.sim_reset()
-  print dut.line_trace()
+  print( dut.line_trace() )
   dut.incr = b1(1)
   dut.load = b1(1)
   dut.load_value = b4(3)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(3)
   dut.load = b1(0)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(4)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(5)
 
   dut.decr = b1(1)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(5)
 
   dut.incr = b1(0)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(4)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(3)
   dut.tick()
-  print dut.line_trace()
+  print( dut.line_trace() )
   assert dut.count == b4(2)

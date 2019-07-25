@@ -1,7 +1,8 @@
 #=========================================================================
-# ChannelRTL.py
+# ChannelCL.py
 #=========================================================================
-# A Link unit for connecting routers to form network.
+# CL channel module for connecting routers to form network. This simple
+# channel has latency insensitive send/recv interfaces.
 #
 # Author : Yanghui Ou
 #   Date : May 19, 2019
@@ -27,12 +28,14 @@ class ChannelCL( Component ):
     # Channel queue placement
 
     if s.latency == 0:
-      s.connect( s.recv, s.send )
+
+      s.recv //= s.send
 
     else:
+
       s.queues = [ QueueType( num_entries=2 ) for i in range( s.latency ) ]
 
-      s.connect( s.recv, s.queues[0].enq )
+      s.recv //= s.queues[0].enq
 
       @s.update
       def chnl_up_send():
@@ -45,4 +48,4 @@ class ChannelCL( Component ):
           s.send( s.queues[-1].deq() )
 
   def line_trace( s ):
-    return ""
+    return f"{s.recv}(){s.send}"

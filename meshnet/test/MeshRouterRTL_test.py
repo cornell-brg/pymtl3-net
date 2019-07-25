@@ -45,9 +45,6 @@ class TestHarness( Component ):
                  arrival_time  =[None, None, None, None, None]
                ):
 
-    print "=" * 74
-    # print "src:", src_msgs
-    # print "sink:", sink_msgs
     MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
     s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = InputUnitRTL,
         RouteUnitType = DORYMeshRouteUnitRTL )
@@ -61,8 +58,8 @@ class TestHarness( Component ):
     # Connections
 
     for i in range ( s.dut.num_outports ):
-      s.connect( s.srcs[i].send, s.dut.recv[i]   )
-      s.connect( s.dut.send[i],  s.sinks[i].recv )
+      s.srcs[i].send //= s.dut.recv[i]
+      s.dut.send[i]  //= s.sinks[i].recv
 
     #TODO: provide pos for router...
     @s.update
@@ -109,12 +106,12 @@ def run_sim( test_harness, max_cycles=1000 ):
   # Run simulation
 
   ncycles = 0
-  print ""
-  print "{}:{}".format( ncycles, test_harness.line_trace() )
+  print()
+  print( "{}:{}".format( ncycles, test_harness.line_trace() ))
   while not test_harness.done() and ncycles < max_cycles:
     test_harness.tick()
     ncycles += 1
-    print "{}:{}".format( ncycles, test_harness.line_trace() )
+    print( "{}:{}".format( ncycles, test_harness.line_trace() ))
 
   # Check timeout
 
@@ -135,8 +132,7 @@ test_msgs = [[(0,0,11,1),(0,0,12,1),(0,1,13,2),(2,1,14,3),(0,0,15,1)],
             ]
 result_msgs = [[],[],[],[],[]]
 
-def ttest_normal_simple():
-
+def test_normal_simple():
   src_packets = [[],[],[],[],[]]
   for item in test_msgs:
     for i in range( len( item ) ):
@@ -149,7 +145,7 @@ def ttest_normal_simple():
   th = TestHarness( PacketType, 4, 4, 1, 1, src_packets, result_msgs, 0, 0, 0, 0 )
   run_sim( th )
 
-def ttest_self_simple():
+def test_self_simple():
   PacketType = mk_mesh_pkt(4, 4)
   pkt = PacketType( 0, 0, 0, 0, 0, 0xdead )
   src_pkts  = [ [], [], [], [], [pkt] ]
@@ -157,7 +153,7 @@ def ttest_self_simple():
   th = TestHarness( PacketType, 4, 4, 0, 0, src_pkts, sink_pkts )
   run_sim( th )
 
-def ttest_h1():
+def test_h1():
   pos_x, pos_y, mesh_wid, mesh_ht = 0, 0, 2, 2
   PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
   pkt0 = PacketType( 0, 0, 0, 1, 0, 0xdead )
@@ -173,15 +169,15 @@ def ttest_h1():
   )
   run_sim( th )
 
-def ttest_h2():
+def test_h2():
   pos_x, pos_y, mesh_wid, mesh_ht = 0, 0, 2, 2
-  PacketType( mesh_wid, mesh_ht )
+  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
   pkt0 = PacketType( 0, 0, 1, 0, 0, 0xdead )
   pkt1 = PacketType( 0, 1, 1, 0, 1, 0xbeef )
   pkt2 = PacketType( 0, 1, 1, 0, 2, 0xcafe )
               # N             S   W   E                   self
   src_pkts  = [ [pkt1, pkt2], [], [], [],                 [pkt0] ]
-  sink_pkts = [ [],           [], [], [pkt1, pkt2, pkt0], []     ]
+  sink_pkts = [ [],           [], [], [pkt1, pkt0, pkt2], []     ]
   th = TestHarness(
     PacketType, mesh_wid, mesh_ht, pos_x, pos_y,
     src_pkts, sink_pkts
@@ -192,7 +188,7 @@ def ttest_h2():
   )
   run_sim( th, 10 )
 
-def ttest_h3():
+def test_h3():
   pos_x, pos_y, mesh_wid, mesh_ht = 0, 1, 2, 2
   PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
   pkt0 = PacketType( 0, 1, 0, 0, 0, 0xdead )

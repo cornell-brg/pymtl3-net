@@ -8,17 +8,15 @@ Author : Yanghui Ou, Cheng Tan
   Date : June 28, 2019
 """
 import pytest
-from itertools import product
-
-from pymtl3 import *
+from itertools                    import product
+from pymtl3                       import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-
-from ocn_pclib.test.net_sinks import TestNetSinkRTL
-from ocn_pclib.ifcs.positions import mk_mesh_pos
-from ocn_pclib.ifcs.packets import mk_mesh_pkt
-from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
-from torusnet.TorusRouterFL import TorusRouterFL
-from torusnet.TorusRouterRTL import TorusRouterRTL
+from ocn_pclib.test.net_sinks     import TestNetSinkRTL
+from ocn_pclib.ifcs.positions     import mk_mesh_pos
+from ocn_pclib.ifcs.packets       import mk_mesh_pkt
+from ocn_pclib.ifcs.CreditIfc     import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
+from torusnet.TorusRouterFL       import TorusRouterFL
+from torusnet.TorusRouterRTL      import TorusRouterRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -54,11 +52,10 @@ class TestHarness( Component ):
 
     # Connections
     for i in range ( s.dut.num_outports ):
-      s.connect( s.srcs[i].send,          s.src_adapters[i].recv )
-      s.connect( s.src_adapters[i].send,  s.dut.recv[i]          )
-
-      s.connect( s.dut.send[i],           s.sink_adapters[i].recv )
-      s.connect( s.sink_adapters[i].send, s.sinks[i].recv         )
+      s.srcs[i].send          //= s.src_adapters[i].recv
+      s.src_adapters[i].send  //= s.dut.recv[i]
+      s.dut.send[i]           //= s.sink_adapters[i].recv
+      s.sink_adapters[i].send //= s.sinks[i].recv
 
     @s.update
     def up_pos():
@@ -103,12 +100,12 @@ class TorusRouterRTL_Tests( object ):
 
     # Run simulation
     ncycles = 0
-    print ""
-    print "{:3}:{}".format( ncycles, th.line_trace() )
+    print()
+    print( "{:3}:{}".format( ncycles, th.line_trace() ))
     while not th.done() and ncycles < max_cycles:
       th.tick()
       ncycles += 1
-      print "{:3}:{}".format( ncycles, th.line_trace() )
+      print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
     # Check timeout
     assert ncycles < max_cycles

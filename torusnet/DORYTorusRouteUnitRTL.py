@@ -8,9 +8,9 @@ Author : Yanghui Ou, Cheng Tan
   Date : June 29, 2019
 """
 from pymtl3             import *
-from directions         import *
+from .directions        import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
-from copy import deepcopy
+from copy               import deepcopy
 
 class DORYTorusRouteUnitRTL( Component ):
 
@@ -47,8 +47,8 @@ class DORYTorusRouteUnitRTL( Component ):
 
     # Connections
     for i in range( s.num_outports ):
-      s.connect( s.give_ens[i],   s.give[i].en  )
-      s.connect( s.give_msg_wire, s.give[i].msg )
+      s.give_ens[i]   //= s.give[i].en
+      s.give_msg_wire //= s.give[i].msg
 
     # Calculate distance
     @s.update

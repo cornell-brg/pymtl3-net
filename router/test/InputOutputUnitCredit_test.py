@@ -7,16 +7,15 @@ Composition test for input/output unit with credit based interfaces.
 Author : Yanghui Ou
   Date : June 22, 2019
 """
-from pymtl3 import *
+from pymtl3                       import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-from pymtl3.stdlib.rtl.queues import BypassQueueRTL
-
-from ocn_pclib.test.net_sinks import TestNetSinkRTL
-from ocn_pclib.ifcs.packets import mk_generic_pkt
-from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
-from ..InputUnitCreditRTL import InputUnitCreditRTL
-from ..SwitchUnitRTL import SwitchUnitRTL
-from ..OutputUnitCreditRTL import OutputUnitCreditRTL
+from pymtl3.stdlib.rtl.queues     import BypassQueueRTL
+from ocn_pclib.test.net_sinks     import TestNetSinkRTL
+from ocn_pclib.ifcs.packets       import mk_generic_pkt
+from ocn_pclib.ifcs.CreditIfc     import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
+from ..InputUnitCreditRTL         import InputUnitCreditRTL
+from ..SwitchUnitRTL              import SwitchUnitRTL
+from ..OutputUnitCreditRTL        import OutputUnitCreditRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -25,19 +24,19 @@ from ..OutputUnitCreditRTL import OutputUnitCreditRTL
 class TestHarness( Component ):
   def construct( s, Type, src_msgs, sink_msgs, nvcs=2, credit_line=2 ):
 
-    s.src = TestSrcRTL( Type, src_msgs )
+    s.src   = TestSrcRTL( Type, src_msgs )
     s.src_q = BypassQueueRTL( Type, num_entries=1 )
     s.output_unit = OutputUnitCreditRTL( Type, nvcs=nvcs, credit_line=credit_line )
     s.input_unit  = InputUnitCreditRTL( Type, nvcs=nvcs, credit_line=credit_line )
     s.switch_unit = SwitchUnitRTL( Type, num_inports=nvcs )
     s.sink = TestNetSinkRTL( Type, sink_msgs )
 
-    s.connect( s.src.send,             s.src_q.enq       )
-    s.connect( s.src_q.deq,            s.output_unit.get )
-    s.connect( s.output_unit.send,     s.input_unit.recv )
-    s.connect( s.switch_unit.give.msg, s.sink.recv.msg   )
+    s.src.send             //= s.src_q.enq
+    s.src_q.deq            //= s.output_unit.get
+    s.output_unit.send     //= s.input_unit.recv
+    s.switch_unit.give.msg //= s.sink.recv.msg
     for i in range( nvcs ):
-      s.connect( s.input_unit.give[i], s.switch_unit.get[i] )
+      s.input_unit.give[i] //= s.switch_unit.get[i]
 
     @s.update
     def up_sink_recv():

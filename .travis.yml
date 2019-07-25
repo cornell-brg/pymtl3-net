@@ -8,9 +8,9 @@
 
 dist: xenial
 language: python
-# Use Python 2.7 at the moment
+
 python:
- - "2.7"
+ - "3.7"
 
 env:
  - CONFIG="-v --tb=short"

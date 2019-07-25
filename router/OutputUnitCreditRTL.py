@@ -31,7 +31,7 @@ class OutputUnitCreditRTL( Component ):
 
     s.credit = [ Counter( credit_type, credit_line ) for _ in range( nvcs ) ]
 
-    s.connect( s.get.msg, s.send.msg   )
+    s.get.msg //= s.send.msg
 
     @s.update
     def up_credit_send():
@@ -50,9 +50,9 @@ class OutputUnitCreditRTL( Component ):
         s.credit[i].decr = s.send.en & ( vcid_type(i) == s.send.msg.vc_id )
 
     for i in range( nvcs ):
-      s.connect( s.credit[i].incr,       s.send.yum[i] )
-      s.connect( s.credit[i].load,       b1(0)         )
-      s.connect( s.credit[i].load_value, credit_type(0) )
+      s.credit[i].incr       //= s.send.yum[i]
+      s.credit[i].load       //= b1(0)
+      s.credit[i].load_value //= credit_type(0)
 
   def line_trace( s ):
     return "{}({}){}".format(

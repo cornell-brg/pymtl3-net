@@ -7,13 +7,12 @@ Credit based interfaces.
 Author : Yanghui Ou
   Date : June 10, 2019
 """
-from pymtl3 import *
-from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL, enrdy_to_str
-from pymtl3.stdlib.rtl.Encoder import Encoder
+from pymtl3                     import *
+from pymtl3.stdlib.ifcs         import SendIfcRTL, RecvIfcRTL, enrdy_to_str
+from pymtl3.stdlib.rtl.Encoder  import Encoder
 from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
-from pymtl3.stdlib.rtl.queues import BypassQueueRTL
-
-from ocn_pclib.rtl import Counter
+from pymtl3.stdlib.rtl.queues   import BypassQueueRTL
+from ocn_pclib.rtl              import Counter
 
 #-------------------------------------------------------------------------
 # RTL interfaces
@@ -123,8 +122,8 @@ class RecvRTL2CreditSendRTL( Component ):
     s.buffer = BypassQueueRTL( MsgType, num_entries=1 )
     s.credit = [ Counter( CreditType, credit_line ) for _ in range( nvcs ) ]
 
-    s.connect( s.recv,           s.buffer.enq )
-    s.connect( s.buffer.deq.msg, s.send.msg   )
+    s.recv           //=  s.buffer.enq
+    s.buffer.deq.msg //=  s.send.msg
 
     @s.update
     def up_credit_send():
@@ -142,9 +141,9 @@ class RecvRTL2CreditSendRTL( Component ):
         s.credit[i].decr = s.send.en & ( VcIDType(i) == s.send.msg.vc_id )
 
     for i in range( nvcs ):
-      s.connect( s.credit[i].incr,       s.send.yum[i] )
-      s.connect( s.credit[i].load,       b1(0)         )
-      s.connect( s.credit[i].load_value, CreditType(0) )
+      s.credit[i].incr       //= s.send.yum[i]
+      s.credit[i].load       //= b1(0)        
+      s.credit[i].load_value //= CreditType(0)
 
   def line_trace( s ):
     return "{}({},{}){}".format(
@@ -179,10 +178,10 @@ class CreditRecvRTL2SendRTL( Component ):
     s.encoder = Encoder( in_nbits=nvcs, out_nbits=clog2(nvcs) )
 
     for i in range( nvcs ):
-      s.connect( s.buffers[i].enq.msg, s.recv.msg        )
-      s.connect( s.buffers[i].deq.rdy, s.arbiter.reqs[i] )
-    s.connect( s.arbiter.grants, s.encoder.in_ )
-    s.connect( s.arbiter.en,     s.send.en     )
+      s.buffers[i].enq.msg //= s.recv.msg
+      s.buffers[i].deq.rdy //= s.arbiter.reqs[i]
+    s.arbiter.grants //= s.encoder.in_
+    s.arbiter.en     //= s.send.en
 
     @s.update
     def up_enq():

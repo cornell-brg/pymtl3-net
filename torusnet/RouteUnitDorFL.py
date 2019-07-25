@@ -7,8 +7,8 @@ FL route unit that implements dimension order routing.
 Author : Yanghui Ou
   Date : June 30, 2019
 """
-from pymtl3 import *
-from directions import *
+from pymtl3      import *
+from .directions import *
 
 class RouteUnitDorFL( object ):
 

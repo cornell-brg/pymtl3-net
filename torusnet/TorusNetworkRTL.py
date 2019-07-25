@@ -8,9 +8,9 @@
 
 from pymtl3                   import *
 from channel.ChannelRTL       import ChannelRTL
-from directions               import *
+from .directions              import *
 from pymtl3.stdlib.ifcs       import SendIfcRTL, RecvIfcRTL
-from TorusRouterRTL           import TorusRouterRTL
+from .TorusRouterRTL          import TorusRouterRTL
 from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
 
 class TorusNetworkRTL( Component ):
@@ -56,14 +56,14 @@ class TorusNetworkRTL( Component ):
     chl_id  = 0
     for i in range (s.num_routers):
       # Connect s.routers together in Torus
-      s.connect( s.routers[i].send[SOUTH],
-                 s.routers[(i-mesh_wid+s.num_routers)%s.num_routers].recv[NORTH])
-      s.connect( s.routers[i].send[NORTH],
-                 s.routers[(i+mesh_wid+s.num_routers)%s.num_routers].recv[SOUTH])
-      s.connect( s.routers[i].send[WEST],
-                 s.routers[i-(i%mesh_wid-(i-1)%mesh_wid)].recv[EAST])
-      s.connect( s.routers[i].send[EAST],
-                 s.routers[i+(i+1)%mesh_wid-i%mesh_wid].recv[WEST])
+      s.routers[i].send[SOUTH] //=\
+        s.routers[(i-mesh_wid+s.num_routers)%s.num_routers].recv[NORTH]
+      s.routers[i].send[NORTH] //=\
+        s.routers[(i+mesh_wid+s.num_routers)%s.num_routers].recv[SOUTH]
+      s.routers[i].send[WEST]  //=\
+        s.routers[i-(i%mesh_wid-(i-1)%mesh_wid)].recv[EAST]
+      s.routers[i].send[EAST]  //=\
+        s.routers[i+(i+1)%mesh_wid-i%mesh_wid].recv[WEST]
 
 #      s.connect(s.routers[i].send[SOUTH], s.channels[chl_id].recv)
 #      s.connect(s.channels[chl_id].send, s.routers[(i-mesh_ht+
@@ -86,11 +86,11 @@ class TorusNetworkRTL( Component ):
 #      chl_id += 1
 
       # Connect the self port (with Network Interface)
-      s.connect( s.recv[i],               s.recv_adapters[i].recv )
-      s.connect( s.recv_adapters[i].send, s.routers[i].recv[SELF] )
+      s.recv[i]               //= s.recv_adapters[i].recv
+      s.recv_adapters[i].send //= s.routers[i].recv[SELF]
 
-      s.connect( s.routers[i].send[SELF], s.send_adapters[i].recv )
-      s.connect( s.send_adapters[i].send, s.send[i]               )
+      s.routers[i].send[SELF] //= s.send_adapters[i].recv
+      s.send_adapters[i].send //= s.send[i]
 
 #      s.connect(s.recv[i], s.routers[i].recv[SELF])
 #      s.connect(s.send[i], s.routers[i].send[SELF])

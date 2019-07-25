@@ -7,11 +7,10 @@ Ring network implementation.
 Author : Yanghui Ou, Cheng Tan
   Date : June 22, 2019
 """
-from pymtl3 import *
-from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
-
-from directions import *
-from RingRouterRTL import RingRouterRTL
+from pymtl3                   import *
+from pymtl3.stdlib.ifcs       import SendIfcRTL, RecvIfcRTL
+from .RingRouterRTL           import RingRouterRTL
+from .directions              import *
 from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
 
 class RingNetworkRTL( Component ):
@@ -45,16 +44,13 @@ class RingNetworkRTL( Component ):
 
     for i in range( s.num_routers ):
       next_id = (i+1) % num_routers
-      s.connect( s.routers[i].send[RIGHT],      s.routers[next_id].recv[LEFT] )
-      s.connect( s.routers[next_id].send[LEFT], s.routers[i].recv[RIGHT]      )
-
+      s.routers[i].send[RIGHT]      //= s.routers[next_id].recv[LEFT]
+      s.routers[next_id].send[LEFT] //= s.routers[i].recv[RIGHT]
       # Connect the self port (with Network Interface)
-
-      s.connect( s.recv[i],               s.recv_adp[i].recv )
-      s.connect( s.recv_adp[i].send, s.routers[i].recv[SELF] )
-
-      s.connect( s.routers[i].send[SELF], s.send_adp[i].recv )
-      s.connect( s.send_adp[i].send, s.send[i]               )
+      s.recv[i]                     //= s.recv_adp[i].recv
+      s.recv_adp[i].send            //= s.routers[i].recv[SELF]
+      s.routers[i].send[SELF]       //= s.send_adp[i].recv
+      s.send_adp[i].send            //= s.send[i]              
 
     # FIXME: unable to connect a struct to a port.
     @s.update

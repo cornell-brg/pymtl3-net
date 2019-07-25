@@ -28,8 +28,8 @@ class TestHarness( Component ):
     s.dut  = ChannelCL ( MsgType, latency=1 )
 
     # Connections
-    s.connect( s.src.send, s.dut.recv  )
-    s.connect( s.dut.send, s.sink.recv )
+    s.src.send //= s.dut.recv
+    s.dut.send //= s.sink.recv
 
   def done( s ):
     return s.src.done() and s.sink.done()
@@ -53,12 +53,12 @@ def run_sim( test_harness, max_cycles=100 ):
   # Run simulation
 
   ncycles = 0
-  print ""
-  print "{:2}:{}".format( ncycles, test_harness.line_trace() )
+  print()
+  print( "{:2}:{}".format( ncycles, test_harness.line_trace() ))
   while not test_harness.done() and ncycles < max_cycles:
     test_harness.tick()
     ncycles += 1
-    print "{:2}:{}".format( ncycles, test_harness.line_trace() )
+    print( "{:2}:{}".format( ncycles, test_harness.line_trace() ))
 
   # Check timeout
 
