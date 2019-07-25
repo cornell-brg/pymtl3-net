@@ -35,32 +35,33 @@ class TorusNetworkCL( Component ):
     s.channels   = [ ChannelCL( PacketType, latency = chl_lat)
                      for _ in range( num_channels ) ]
 
-    # Connect s.routers together in Torus
+    # Connect routers in Torus
 
     chl_id  = 0
     for i in range (s.num_routers):
-      # Connect s.routers together in Torus
+
+      s_idx = (i-mesh_ht+s.num_routers) % s.num_routers
       s.routers[i].send[SOUTH] //= s.channels[chl_id].recv
-      s.channels[chl_id].send  //= s.routers[(i-mesh_ht+\
-          s.num_routers)%s.num_routers].recv[NORTH]
+      s.channels[chl_id].send  //= s.routers[s_idx].recv[NORTH]
       chl_id += 1
 
+      n_idx = (i+mesh_ht+s.num_routers) % s.num_routers
       s.routers[i].send[NORTH] //= s.channels[chl_id].recv
-      s.channels[chl_id].send  //= s.routers[\
-          (i+mesh_ht+s.num_routers)%s.num_routers].recv[SOUTH]
+      s.channels[chl_id].send  //= s.routers[n_idx].recv[SOUTH]
       chl_id += 1
 
+      w_idx = i - ( i % mesh_wid - (i-1) % mesh_wid )
       s.routers[i].send[WEST] //= s.channels[chl_id].recv
-      s.channels[chl_id].send //= s.routers[\
-          i-(i%mesh_wid-(i-1)%mesh_wid)].recv[EAST])
+      s.channels[chl_id].send //= s.routers[w_idx].recv[EAST]
       chl_id += 1
 
+      e_idx = i + (i+1) % mesh_wid - i % mesh_wid
       s.routers[i].send[EAST] //= s.channels[chl_id].recv
-      s.channels[chl_id].send //= s.routers[\
-          i+(i+1)%mesh_wid-i%mesh_wid].recv[WEST])
+      s.channels[chl_id].send //= s.routers[e_idx].recv[WEST]
       chl_id += 1
 
       # Connect the self port (with Network Interface)
+
       s.recv[i] //= s.routers[i].recv[SELF]
       s.send[i] //= s.routers[i].send[SELF]
 

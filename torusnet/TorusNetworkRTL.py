@@ -16,14 +16,14 @@ from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRT
 class TorusNetworkRTL( Component ):
 
   def construct( s,
-                 PacketType,
-                 PositionType,
-                 mesh_wid=4,
-                 mesh_ht=4,
-                 chl_lat=0,
-                 nvcs=2,
-                 credit_line=2,
-               ):
+    PacketType,
+    PositionType,
+    mesh_wid=4,
+    mesh_ht=4,
+    chl_lat=0,
+    nvcs=2,
+    credit_line=2,
+  ):
 
     # Constants
 
@@ -48,16 +48,12 @@ class TorusNetworkRTL( Component ):
     s.send_adapters = [ CreditRecvRTL2SendRTL( PacketType, nvcs=nvcs,
         credit_line=credit_line ) for _ in range( s.num_routers ) ]
 
-#    s.channels   = [ ChannelRTL( PacketType, latency = chl_lat)
-#                     for _ in range( num_channels ) ]
-
     # Connect s.routers together in Torus
 
     chl_id  = 0
     for i in range (s.num_routers):
-      # Connect s.routers together in Torus
-      s.routers[i].send[SOUTH] //=\
-        s.routers[(i-mesh_wid+s.num_routers)%s.num_routers].recv[NORTH]
+      s_idx = (i-mesh_ht+s.num_routers) % s.num_routers
+      s.routers[i].send[SOUTH] //= s.routers[s_idx].recv[NORTH]
       s.routers[i].send[NORTH] //=\
         s.routers[(i+mesh_wid+s.num_routers)%s.num_routers].recv[SOUTH]
       s.routers[i].send[WEST]  //=\
@@ -65,35 +61,12 @@ class TorusNetworkRTL( Component ):
       s.routers[i].send[EAST]  //=\
         s.routers[i+(i+1)%mesh_wid-i%mesh_wid].recv[WEST]
 
-#      s.connect(s.routers[i].send[SOUTH], s.channels[chl_id].recv)
-#      s.connect(s.channels[chl_id].send, s.routers[(i-mesh_ht+
-#          s.num_routers)%s.num_routers].recv[NORTH])
-#      chl_id += 1
-#
-#      s.connect(s.routers[i].send[NORTH], s.channels[chl_id].recv)
-#      s.connect(s.channels[chl_id].send, s.routers[
-#          (i+mesh_ht+s.num_routers)%s.num_routers].recv[SOUTH])
-#      chl_id += 1
-#
-#      s.connect(s.routers[i].send[WEST],  s.channels[chl_id].recv)
-#      s.connect(s.channels[chl_id].send, s.routers[
-#          i-(i%mesh_wid-(i-1)%mesh_wid)].recv[EAST])
-#      chl_id += 1
-#
-#      s.connect(s.routers[i].send[EAST],  s.channels[chl_id].recv)
-#      s.connect(s.channels[chl_id].send, s.routers[
-#          i+(i+1)%mesh_wid-i%mesh_wid].recv[WEST])
-#      chl_id += 1
-
       # Connect the self port (with Network Interface)
       s.recv[i]               //= s.recv_adapters[i].recv
       s.recv_adapters[i].send //= s.routers[i].recv[SELF]
 
       s.routers[i].send[SELF] //= s.send_adapters[i].recv
       s.send_adapters[i].send //= s.send[i]
-
-#      s.connect(s.recv[i], s.routers[i].recv[SELF])
-#      s.connect(s.send[i], s.routers[i].send[SELF])
 
     @s.update
     def up_pos():
@@ -103,11 +76,10 @@ class TorusNetworkRTL( Component ):
           s.routers[idx].pos = PositionType( x, y )
 
   def line_trace( s ):
-    in_trace  = [ str( s.recv[i] ) for i in range( s.num_terminals ) ]
-    out_trace = [ str( s.send[i] ) for i in range( s.num_terminals ) ]
+    in_trace  = "|".join([ str( s.recv[i] ) for i in range( s.num_terminals ) ])
+    out_trace = "|".join([ str( s.send[i] ) for i in range( s.num_terminals ) ])
 
-    return "{}_()_{}".format( "|".join( in_trace ), "|".join( out_trace ) )
-    # return "{}".format( "|".join( out_trace ) )
+    return f"{in_trace}_()_{out_trace}"
 
   def elaborate_physical( s ):
     # Initialize dimension for sub-modules.
