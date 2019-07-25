@@ -1,8 +1,9 @@
 """
-=========================================================================
+==========================================================================
 DTRBfRouteUnitRTL.py
-=========================================================================
-A butterfly route unit with get/give interface.
+==========================================================================
+RTL implementation of a route unit for butterfly network. It uses
+destination tag routing.
 
 Author : Yanghui Ou, Cheng Tan
   Date : April 6, 2019

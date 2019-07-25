@@ -2,7 +2,7 @@
 =========================================================================
 BfRouteRTL.py
 =========================================================================
-Butterfly network-on-chip router
+RTL router for butterfly network.
 
 Author : Cheng Tan, Yanghui Ou
   Date : April 6, 2019
@@ -16,11 +16,22 @@ from .DTRBflyRouteUnitRTL import DTRBflyRouteUnitRTL
 
 class BflyRouterRTL( Router ):
 
-  def construct( s, PacketType, PositionType,
-                 k_ary = 2, InputUnitType = InputUnitRTL,
-                 RouteUnitType = DTRBflyRouteUnitRTL,
-                 SwitchUnitType = SwitchUnitRTL ):
+  def construct( s,
+    PacketType,
+    PositionType,
+    k_ary = 2,
+    InputUnitType = InputUnitRTL,
+    RouteUnitType = DTRBflyRouteUnitRTL,
+    SwitchUnitType = SwitchUnitRTL
+  ):
 
     super( BflyRouterRTL, s ).construct(
-      PacketType, PositionType, k_ary, k_ary, InputUnitType, RouteUnitType,
-      SwitchUnitType, OutputUnitRTL )
+      PacketType,
+      PositionType,
+      k_ary,
+      k_ary,
+      InputUnitType,
+      RouteUnitType,
+      SwitchUnitType,
+      OutputUnitRTL,
+    )

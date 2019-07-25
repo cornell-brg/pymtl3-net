@@ -17,6 +17,7 @@ from ocn_pclib.ifcs.positions      import *
 
 from pymtl3.passes.sverilog import ImportPass, TranslationPass
 from pymtl3.passes import DynamicSim
+
 #-------------------------------------------------------------------------
 # Test Vector
 #-------------------------------------------------------------------------
@@ -32,7 +33,6 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
 
     if test_vector[0] != 'x':
       terminal_id = test_vector[0]
-#      pkt = mk_bf_pkt( terminal_id, test_vector[1][0], k_ary, n_fly, 1, test_vector[1][1])
       if r_rows == 1 or k_ary == 1:
         DstType = mk_bits( n_fly )
       else:
@@ -64,16 +64,8 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
       assert model.send[test_vector[2]].msg.payload == test_vector[3]
-#    for i in range(model.num_terminals):
-#      print 'msg: ', model.send[test_vector[2]].msg.payload, '; vec: ', test_vector[3]
 
   model.elaborate()
-#  model.sverilog_translate = True
-#  model.sverilog_import = True
-#  model.apply( TranslationPass() )
-#  model = ImportPass()( test_harness )
-#  model.apply( SimpleSim )
-#  model.apply( DynamicSim )
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
   model.sim_reset()
@@ -99,7 +91,7 @@ def test_vector_2ary_1fly( dump_vcd, test_verilog ):
 
   # Specific for wire connection (link delay = 0) in 2x2 Torus topology
   simple_2_test = [
-# terminal [packet]   arr_term   msg
+  # terminal [packet]   arr_term   msg
   [  0,    [0,1001],     x,       x  ],
   [  0,    [1,1002],     0,     1001 ],
   [  0,    [1,1003],     1,     1002 ],
@@ -126,21 +118,20 @@ def test_vector_2ary_2fly( dump_vcd, test_verilog ):
   PacketType   = mk_bfly_pkt( k_ary, n_fly )
   model = BflyNetworkRTL( PacketType, BflyPos, k_ary, n_fly, 0 )
 
-  #FIXME: This should have other way to set the default value
   model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
 
   x = 'x'
   # Specific for wire connection (link delay = 0) in 2x2 bfly topology
   simple_4_test = [
-# terminal [packet]   arr_term   msg
-  [  0,    [0,1001],     x,       x  ],
-  [  0,    [2,1002],     x,       x  ],
-  [  0,    [3,1003],     0,     1001 ],
-  [  x,    [0,0000],     2,     1002 ],
-  [  0,    [1,1004],     3,     1003 ],
-  [  0,    [0,1005],     x,       x  ],
-  [  x,    [0,0000],     1,     1004 ],
-  [  x,    [0,0000],     0,     1005 ],
+  # terminal [packet]   arr_term   msg
+  [  0,      [0,1001],     x,       x  ],
+  [  0,      [2,1002],     x,       x  ],
+  [  0,      [3,1003],     0,     1001 ],
+  [  x,      [0,0000],     2,     1002 ],
+  [  0,      [1,1004],     3,     1003 ],
+  [  0,      [0,1005],     x,       x  ],
+  [  x,      [0,0000],     1,     1004 ],
+  [  x,      [0,0000],     0,     1005 ],
   ]
 
   run_vector_test( model, PacketType, simple_4_test, k_ary, n_fly )
@@ -148,6 +139,7 @@ def test_vector_2ary_2fly( dump_vcd, test_verilog ):
 #-------------------------------------------------------------------------
 # TestHarness
 #-------------------------------------------------------------------------
+
 class TestHarness( Component ):
 
   def construct( s, MsgType, k_ary, n_fly, src_msgs, sink_msgs,
@@ -183,7 +175,6 @@ class TestHarness( Component ):
     return srcs_done and sinks_done
 
   def line_trace( s ):
-#    pass
     return s.dut.line_trace()
 
 #-------------------------------------------------------------------------
@@ -218,13 +209,25 @@ def run_sim( test_harness, max_cycles=100 ):
 #-------------------------------------------------------------------------
 # Test cases (specific for 4-ary 2-fly butterfly)
 #-------------------------------------------------------------------------
-#           src, dst, payload
-test_msgs = [ (0,15,0xcdab101), (1,14,0xabcd102), (2,13,0xbcda103), (3,12,0xdcba104),
-              (4,11,0xcdab105), (5,10,0xabcd106), (6, 9,0xbcda107), (7, 8,0xdcba108),
-              (8, 7,0xcdab109), (9, 6,0xabcd110), (10,5,0xbcda111), (11,4,0xdcba112),
-              (12,3,0xcdab113), (13,2,0xabcd114), (14,1,0xbcda115), (15,0,0xdcba116) ]
-
-#test_msgs = [ (0,15,0xcdab10115), (1,14,0xabcd10214) ]
+test_msgs = [
+  # src dst payload
+  ( 0,  15, 0xcdab101 ),
+  ( 1,  14, 0xabcd102 ),
+  ( 2,  13, 0xbcda103 ),
+  ( 3,  12, 0xdcba104 ),
+  ( 4,  11, 0xcdab105 ),
+  ( 5,  10, 0xabcd106 ),
+  ( 6,  9,  0xbcda107 ),
+  ( 7,  8,  0xdcba108 ),
+  ( 8,  7,  0xcdab109 ),
+  ( 9,  6,  0xabcd110 ),
+  ( 10, 5,  0xbcda111 ),
+  ( 11, 4,  0xdcba112 ),
+  ( 12, 3,  0xcdab113 ),
+  ( 13, 2,  0xabcd114 ),
+  ( 14, 1,  0xbcda115 ),
+  ( 15, 0,  0xdcba116 )
+]
 
 def set_dst(k_ary, n_fly, vec_dst):
 
@@ -257,7 +260,6 @@ def test_srcsink_4ary_2fly():
   n_fly = 2
   for (vec_src, vec_dst, payload) in test_msgs:
     PacketType  = mk_bfly_pkt( k_ary, n_fly )
-#    r_rows = k_ary ** ( n_fly - 1 )
     bf_dst = set_dst( k_ary, n_fly, vec_dst)
     pkt = PacketType( vec_src, bf_dst, 0, payload)
     src_packets [vec_src].append( pkt )

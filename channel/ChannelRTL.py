@@ -1,9 +1,10 @@
 #=========================================================================
 # ChannelRTL.py
 #=========================================================================
-# A Link unit for connecting routers to form network.
+# CL channel module for connecting routers to form network. This simple
+# channel has latency insensitive send/recv interfaces.
 #
-# Author : Cheng Tan
+# Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 16, 2019
 
 from pymtl3 import *
@@ -25,11 +26,14 @@ class ChannelRTL( Component ):
     s.send  = SendIfcRTL( PacketType )
 
     if s.QueueType != None and s.latency > 0:
+
       # Component
-      s.queues = [ s.QueueType( PacketType, s.num_entries ) 
+
+      s.queues = [ s.QueueType( PacketType, s.num_entries )
                    for _ in range( s.latency ) ]
 
       # Connections
+
       s.recv.rdy //= s.queues[0].enq.rdy
 
       @s.update
@@ -46,6 +50,9 @@ class ChannelRTL( Component ):
         s.queues[s.latency-1].deq.en   = s.send.en
 
     else:
+
+      # If latency==0 simply bypass
+
       s.recv //= s.send
 
   def line_trace( s ):
@@ -53,9 +60,9 @@ class ChannelRTL( Component ):
       trace = '>'
       for i in range( s.latency ):
         trace += s.queues[i].line_trace() + '>'
-      return "{}({}){}".format(s.recv.msg, trace, s.send.msg)
+      return f"{s.recv.msg}({trace}){s.send.msg}"
     else:
-      return "{}(0){}".format( s.recv.msg, s.send.msg)
+      return f"{s.recv}(0){s.send}"
 
   def elaborate_physical( s ):
     s.dim.w = 250

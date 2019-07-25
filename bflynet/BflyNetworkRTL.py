@@ -2,7 +2,7 @@
 =========================================================================
 BfNetworkRTL.py
 =========================================================================
-Butterfly network implementation.
+RTL implementation of a butterfly network.
 
 Author : Cheng Tan
   Date : April 6, 2019
@@ -96,14 +96,11 @@ class BflyNetworkRTL( Component ):
           terminal_id_send += 1
 
   def line_trace( s ):
-    trace = [ "" for _ in range( s.num_terminals ) ]
-    for i in range( s.num_terminals ):
-      trace[i] += s.send[i].line_trace()
+    trace = [ f"{s.send[i]}" for i in range( s.num_terminals ) ]
     return "|".join( trace )
 
   def elaborate_physical( s ):
 
-    # FIXME: This should be done by the pass (but not yet merged into master...)
     for r in s.routers:
       r.elaborate_physical()
 
