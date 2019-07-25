@@ -1,12 +1,13 @@
-#=========================================================================
-# net_sinks
-#=========================================================================
-# Test sinks for networks, which does not check the order of the received
-# messages.
-#
-# Author : Yanghui Ou
-#   Date : Apr 30, 2019
+"""
+=========================================================================
+net_sinks
+=========================================================================
+Test sinks for networks, which does not check the order of the received
+messages.
 
+Author : Yanghui Ou
+  Date : Apr 30, 2019
+"""
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, RecvRTL2SendCL, enrdy_to_str
 
