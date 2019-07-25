@@ -63,7 +63,7 @@ class DORYCMeshRouteUnitRTL( Component ):
       s.get.en = s.give_ens > TType(0)
 
   # Line trace
-  def line_trace( s ):
 
+  def line_trace( s ):
     out_str = "|".join([ f"{s.give[i]}" for i in range( s.num_outports ) ])
     return f"{s.get}(){out_str}"

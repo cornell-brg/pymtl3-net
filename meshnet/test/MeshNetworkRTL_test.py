@@ -15,7 +15,6 @@ from pymtl3.stdlib.test               import TestVectorSimulator
 from meshnet.MeshNetworkRTL           import MeshNetworkRTL
 from meshnet.DORYMeshRouteUnitRTL     import DORYMeshRouteUnitRTL
 from meshnet.DORXMeshRouteUnitRTL     import DORXMeshRouteUnitRTL
-from meshnet.TestMeshRouteUnitRTL     import TestMeshRouteUnitRTL
 from router.InputUnitRTL              import InputUnitRTL
 from ocn_pclib.ifcs.positions         import mk_mesh_pos
 from ocn_pclib.ifcs.packets           import mk_mesh_pkt

@@ -36,7 +36,7 @@ class MeshNetworkCL( Component ):
     s.channels = [ ChannelCL( PacketType, latency = chl_lat)
                  for _ in range( num_channels ) ]
 
-    # Connect s.routers together in Mesh
+    # Connect routers together in Mesh
 
     chl_id  = 0
     for i in range( s.num_routers ):
@@ -92,6 +92,11 @@ class MeshNetworkCL( Component ):
 
   def line_trace( s ):
     return "|".join( [ s.routers[i].line_trace() for i in range(s.num_routers) ] )
+
+#-------------------------------------------------------------------------
+# WrappedMeshNetCL
+#-------------------------------------------------------------------------
+# A wrapped mesh net exposing only callee ports.
 
 class WrappedMeshNetCL( Component ):
 

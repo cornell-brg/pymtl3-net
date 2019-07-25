@@ -1,17 +1,18 @@
-#=========================================================================
-# CrossbarRTL.py
-#=========================================================================
-# Crossbar implementation.
-#
-# Author : Cheng Tan
-#   Date : April 6, 2019
+"""
+==========================================================================
+CrossbarRTL.py
+==========================================================================
+Crossbar implementation.
 
+Author : Cheng Tan
+  Date : April 6, 2019
+"""
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
-from router.InputUnitRTL    import InputUnitRTL
-from router.SwitchUnitRTL   import SwitchUnitRTL
-from router.OutputUnitRTL   import OutputUnitRTL
-from CrossbarRouteUnitRTL   import CrossbarRouteUnitRTL
+from router.InputUnitRTL import InputUnitRTL
+from router.SwitchUnitRTL import SwitchUnitRTL
+from router.OutputUnitRTL import OutputUnitRTL
+from CrossbarRouteUnitRTL import CrossbarRouteUnitRTL
 
 class CrossbarRTL( Component ):
   def construct( s, PacketType, num_terminals=4,
@@ -34,16 +35,16 @@ class CrossbarRTL( Component ):
     # Components
 
     s.input_units  = [ InputUnitType( PacketType )
-                      for _ in range( s.num_inports ) ]
+                       for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PacketType, s.num_outports )
-                      for i in range( s.num_inports ) ]
+                       for i in range( s.num_inports ) ]
 
     s.switch_units = [ SwitchUnitType( PacketType, s.num_inports )
-                      for _ in range( s.num_outports ) ]
+                       for _ in range( s.num_outports ) ]
 
     s.output_units = [ OutputUnitType( PacketType )
-                      for _ in range( s.num_outports ) ]
+                       for _ in range( s.num_outports ) ]
 
     # Connection
 
@@ -60,7 +61,5 @@ class CrossbarRTL( Component ):
       s.connect( s.output_units[j].send, s.send[j]              )
 
   def line_trace( s ):
-    trace = [ "" for _ in range( s.num_terminals ) ]
-    for i in range( s.num_terminals ):
-      trace[i] += s.send[i].line_trace()
-    return "|".join( trace )
+    trace = "|".join([ str(s.send[i]) for i in range( s.num_terminals ) ])
+    return trace

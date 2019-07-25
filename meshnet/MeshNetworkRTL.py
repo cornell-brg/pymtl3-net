@@ -14,7 +14,7 @@ from .MeshRouterRTL                 import MeshRouterRTL
 from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 class MeshNetworkRTL( Component ):
-  def construct( s, PacketType, PositionType, 
+  def construct( s, PacketType, PositionType,
                  mesh_wid = 4, mesh_ht = 4, chl_lat = 0 ):
 
     # Constants
@@ -37,8 +37,6 @@ class MeshNetworkRTL( Component ):
     s.channels = [ ChannelRTL( PacketType, latency = chl_lat )
                  for _ in range( num_channels ) ]
 
-#    s.pos      = [ PositionType( r % mesh_wid, r / mesh_wid)
-#                 for r in range( mesh_wid * mesh_ht )]
     XYType  = mk_bits( clog2( mesh_wid ) )
     s.pos_x = [ InPort(XYType) for _ in range( s.num_routers )]
     s.pos_y = [ InPort(XYType) for _ in range( s.num_routers )]
@@ -48,7 +46,7 @@ class MeshNetworkRTL( Component ):
       s.pos_y[r] //= s.routers[r].pos.pos_y
 
 
-    # Connect s.routers together in Mesh
+    # Connect routers together in Mesh
 
     chl_id  = 0
     for i in range( s.num_routers ):
@@ -99,16 +97,6 @@ class MeshNetworkRTL( Component ):
         s.routers[i].recv[EAST].en           //= 0
         s.routers[i].recv[EAST].msg.payload  //= 0
 
-    # FIXME: unable to connect a struct to a port.
-#    @s.update
-#    def up_pos():
-#      for y in range( mesh_ht ):
-#        for x in range( mesh_wid ):
-#          idx = y * mesh_wid + x
-#          s.routers[idx].pos = PositionType( x, y )
-
   def line_trace( s ):
-    trace = [ "" for _ in range( s.num_terminals ) ]
-    for i in range( s.num_terminals ):
-      trace[i] += s.send[i].line_trace()
-    return "|".join( trace )
+    trace = "|".join([ str(s.send[i]) for i in range( s.num_terminals ) ])
+    return trace

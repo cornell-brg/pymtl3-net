@@ -1,11 +1,12 @@
-#=========================================================================
-# CrossbarRouteUnitRTL.py
-#=========================================================================
-# A crossbar route unit with get/give interface.
-#
-# Author : Yanghui Ou, Cheng Tan
-#   Date : April 18, 2019
+"""
+==========================================================================
+CrossbarRouteUnitRTL.py
+==========================================================================
+A crossbar route unit with get/give interface.
 
+Author : Yanghui Ou, Cheng Tan
+  Date : April 18, 2019
+"""
 from pymtl          import *
 from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
 
@@ -13,8 +14,9 @@ class CrossbarRouteUnitRTL( Component ):
 
   def construct( s, PacketType, num_outports ):
 
-    # Constants 
-    s.num_outports = num_outports 
+    # Local parameters
+
+    s.num_outports = num_outports
 
     # Interface
 
@@ -23,18 +25,18 @@ class CrossbarRouteUnitRTL( Component ):
 
     # Componets
 
-    s.give_ens = Wire( mk_bits( s.num_outports ) ) 
+    s.give_ens = Wire( mk_bits( s.num_outports ) )
 
     # Connections
 
     for i in range( s.num_outports ):
       s.connect( s.get.msg,     s.give[i].msg )
       s.connect( s.give_ens[i], s.give[i].en  )
-    
+
     # Routing logic
+
     @s.update
     def up_ru_routing():
- 
       for i in range( s.num_outports ):
         s.give[i].rdy = 0
 
@@ -43,13 +45,10 @@ class CrossbarRouteUnitRTL( Component ):
 
     @s.update
     def up_ru_get_en():
-      s.get.en = s.give_ens > 0 
+      s.get.en = s.give_ens > 0
 
   # Line trace
+
   def line_trace( s ):
-
-    out_str = [ "" for _ in range( s.num_outports ) ]
-    for i in range (s.num_outports):
-      out_str[i] = "{}".format( s.give[i] ) 
-
-    return "{}({}){}".format( s.get, s.get.msg.dst, "|".join( out_str ) )
+    out_str = "|".join([ f"{s.give[i]}" for i in range( s.num_outports ) ])
+    return f"{s.get}({s.get.msg.dst}){out_str}"
