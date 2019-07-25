@@ -101,7 +101,5 @@ class CMeshNetworkRTL( Component ):
           s.routers[idx].pos = PositionType( x, y )
 
   def line_trace( s ):
-    trace = [ "" for _ in range( s.num_terminals ) ]
-    for i in range( s.num_terminals ):
-      trace[i] += s.send[i].line_trace()
+    trace = [ f"{s.send[i]}" for i in range( s.num_terminals ) ]
     return "|".join( trace )
