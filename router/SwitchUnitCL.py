@@ -29,8 +29,6 @@ class SwitchUnitCL( Component ):
 
     for i in range( s.num_inports ):
       s.add_constraints( M( s.get[i] ) == M( s.give ) )
-      # s.add_constraints( U( up_su_arb_cl ) < M( s.get[i].rdy ) )
-      # s.add_constraints( M( s.get[i] ) < M( s.send ) )
 
   def any_ready( s ):
     flag = False
