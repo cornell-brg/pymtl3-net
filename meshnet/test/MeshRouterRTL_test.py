@@ -13,7 +13,6 @@ from pymtl3.stdlib.test.test_srcs     import TestSrcRTL
 from ocn_pclib.test.net_sinks         import TestNetSinkRTL
 from ocn_pclib.ifcs.positions         import mk_mesh_pos
 from ocn_pclib.ifcs.packets           import mk_mesh_pkt
-from pymtl3.stdlib.test               import TestVectorSimulator
 from meshnet.MeshRouterRTL            import MeshRouterRTL
 from meshnet.DORXMeshRouteUnitRTL     import DORXMeshRouteUnitRTL
 from meshnet.DORYMeshRouteUnitRTL     import DORYMeshRouteUnitRTL
@@ -61,7 +60,6 @@ class TestHarness( Component ):
       s.srcs[i].send //= s.dut.recv[i]
       s.dut.send[i]  //= s.sinks[i].recv
 
-    #TODO: provide pos for router...
     @s.update
     def up_pos():
       s.dut.pos = MeshPos( pos_x, pos_y )
@@ -69,23 +67,18 @@ class TestHarness( Component ):
   def done( s ):
     srcs_done = 1
     sinks_done = 1
-#    for i in range( s.dut.num_inports ):
-#      if s.srcs[i].done() == 0:
+
     for x in s.srcs:
       if x.done() == 0:
         srcs_done = 0
-#    for i in range( s.dut.num_outports ):
-#      if s.sinks[i].done() == 0:
+
     for x in s.sinks:
       if x.done() == 0:
         sinks_done = 0
     return srcs_done and sinks_done
 
   def line_trace( s ):
-    return "{}".format(
-      s.dut.line_trace(),
-      #'|'.join( [ s.sinks[i].line_trace() for i in range(5) ] ),
-    )
+    return "{}".format( s.dut.line_trace() )
 
 #-------------------------------------------------------------------------
 # run_rtl_sim
@@ -94,12 +87,8 @@ class TestHarness( Component ):
 def run_sim( test_harness, max_cycles=1000 ):
 
   # Create a simulator
+
   test_harness.elaborate()
-#  test_harness.dut.sverilog_translate = True
-#  test_harness.dut.sverilog_import = True
-#  test_harness.apply( TranslationPass() )
-#  test_harness = ImportPass()( test_harness )
-#  test_harness.apply( SimpleSim )
   test_harness.apply( DynamicSim )
   test_harness.sim_reset()
 

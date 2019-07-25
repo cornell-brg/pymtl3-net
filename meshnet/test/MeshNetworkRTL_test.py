@@ -21,119 +21,6 @@ from ocn_pclib.ifcs.packets           import mk_mesh_pkt
 from pymtl3.passes.sverilog           import ImportPass, TranslationPass
 
 #-------------------------------------------------------------------------
-# Test Vector
-#-------------------------------------------------------------------------
-def run_vector_test( model, test_vectors, mesh_wid, mesh_ht ):
-
-  def tv_in( model, test_vector ):
-    num_routers = mesh_wid * mesh_ht
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
-
-    if test_vector[0] != 'x':
-      router_id = test_vector[0]
-      pkt = PacketType( router_id % mesh_wid, router_id / mesh_wid,
-                  test_vector[1][0], test_vector[1][1], 1, test_vector[1][2])
-
-      # Enable the network interface on specific router
-      for i in range (num_routers):
-        model.recv[i].en  = 0
-      model.recv[router_id].msg = pkt
-      model.recv[router_id].en  = 1
-
-    XYType = mk_bits( clog2( mesh_wid ) )
-    for i in range (num_routers):
-      model.send[i].rdy = 1
-      model.pos_x[i] = XYType(i%mesh_wid)
-      model.pos_y[i] = XYType(i/mesh_ht)
-
-  def tv_out( model, test_vector ):
-    if test_vector[2] != 'x':
-      assert model.send[test_vector[2]].msg.payload == test_vector[3]
-
-  sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
-  sim.run_test()
-
-def test_vector_mesh2x2( dump_vcd, test_verilog ):
-
-  mesh_wid = 2
-  mesh_ht  = 2
-  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  num_routers = mesh_wid * mesh_ht
-  num_inports = 5
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
-  model = MeshNetworkRTL( PacketType, MeshPos, mesh_wid, mesh_ht, 0 )
-
-  x = 'x'
-
-  # Specific for wire connection (link delay = 0) in 2x2 Mesh topology
-  simple_2_2_test = [
-#  router   [packet]   arr_router  msg
-  [  0,    [1,0,1001],     x,       x  ],
-  [  0,    [1,1,1002],     x,       x  ],
-  [  0,    [0,1,1003],     1,     1001 ],
-  [  0,    [0,1,1004],     x,       x  ],
-  [  0,    [1,0,1005],     2,     1003 ],
-  [  2,    [0,0,1006],     x,       x  ],
-  [  1,    [0,1,1007],     1,     1005 ],
-  [  2,    [1,1,1008],     0,     1006 ],
-  [  x,    [0,0,0000],     x,       x  ],
-  [  x,    [0,0,0000],     2,     1007 ],
-  [  x,    [0,0,0000],     x,       x  ],
-  [  x,    [0,0,0000],     3,     1008 ],
-  [  x,    [0,0,0000],     x,       x  ],
-  [  x,    [0,0,0000],     x,       x  ],
-  [  x,    [0,0,0000],     x,       x  ],
-  [  x,    [0,0,0000],     x,       x  ],
-  ]
-
-#  model.set_param("top.routers*.input_units*.construct", QueueType=NormalQueueRTL)
-
-  model.set_param("top.routers*.construct", RouteUnitType=DORYMeshRouteUnitRTL)
-
-#  model.set_param("top.routers[2].translate", True)
-#  model.set_param("top.routers*.translate", True)
-#  model.set_param("top.translate", False)
-
-  # dt = DrawGraph()
-  # model.set_draw_graph( dt )
-  run_vector_test( model, simple_2_2_test, mesh_wid, mesh_ht)
-
-def test_vector_mesh4x4( dump_vcd, test_verilog ):
-
-  mesh_wid = 4
-  mesh_ht  = 4
-  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
-  model = MeshNetworkRTL( PacketType, MeshPos, mesh_wid, mesh_ht, 0)
-
-  num_routers = mesh_wid * mesh_ht
-  num_inports = 5
-#  for r in range (num_routers):
-#    for i in range (num_inports):
-#      path_qt = "top.routers[" + str(r) + "].input_units[" + str(i) + "].elaborate.QueueType"
-#      path_ru = "top.routers[" + str(r) + "].elaborate.RouteUnitType"
-#      model.set_param(path_qt, NormalQueueRTL)
-#      model.set_param(path_ru, DORYMeshRouteUnitRTL)
-
-  x = 'x'
-  # Specific for wire connection (link delay = 0) in 4x4 Mesh topology
-  simple_4_4_test = [
-#  router   [packet]   arr_router  msg
-  [  0,    [1,0,1001],     x,       x  ],
-  [  0,    [1,1,1002],     x,       x  ],
-  [  0,    [0,1,1003],     1,     1001 ],
-  [  0,    [0,1,1004],     x,       x  ],
-  [  0,    [1,0,1005],     4,     1003 ],
-  ]
-
-  # dt = DrawGraph()
-  # model.set_draw_graph( dt )
-  run_vector_test( model, simple_4_4_test, mesh_wid, mesh_ht)
-
-  # dt.draw_topology( model.routers, model.channels )
-
-#-------------------------------------------------------------------------
 # TestHarness
 #-------------------------------------------------------------------------
 
@@ -149,30 +36,21 @@ class TestHarness( Component ):
     match_func = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
-              for i in range ( s.dut.num_routers ) ]
-    if arrival_time != None:
-      s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval, arrival_time[i], match_func=match_func)
                 for i in range ( s.dut.num_routers ) ]
+    if arrival_time != None:
+      s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial,
+                  sink_interval, arrival_time[i], match_func=match_func)
+                  for i in range ( s.dut.num_routers ) ]
     else:
       s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval, match_func=match_func)
-                for i in range ( s.dut.num_routers ) ]
+                  sink_interval, match_func=match_func)
+                  for i in range ( s.dut.num_routers ) ]
 
     # Connections
+
     for i in range ( s.dut.num_routers ):
       s.srcs[i].send //= s.dut.recv[i]
       s.dut.send[i]  //= s.sinks[i].recv
-
-    #TODO: provide pos for router...
-    XYType = mk_bits( clog2( mesh_wid ) )
-    @s.update
-    def up_pos():
-      for y in range( mesh_ht ):
-        for x in range( mesh_wid ):
-          idx = y * mesh_wid + x
-          s.dut.pos_x[idx] = XYType(x)
-          s.dut.pos_y[idx] = XYType(y)
 
   def done( s ):
     srcs_done = 1
