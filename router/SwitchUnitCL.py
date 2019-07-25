@@ -46,8 +46,5 @@ class SwitchUnitCL( Component ):
 
   # CL line trace
   def line_trace( s ):
-    return "{}_({})_{}".format(
-      "|".join( [ str(s.get[i]) for i in range(s.num_inports) ] ),
-      s.priority,
-      s.give,
-    )
+    in_str = "|".join([ str(s.get[i]) for i in range(s.num_inports) ])
+    return f"{in_str}_({s.priority})_{s.give}"
