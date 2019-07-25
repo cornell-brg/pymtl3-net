@@ -54,7 +54,6 @@ class RingRouteUnitRTL( Component ):
         s.left_dist  = s.pos + dist_type(1) + s.last_idx - s.get.msg.dst
         s.right_dist = s.get.msg.dst -s.pos
 
-    # FIXME: Don't use integers!
     @s.update
     def up_ru_routing():
 
