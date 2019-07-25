@@ -2,7 +2,7 @@
 ==========================================================================
 CMeshNetworkRTL.py
 ==========================================================================
-CMesh network implementation.
+RTL implementation of concetrated mesh network.
 
 Author : Cheng Tan
   Date : Mar 10, 2019
@@ -15,7 +15,7 @@ from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 class CMeshNetworkRTL( Component ):
   def construct( s, PacketType, PositionType,
-                 mesh_wid = 4, mesh_ht = 4, num_nodes_each = 4, chl_lat = 0 ):
+                 mesh_wid=4, mesh_ht=4, num_nodes_each=4, chl_lat=0 ):
 
     # Constants
 
@@ -34,12 +34,14 @@ class CMeshNetworkRTL( Component ):
     # Components
 
     s.routers  = [ CMeshRouterRTL( PacketType, PositionType, num_inports,
-                 num_outports ) for i in range( s.num_routers ) ]
+                     num_outports ) for i in range( s.num_routers ) ]
 
     s.channels = [ ChannelRTL( PacketType, latency = chl_lat)
-                 for _ in range( num_channels ) ]
+                   for _ in range( num_channels ) ]
 
     # Connect s.routers together in Mesh
+    # FIXME: we need to calculate the bit width for directions. Currently
+    # the translation pass may throw an error.
 
     chl_id  = 0
     for i in range( s.num_routers ):
@@ -97,8 +99,7 @@ class CMeshNetworkRTL( Component ):
     def up_pos():
       for y in range( mesh_ht ):
         for x in range( mesh_wid ):
-          idx = y * mesh_wid + x
-          s.routers[idx].pos = PositionType( x, y )
+          s.routers[y*mesh_wid+x].pos = PositionType( x, y )
 
   def line_trace( s ):
     trace = [ f"{s.send[i]}" for i in range( s.num_terminals ) ]

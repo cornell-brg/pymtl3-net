@@ -15,7 +15,7 @@ class DORYCMeshRouteUnitRTL( Component ):
 
   def construct( s, PacketType, PositionType, num_outports = 5 ):
 
-    # Constants 
+    # Constants
 
     s.num_outports = num_outports
     TType = mk_bits( num_outports )
@@ -28,7 +28,7 @@ class DORYCMeshRouteUnitRTL( Component ):
 
     # Componets
 
-    s.give_ens = Wire( mk_bits( s.num_outports ) ) 
+    s.give_ens = Wire( mk_bits( s.num_outports ) )
     s.give_rdy = [ Wire( Bits1 ) for _ in range( s.num_outports )]
 
     # Connections
@@ -37,11 +37,12 @@ class DORYCMeshRouteUnitRTL( Component ):
       s.get.msg     //= s.give[i].msg
       s.give_ens[i] //= s.give[i].en
       s.give_rdy[i] //= s.give[i].rdy
-    
+
     # Routing logic
+
     @s.update
     def up_ru_routing():
- 
+
       for i in range( s.num_outports ):
         s.give_rdy[i] = Bits1(0)
 
@@ -59,13 +60,10 @@ class DORYCMeshRouteUnitRTL( Component ):
 
     @s.update
     def up_ru_get_en():
-      s.get.en = s.give_ens > TType(0) 
+      s.get.en = s.give_ens > TType(0)
 
   # Line trace
   def line_trace( s ):
 
-    out_str = [ "" for _ in range( s.num_outports ) ]
-    for i in range (s.num_outports):
-      out_str[i] = "{}".format( s.give[i] ) 
-
-    return "{}{}".format( s.get, "|".join( out_str ) )
+    out_str = "|".join([ f"{s.give[i]}" for i in range( s.num_outports ) ])
+    return f"{s.get}(){out_str}"
