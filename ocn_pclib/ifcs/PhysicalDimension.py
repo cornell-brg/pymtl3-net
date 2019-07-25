@@ -7,7 +7,7 @@
 #   Date : May 7, 2019
 
 #-------------------------------------------------------------------------
-# Dimension information used for floorplanning and topology demo 
+# Dimension information used for floorplanning and topology demo
 #-------------------------------------------------------------------------
 
 class PhysicalDimension( object ):
@@ -19,6 +19,6 @@ class PhysicalDimension( object ):
     s.h     = 0
 
   def __str__( s ):
-    return "({},{}|{},{}|{},{})".format( s.x, s.y, s.w, s.h, 
+    return "({},{}|{},{}|{},{})".format( s.x, s.y, s.w, s.h,
             s.x + s.w, s.y + s.h )
 

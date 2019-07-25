@@ -2,7 +2,7 @@
 # positions.py
 #=========================================================================
 # Positions definition.
-# 
+#
 # Author : Yanghui Ou
 #   Date : May 20, 2019
 
