@@ -49,7 +49,12 @@ PyOCN requires Python3.7 and has the following additional prerequisites:
 The steps for installing these prerequisites and PyOCN on a fresh Ubuntu
 distribution are shown below. They have been tested with Ubuntu Trusty
 14.04.
-...
+
+### Install python3
+
+```
+ % sudo apt-get install python3.7
+```
 
 ### Install graphviz
 
