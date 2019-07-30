@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 """
 =========================================================================
-netsim.py
+pyocn.py
 =========================================================================
-A simple implementation of network simulation.
+Example of PyOCN for modeling, testing, and evaluating.
 
 Author : Cheng Tan
   Date : July 30, 2019
 """
-
 #=========================================================================
 # netsim.py [options]
 #=========================================================================
@@ -293,7 +292,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   elif opts.topology == "Mesh":
     NetModel = topology_dict[ "Mesh" ]
-    net_width = opts.routers/opts.rows
+    net_width = int(opts.routers/opts.rows)
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
     PacketType = mk_mesh_pkt_timestamp( net_width, net_height,
@@ -551,76 +550,30 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 # Main
 #-------------------------------------------------------------------------
 
+from ruamel.yaml import YAML
+from pathlib import Path
+
 def main():
 
-  opts = parse_cmdline()
+#  opts = parse_cmdline()
 
-  dump_vcd = None
+  path   = Path('config.yml')
+  yaml   = YAML(typ='safe')
+  config = yaml.load(path)
+
+  print( config )
+  
+  return
+
   start_time      = 0
   end_time        = 1
 
-  # sweep mode: sweep the injection rate until the network is saturated.
-  # we assume the latency is 100 when the network is saturated.
+  start_time = time.time()
 
-  if opts.sweep:
+  results = simulate( opts, opts.injection_rate, opts.pattern, 500,
+          dump_vcd, opts.trace, opts.verbose )
 
-    print()
-    print( "Pattern: " + opts.pattern )
-    print()
-    print( "{:<20} | {:<20} | {:<20} | {:<20}".\
-            format( "Injection rate (%)", "Avg. Latency", \
-                    "Sim.Time (sec)", "Sim.Speed (cyc/s)") )
-
-    inj             = 0
-    avg_lat         = 0
-    zero_load_lat   = 0
-    running_avg_lat = 0.0
-    inj_shamt_mult  = 5
-    inj_shamt       = 0.0
-    inj_step        = 5 if opts.topology == "bus" else 10 # ring
-
-    while avg_lat <= 500 and inj <= 100:
-
-      start_time = time.time()
-
-      results = simulate( opts, max(inj,1), opts.pattern, 500,
-              opts.dump_vcd, opts.trace, opts.verbose )
-
-      end_time = time.time()
-
-      avg_lat = results[0]
-
-      print( "{:<20} | {:<20.1f} | {:<20.1f} | {:<20.1f}".\
-              format( max(inj,1), avg_lat, (end_time - start_time),
-              results[2]/(end_time - start_time)) )
-
-      if inj == 0:
-        zero_load_lat = avg_lat
-
-      # dynamically reduce inj_step depending on the slope
-      if running_avg_lat == 0.0:
-        running_avg_lat = int(avg_lat)
-      else:
-        running_avg_lat = 0.5 * int(avg_lat) + 0.5 * int(running_avg_lat)
-
-#      inj_shamt = ( (int(avg_lat) / running_avg_lat) - 1 ) * inj_shamt_mult
-#      inj_step  = inj_step >> int(inj_shamt)
-#      if inj_step < 1:
-#        inj_step = 1
-#      inj += inj_step
-      inj += 10
-
-    print()
-    print( "Zero-load latency = %.1f" % zero_load_lat )
-    print()
-
-  else:
-    start_time = time.time()
-
-    results = simulate( opts, opts.injection_rate, opts.pattern, 500,
-            dump_vcd, opts.trace, opts.verbose )
-
-    end_time = time.time()
+  end_time = time.time()
 
   if opts.stats and not opts.sweep:
     print()

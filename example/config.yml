@@ -1,0 +1,52 @@
+#=========================================================================
+#config.yml
+#=========================================================================
+#Yaml-based configuratin file of PyOCN for modeling, testing, 
+#and evaluating.
+#
+#Author : Cheng Tan
+#  Date : July 30, 2019
+#
+---
+
+# Action user wants to perform in this example.
+action:
+  - simulating
+#  - generating
+#  - characterizing
+
+# Topology (choose from crossbar, ring, mesh, torus, cmesh, butterfly).
+topology:
+  - Ring
+  - Mesh
+  - CMesh
+  - Torus
+  - Bfly
+
+# Model (choose from FL, CL, RTL).
+model:
+  - CL
+  - RTL
+
+# For simulation:
+# Injection ratio (choose from 0 to 1).
+injection:
+  - 0.2
+  - 0.4
+
+# Communication pattern (choose from urandom, partition, opposite,
+# neighbor, complement).
+pattern:
+  - urandom
+  - complement
+
+# Number of routers (choose from 4, 16, 64, etc).
+routers: 16
+
+# Number of rows (choose from 2, 4, 8, etc).
+rows: 4
+
+# Latency of channels between routers.
+channel_lat: 1
+
+...
