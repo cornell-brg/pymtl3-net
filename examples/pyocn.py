@@ -8,66 +8,6 @@ Example of PyOCN for modeling, testing, and evaluating.
 Author : Cheng Tan
   Date : July 30, 2019
 """
-#=========================================================================
-# netsim.py [options]
-#=========================================================================
-#
-#  -h --help           Display this message
-#  -v --verbose        Verbose mode
-#
-#  --pattern <pattern> Choose a network pattern
-#                      urandom             dest = random % 4
-#                      partition2          dest = (random & 2'b01) | (src & 2'b10)
-#                      opposite            dest = (src + 2) % 4
-#                      neighbor            dest = (src + 1) % 4
-#                      complement          dest = ~src
-#
-#  --injection-rate    Injection rate of network message (in percent)
-#  --sweep             Sweep the injection rates
-#  --dump-vcd          Dump vcd
-#  --stats             Print stats
-#  --trace             Display line-trace
-#
-#  --mode              Choose model
-#                      FL  : functional-level models
-#                      CL  : cycle-level models
-#                      RTL : register-transfer-level models
-#
-#  --topology          Choose NoC topology
-#                      Ring     : ring network
-#                      Mesh     : mesh network
-#                      CMesh    : concentrated mesh network
-#                      Torus    : torus network
-#                      Butterfly: K-ary n-fly butterfly network
-#
-#  --virtual-channels  Number of virtual channels
-#
-#  --routing-strategy  Choose a routing algorithm
-#                      DORX : Dimension Order Routing - X
-#                      DORY : Dimension Order Routing - Y
-#
-#  --routers           Number of routers in network
-#
-#  --terminals-each    Number of terminals attached to router (for CMesh)
-#
-#  --rows              Number of rows of routers in network
-#
-#  --router-inports    Number of inports in each router
-#
-#  --router-outports   Number of outports in each router
-#
-#  --channel-latency   Latency of the channel between routers
-#
-# The OCN generator simulator. Choose an implementation and an
-# access pattern to execute. Use --stats to display statistics about the
-# simulation.
-#
-# Author : Cheng Tan
-# Date   : April 14, 2018
-
-#from __future__ import print_function
-
-# Hack to add project root to python path
 
 import os
 import sys
@@ -129,8 +69,8 @@ def characterize():
 
 # Global constants for simulation
 
-NUM_WARMUP_CYCLES   = 100
-NUM_SAMPLE_CYCLES   = 500 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 10
+NUM_SAMPLE_CYCLES   = 50 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbose ):
@@ -138,7 +78,7 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
 
   routers         = nodes
   channel_latency = channel_lat
-  injection_rate  = injection
+  injection_rate  = injection * 100
   net             = None
 
   # Simulation Variables
@@ -173,7 +113,7 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       RingPos    = mk_ring_pos( routers )
       PacketType = mk_ring_pkt_timestamp( routers, nvcs = 2,
                    max_time = NUM_SAMPLE_CYCLES )
-      net      = NetModel( PacketType, RingPos, routers, 0 )
+      net      = NetModel( PacketType, RingPos, routers, channel_lat )
 #      net.set_param( "top.routers*.route_units*.construct", num_routers=routers)
   
     elif topology == "Mesh":
@@ -183,11 +123,12 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       MeshPos     = mk_mesh_pos( net_width, net_height )
       PacketType  = mk_mesh_pkt_timestamp( net_width, net_height,
                     payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
-      net         = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
+      net         = NetModel( PacketType, MeshPos, 
+                    net_width, net_height, channel_lat )
   
     elif topology == "Torus":
       NetModel    = TorusNetworkRTL
-      net_width   = routers/rows
+      net_width   = int(routers/rows)
       net_height  = rows
       MeshPos     = mk_mesh_pos( net_width, net_height )
       PacketType  = mk_mesh_pkt_timestamp( net_width, net_height, nvcs = 2,
@@ -197,25 +138,26 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       # model.set_param('top.routers*.route_units*.construct', nrows=net_height)
   
     elif topology == "CMesh":
+      # TODO: need to provide parameters for different topology specifically.
       NetModel    = CMeshNetworkRTL
       routers     = rows * rows
-      net_width   = routers/rows
+      net_width   = int(routers/rows)
       net_height  = rows
-      term_each   = nodes/routers
+      term_each   = int(nodes/routers)
       inports     = term_each + 4
       outports    = term_each + 4
       MeshPos     = mk_mesh_pos( net_width, net_height )
       PacketType  = mk_cmesh_pkt_timestamp( net_width, net_height,
-                    inports, outports, payload_nbits = 1, 
+                    inports, outports, payload_nbits = 2, 
                     max_time = NUM_SAMPLE_CYCLES )
       net         = NetModel( PacketType, MeshPos, net_width, net_height,
                     term_each, 0 )
   
-    elif topology == "Butterfly":
+    elif topology == "Bfly":
       NetModel    = BflyNetworkRTL
       k_ary       = 4
       n_fly       = 3
-      num_nodes   = k_ary * ( k_ary ** ( n_fly - 1 ) )
+      nodes   = k_ary * ( k_ary ** ( n_fly - 1 ) )
       num_routers = n_fly * ( k_ary ** ( n_fly - 1 ) )
       MeshPos     = mk_bfly_pos( k_ary, n_fly )
       PacketType  = mk_bfly_pkt_timestamp( k_ary, n_fly,
@@ -266,113 +208,53 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
 
         # inject packet past the warmup period
 
+        timestamp = INVALID_TIMESTAMP
         if ( NUM_WARMUP_CYCLES < ncycles < NUM_SAMPLE_CYCLES ):
-          if topology == "Ring":
-            if dest < i and i - dest <= nodes/2:
-              opaque = 0
-            elif dest > i and dest - i <= nodes/2:
-              opaque = 0
-            else:
-              opaque = 0
+          timestamp = ncycles
 
-            pkt = PacketType( i, dest, 0, opaque, 98+i+ncycles, ncycles )
+        if topology == "Ring":
+          pkt = PacketType( i, dest, 0, 0, 98+i+ncycles, timestamp )
 
-          elif topology == "Mesh":
-#            net_width = opts.routers / opts.rows
-            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 0, 6, ncycles )
+        elif topology == "Mesh":
+          pkt = PacketType( i%net_width, i/net_width, dest%net_width,
+                  dest/net_width, 0, 6, timestamp )
 
-          elif topology == "Torus":
-#            net_width = opts.routers / opts.rows
-            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 0, 0, 6, ncycles )
 
-          elif topology == "CMesh":
-            pkt = PacketType( (i/term_each)%net_width,
-                              (i/term_each)/net_width,
-                              (dest/term_each)%net_width,
-                              (dest/term_each)/net_width,
-                              dest%term_each,
-                              0, 6, ncycles )
+        elif topology == "Torus":
+          pkt = PacketType( i%net_width, i/net_width, dest%net_width,
+                  dest/net_width, 0, 0, 6, timestamp )
 
-          elif topology == "Butterfly":
-            r_rows = k_ary ** ( n_fly - 1 )
-#            DstType = mk_bits( clog2( r_rows ) * n_fly )
-            if r_rows == 1 or k_ary == 1:
-              DstType = mk_bits( n_fly )
-            else:
-              DstType = mk_bits( clog2( k_ary ) * n_fly )
-            bf_dst = DstType(0)
-            tmp = 0
-            dst = dest
-            for index in range( n_fly ):
-              tmp = dst / (k_ary**(n_fly-index-1))
-              dst = dst % (k_ary**(n_fly-index-1))
-              bf_dst = DstType(bf_dst | DstType(tmp))
-              if index != n_fly - 1:
-                if k_ary == 1:
-                  bf_dst = bf_dst * 2
-                else:
-                  bf_dst = bf_dst * k_ary
-            pkt = PacketType( i, bf_dst, 0, 6, ncycles )
+        elif topology == "CMesh":
+          pkt = PacketType( (i/term_each)%net_width,
+                            (i/term_each)/net_width,
+                            (dest/term_each)%net_width,
+                            (dest/term_each)/net_width,
+                            dest%term_each,
+                            0, 6, timestamp )
 
-          src[i].append( pkt )
+        elif topology == "Bfly":
+          r_rows = k_ary ** ( n_fly - 1 )
+          if r_rows == 1 or k_ary == 1:
+            DstType = mk_bits( n_fly )
+          else:
+            DstType = mk_bits( clog2( k_ary ) * n_fly )
+          bf_dst = DstType(0)
+          tmp = 0
+          dst = dest
+          for index in range( n_fly ):
+            tmp = dst / (k_ary**(n_fly-index-1))
+            dst = dst % (k_ary**(n_fly-index-1))
+            bf_dst = DstType(bf_dst | DstType(tmp))
+            if index != n_fly - 1:
+              if k_ary == 1:
+                bf_dst = bf_dst * 2
+              else:
+                bf_dst = bf_dst * k_ary
+          pkt = PacketType( i, bf_dst, 0, 6, timestamp )
+
+        src[i].append( pkt )
+        if ( ncycles < NUM_SAMPLE_CYCLES ):
           packets_generated += 1
-
-        # packet injection during warmup or drain phases
-
-        else:
-          if topology == "Ring":
-            if dest < i and i - dest <= num_nodes/2:
-              opaque = 0
-            elif dest > i and dest - i <= num_nodes/2:
-              opaque = 0
-            else:
-              opaque = 0
-            pkt = PacketType( i, dest, opaque, 0, 98+i+ncycles, INVALID_TIMESTAMP )
-
-          elif topology == "Mesh":
-            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 0, 6, INVALID_TIMESTAMP )
-#            pkt = mk_mesh_pkt_timestamp( i%net_width, i/net_width, dest%net_width,
-#                    dest/net_width, 1, 6, INVALID_TIMESTAMP )
-
-          elif topology == "Torus":
-            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 0, 0, 6, INVALID_TIMESTAMP )
-
-          elif topology == "CMesh":
-            pkt = PacketType( (i/term_each)%net_width,
-                              (i/term_each)/net_width,
-                              (dest/term_each)%net_width,
-                              (dest/term_each)/net_width,
-                              dest%term_each,
-                              0, 6, INVALID_TIMESTAMP )
-
-          elif topology == "Butterfly":
-            r_rows = k_ary ** ( n_fly - 1 )
-#            DstType = mk_bits( clog2( r_rows ) * n_fly )
-            if r_rows == 1 or k_ary == 1:
-              DstType = mk_bits( n_fly )
-            else:
-              DstType = mk_bits( clog2( k_ary ) * n_fly )
-            bf_dst = DstType(0)
-            tmp = 0
-            dst = dest
-            for index in range( n_fly ):
-              tmp = dst / (k_ary**(n_fly-index-1))
-              dst = dst % (k_ary**(n_fly-index-1))
-              bf_dst = DstType(bf_dst | DstType(tmp))
-              if index != n_fly - 1:
-                if k_ary == 1:
-                  bf_dst = bf_dst * 2
-                else:
-                  bf_dst = bf_dst * k_ary
-            pkt = PacketType( i, bf_dst, 0, 6, INVALID_TIMESTAMP )
-
-          src[i].append( pkt )
-          if ( ncycles < NUM_SAMPLE_CYCLES ):
-            packets_generated += 1
 
       # Inject from source queue
 
@@ -380,7 +262,6 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
         if net.recv[i].rdy:
           net.recv[i].msg = src[i][0]
           net.recv[i].en  = 1
-#          print 'injected pkt: ', src[i][0]
         else:
           net.recv[i].en  = 0
       else:
@@ -399,8 +280,6 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
           average_latency = total_latency / float( packets_received )
 
       # Check if finished - drain phase
-      #print 'all_packets_received: ', all_packets_received
-      #print 'packets_generated: ', packets_generated
 
       if ( ncycles >= NUM_SAMPLE_CYCLES and
            all_packets_received >= packets_generated ):
@@ -415,9 +294,7 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
 
     # print line trace if enables
 
-    # advance simulation
-
-    print( "{:3}:{}".format( ncycles, net.line_trace() ))
+#    print( "{:3}:{}".format( ncycles, net.line_trace() ))
 
     net.tick()
     ncycles += 1
@@ -435,8 +312,6 @@ from pathlib import Path
 
 def main():
 
-#  opts = parse_cmdline()
-
   path   = Path('config.yml')
   yaml   = YAML(typ='safe')
   config = yaml.load(path)
@@ -444,31 +319,49 @@ def main():
   print( config )
   print( config['topology'] )
   
-  start_time      = 0
-  end_time        = 1
+  for action in config['action']:
 
-  start_time = time.time()
+    if action == 'generating':
+    # TODO: Generating Verilog
+      pass
 
-  model     = config['model'][1]
-  topology  = config['topology'][0]
-  injection = config['injection'][0]
-  pattern   = config['pattern'][0]
-  results   = simulate( model, topology, config['nodes'], config['rows'],  
-              config['channel_lat'], injection, pattern )
- 
-  end_time = time.time()
+    if action == 'evaluating':
+    # TODO: Use the backend script to characterize the target network?
+      pass
 
-  print()
-  print( "Pattern:         " + pattern )
-  print( "Injection rate:  %d" % injection )
-  print()
-  print( "Average Latency  = %.1f" % results[0] )
-  print( "Num Packets      = %d" % results[1] )
-  print( "Total cycles     = %d" % results[2] )
-  print( "Simulation time  = %.1f sec" % (end_time - start_time) )
-  print( "Simulation speed = %.1f cycle/sec" % \
-          (results[2]/(end_time - start_time)) )
-  print()
+    if action == 'simulating':
+  
+      print()
+      print( "[SIMULATION]" )
+      print( "Warmup Cycles:    %d" % NUM_WARMUP_CYCLES )
+      print( "Sample Cycles:    %d" % NUM_SAMPLE_CYCLES )
+      print()
+    
+      print( "=======================================================================================" )
+      print( "|Model|Topology|Pattern    |Inj.Rate|Avg.Lat|Num.Pkt|Total Cycles|Sim.Time|Speed (c/s)|" )
+      print( "|-----|--------|-----------|--------|-------|-------|------------|--------|-----------|" )
+    
+      for model in config['model']:
+        for topology in config['topology']:
+          for injection in config['injection']:
+            for pattern in config['pattern']:
+              start_time = time.time()
+
+              # Start simulation
+
+              results = simulate( model, topology, config['nodes'], config['rows'],
+                        config['channel_lat'], injection, pattern )
+
+              end_time = time.time()
+    
+              print( "|{:<5}|{:<8}|{:<11}|{:<8}|{:<7}|{:<7}|{:<12}|{:<8}|{:<11}|".\
+                      format(model, topology, pattern, injection,\
+                          "{0:.1f}".format(results[0]), results[1], results[2], 
+                          "{0:.1f}".format(end_time - start_time),
+                          "{0:.1f}".format(results[2]/(end_time - start_time))) )
+    
+      print( "|=====================================================================================|" )
+      print()
 
 main()
 

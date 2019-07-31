@@ -237,8 +237,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 100
-NUM_SAMPLE_CYCLES   = 500 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 10
+NUM_SAMPLE_CYCLES   = 50 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
@@ -293,7 +293,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   elif opts.topology == "Mesh":
     NetModel = topology_dict[ "Mesh" ]
-    net_width = opts.routers/opts.rows
+    net_width = int(opts.routers/opts.rows)
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
     PacketType = mk_mesh_pkt_timestamp( net_width, net_height,
@@ -302,7 +302,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   elif opts.topology == "Torus":
     NetModel = topology_dict[ "Torus" ]
-    net_width = opts.routers/opts.rows
+    net_width = int(opts.routers/opts.rows)
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
     PacketType = mk_mesh_pkt_timestamp( net_width, net_height, nvcs = 2,
@@ -313,7 +313,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   elif opts.topology == "CMesh":
     NetModel = topology_dict[ "CMesh" ]
-    net_width = opts.routers/opts.rows
+    net_width = int(opts.routers/opts.rows)
     net_height = opts.rows
     inports   = opts.router_inports
     outports  = opts.router_outports
