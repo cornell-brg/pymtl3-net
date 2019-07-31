@@ -21,7 +21,7 @@ topology:
   - Mesh
   - CMesh
   - Torus
-  - Bfly
+  - Butterfly
 
 # Model (choose from FL, CL, RTL).
 model:
@@ -41,7 +41,7 @@ pattern:
   - complement
 
 # Number of routers (choose from 4, 16, 64, etc).
-routers: 16
+nodes: 16
 
 # Number of rows (choose from 2, 4, 8, etc).
 rows: 4
