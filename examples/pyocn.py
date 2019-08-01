@@ -8,7 +8,6 @@ Example of PyOCN for modeling, testing, and evaluating.
 Author : Cheng Tan
   Date : July 30, 2019
 """
-
 import os
 import sys
 import argparse
@@ -118,7 +117,7 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
   
     elif topology == "Mesh":
       NetModel    = MeshNetworkRTL
-      net_width   = int(routers/rows)
+      net_width   = routers // rows
       net_height  = rows
       MeshPos     = mk_mesh_pos( net_width, net_height )
       PacketType  = mk_mesh_pkt_timestamp( net_width, net_height,
@@ -128,7 +127,7 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
   
     elif topology == "Torus":
       NetModel    = TorusNetworkRTL
-      net_width   = int(routers/rows)
+      net_width   = routers // rows
       net_height  = rows
       MeshPos     = mk_mesh_pos( net_width, net_height )
       PacketType  = mk_mesh_pkt_timestamp( net_width, net_height, nvcs = 2,
@@ -141,9 +140,9 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       # TODO: need to provide parameters for different topology specifically.
       NetModel    = CMeshNetworkRTL
       routers     = rows * rows
-      net_width   = int(routers/rows)
+      net_width   = routers // rows
       net_height  = rows
-      term_each   = int(nodes/routers)
+      term_each   = nodes // routers
       inports     = term_each + 4
       outports    = term_each + 4
       MeshPos     = mk_mesh_pos( net_width, net_height )
@@ -180,8 +179,8 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
 
     if topology == "Mesh":
       XYType = mk_bits( clog2( net_width ) )
-      net.pos_x[i] = XYType(i%net_width)
-      net.pos_y[i] = XYType(i/net_height)
+      net.pos_x[i] = XYType(i % net_width)
+      net.pos_y[i] = XYType(i // net_height)
 
   ncycles = 0
 
@@ -197,8 +196,8 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
         if   pattern == "urandom":
           dest = randint( 0, nodes-1 )
         elif pattern == "partition":
-          dest = ( randint( 0, nodes-1 ) ) & (nodes/2-1) |\
-                 ( i & (nodes/2) )
+          dest = ( randint( 0, nodes-1 ) ) & (nodes // 2-1) |\
+                 ( i & (nodes // 2) )
         elif pattern == "opposite":
           dest = ( i + 2 ) % nodes
         elif pattern == "neighbor":
@@ -216,20 +215,20 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
           pkt = PacketType( i, dest, 0, 0, 98+i+ncycles, timestamp )
 
         elif topology == "Mesh":
-          pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                  dest/net_width, 0, 6, timestamp )
+          pkt = PacketType( i % net_width, i // net_width, dest % net_width,
+                  dest // net_width, 0, 6, timestamp )
 
 
         elif topology == "Torus":
-          pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                  dest/net_width, 0, 0, 6, timestamp )
+          pkt = PacketType( i % net_width, i // net_width, dest % net_width,
+                  dest // net_width, 0, 0, 6, timestamp )
 
         elif topology == "CMesh":
-          pkt = PacketType( (i/term_each)%net_width,
-                            (i/term_each)/net_width,
-                            (dest/term_each)%net_width,
-                            (dest/term_each)/net_width,
-                            dest%term_each,
+          pkt = PacketType( (i // term_each) %  net_width,
+                            (i // term_each) // net_width,
+                            (dest // term_each) %  net_width,
+                            (dest // term_each) // net_width,
+                            dest % term_each,
                             0, 6, timestamp )
 
         elif topology == "Bfly":
@@ -242,8 +241,8 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
           tmp = 0
           dst = dest
           for index in range( n_fly ):
-            tmp = dst / (k_ary**(n_fly-index-1))
-            dst = dst % (k_ary**(n_fly-index-1))
+            tmp = dst // (k_ary**(n_fly-index-1))
+            dst = dst %  (k_ary**(n_fly-index-1))
             bf_dst = DstType(bf_dst | DstType(tmp))
             if index != n_fly - 1:
               if k_ary == 1:
@@ -322,12 +321,16 @@ def main():
   for action in config['action']:
 
     if action == 'generating':
-    # TODO: Generating Verilog
-      pass
+      # TODO: Generating Verilog
+      print()
+      print( "[GENERATION]" )
+      print( "=======================================================================================" )
 
     if action == 'evaluating':
-    # TODO: Use the backend script to characterize the target network?
-      pass
+      # TODO: Use the backend script to characterize the target network?
+      print()
+      print( "[EVALUATION]" )
+      print( "=======================================================================================" )
 
     if action == 'simulating':
   
@@ -335,8 +338,6 @@ def main():
       print( "[SIMULATION]" )
       print( "Warmup Cycles:    %d" % NUM_WARMUP_CYCLES )
       print( "Sample Cycles:    %d" % NUM_SAMPLE_CYCLES )
-      print()
-    
       print( "=======================================================================================" )
       print( "|Model|Topology|Pattern    |Inj.Rate|Avg.Lat|Num.Pkt|Total Cycles|Sim.Time|Speed (c/s)|" )
       print( "|-----|--------|-----------|--------|-------|-------|------------|--------|-----------|" )
