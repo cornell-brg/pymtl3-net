@@ -114,7 +114,7 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
                    max_time = NUM_SAMPLE_CYCLES )
       net      = NetModel( PacketType, RingPos, routers, channel_lat )
 #      net.set_param( "top.routers*.route_units*.construct", num_routers=routers)
-  
+
     elif topology == "Mesh":
       NetModel    = MeshNetworkRTL
       net_width   = routers // rows
@@ -122,9 +122,9 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       MeshPos     = mk_mesh_pos( net_width, net_height )
       PacketType  = mk_mesh_pkt_timestamp( net_width, net_height,
                     payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
-      net         = NetModel( PacketType, MeshPos, 
+      net         = NetModel( PacketType, MeshPos,
                     net_width, net_height, channel_lat )
-  
+
     elif topology == "Torus":
       NetModel    = TorusNetworkRTL
       net_width   = routers // rows
@@ -135,7 +135,7 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       net         = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
       # model.set_param('top.routers*.route_units*.construct', ncols=net_width )
       # model.set_param('top.routers*.route_units*.construct', nrows=net_height)
-  
+
     elif topology == "CMesh":
       # TODO: need to provide parameters for different topology specifically.
       NetModel    = CMeshNetworkRTL
@@ -147,11 +147,11 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       outports    = term_each + 4
       MeshPos     = mk_mesh_pos( net_width, net_height )
       PacketType  = mk_cmesh_pkt_timestamp( net_width, net_height,
-                    inports, outports, payload_nbits = 2, 
+                    inports, outports, payload_nbits = 2,
                     max_time = NUM_SAMPLE_CYCLES )
       net         = NetModel( PacketType, MeshPos, net_width, net_height,
                     term_each, 0 )
-  
+
     elif topology == "Bfly":
       NetModel    = BflyNetworkRTL
       k_ary       = 4
@@ -317,23 +317,24 @@ def main():
 
   print( config )
   print( config['topology'] )
-  
+
   for action in config['action']:
 
-    if action == 'generating':
+    if action == 'generate':
       # TODO: Generating Verilog
       print()
       print( "[GENERATION]" )
       print( "=======================================================================================" )
+      generate()
 
-    if action == 'evaluating':
+    if action == 'characterize':
       # TODO: Use the backend script to characterize the target network?
       print()
-      print( "[EVALUATION]" )
+      print( "[CHARACTERIZE]" )
       print( "=======================================================================================" )
 
-    if action == 'simulating':
-  
+    if action == 'simulate':
+
       print()
       print( "[SIMULATION]" )
       print( "Warmup Cycles:    %d" % NUM_WARMUP_CYCLES )
@@ -341,7 +342,7 @@ def main():
       print( "=======================================================================================" )
       print( "|Model|Topology|Pattern    |Inj.Rate|Avg.Lat|Num.Pkt|Total Cycles|Sim.Time|Speed (c/s)|" )
       print( "|-----|--------|-----------|--------|-------|-------|------------|--------|-----------|" )
-    
+
       for model in config['model']:
         for topology in config['topology']:
           for injection in config['injection']:
@@ -354,13 +355,13 @@ def main():
                         config['channel_lat'], injection, pattern )
 
               end_time = time.time()
-    
+
               print( "|{:<5}|{:<8}|{:<11}|{:<8}|{:<7}|{:<7}|{:<12}|{:<8}|{:<11}|".\
                       format(model, topology, pattern, injection,\
-                          "{0:.1f}".format(results[0]), results[1], results[2], 
+                          "{0:.1f}".format(results[0]), results[1], results[2],
                           "{0:.1f}".format(end_time - start_time),
                           "{0:.1f}".format(results[2]/(end_time - start_time))) )
-    
+
       print( "|=====================================================================================|" )
       print()
 

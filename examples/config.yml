@@ -1,7 +1,7 @@
 #=========================================================================
 #config.yml
 #=========================================================================
-#Yaml-based configuratin file of PyOCN for modeling, testing, 
+#Yaml-based configuratin file of PyOCN for modeling, testing,
 #and evaluating.
 #
 #Author : Cheng Tan
@@ -10,14 +10,14 @@
 ---
 
 action:
-  - simulating
-  - generating
-  - characterizing
+  - simulate
+  - generate
+  - characterize
 
 topology:
-  - Ring
+  # - Ring
   - Mesh
-  - Torus
+  # - Torus
   # - Bfly
 
 model:
@@ -26,11 +26,11 @@ model:
 
 # For simulation:
 injection:
-  - 0.2
+  # - 0.2
   - 0.4
 
 pattern:
-  - urandom
+  # - urandom
   - complement
 
 nodes: 16
