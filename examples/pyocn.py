@@ -39,6 +39,7 @@ from bflynet.BflyNetworkRTL   import BflyNetworkRTL
 from ocn_pclib.ifcs.packets   import *
 from ocn_pclib.ifcs.positions import *
 from pymtl3.stdlib.test       import TestVectorSimulator
+from pymtl3.passes.sverilog   import ImportPass, TranslationPass
 
 import time
 
@@ -112,7 +113,7 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       RingPos    = mk_ring_pos( routers )
       PacketType = mk_ring_pkt_timestamp( routers, nvcs = 2,
                    max_time = NUM_SAMPLE_CYCLES )
-      net      = NetModel( PacketType, RingPos, routers, channel_lat )
+      net        = NetModel( PacketType, RingPos, routers, channel_lat )
 #      net.set_param( "top.routers*.route_units*.construct", num_routers=routers)
 
     elif topology == "Mesh":
@@ -167,6 +168,13 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
 
 #  net.elaborate()
   sim = net.apply( DynamicSim )
+  net.sverilog_translate = True;
+  net.apply( TranslationPass() )
+#  test_harness.dut.sverilog_translate = True
+#  test_harness.dut.sverilog_import = True
+#  test_harness.apply( TranslationPass() )
+#  test_harness = ImportPass()( test_harness )
+#  test_harness.apply( SimpleSim )
 
   # Source Queues - Modeled as Bypass Queues
   src = [ deque() for x in range( nodes ) ]
@@ -323,7 +331,7 @@ def main():
     if action == 'generate':
       # TODO: Generating Verilog
       print()
-      print( "[GENERATION]" )
+      print( "[GENERATE]" )
       print( "=======================================================================================" )
       generate()
 
@@ -336,7 +344,7 @@ def main():
     if action == 'simulate':
 
       print()
-      print( "[SIMULATION]" )
+      print( "[SIMULATE]" )
       print( "Warmup Cycles:    %d" % NUM_WARMUP_CYCLES )
       print( "Sample Cycles:    %d" % NUM_SAMPLE_CYCLES )
       print( "=======================================================================================" )
