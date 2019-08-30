@@ -166,10 +166,13 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       net.set_param( "top.routers*.construct", k_ary=k_ary )
       net.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
 
-#  net.elaborate()
-  sim = net.apply( DynamicSim )
-  net.sverilog_translate = True;
+  net.elaborate()
+  net.sverilog_translate = True
+  net.dump_vcd = True
+  net.vcd_file_name = "dumpVCD"
   net.apply( TranslationPass() )
+  sim = net.apply( SimulationPass )
+#  sim = net.apply( DynamicSim )
 #  test_harness.dut.sverilog_translate = True
 #  test_harness.dut.sverilog_import = True
 #  test_harness.apply( TranslationPass() )
