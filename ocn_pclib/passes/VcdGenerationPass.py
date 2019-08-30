@@ -16,6 +16,7 @@ import py
 from pymtl3.dsl import Const
 from pymtl3.passes.BasePass import BasePass, PassMetadata
 from pymtl3.passes.errors import PassOrderError
+from pymtl3.datatypes.BitStruct import BitStruct
 
 
 class VcdGenerationPass( BasePass ):
