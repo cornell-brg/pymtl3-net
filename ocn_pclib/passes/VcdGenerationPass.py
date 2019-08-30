@@ -207,7 +207,7 @@ class VcdGenerationPass( BasePass ):
       ), file=vcdmeta.vcd_file )
 
       # Set this to be the last cycle value
-      setattr( vcdmeta, "last_{}".format(i), net[0]._dsl.Type().bin() )
+      setattr( vcdmeta, "last_{}".format(i), net_type_inst.bin() )
 
     # Now we create per-cycle signal value collect functions
 
@@ -218,13 +218,17 @@ class VcdGenerationPass( BasePass ):
            file=vcdmeta.vcd_file )
 
     dump_vcd_per_signal = """
-    if vcdmeta.last_{0} != {1}:
+    if isinstance( {1}, BitStruct ):
+      tmp = {1}.to_bits()
+    else:
+      tmp = {1}
+    if vcdmeta.last_{0} != tmp:
       try:
-        value_str = {1}.bin()
+        value_str = tmp.bin()
       except AttributeError as e:
         raise AttributeError( '{{}}\\n - {1} becomes another type. Please check your code.'.format(e) )
       print( 'b{{}} {2}'.format( value_str ), file=vcdmeta.vcd_file )
-      vcdmeta.last_{0} = deepcopy({1})"""
+      vcdmeta.last_{0} = deepcopy( tmp )"""
 
     # TODO type check
 
@@ -238,6 +242,10 @@ class VcdGenerationPass( BasePass ):
     for i, net in enumerate( trimmed_value_nets ):
       if i != vcdmeta.clock_net_idx:
         symbol = net_symbol_mapping[i]
+        if '{' in symbol:
+          symbol = symbol.replace('{','{{')
+        if '}' in symbol:
+          symbol = symbol.replace('}','}}')
         vcd_srcs.append( dump_vcd_per_signal.format( i, net[0], symbol ) )
 
     deepcopy # I have to do this to circumvent the tools
@@ -260,7 +268,12 @@ def dump_vcd():
   print( '#{{}}\\nb0b1 {0}\\n'.format( 100*vcdmeta.sim_ncycles+100 ), file=vcdmeta.vcd_file )
   vcdmeta.sim_ncycles += 1
 """.format( net_symbol_mapping[ vcdmeta.clock_net_idx ], "", "".join(vcd_srcs) )
-
+    print( src )
     s = top
-    exec(compile( src, filename="vcd_generation", mode="exec"), globals().update(locals()))
-    return dump_vcd
+    _globals = globals().copy()
+    # scope.update( locals() )
+    _locals = locals().copy()
+    _globals[ 'vcdmeta' ] = vcdmeta
+    _globals.update( _locals )
+    exec(compile( src, filename="vcd_generation", mode="exec"), _globals, _locals )
+    return _locals['dump_vcd']
