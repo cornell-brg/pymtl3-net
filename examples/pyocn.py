@@ -123,7 +123,7 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       net_height  = rows
       MeshPos     = mk_mesh_pos( net_width, net_height )
       PacketType  = mk_mesh_pkt_timestamp( net_width, net_height,
-                    payload_nbits = 1, max_time = NUM_SAMPLE_CYCLES )
+                    payload_nbits = 32, max_time = NUM_SAMPLE_CYCLES )
       net         = NetModel( PacketType, MeshPos,
                     net_width, net_height, channel_lat )
 
@@ -187,7 +187,7 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
 
   net.sim_reset()
   for i in range( nodes ):
-    net.send[i].rdy = 1
+    net.send[i].rdy = Bits1(1)
 
     if topology == "Mesh":
       XYType = mk_bits( clog2( net_width ) )
@@ -227,8 +227,11 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
           pkt = PacketType( i, dest, 0, 0, 98+i+ncycles, timestamp )
 
         elif topology == "Mesh":
-          pkt = PacketType( i % net_width, i // net_width, dest % net_width,
-                  dest // net_width, 0, 6, timestamp )
+          XYType = mk_bits( clog2( net_width ) )
+          timeType = mk_bits(clog2(NUM_SAMPLE_CYCLES+1))
+          pkt = PacketType( XYType(i%net_width), XYType(i//net_width), 
+                  XYType(dest % net_width), XYType(dest//net_width), 
+                  Bits8(0), Bits32(6), timeType(timestamp) )
 
 
         elif topology == "Torus":
@@ -272,11 +275,11 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
       if ( len( src[i] ) > 0 ):
         if net.recv[i].rdy:
           net.recv[i].msg = src[i][0]
-          net.recv[i].en  = 1
+          net.recv[i].en  = Bits1(1)
         else:
-          net.recv[i].en  = 0
+          net.recv[i].en  = Bits1(0)
       else:
-        net.recv[i].en  = 0
+        net.recv[i].en  = Bits1(0)
 
       # Receive a packet
 
@@ -288,19 +291,19 @@ def simulate( model, topology, nodes, rows, channel_lat, injection, pattern ):
         if ( timestamp != INVALID_TIMESTAMP ):
           total_latency    += ( ncycles - timestamp )
           packets_received += 1
-          average_latency = total_latency / float( packets_received )
+          average_latency = int( total_latency ) / float( packets_received )
 
       # Check if finished - drain phase
 
       if ( ncycles >= NUM_SAMPLE_CYCLES and
            all_packets_received >= packets_generated ):
-        average_latency = total_latency / float( packets_received )
+        average_latency = int( total_latency ) / float( packets_received )
         sim_done = True
         break
 
       # Pop the source queue
 
-      if ( net.recv[i].rdy == 1 ) and ( len( src[i] ) > 0 ):
+      if ( net.recv[i].rdy == Bits1(1) ) and ( len( src[i] ) > 0 ):
         src[i].popleft()
 
     # print line trace if enables

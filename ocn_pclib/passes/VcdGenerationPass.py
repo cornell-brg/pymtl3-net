@@ -268,7 +268,7 @@ def dump_vcd():
   print( '#{{}}\\nb0b1 {0}\\n'.format( 100*vcdmeta.sim_ncycles+100 ), file=vcdmeta.vcd_file )
   vcdmeta.sim_ncycles += 1
 """.format( net_symbol_mapping[ vcdmeta.clock_net_idx ], "", "".join(vcd_srcs) )
-    print( src )
+    # print( src )
     s = top
     _globals = globals().copy()
     # scope.update( locals() )

@@ -95,14 +95,14 @@ def run_sim( test_harness, max_cycles=1000 ):
 
   # Create a simulator
   test_harness.elaborate()
-  test_harness.dut.sverilog_translate = True
+#  test_harness.dut.sverilog_translate = True
 #  test_harness.dut.sverilog_import = True
-  test_harness.apply( TranslationPass() )
+#  test_harness.apply( TranslationPass() )
 #  test_harness = ImportPass()( test_harness )
 #  test_harness.apply( SimpleSim )
 #  test_harness.apply( DynamicSim )
-  test_harness.dump_vcd = True
-  test_harness.vcd_file_name = "generatedVCD"
+#  test_harness.dump_vcd = True
+#  test_harness.vcd_file_name = "generatedVCD"
   test_harness.apply( SimulationPass )
   test_harness.sim_reset()
 
