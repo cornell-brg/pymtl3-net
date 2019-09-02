@@ -10,9 +10,8 @@
 ---
 
 action:
-  - simulate
+#  - simulate
   - generate
-  - characterize
 
 topology:
   # - Ring
@@ -23,6 +22,15 @@ topology:
 model:
   # - CL
   - RTL
+
+# For generation (packets):
+packets: [
+  {
+    src: 1,
+    dest: 9,
+    data: 255
+  },
+]
 
 # For simulation:
 injection:
