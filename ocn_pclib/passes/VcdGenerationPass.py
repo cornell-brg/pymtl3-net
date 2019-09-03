@@ -81,6 +81,48 @@ class VcdGenerationPass( BasePass ):
         yield code
         n += 1
 
+    # The actual dump_vcd function to be appended to _sched.
+    # The framework will call this function without arguments, and therefore
+    # I chose to monkey patch the data structure objects to the global
+    # namespace of `dump_vcd`. This might be hacky but probably better than
+    # compiling a million lines of code to a Python function (you will almost
+    # certainly get a segfault from that).
+    # TODO: make this less hacky? type check?
+
+    def dump_vcd():
+      s             = top
+      vcd_file      = vcdmeta.vcd_file
+      clock_net_idx = vcdmeta.clock_net_idx
+      clock_symbol  = net_symbol_mapping[vcdmeta.clock_net_idx]
+      next_neg_edge = 100*vcdmeta.sim_ncycles+50
+      next_pos_edge = 100*vcdmeta.sim_ncycles+100
+      try:
+        # Dump VCD
+        for i, _net in enumerate( trimmed_value_nets ):
+          net = eval(str(_net[0]))
+          if i != clock_net_idx:
+            symbol = net_symbol_mapping[i]
+            if '{' in symbol:
+              symbol = symbol.replace('{', '{{')
+            if '}' in symbol:
+              symbol = symbol.replace('}', '}}')
+            net_bits = net.to_bits() if isinstance(net, BitStruct) else net
+            try:
+              if getattr( vcdmeta, f"last_{i}" ) != net_bits:
+                value_str = net_bits.bin()
+                print( f'b{value_str} {symbol}', file=vcd_file )
+                setattr( vcdmeta, f"last_{i}", deepcopy( net_bits ) )
+            except AttributeError as e:
+              raise AttributeError('{}\\n - {} becomes another type. Please check your code.'.format(e, net))
+      except Exception:
+        raise
+
+      # Flop clock at the end of cycle
+      print( '\\n#{}\\nb0b0 {}'.format(next_neg_edge, clock_symbol), file=vcd_file )
+      # Flip clock of the next cycle
+      print( '#{}\\nb0b1 {}\\n'.format(next_pos_edge, clock_symbol), file=vcd_file )
+      vcdmeta.sim_ncycles += 1
+
     vcd_symbols = _gen_vcd_symbol()
 
     # Preprocess some metadata
@@ -217,63 +259,16 @@ class VcdGenerationPass( BasePass ):
     print( '\n#0\nb0b1 {}\n'.format( net_symbol_mapping[ vcdmeta.clock_net_idx ] ),
            file=vcdmeta.vcd_file )
 
-    dump_vcd_per_signal = """
-    if isinstance( {1}, BitStruct ):
-      tmp = {1}.to_bits()
-    else:
-      tmp = {1}
-    if vcdmeta.last_{0} != tmp:
-      try:
-        value_str = tmp.bin()
-      except AttributeError as e:
-        raise AttributeError( '{{}}\\n - {1} becomes another type. Please check your code.'.format(e) )
-      print( 'b{{}} {2}'.format( value_str ), file=vcdmeta.vcd_file )
-      vcdmeta.last_{0} = deepcopy( tmp )"""
-
-    # TODO type check
-
-    # Concatenate the strings for all signals
-
     # Give all ' and " characters a preceding backslash for .format
     for i, x in enumerate(net_symbol_mapping):
       net_symbol_mapping[i] = x.replace('\\', '\\\\').replace('\'','\\\'').replace('\"','\\\"')
 
-    vcd_srcs = []
-    for i, net in enumerate( trimmed_value_nets ):
-      if i != vcdmeta.clock_net_idx:
-        symbol = net_symbol_mapping[i]
-        if '{' in symbol:
-          symbol = symbol.replace('{','{{')
-        if '}' in symbol:
-          symbol = symbol.replace('}','}}')
-        vcd_srcs.append( dump_vcd_per_signal.format( i, net[0], symbol ) )
+    # Monkey-patch `top`, `net_symbol_mapping`, and `trimmed_value_nets`
+    # to the global namespace of `dump_vcd`
+    dump_vcd.__globals__.update({
+      'top'                : top,
+      'net_symbol_mapping' : net_symbol_mapping,
+      'trimmed_value_nets' : trimmed_value_nets,
+    })
 
-    deepcopy # I have to do this to circumvent the tools
-
-    src =  """
-def dump_vcd():
-
-  try:
-    # Type check
-    {1}
-    # Dump VCD
-    {2}
-  except Exception:
-    raise
-
-  # Flop clock at the end of cycle
-  print( '\\n#{{}}\\nb0b0 {0}'.format(100*vcdmeta.sim_ncycles+50 ),
-        file=vcdmeta.vcd_file )
-  # Flip clock of the next cycle
-  print( '#{{}}\\nb0b1 {0}\\n'.format( 100*vcdmeta.sim_ncycles+100 ), file=vcdmeta.vcd_file )
-  vcdmeta.sim_ncycles += 1
-""".format( net_symbol_mapping[ vcdmeta.clock_net_idx ], "", "".join(vcd_srcs) )
-    # print( src )
-    s = top
-    _globals = globals().copy()
-    # scope.update( locals() )
-    _locals = locals().copy()
-    _globals[ 'vcdmeta' ] = vcdmeta
-    _globals.update( _locals )
-    exec(compile( src, filename="vcd_generation", mode="exec"), _globals, _locals )
-    return _locals['dump_vcd']
+    return dump_vcd
