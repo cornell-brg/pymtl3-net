@@ -1,0 +1,42 @@
+#=========================================================================
+#config.yml
+#=========================================================================
+#Yaml-based configuratin file of PyOCN for modeling, testing,
+#and evaluating.
+#
+#Author : Cheng Tan
+#  Date : July 30, 2019
+#
+#-------------------------------------------------------------------------
+# Topology
+#-------------------------------------------------------------------------
+# Topology information for specific network.
+network         : 'Mesh'
+terminal        : 16
+dimension       : 4
+channel_latency : 0
+
+#-------------------------------------------------------------------------
+# Action
+#-------------------------------------------------------------------------
+# Actions to generate synthesizable Verilog code, verify the models using
+# tests, simulate with single packet (from first terminal to the last one),
+# simulate with specific traffic pattern at different injection ratio.
+action:
+  - generate
+  - verify
+  - simulate-1pkt
+  - simulate-lat-vs-bw
+
+##-------------------------------------------------------------------------
+# Pattern
+#-------------------------------------------------------------------------
+# Pattern is specific for simulation on latency vs. bandwidth
+# (simulate-lat-vs-bw).
+pattern:
+  #  - complement
+  - urandom
+  # - partition
+  # - opposite
+  # - neighbor
+...

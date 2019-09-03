@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+"""
+=========================================================================
+netsim.py
+=========================================================================
+A simple implementation of network simulation.
+
+Author : Cheng Tan
+  Date : July 30, 2019
+"""
+
 #=========================================================================
 # netsim.py [options]
 #=========================================================================
@@ -227,8 +237,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 100
-NUM_SAMPLE_CYCLES   = 500 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 10
+NUM_SAMPLE_CYCLES   = 50 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
@@ -283,7 +293,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   elif opts.topology == "Mesh":
     NetModel = topology_dict[ "Mesh" ]
-    net_width = opts.routers/opts.rows
+    net_width = int(opts.routers/opts.rows)
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
     PacketType = mk_mesh_pkt_timestamp( net_width, net_height,
@@ -292,7 +302,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   elif opts.topology == "Torus":
     NetModel = topology_dict[ "Torus" ]
-    net_width = opts.routers/opts.rows
+    net_width = int(opts.routers/opts.rows)
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
     PacketType = mk_mesh_pkt_timestamp( net_width, net_height, nvcs = 2,
@@ -303,7 +313,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   elif opts.topology == "CMesh":
     NetModel = topology_dict[ "CMesh" ]
-    net_width = opts.routers/opts.rows
+    net_width = int(opts.routers/opts.rows)
     net_height = opts.rows
     inports   = opts.router_inports
     outports  = opts.router_outports
@@ -388,8 +398,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
           elif opts.topology == "Torus":
 #            net_width = opts.routers / opts.rows
-            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 0, 0, 6, ncycles )
+            pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                    dest//net_width, 0, 0, 6, ncycles )
 
           elif opts.topology == "CMesh":
             pkt = PacketType( (i/term_each)%net_width,
@@ -436,14 +446,12 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             pkt = PacketType( i, dest, opaque, 0, 98+i+ncycles, INVALID_TIMESTAMP )
 
           elif opts.topology == "Mesh":
-            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 0, 6, INVALID_TIMESTAMP )
-#            pkt = mk_mesh_pkt_timestamp( i%net_width, i/net_width, dest%net_width,
-#                    dest/net_width, 1, 6, INVALID_TIMESTAMP )
+            pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                    dest//net_width, 0, 6, INVALID_TIMESTAMP )
 
           elif opts.topology == "Torus":
-            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 0, 0, 6, INVALID_TIMESTAMP )
+            pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                    dest//net_width, 0, 0, 6, INVALID_TIMESTAMP )
 
           elif opts.topology == "CMesh":
             pkt = PacketType( (i/term_each)%net_width,

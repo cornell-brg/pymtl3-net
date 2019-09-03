@@ -46,7 +46,7 @@ class TorusRouterRTL( Component ):
                       for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PacketType, PositionType, ncols, nrows )
-                      for i in range( s.num_route_units ) ]
+                      for _ in range( s.num_route_units ) ]
 
     s.switch_units = [ SwitchUnitType( PacketType, s.num_route_units )
                       for _ in range( s.num_outports ) ]
