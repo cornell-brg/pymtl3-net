@@ -11,8 +11,6 @@ import time
 from collections import defaultdict
 from copy import deepcopy
 
-import py
-
 from pymtl3.dsl import Const
 from pymtl3.passes.BasePass import BasePass, PassMetadata
 from pymtl3.passes.errors import PassOrderError
@@ -96,6 +94,7 @@ class VcdGenerationPass( BasePass ):
       clock_symbol  = net_symbol_mapping[vcdmeta.clock_net_idx]
       next_neg_edge = 100*vcdmeta.sim_ncycles+50
       next_pos_edge = 100*vcdmeta.sim_ncycles+100
+
       try:
         # Dump VCD
         for i, _net in enumerate( trimmed_value_nets ):
@@ -106,6 +105,11 @@ class VcdGenerationPass( BasePass ):
               symbol = symbol.replace('{', '{{')
             if '}' in symbol:
               symbol = symbol.replace('}', '}}')
+
+            # If we encounter a BitStruct then dump it as a concatenation of
+            # all fields.
+            # TODO: treat each field in a BitStruct as a separate signal?
+
             net_bits = net.to_bits() if isinstance(net, BitStruct) else net
             try:
               if getattr( vcdmeta, f"last_{i}" ) != net_bits:
@@ -113,14 +117,14 @@ class VcdGenerationPass( BasePass ):
                 print( f'b{value_str} {symbol}', file=vcd_file )
                 setattr( vcdmeta, f"last_{i}", deepcopy( net_bits ) )
             except AttributeError as e:
-              raise AttributeError('{}\\n - {} becomes another type. Please check your code.'.format(e, net))
+              raise AttributeError('{}\n - {} becomes another type. Please check your code.'.format(e, net))
       except Exception:
         raise
 
       # Flop clock at the end of cycle
-      print( '\\n#{}\\nb0b0 {}'.format(next_neg_edge, clock_symbol), file=vcd_file )
+      print( '\n#{}\nb0b0 {}'.format(next_neg_edge, clock_symbol), file=vcd_file )
       # Flip clock of the next cycle
-      print( '#{}\\nb0b1 {}\\n'.format(next_pos_edge, clock_symbol), file=vcd_file )
+      print( '#{}\nb0b1 {}\n'.format(next_pos_edge, clock_symbol), file=vcd_file )
       vcdmeta.sim_ncycles += 1
 
     vcd_symbols = _gen_vcd_symbol()
