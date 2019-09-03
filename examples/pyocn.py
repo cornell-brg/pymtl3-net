@@ -115,20 +115,7 @@ def perform( action, model, topology, terminals, dimension,
   drain_cycles          = 0
   sim_done              = False
 
-  # TODO: Might support FL and CL soon.
-  if model == "CL":
-    if topology == "ring":
-      NetModel = RingNetworkCL
-    elif topology == "mesh":
-      NetModel = MeshNetworkCL
-    elif topology == "cmesh":
-      NetModel = CMeshNetworkCL
-    elif topology == "torus":
-      NetModel = TorusNetworkCL
-    elif topology == "bfly":
-      NetModel = BflyNetworkCL
-
-  elif model == "RTL":
+  if model == "RTL":
     # Instantiate and elaborate a ring network
 
     if topology  == "Ring":
@@ -405,7 +392,7 @@ def main():
       topology = config['network']
       generate( topology, config['terminal'],
                 config['dimension'], config['channel_latency'] )
-      print( "=================================================================================" )
+      print( "="*74 )
 
     if action == 'verify':
       print()
@@ -421,7 +408,7 @@ def main():
         verify( topology, config['terminal'], config['dimension'],
                            config['channel_latency'], packets )
       print("\n")
-      print( "=================================================================================" )
+      print( "="*74 )
 
     if action == 'simulate-1pkt':
       print()
@@ -430,16 +417,16 @@ def main():
       topology = config['network']
       simulate_1pkt( topology, config['terminal'], config['dimension'],
                      config['channel_latency'], packets )
-      print( "=================================================================================" )
+      print( "="*74 )
 
     if action == 'simulate-lat-vs-bw':
       print()
       print( "[SIMULATING latency vs. bandwidth]" )
       print( "Warmup Cycles:    %d" % NUM_WARMUP_CYCLES )
       print( "Sample Cycles:    %d" % NUM_SAMPLE_CYCLES )
-      print( "=================================================================================" )
-      print( "|Topology|Pattern    |Inj.Rate|Avg.Lat|Num.Pkt|Total Cycles|Sim.Time|Speed (c/s)|" )
-      print( "|--------|-----------|--------|-------|-------|------------|--------|-----------|" )
+      print( "="*74 )
+      print( "|Topology|Pattern    |Inj.Rate|Avg.Lat|Num.Pkt|Cycles|Sim.Time|Speed(c/s)|" )
+      print( "|--------|-----------|--------|-------|-------|------|--------|----------|" )
 
       injection_list = [0.01, 0.1, 0.2, 0.4, 0.6]
       topology = config['network']
@@ -455,13 +442,13 @@ def main():
 
           end_time = time.time()
 
-          print( "|{:<8}|{:<11}|{:<8}|{:<7}|{:<7}|{:<12}|{:<8}|{:<11}|".\
+          print( "|{:<8}|{:<11}|{:<8}|{:<7}|{:<7}|{:<6}|{:<8}|{:<10}|".\
                   format(topology, pattern, injection,\
                       "{0:.1f}".format(results[0]), results[1], results[2],
                       "{0:.1f}".format(end_time - start_time),
                       "{0:.1f}".format(results[2]/(end_time - start_time))) )
 
-      print( "|===============================================================================|" )
+      print( "="*74 )
       print()
 
 main()

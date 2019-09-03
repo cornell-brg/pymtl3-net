@@ -23,9 +23,9 @@ channel_latency : 0
 # tests, simulate with single packet (from first terminal to the last one),
 # simulate with specific traffic pattern at different injection ratio.
 action:
-  #  - generate
-  #  - verify
-  #  - simulate-1pkt
+  - generate
+  - verify
+  - simulate-1pkt
   - simulate-lat-vs-bw
 
 ##-------------------------------------------------------------------------
