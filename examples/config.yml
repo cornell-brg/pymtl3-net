@@ -7,42 +7,36 @@
 #Author : Cheng Tan
 #  Date : July 30, 2019
 #
----
+#-------------------------------------------------------------------------
+# Topology
+#-------------------------------------------------------------------------
+# Topology information for specific network.
+network         : 'Mesh'
+terminal        : 16
+dimension       : 4
+channel_latency : 0
 
+#-------------------------------------------------------------------------
+# Action
+#-------------------------------------------------------------------------
+# Actions to generate synthesizable Verilog code, verify the models using
+# tests, simulate with single packet (from first terminal to the last one),
+# simulate with specific traffic pattern at different injection ratio.
 action:
-#  - simulate
-  - generate
+  #  - generate
+  - verify
+  - simulate-1pkt
+    #  - simulate-lat-vs-bw
 
-topology:
-  # - Ring
-  - Mesh
-  # - Torus
-  # - Bfly
-
-model:
-  # - CL
-  - RTL
-
-# For generation (packets):
-packets: [
-  {
-    src: 1,
-    dest: 9,
-    data: 255
-  },
-]
-
-# For simulation:
-injection:
-  # - 0.2
-  - 0.4
-
+##-------------------------------------------------------------------------
+# Pattern
+#-------------------------------------------------------------------------
+# Pattern is specific for simulation on latency vs. bandwidth
+# (simulate-lat-vs-bw).
 pattern:
-  # - urandom
   - complement
-
-nodes: 16
-rows: 4
-channel_lat: 0
-
+  # - urandom
+  # - partition
+  # - opposite
+  # - neighbor
 ...

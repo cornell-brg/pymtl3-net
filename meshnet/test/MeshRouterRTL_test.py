@@ -100,10 +100,7 @@ def run_sim( test_harness, max_cycles=1000 ):
 #  test_harness.apply( TranslationPass() )
 #  test_harness = ImportPass()( test_harness )
 #  test_harness.apply( SimpleSim )
-#  test_harness.apply( DynamicSim )
-#  test_harness.dump_vcd = True
-#  test_harness.vcd_file_name = "generatedVCD"
-  test_harness.apply( SimulationPass )
+  test_harness.apply( DynamicSim )
   test_harness.sim_reset()
 
   # Run simulation
