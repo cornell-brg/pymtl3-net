@@ -14,7 +14,7 @@ from .MeshRouterRTL                 import MeshRouterRTL
 from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 class MeshNetworkRTL( Component ):
-  def construct( s, PacketType, PositionType, 
+  def construct( s, PacketType, PositionType,
                  mesh_wid = 4, mesh_ht = 4, chl_lat = 0 ):
 
     # Constants
@@ -100,15 +100,26 @@ class MeshNetworkRTL( Component ):
         s.routers[i].recv[EAST].msg.payload  //= 0
 
     # FIXME: unable to connect a struct to a port.
-#    @s.update
-#    def up_pos():
-#      for y in range( mesh_ht ):
-#        for x in range( mesh_wid ):
-#          idx = y * mesh_wid + x
-#          s.routers[idx].pos = PositionType( x, y )
+    # @s.update
+    # def up_pos():
+    #   for y in range( mesh_ht ):
+    #     for x in range( mesh_wid ):
+    #       idx = y * mesh_wid + x
+    #       s.routers[idx].pos = PositionType( x, y )
 
   def line_trace( s ):
-    trace = [ "" for _ in range( s.num_terminals ) ]
-    for i in range( s.num_terminals ):
-      trace[i] += s.send[i].line_trace()
-    return "|".join( trace )
+    trace    = []
+    send_lst = []
+    recv_lst = []
+    for r in s.routers:
+      has_recv = any([ r.recv[i].en for i in range(5) ])
+      has_send = any([ r.send[i].en for i in range(5) ])
+      if has_send:
+        send_lst.append( f'{r.pos}' )
+      if has_recv:
+        recv_lst.append( f'{r.pos}')
+      if has_recv or has_send:
+        trace.append( f'  {r.line_trace()}')
+    send_str = ','.join( send_lst )
+    recv_str = ','.join( recv_lst )
+    return f' {send_str:3} -> {recv_str:3}' # + '\n'.join( trace )
