@@ -63,11 +63,10 @@ def generate( topology, terminals, dimension, channel_latency ):
 # verify using test cases.
 #--------------------------------------------------------------------------
 
-def verify( topology, terminals, dimension, channel_latency ):
+def verify( topology, terminals, dimension, channel_latency, packets ):
   model = "RTL"
-  # TODO: need to point to the test cases in specific folder?
   perform( "verify", model, topology, terminals, dimension,
-           channel_latency, 0, None, None )
+           channel_latency, 0, None, packets )
 
 #--------------------------------------------------------------------------
 # simulate for single packet (from the first terminal to the last one).
@@ -89,6 +88,10 @@ def simulate_lat_vs_bw( topology, terminals, dimension, channel_latency,
   return perform( "simulate-lat-vs-bw", model, topology, terminals,
                   dimension, channel_latency, injection, pattern, None )
 
+#--------------------------------------------------------------------------
+# perform function is generic for all the actions.
+#--------------------------------------------------------------------------
+
 # Global constants for simulation
 
 NUM_WARMUP_CYCLES   = 10
@@ -98,11 +101,7 @@ INVALID_TIMESTAMP   = 0
 def perform( action, model, topology, terminals, dimension,
              channel_latency, injection, pattern, packets ):
 
-  if action == "verify":
-    return
-
   routers         = terminals
-  channel_latency = channel_latency
   injection_rate  = injection * 100
   net             = None
 
@@ -202,7 +201,8 @@ def perform( action, model, topology, terminals, dimension,
   if action == "simulate-1pkt":
     net.dump_vcd = True
     net.vcd_file_name = "dumpVCD"
-    sim = net.apply( SimulationPass )
+
+  sim = net.apply( SimulationPass )
 
   # Source Queues - Modeled as Bypass Queues
   src_queue = [ deque() for x in range( terminals ) ]
@@ -221,6 +221,10 @@ def perform( action, model, topology, terminals, dimension,
 
   ncycles = 0
 
+  pkt_verify_queue = [[] for _ in range(terminals) ]
+
+  verify_failed = False
+
   while not sim_done:
     # Iterate over all terminals
     for i in range( terminals ):
@@ -229,8 +233,8 @@ def perform( action, model, topology, terminals, dimension,
 
       if ( (action == "simulate-lat-vs-bw" and
             randint(1, 100) <= injection_rate) or
-           (action == "simulate-1pkt" and len(packets) > 0 and
-            int(packets[0]['src']) == i) ):
+           ((action == "simulate-1pkt" or action == "verify") and
+            len(packets) > 0 and int(packets[0]['src']) == i) ):
 
         if (action == "simulate-lat-vs-bw"):
           # traffic pattern based dest selection
@@ -248,11 +252,13 @@ def perform( action, model, topology, terminals, dimension,
           src = i
           data = Bits32(6)
 
-        if (action == "simulate-1pkt"):
+        if (action == "simulate-1pkt" or action == "verify"):
           src  = packets[0]['src']
           dest = packets[0]['dest']
           data = Bits32(packets[0]['data'])
           packets.pop(0)
+          if action == "verify":
+            pkt_verify_queue[dest].append(data)
 
         # inject packet past the warmup period
 
@@ -323,6 +329,13 @@ def perform( action, model, topology, terminals, dimension,
       if ( net.send[i].en == 1 ):
         timestamp = net.send[i].msg.timestamp
         all_packets_received += 1
+        if action == "verify":
+          if net.send[i].msg.payload not in pkt_verify_queue[i]:
+#            print("\33[32m.\033[0m", end="")
+#          else:
+            print("x")
+            print("[VERIFY FAILED]")
+            return
 
         # collect data for measurement packets
         if ( timestamp != INVALID_TIMESTAMP ):
@@ -338,7 +351,7 @@ def perform( action, model, topology, terminals, dimension,
           average_latency = int( total_latency ) / float( packets_received )
           sim_done = True
           break
-      elif action == "simulate-1pkt":
+      elif action == "simulate-1pkt" or action == "verify":
         if ( packets_generated > 0 and
              all_packets_received >= packets_generated ):
           sim_done = True
@@ -356,15 +369,16 @@ def perform( action, model, topology, terminals, dimension,
     net.tick()
     ncycles += 1
 
+  # FIXME: To extend the period for gtkwave, but does not work yet.
   net.tick()
   net.tick()
   net.tick()
-  net.tick()
-  net.tick()
-  net.tick()
-  net.tick()
-  net.tick()
-  net.tick()
+
+  if action == "verify":
+    print("\33[32m.\033[0m", end="")
+    sys.stdout.flush()
+#    print("\n[VERIFY DONE]: passed test cases")
+
   # return the calculated average_latency and count of packets received
 
   return [average_latency, packets_received, ncycles]
@@ -398,9 +412,16 @@ def main():
       print()
       print( "[VERIFY]" )
       print( "=================================================================================" )
-      topology = config['network']
-      verify( topology, config['terminal'],
-                config['dimension'], config['channel_latency'] )
+      for i in range(10):
+        packets = [{'src': 0+i, 'dest': config['terminal']-i-1, 'data': 0xffff},
+                   {'src': 1+i, 'dest': config['terminal']-i-2, 'data': 0xfffe},
+                   {'src': 2+i, 'dest': config['terminal']-i-3, 'data': 0xfffd},
+                   {'src': 3+i, 'dest': config['terminal']-i-4, 'data': 0xfffc},
+                   {'src': 4+i, 'dest': config['terminal']-i-5, 'data': 0xfffb}]
+        topology = config['network']
+        verify( topology, config['terminal'], config['dimension'],
+                           config['channel_latency'], packets )
+      print("\n[VERIFY DONE]: passed test cases")
 
     if action == 'simulate-1pkt':
       print()
@@ -408,8 +429,8 @@ def main():
       print( "=================================================================================" )
       packets = [{'src': 0, 'dest': config['terminal']-1, 'data': 0xffff},]
       topology = config['network']
-      simulate_1pkt( topology, config['terminal'],
-                     config['dimension'], config['channel_latency'], packets )
+      simulate_1pkt( topology, config['terminal'], config['dimension'],
+                     config['channel_latency'], packets )
 
     if action == 'simulate-lat-vs-bw':
 

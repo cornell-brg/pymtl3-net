@@ -24,9 +24,9 @@ channel_latency : 0
 # simulate with specific traffic pattern at different injection ratio.
 action:
   #  - generate
-  - verify
+  #  - verify
   - simulate-1pkt
-    #  - simulate-lat-vs-bw
+  #  - simulate-lat-vs-bw
 
 ##-------------------------------------------------------------------------
 # Pattern
