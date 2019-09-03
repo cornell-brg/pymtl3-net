@@ -15,11 +15,7 @@ from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 class MeshNetworkRTL( Component ):
   def construct( s, PacketType, PositionType,
-<<<<<<< HEAD
                  mesh_wid=4, mesh_ht=4, chl_lat=0 ):
-=======
-                 mesh_wid = 4, mesh_ht = 4, chl_lat = 0 ):
->>>>>>> ct-showcase
 
     # Local parameters
 
