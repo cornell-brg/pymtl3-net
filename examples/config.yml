@@ -25,8 +25,8 @@ channel_latency : 0
 action:
   #  - generate
   #  - verify
-  - simulate-1pkt
-  #  - simulate-lat-vs-bw
+  #  - simulate-1pkt
+  - simulate-lat-vs-bw
 
 ##-------------------------------------------------------------------------
 # Pattern
@@ -34,8 +34,8 @@ action:
 # Pattern is specific for simulation on latency vs. bandwidth
 # (simulate-lat-vs-bw).
 pattern:
-  - complement
-  # - urandom
+  #  - complement
+  - urandom
   # - partition
   # - opposite
   # - neighbor

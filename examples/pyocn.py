@@ -276,7 +276,6 @@ def perform( action, model, topology, terminals, dimension,
                   XYType(dest % net_width), XYType(dest//net_width),
                   Bits8(0), data, timeType(timestamp) )
 
-
         elif topology == "Torus":
           pkt = PacketType( src % net_width, src // net_width, dest % net_width,
                   dest // net_width, 0, 0, data, timestamp )
@@ -327,7 +326,7 @@ def perform( action, model, topology, terminals, dimension,
       # Receive a packet
 
       if ( net.send[i].en == 1 ):
-        timestamp = net.send[i].msg.timestamp
+        timestamp = int(net.send[i].msg.timestamp)
         all_packets_received += 1
         if action == "verify":
           if net.send[i].msg.payload not in pkt_verify_queue[i]:
@@ -341,14 +340,14 @@ def perform( action, model, topology, terminals, dimension,
         if ( timestamp != INVALID_TIMESTAMP ):
           total_latency    += ( ncycles - timestamp )
           packets_received += 1
-          average_latency = int( total_latency ) / float( packets_received )
+          average_latency = total_latency / float( packets_received )
 
       # Check if finished - drain phase
 
       if action == "simulate-lat-vs-bw":
         if ( ncycles >= NUM_SAMPLE_CYCLES and
              all_packets_received >= packets_generated ):
-          average_latency = int( total_latency ) / float( packets_received )
+          average_latency = total_latency / float( packets_received )
           sim_done = True
           break
       elif action == "simulate-1pkt" or action == "verify":
@@ -402,47 +401,47 @@ def main():
 
     if action == 'generate':
       print()
-      print( "[GENERATE: synthesizable Verilog]" )
-      print( "=================================================================================" )
+      print( "[GENERATING synthesizable Verilog]" )
       topology = config['network']
       generate( topology, config['terminal'],
                 config['dimension'], config['channel_latency'] )
+      print( "=================================================================================" )
 
     if action == 'verify':
       print()
-      print( "[VERIFY]" )
-      print( "=================================================================================" )
-      for i in range(10):
-        packets = [{'src': 0+i, 'dest': config['terminal']-i-1, 'data': 0xffff},
-                   {'src': 1+i, 'dest': config['terminal']-i-2, 'data': 0xfffe},
-                   {'src': 2+i, 'dest': config['terminal']-i-3, 'data': 0xfffd},
-                   {'src': 3+i, 'dest': config['terminal']-i-4, 'data': 0xfffc},
-                   {'src': 4+i, 'dest': config['terminal']-i-5, 'data': 0xfffb}]
+      print( "[VERIFYING using test cases]" )
+      terminals = config['terminal']
+      for i in range(6):
+        packets = [{'src': (0+i)%terminals, 'dest': terminals-(i+1)%terminals, 'data': 0xffff},
+                   {'src': (1+i)%terminals, 'dest': terminals-(i+2)%terminals, 'data': 0xfffe},
+                   {'src': (2+i)%terminals, 'dest': terminals-(i+3)%terminals, 'data': 0xfffd},
+                   {'src': (3+i)%terminals, 'dest': terminals-(i+4)%terminals, 'data': 0xfffc},
+                   {'src': (4+i)%terminals, 'dest': terminals-(i+5)%terminals, 'data': 0xfffb}]
         topology = config['network']
         verify( topology, config['terminal'], config['dimension'],
                            config['channel_latency'], packets )
-      print("\n[VERIFY DONE]: passed test cases")
+      print("\n")
+      print( "=================================================================================" )
 
     if action == 'simulate-1pkt':
       print()
-      print( "[SIMULATE: single packet]" )
-      print( "=================================================================================" )
+      print( "[SIMULATING single packet]" )
       packets = [{'src': 0, 'dest': config['terminal']-1, 'data': 0xffff},]
       topology = config['network']
       simulate_1pkt( topology, config['terminal'], config['dimension'],
                      config['channel_latency'], packets )
+      print( "=================================================================================" )
 
     if action == 'simulate-lat-vs-bw':
-
       print()
-      print( "[SIMULATE: latency vs. bandwidth]" )
+      print( "[SIMULATING latency vs. bandwidth]" )
       print( "Warmup Cycles:    %d" % NUM_WARMUP_CYCLES )
       print( "Sample Cycles:    %d" % NUM_SAMPLE_CYCLES )
       print( "=================================================================================" )
       print( "|Topology|Pattern    |Inj.Rate|Avg.Lat|Num.Pkt|Total Cycles|Sim.Time|Speed (c/s)|" )
       print( "|--------|-----------|--------|-------|-------|------------|--------|-----------|" )
 
-      injection_list = {1, 10, 20, 40, 60}
+      injection_list = [0.01, 0.1, 0.2, 0.4, 0.6]
       topology = config['network']
       for injection in injection_list:
         for pattern in config['pattern']:
@@ -462,7 +461,7 @@ def main():
                       "{0:.1f}".format(end_time - start_time),
                       "{0:.1f}".format(results[2]/(end_time - start_time))) )
 
-      print( "|================================================================================|" )
+      print( "|===============================================================================|" )
       print()
 
 main()
