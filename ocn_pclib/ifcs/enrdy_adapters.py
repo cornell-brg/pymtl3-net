@@ -19,7 +19,7 @@ class ValRdy2EnRdy( RTLComponent ):
   def construct( s, MsgType ):
 
     s.in_ = InValRdyIfc( MsgType )
-    s.out = OutEnRdyIfc( MsgType ) 
+    s.out = OutEnRdyIfc( MsgType )
 
     @s.update
     def comb_logic0():
@@ -28,14 +28,14 @@ class ValRdy2EnRdy( RTLComponent ):
     @s.update
     def comb_logic1():
       s.out.en  = s.out.rdy and s.in_.val
-    
+
     @s.update
-    def comb_logic2(): 
+    def comb_logic2():
       s.out.msg = s.in_.msg
-  
+
   def line_trace( s ):
 
-    return "{} | {}".format( s.in_, s.out )
+    return f"{s.in_}(){s.out}"
 
 #-------------------------------------------------------------------------
 # EnRdy2ValRdy
@@ -46,21 +46,21 @@ class EnRdy2ValRdy( RTLComponent ):
   def construct( s, MsgType ):
 
     s.in_ = InEnRdyIfc  ( MsgType )
-    s.out = OutValRdyIfc( MsgType ) 
+    s.out = OutValRdyIfc( MsgType )
 
     @s.update
     def comb_logic0():
       s.in_.rdy = s.out.rdy
-    
+
     @s.update
     def comb_logic1():
       s.out.val = s.in_.en
-    
+
     @s.update
-    def comb_logic2(): 
+    def comb_logic2():
       s.out.msg = s.in_.msg
-  
+
   def line_trace( s ):
 
-    return "{} | {}".format( s.in_, s.out )
+    return f"{s.in_}(){s.out}"
 

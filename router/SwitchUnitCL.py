@@ -29,8 +29,6 @@ class SwitchUnitCL( Component ):
 
     for i in range( s.num_inports ):
       s.add_constraints( M( s.get[i] ) == M( s.give ) )
-      # s.add_constraints( U( up_su_arb_cl ) < M( s.get[i].rdy ) )
-      # s.add_constraints( M( s.get[i] ) < M( s.send ) )
 
   def any_ready( s ):
     flag = False
@@ -47,9 +45,7 @@ class SwitchUnitCL( Component ):
         return s.get[i]()
 
   # CL line trace
+
   def line_trace( s ):
-    return "{}_({})_{}".format(
-      "|".join( [ str(s.get[i]) for i in range(s.num_inports) ] ),
-      s.priority,
-      s.give,
-    )
+    in_str = "|".join([ str(s.get[i]) for i in range(s.num_inports) ])
+    return f"{in_str}_({s.priority})_{s.give}"

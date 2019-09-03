@@ -17,11 +17,13 @@ class DORYTorusRouteUnitRTL( Component ):
   def construct( s, PacketType, PositionType, ncols=2, nrows=2 ):
 
     # Constants
+
     s.num_outports = 5
     s.ncols = ncols
     s.nrows = nrows
 
     # Here we add 1 to avoid overflow
+
     posx_type     = mk_bits( clog2( ncols ) )
     posy_type     = mk_bits( clog2( nrows ) )
     ns_dist_type  = mk_bits( clog2( nrows+1 ) )
@@ -31,11 +33,13 @@ class DORYTorusRouteUnitRTL( Component ):
     s.last_col_id = we_dist_type( ncols-1 )
 
     # Interface
+
     s.get  = GetIfcRTL( PacketType )
     s.give = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Componets
+
     s.out_dir       = Wire( Bits3        )
     s.give_ens      = Wire( Bits5        )
     s.turning       = Wire( Bits1        )
@@ -46,11 +50,13 @@ class DORYTorusRouteUnitRTL( Component ):
     s.give_msg_wire = Wire( PacketType   )
 
     # Connections
+
     for i in range( s.num_outports ):
       s.give_ens[i]   //= s.give[i].en
       s.give_msg_wire //= s.give[i].msg
 
     # Calculate distance
+
     @s.update
     def up_ns_dist():
       if s.get.msg.dst_y < s.pos.pos_y:
@@ -70,6 +76,7 @@ class DORYTorusRouteUnitRTL( Component ):
         s.east_dist = s.get.msg.dst_x - s.pos.pos_x
 
     # Routing logic
+
     @s.update
     def up_ru_routing():
 
@@ -89,9 +96,11 @@ class DORYTorusRouteUnitRTL( Component ):
           s.out_dir = WEST if s.west_dist < s.east_dist else EAST
 
         # Turning logic
+
         s.turning = ( s.get.msg.src_x == s.pos.pos_x ) & ( s.get.msg.src_y != s.pos.pos_y ) & ( s.out_dir == WEST | s.out_dir == EAST )
 
         # Dateline logic
+
         if s.turning:
           s.give_msg_wire.vc_id = b1(0)
 
@@ -105,26 +114,20 @@ class DORYTorusRouteUnitRTL( Component ):
           s.give_msg_wire.vc_id = b1(1)
 
         s.give[ s.out_dir ].rdy = b1(1)
-        # s.give[ s.out_dir ].msg = s.give_msg_wire
 
     @s.update
     def up_ru_get_en():
       s.get.en = s.give_ens > 0
 
   # Line trace
+
   def line_trace( s ):
-
-    out_str = [ "" for _ in range( s.num_outports ) ]
-    for i in range (s.num_outports):
-      out_str[i] = "{}".format( s.give[i] )
-
-    return "{}({},{},{}<>{}){}".format(
-      s.get,
+    out_str = "|".join([ str(s.give[i]) for i in range( s.num_outports ) ])
+    dir_str = (
       "N" if s.out_dir == NORTH else
       "S" if s.out_dir == SOUTH else
       "W" if s.out_dir == WEST  else
-      "E",
-      "t" if s.turning else " ",
-      s.west_dist, s.east_dist,
-      "|".join( out_str ),
+      "E"
     )
+    turn_str = "t" if s.turning else " "
+    return f"{s.get}({dir_str},{turn_str}){out_str}"

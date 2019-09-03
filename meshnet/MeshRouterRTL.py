@@ -21,5 +21,5 @@ class MeshRouterRTL( Router ):
                  SwitchUnitType = SwitchUnitRTL ):
 
     super( MeshRouterRTL, s ).construct(
-      PacketType, PositionType, 5, 5, InputUnitType, RouteUnitType, 
+      PacketType, PositionType, 5, 5, InputUnitType, RouteUnitType,
       SwitchUnitType, OutputUnitRTL )

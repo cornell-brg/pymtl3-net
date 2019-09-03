@@ -73,5 +73,5 @@ class DORXMeshRouteUnitCL( Component ):
     return ret
 
   def line_trace( s ):
-
-    return "{}".format( s.pkt )
+    out_trace = "|".join([ str(s.give[i]) for i in range(s.num_outports) ])
+    return f"{s.get}(){out_trace}"

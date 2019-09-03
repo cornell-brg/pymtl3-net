@@ -25,22 +25,17 @@ class DORYTorusRouteUnitCL( Component ):
 
     # Interface
 
-#    s.get  = GetIfcRTL( PacketType )
-#    s.give = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
-
     s.get  = NonBlockingCallerIfc()
     s.give = [ NonBlockingCalleeIfc() for _ in range ( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Componets
 
-#    s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
-#    s.give_ens = Wire( mk_bits( s.num_outports ) )
-
     s.rdy_lst = [ False for _ in range( s.num_outports ) ]
     s.msg     = None
 
     # Routing logic
+
     @s.update
     def up_ru_routing():
 
@@ -73,6 +68,7 @@ class DORYTorusRouteUnitCL( Component ):
         s.rdy_lst = [ False for _ in range( s.num_outports ) ]
 
     # Assign method and ready
+
     for i in range( s.num_outports ):
       def gen_give_rdy( s, port_id ):
         def give_rdy():
@@ -99,9 +95,5 @@ class DORYTorusRouteUnitCL( Component ):
    # TODO: CL line trace
 
   def line_trace( s ):
-
-    out_str = [ "" for _ in range( s.num_outports ) ]
-    for i in range (s.num_outports):
-      out_str[i] = "{}".format( s.give[i] )
-
-    return "{}{}".format( s.get, "|".join( out_str ) )
+    out_str = "|".join([ str(s.give[i]) for i in range( s.num_outports ) ])
+    return f"{s.get}(){out_str}"

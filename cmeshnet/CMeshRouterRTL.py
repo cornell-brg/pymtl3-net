@@ -18,9 +18,16 @@ class CMeshRouterRTL( Router ):
 
   def construct( s, PacketType, PositionType, num_inports, num_outports,
                  InputUnitType  = InputUnitRTL,
-                 RouteUnitType  = DORYCMeshRouteUnitRTL, 
+                 RouteUnitType  = DORYCMeshRouteUnitRTL,
                  SwitchUnitType = SwitchUnitRTL ):
 
     super( CMeshRouterRTL, s ).construct(
-      PacketType, PositionType, num_inports, num_outports, 
-      InputUnitType, RouteUnitType, SwitchUnitType, OutputUnitRTL )
+      PacketType,
+      PositionType,
+      num_inports,
+      num_outports,
+      InputUnitType,
+      RouteUnitType,
+      SwitchUnitType,
+      OutputUnitRTL,
+    )

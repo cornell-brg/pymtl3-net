@@ -50,7 +50,6 @@ class Router( Component ):
     for i in range( s.num_inports ):
       for j in range( s.num_outports ):
         s.route_units[i].give[j] //= s.switch_units[j].get[i]
-#        s.connect( s.route_units[i].out_ocp[j], s.switch_units[j].out_ocp )
 
     for j in range( s.num_outports ):
       s.switch_units[j].give //= s.output_units[j].get

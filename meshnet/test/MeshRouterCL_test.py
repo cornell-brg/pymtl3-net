@@ -103,11 +103,14 @@ class MeshRouterCL_Tests( object ):
     s.TestHarness = TestHarness
 
   def run_sim( s, th, max_cycles=100 ):
+
     # Create a simulator
+
     th.apply( DynamicSim )
     th.sim_reset()
 
     # Run simulation
+
     ncycles = 0
     print()
     print( "{:3}:{}".format( ncycles, th.line_trace() ))
@@ -117,6 +120,7 @@ class MeshRouterCL_Tests( object ):
       print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
     # Check timeout
+
     assert ncycles < max_cycles
 
   @pytest.mark.parametrize(
@@ -137,6 +141,7 @@ class MeshRouterCL_Tests( object ):
     s.run_sim( th )
 
   # Failing test cases captured by hypothesis
+
   def test_h0( s ):
     pos_x = 0; pos_y = 0; mesh_wid = 2; mesh_ht = 2
     Pkt = mk_mesh_pkt( mesh_wid, mesh_ht )
@@ -165,6 +170,7 @@ class MeshRouterCL_Tests( object ):
 #-------------------------------------------------------------------------
 # Hypothesis test
 #-------------------------------------------------------------------------
+
   @hypothesis.settings( deadline = None )
   @hypothesis.given(
     mesh_wid   = st.integers(2, 16),

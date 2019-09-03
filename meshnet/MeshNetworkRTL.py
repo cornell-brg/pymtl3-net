@@ -14,15 +14,17 @@ from .MeshRouterRTL                 import MeshRouterRTL
 from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 class MeshNetworkRTL( Component ):
-  def construct( s, PacketType, PositionType, 
-                 mesh_wid = 4, mesh_ht = 4, chl_lat = 0 ):
+  def construct( s, PacketType, PositionType,
+                 mesh_wid=4, mesh_ht=4, chl_lat=0 ):
 
-    # Constants
+    # Local parameters
 
     s.num_routers   = mesh_wid * mesh_ht
     s.num_terminals = s.num_routers
     num_channels    = (mesh_ht*(mesh_wid-1)+mesh_wid*(mesh_ht-1)) * 2
     chl_lat         =  0
+    XType           = mk_bits( clog2(mesh_wid) )
+    YType           = mk_bits( clog2(mesh_ht ) )
 
     # Interface
 
@@ -32,23 +34,22 @@ class MeshNetworkRTL( Component ):
     # Components
 
     s.routers  = [ MeshRouterRTL( PacketType, PositionType )
-                 for i in range( s.num_routers ) ]
+                   for i in range( s.num_routers ) ]
 
     s.channels = [ ChannelRTL( PacketType, latency = chl_lat )
-                 for _ in range( num_channels ) ]
+                   for _ in range( num_channels ) ]
 
-#    s.pos      = [ PositionType( r % mesh_wid, r / mesh_wid)
-#                 for r in range( mesh_wid * mesh_ht )]
-    XYType  = mk_bits( clog2( mesh_wid ) )
-    s.pos_x = [ InPort(XYType) for _ in range( s.num_routers )]
-    s.pos_y = [ InPort(XYType) for _ in range( s.num_routers )]
+    # Wire the position ports of router
 
-    for r in range( s.num_routers ):
-      s.pos_x[r] //= s.routers[r].pos.pos_x
-      s.pos_y[r] //= s.routers[r].pos.pos_y
+    for y in range( mesh_ht ):
+      for x in range( mesh_wid ):
+        s.routers[y*mesh_wid+x].pos.pos_x //= XType(x)
+        s.routers[y*mesh_wid+x].pos.pos_y //= YType(y)
 
-
-    # Connect s.routers together in Mesh
+    # Connect routers together in Mesh
+    # NOTE: for now we put all channels in a single list. In the future we
+    # may want to divide channels into different groups so that it is
+    # easier to configure.
 
     chl_id  = 0
     for i in range( s.num_routers ):
@@ -78,37 +79,29 @@ class MeshNetworkRTL( Component ):
       s.send[i] //= s.routers[i].send[SELF]
 
       # Connect the unused ports
+      # FIXME: for now we hackily ground the payload field so that pymtl
+      # won't complain about net need driver.
 
       if i // mesh_wid == 0:
-        s.routers[i].send[SOUTH].rdy         //= 0
-        s.routers[i].recv[SOUTH].en          //= 0
+        s.routers[i].send[SOUTH].rdy         //= b1(0)
+        s.routers[i].recv[SOUTH].en          //= b1(0)
         s.routers[i].recv[SOUTH].msg.payload //= 0
 
       if i // mesh_wid == mesh_ht - 1:
-        s.routers[i].send[NORTH].rdy         //= 0
-        s.routers[i].recv[NORTH].en          //= 0
+        s.routers[i].send[NORTH].rdy         //= b1(0)
+        s.routers[i].recv[NORTH].en          //= b1(0)
         s.routers[i].recv[NORTH].msg.payload //= 0
 
       if i % mesh_wid == 0:
-        s.routers[i].send[WEST].rdy          //= 0
-        s.routers[i].recv[WEST].en           //= 0
+        s.routers[i].send[WEST].rdy          //= b1(0)
+        s.routers[i].recv[WEST].en           //= b1(0)
         s.routers[i].recv[WEST].msg.payload  //= 0
 
       if i % mesh_wid == mesh_wid - 1:
-        s.routers[i].send[EAST].rdy          //= 0
-        s.routers[i].recv[EAST].en           //= 0
+        s.routers[i].send[EAST].rdy          //= b1(0)
+        s.routers[i].recv[EAST].en           //= b1(0)
         s.routers[i].recv[EAST].msg.payload  //= 0
 
-    # FIXME: unable to connect a struct to a port.
-#    @s.update
-#    def up_pos():
-#      for y in range( mesh_ht ):
-#        for x in range( mesh_wid ):
-#          idx = y * mesh_wid + x
-#          s.routers[idx].pos = PositionType( x, y )
-
   def line_trace( s ):
-    trace = [ "" for _ in range( s.num_terminals ) ]
-    for i in range( s.num_terminals ):
-      trace[i] += s.send[i].line_trace()
-    return "|".join( trace )
+    trace = "|".join([ str(s.send[i]) for i in range( s.num_terminals ) ])
+    return trace
