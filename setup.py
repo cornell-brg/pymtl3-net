@@ -70,15 +70,7 @@ setup(
     'Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)',
   ],
 
-  package_data = {
-    'docs' : [
-      'code_hierarchy.png',
-      'design_flow.png',
-      'noc_structure.png',
-      'router_structure.png',
-      'test.png',
-    ],
-  },
+  packages = find_packages(),
 
   install_requires = [
     'pymtl3',
