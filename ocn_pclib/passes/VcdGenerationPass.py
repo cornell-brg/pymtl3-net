@@ -101,10 +101,6 @@ class VcdGenerationPass( BasePass ):
           net = eval(str(_net[0]))
           if i != clock_net_idx:
             symbol = net_symbol_mapping[i]
-            if '{' in symbol:
-              symbol = symbol.replace('{', '{{')
-            if '}' in symbol:
-              symbol = symbol.replace('}', '}}')
 
             # If we encounter a BitStruct then dump it as a concatenation of
             # all fields.
@@ -113,7 +109,10 @@ class VcdGenerationPass( BasePass ):
             net_bits = net.to_bits() if isinstance(net, BitStruct) else net
             try:
               if getattr( vcdmeta, f"last_{i}" ) != net_bits:
-                value_str = net_bits.bin()
+                if hasattr(net_bits, "bin"):
+                  value_str = net_bits.bin()
+                else:
+                  value_str = bin(net_bits)
                 print( f'b{value_str} {symbol}', file=vcd_file )
                 setattr( vcdmeta, f"last_{i}", deepcopy( net_bits ) )
             except AttributeError as e:
@@ -138,9 +137,15 @@ class VcdGenerationPass( BasePass ):
     # We only collect non-sliced leaf signals
     # TODO only collect leaf signals and for nested structs
     for x in top._dsl.all_signals:
-      for y in x.get_leaf_signals():
-        host = y.get_host_component()
-        component_signals[ host ].add(y)
+      if x.is_leaf_signal():
+        for y in x.get_leaf_signals():
+          host = y.get_host_component()
+          component_signals[ host ].add(y)
+      # BitStruct signals are not leaf signals. But as a temporary workaround
+      # we just add the whole signal to the component_signals dict
+      else:
+        host = x.get_host_component()
+        component_signals[ host ].add(x)
 
     # We pre-process all nets in order to remove all sliced wires because
     # they belong to a top level wire and we count that wire
@@ -176,7 +181,7 @@ class VcdGenerationPass( BasePass ):
 
     # Vcd file takes a(0) instead of a[0]
     def vcd_mangle_name( name ):
-      return name.replace('[','(').replace(']',')')
+      return name.replace('[','(').replace(']',')').replace(':', '_$_')
 
     def recurse_models( m, level ):
 
@@ -207,9 +212,14 @@ class VcdGenerationPass( BasePass ):
           # We treat this as a new net
 
           # Check if it's clock. Hardcode clock net
+
           if repr(signal) == "s.clk":
             assert vcdmeta.clock_net_idx is None
             vcdmeta.clock_net_idx = len(trimmed_value_nets)
+
+          # Otherwise this is a signal whose connection is not captured by
+          # the global net data structure. This might be a sliced signal or
+          # something updated in an upblk. Just create a new net for them.
 
           trimmed_value_nets.append( [ signal ] )
           signal_net_mapping[signal] = len(signal_net_mapping)
@@ -262,10 +272,6 @@ class VcdGenerationPass( BasePass ):
     # Flip clock for the first cycle
     print( '\n#0\nb0b1 {}\n'.format( net_symbol_mapping[ vcdmeta.clock_net_idx ] ),
            file=vcdmeta.vcd_file )
-
-    # Give all ' and " characters a preceding backslash for .format
-    for i, x in enumerate(net_symbol_mapping):
-      net_symbol_mapping[i] = x.replace('\\', '\\\\').replace('\'','\\\'').replace('\"','\\\"')
 
     # Monkey-patch `top`, `net_symbol_mapping`, and `trimmed_value_nets`
     # to the global namespace of `dump_vcd`
