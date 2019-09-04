@@ -201,10 +201,10 @@ def perform( action, model, topology, terminals, dimension,
   for i in range( terminals ):
     net.send[i].rdy = Bits1(1)
 
-    if topology == "Mesh":
-      XYType = mk_bits( clog2( net_width ) )
-      net.pos_x[i] = XYType(i % net_width)
-      net.pos_y[i] = XYType(i // net_height)
+#    if topology == "Mesh":
+#      XYType = mk_bits( clog2( net_width ) )
+#      net.pos_x[i] = XYType(i % net_width)
+#      net.pos_y[i] = XYType(i // net_height)
 
   ncycles = 0
 
