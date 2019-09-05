@@ -25,6 +25,8 @@ class CMeshNetworkRTL( Component ):
     num_inports     = 4 + num_nodes_each
     num_outports    = 4 + num_nodes_each
     chl_lat         = 0
+    XType           = mk_bits( clog2(mesh_wid) )
+    YType           = mk_bits( clog2(mesh_ht ) )
 
     # Interface
 
@@ -94,12 +96,14 @@ class CMeshNetworkRTL( Component ):
         s.routers[i].recv[EAST].en           //=  0
         s.routers[i].recv[EAST].msg.payload  //=  0
 
-    # FIXME: unable to connect a struct to a port.
-    @s.update
-    def up_pos():
-      for y in range( mesh_ht ):
-        for x in range( mesh_wid ):
-          s.routers[y*mesh_wid+x].pos = PositionType( x, y )
+#    # FIXME: unable to connect a struct to a port.
+#    @s.update
+#    def up_pos():
+    for y in range( mesh_ht ):
+      for x in range( mesh_wid ):
+#        s.routers[y*mesh_wid+x].pos = PositionType( x, y )
+        s.routers[y*mesh_wid+x].pos.pos_x //= XType(x)
+        s.routers[y*mesh_wid+x].pos.pos_y //= YType(y)
 
   def line_trace( s ):
     trace = [ f"{s.send[i]}" for i in range( s.num_terminals ) ]

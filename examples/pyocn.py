@@ -16,16 +16,16 @@ import re
 from collections import deque
 from random      import seed, randint
 
-#sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
-#os.system(sim_dir)
-#while sim_dir:
-#  if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
-#    sys.path.insert(0,sim_dir)
-#    # include the pymtl environment here
-#    # sys.path.insert(0,sim_dir + "/../pymtl3/")
-#    break
-#  sim_dir = os.path.dirname(sim_dir)
-#  os.system(sim_dir)
+sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
+os.system(sim_dir)
+while sim_dir:
+  if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
+    sys.path.insert(0,sim_dir)
+    # include the pymtl environment here
+    # sys.path.insert(0,sim_dir + "/../pymtl3/")
+    break
+  sim_dir = os.path.dirname(sim_dir)
+  os.system(sim_dir)
 
 #from meshnet.MeshNetworkFL    import MeshNetworkFL
 #from crossbar.CrossbarRTL     import CrossbarRTL
@@ -193,7 +193,7 @@ def perform( action, model, topology, terminals, dimension,
 
   if action == "simulate-1pkt":
     net.dump_vcd = True
-    net.vcd_file_name = "dumpVCD"
+    net.vcd_file_name = topology+"_sim1pkt"
 
   sim = net.apply( SimulationPass )
 
@@ -206,11 +206,6 @@ def perform( action, model, topology, terminals, dimension,
 
   for i in range( terminals ):
     net.send[i].rdy = Bits1(1)
-
-#    if topology == "Mesh":
-#      XYType = mk_bits( clog2( net_width ) )
-#      net.pos_x[i] = XYType(i % net_width)
-#      net.pos_y[i] = XYType(i // net_height)
 
   ncycles = 0
 
@@ -251,7 +246,6 @@ def perform( action, model, topology, terminals, dimension,
           data = Bits32(packets[0]['data'])
           packets.pop(0)
           if action == "verify":
-            print(dest)
             pkt_verify_queue[dest].append(data)
 
         # inject packet past the warmup period

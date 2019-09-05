@@ -32,6 +32,8 @@ class TorusNetworkRTL( Component ):
     s.num_routers   = mesh_wid * mesh_ht
     num_channels    = mesh_ht * mesh_wid * 4
     s.num_terminals = s.num_routers
+    XType           = mk_bits( clog2(mesh_wid) )
+    YType           = mk_bits( clog2(mesh_ht ) )
 
     # Interface
 
@@ -68,12 +70,14 @@ class TorusNetworkRTL( Component ):
       s.routers[i].send[SELF] //= s.send_adapters[i].recv
       s.send_adapters[i].send //= s.send[i]
 
-    @s.update
-    def up_pos():
-      for y in range( mesh_ht ):
-        for x in range( mesh_wid ):
-          idx = y * mesh_wid + x
-          s.routers[idx].pos = PositionType( x, y )
+#    @s.update
+#    def up_pos():
+    for y in range( mesh_ht ):
+      for x in range( mesh_wid ):
+#          idx = y * mesh_wid + x
+#          s.routers[idx].pos = PositionType( x, y )
+        s.routers[y*mesh_wid+x].pos.pos_x //= XType(x)
+        s.routers[y*mesh_wid+x].pos.pos_y //= YType(y)
 
   def line_trace( s ):
     in_trace  = "|".join([ str( s.recv[i] ) for i in range( s.num_terminals ) ])

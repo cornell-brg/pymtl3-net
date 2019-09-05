@@ -48,7 +48,7 @@ class DORYCMeshRouteUnitRTL( Component ):
 
       if s.get.rdy:
         if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
-          s.give_rdy[Bits3(4)+s.get.msg.dst_ter] = Bits1(1)
+          s.give_rdy[TType(4)+TType(s.get.msg.dst_ter)] = Bits1(1)
         elif s.get.msg.dst_y < s.pos.pos_y:
           s.give_rdy[1] = Bits1(1)
         elif s.get.msg.dst_y > s.pos.pos_y:
