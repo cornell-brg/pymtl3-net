@@ -50,11 +50,11 @@ class RingRouteUnitRTL( Component ):
     @s.update
     def up_left_right_dist():
       if s.get.msg.dst < s.pos:
-        s.left_dist  = dist_type(s.pos-s.get.msg.dst)
-        s.right_dist = s.last_idx-dist_type(s.pos+s.get.msg.dst)+dist_type(1)
+        s.left_dist  = dist_type(s.pos) - dist_type(s.get.msg.dst)
+        s.right_dist = s.last_idx - dist_type(s.pos) + dist_type(s.get.msg.dst) + dist_type(1)
       else:
-        s.left_dist  = dist_type(1)+s.last_idx+dist_type(s.pos-s.get.msg.dst)
-        s.right_dist = dist_type(s.get.msg.dst-s.pos)
+        s.left_dist  = dist_type(1) + s.last_idx + dist_type(s.pos) - dist_type(s.get.msg.dst)
+        s.right_dist = dist_type(s.get.msg.dst) - dist_type(s.pos)
 
     @s.update
     def up_ru_routing():
