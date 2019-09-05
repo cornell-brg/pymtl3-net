@@ -62,7 +62,7 @@ class DTRBflyRouteUnitRTL( Component ):
 
     @s.update
     def up_ru_get_en():
-      s.get.en = s.give_ens>EnType(0)
+      s.get.en = s.give_ens > EnType(0)
       for i in range( s.num_outports ):
         s.give[i].msg = deepcopy( s.get.msg )
       if s.get.rdy:

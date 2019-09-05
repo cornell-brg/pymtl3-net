@@ -1,4 +1,4 @@
-#========================================================================
+#=========================================================================
 #config.yml
 #=========================================================================
 #Yaml-based configuratin file of PyOCN for modeling, testing,
@@ -11,7 +11,9 @@
 # Topology
 #-------------------------------------------------------------------------
 # Topology information for specific network.
-network         : 'Ring'
+#network         : 'Ring'
+#network         : 'Bfly'
+network         : 'CMesh'
 terminal        : 16
 dimension       : 4
 channel_latency : 0

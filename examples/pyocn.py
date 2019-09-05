@@ -39,7 +39,8 @@ from bflynet.BflyNetworkRTL   import BflyNetworkRTL
 from ocn_pclib.ifcs.packets   import *
 from ocn_pclib.ifcs.positions import *
 from pymtl3.stdlib.test       import TestVectorSimulator
-from pymtl3.passes.sverilog   import ImportPass, TranslationPass
+#from pymtl3.passes.sverilog   import ImportPass, TranslationPass
+from pymtl3.passes.yosys      import ImportPass, TranslationPass
 from ocn_pclib.passes.PassGroups import SimulationPass
 
 import time
@@ -50,8 +51,6 @@ seed(0xdeadbeef)
 # Command line processing
 #-------------------------------------------------------------------------
 
-#--------------------------------------------------------------------------
-# generate synthesizable Verilog.
 #--------------------------------------------------------------------------
 
 def generate( topology, terminals, dimension, channel_latency ):
@@ -167,7 +166,7 @@ def perform( action, model, topology, terminals, dimension,
 
     elif topology == "Bfly":
       NetModel    = BflyNetworkRTL
-      k_ary       = 4
+      k_ary       = dimension
       n_fly       = 3
       terminals   = k_ary * ( k_ary ** ( n_fly - 1 ) )
       num_routers = n_fly * ( k_ary ** ( n_fly - 1 ) )
@@ -182,7 +181,8 @@ def perform( action, model, topology, terminals, dimension,
 
   if action == "generate":
     os.system("[ ! -e "+topology+"NetworkRTL.sv ] || rm "+topology+"NetworkRTL.sv")
-    net.sverilog_translate = True
+#    net.sverilog_translate = True
+    net.yosys_translate = True
     net.apply( TranslationPass() )
     sim = net.apply( SimulationPass )
     files = [f for f in os.listdir('.') if re.match(r"{}+.*\.sv".format(topology), f)]

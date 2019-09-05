@@ -454,7 +454,8 @@ def mk_bfly_pkt_timestamp( k_ary=2, n_fly=2, nvcs=0,
   if k_ary ** ( n_fly - 1 ) == 1:
     DstType = mk_bits( n_fly )
   else:
-    DstType = mk_bits( clog2( k_ary ** ( n_fly - 1 ) ) * n_fly )
+    DstType = mk_bits( clog2( k_ary ) * n_fly )
+#    DstType = mk_bits( clog2( k_ary ** ( n_fly - 1 ) ) * n_fly )
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
   TimestampType = mk_bits( clog2(max_time + 1) )
