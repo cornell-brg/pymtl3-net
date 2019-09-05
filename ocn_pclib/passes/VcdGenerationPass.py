@@ -98,7 +98,11 @@ class VcdGenerationPass( BasePass ):
       try:
         # Dump VCD
         for i, _net in enumerate( trimmed_value_nets ):
-          net = eval(str(_net[0]))
+          # FIXME: some nets are invalid
+          try:
+            net = eval(str(_net[0]))
+          except:
+            continue
           if i != clock_net_idx:
             symbol = net_symbol_mapping[i]
 
