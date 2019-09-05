@@ -186,7 +186,7 @@ def perform( action, model, topology, terminals, dimension,
 #    net.sverilog_translate = True
     net.yosys_translate = True
     net.apply( TranslationPass() )
-    sim = net.apply( SimulationPass )
+    net.apply( SimulationPass )
     files = [f for f in os.listdir('.') if re.match(r"{}+.*\.sv".format(topology), f)]
     file_name = files[0]
 #    os.system("mv "+topology+"*.sv "+topology+"NetworkRTL.sv")
@@ -197,7 +197,7 @@ def perform( action, model, topology, terminals, dimension,
     net.dump_vcd = True
     net.vcd_file_name = topology+"_sim1pkt"
 
-  sim = net.apply( SimulationPass )
+  net.apply( SimulationPass )
 
   # Source Queues - Modeled as Bypass Queues
   src_queue = [ deque() for x in range( terminals ) ]
