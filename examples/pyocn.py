@@ -16,16 +16,16 @@ import re
 from collections import deque
 from random      import seed, randint
 
-sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
-os.system(sim_dir)
-while sim_dir:
-  if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
-    sys.path.insert(0,sim_dir)
-    # include the pymtl environment here
-    # sys.path.insert(0,sim_dir + "/../pymtl3/")
-    break
-  sim_dir = os.path.dirname(sim_dir)
-  os.system(sim_dir)
+#sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
+#os.system(sim_dir)
+#while sim_dir:
+#  if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
+#    sys.path.insert(0,sim_dir)
+#    # include the pymtl environment here
+#    # sys.path.insert(0,sim_dir + "/../pymtl3/")
+#    break
+#  sim_dir = os.path.dirname(sim_dir)
+#  os.system(sim_dir)
 
 #from meshnet.MeshNetworkFL    import MeshNetworkFL
 #from crossbar.CrossbarRTL     import CrossbarRTL
@@ -102,7 +102,8 @@ def perform( action, model, topology, terminals, dimension,
              channel_latency, injection, pattern, packets ):
 
   routers         = terminals
-  injection_rate  = injection * 100
+#  injection_rate  = injection * 100
+  injection_rate  = injection
   net             = None
 
   # Simulation Variables
@@ -180,9 +181,14 @@ def perform( action, model, topology, terminals, dimension,
   net.elaborate()
 
   if action == "generate":
+    os.system("[ ! -e "+topology+"NetworkRTL.sv ] || rm "+topology+"NetworkRTL.sv")
     net.sverilog_translate = True
     net.apply( TranslationPass() )
     sim = net.apply( SimulationPass )
+    files = [f for f in os.listdir('.') if re.match(r"{}+.*\.sv".format(topology), f)]
+    file_name = files[0]
+#    os.system("mv "+topology+"*.sv "+topology+"NetworkRTL.sv")
+    os.rename(file_name, topology+"NetworkRTL.sv")
     return
 
   if action == "simulate-1pkt":
@@ -245,6 +251,7 @@ def perform( action, model, topology, terminals, dimension,
           data = Bits32(packets[0]['data'])
           packets.pop(0)
           if action == "verify":
+            print(dest)
             pkt_verify_queue[dest].append(data)
 
         # inject packet past the warmup period
@@ -383,6 +390,7 @@ def main():
   config = yaml.load(path)
 
   print( config )
+  print( "="*74 )
 
   for action in config['action']:
 
@@ -399,11 +407,11 @@ def main():
       print( "[VERIFYING using test cases]" )
       terminals = config['terminal']
       for i in range(6):
-        packets = [{'src': (0+i)%terminals, 'dest': terminals-(i+1)%terminals, 'data': 0xffff},
-                   {'src': (1+i)%terminals, 'dest': terminals-(i+2)%terminals, 'data': 0xfffe},
-                   {'src': (2+i)%terminals, 'dest': terminals-(i+3)%terminals, 'data': 0xfffd},
-                   {'src': (3+i)%terminals, 'dest': terminals-(i+4)%terminals, 'data': 0xfffc},
-                   {'src': (4+i)%terminals, 'dest': terminals-(i+5)%terminals, 'data': 0xfffb}]
+        packets = [{'src': (0+i)%terminals, 'dest': (terminals-(i+1))%terminals, 'data': 0xffff},
+                   {'src': (1+i)%terminals, 'dest': (terminals-(i+2))%terminals, 'data': 0xfffe},
+                   {'src': (2+i)%terminals, 'dest': (terminals-(i+3))%terminals, 'data': 0xfffd},
+                   {'src': (3+i)%terminals, 'dest': (terminals-(i+4))%terminals, 'data': 0xfffc},
+                   {'src': (4+i)%terminals, 'dest': (terminals-(i+5))%terminals, 'data': 0xfffb}]
         topology = config['network']
         verify( topology, config['terminal'], config['dimension'],
                            config['channel_latency'], packets )
@@ -428,25 +436,52 @@ def main():
       print( "|Topology|Pattern    |Inj.Rate|Avg.Lat|Num.Pkt|Cycles|Sim.Time|Speed(c/s)|" )
       print( "|--------|-----------|--------|-------|-------|------|--------|----------|" )
 
-      injection_list = [0.01, 0.1, 0.2, 0.4, 0.6]
       topology = config['network']
-      for injection in injection_list:
-        for pattern in config['pattern']:
+
+      for pattern in config['pattern']:
+
+        inj             = 0
+        avg_lat         = 0
+        zero_load_lat   = 0
+        running_avg_lat = 0.0
+        inj_shamt_mult  = 5
+        inj_shamt       = 0.0
+        inj_step        = 10
+
+        while inj < 100 and avg_lat <= 100 and avg_lat <= 2.5 * zero_load_lat:
+
           start_time = time.time()
 
           # Start simulation
 
           results = simulate_lat_vs_bw( topology, config['terminal'],
                     config['dimension'], config['channel_latency'],
-                    injection, pattern )
+                    max(inj,1), pattern )
 
           end_time = time.time()
 
+          avg_lat = results[0]
+
           print( "|{:<8}|{:<11}|{:<8}|{:<7}|{:<7}|{:<6}|{:<8}|{:<10}|".\
-                  format(topology, pattern, injection,\
+                  format(topology, pattern, max(inj, 1),
                       "{0:.1f}".format(results[0]), results[1], results[2],
                       "{0:.1f}".format(end_time - start_time),
                       "{0:.1f}".format(results[2]/(end_time - start_time))) )
+
+          if inj == 0:
+            zero_load_lat = avg_lat
+
+          # dynamically reduce inj_step depending on the slope
+          if running_avg_lat == 0.0:
+            running_avg_lat = int(avg_lat)
+          else:
+            running_avg_lat = 0.5 * int(avg_lat) + 0.5 * int(running_avg_lat)
+
+          inj_shamt = ( (int(avg_lat) / running_avg_lat) - 1 ) * inj_shamt_mult
+          inj_step  = inj_step >> int(inj_shamt)
+          if inj_step < 1:
+            inj_step = 1
+          inj += inj_step
 
       print( "="*74 )
       print()
