@@ -142,7 +142,7 @@ class RecvRTL2CreditSendRTL( Component ):
 
     for i in range( nvcs ):
       s.credit[i].incr       //= s.send.yum[i]
-      s.credit[i].load       //= b1(0)        
+      s.credit[i].load       //= b1(0)
       s.credit[i].load_value //= CreditType(0)
 
   def line_trace( s ):
