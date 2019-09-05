@@ -183,14 +183,10 @@ def perform( action, model, topology, terminals, dimension,
 
   if action == "generate":
     os.system("[ ! -e "+topology+"NetworkRTL.sv ] || rm "+topology+"NetworkRTL.sv")
-#    net.sverilog_translate = True
     net.yosys_translate = True
     net.apply( TranslationPass() )
-    net.apply( SimulationPass )
-    files = [f for f in os.listdir('.') if re.match(r"{}+.*\.sv".format(topology), f)]
-    file_name = files[0]
-#    os.system("mv "+topology+"*.sv "+topology+"NetworkRTL.sv")
-    os.rename(file_name, topology+"NetworkRTL.sv")
+    sim = net.apply( SimulationPass )
+    os.system("mv "+topology+"*.sv "+topology+"NetworkRTL.sv")
     return
 
   if action == "simulate-1pkt":

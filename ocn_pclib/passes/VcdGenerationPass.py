@@ -169,7 +169,7 @@ class VcdGenerationPass( BasePass ):
             vcdmeta.clock_net_idx = len(trimmed_value_nets)
 
       if new_net:
-        print( new_net[0] )
+#        print( new_net[0] )
         trimmed_value_nets.append( new_net )
 
     # Generate symbol for existing nets
@@ -229,7 +229,6 @@ class VcdGenerationPass( BasePass ):
           # FIXME: some signal with invalid slice is appended, for example
           # [0:10] for a Bits4 instance
 
-          print( f'- appending {signal}' )
           trimmed_value_nets.append( [ signal ] )
           signal_net_mapping[signal] = len(signal_net_mapping)
           symbol = next(vcd_symbols)
