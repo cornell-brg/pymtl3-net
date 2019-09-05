@@ -167,8 +167,12 @@ def perform( action, model, topology, terminals, dimension,
     elif topology == "Bfly":
       NetModel    = BflyNetworkRTL
       k_ary       = dimension
-      n_fly       = 3
-      terminals   = k_ary * ( k_ary ** ( n_fly - 1 ) )
+      temp_v      = terminals // k_ary
+      n_fly       = 1
+      while temp_v != 1:
+        temp_v = temp_v // k_ary
+        n_fly  = n_fly + 1
+      # terminals   = k_ary * ( k_ary ** ( n_fly - 1 ) )
       num_routers = n_fly * ( k_ary ** ( n_fly - 1 ) )
       MeshPos     = mk_bfly_pos( k_ary, n_fly )
       PacketType  = mk_bfly_pkt_timestamp( k_ary, n_fly,
