@@ -8,7 +8,7 @@
       /____/                      
 =======================================
 </pre>
-[![Build Status](https://travis-ci.com/cornell-brg/posh-ocn.svg?branch=master)](https://travis-ci.com/cornell-brg/posh-ocn)
+[![Build Status](https://travis-ci.com/cornell-brg/pymtl3-net.svg?branch=master)](https://travis-ci.com/cornell-brg/pymtl3-net)
 
 PyOCN (PyMTL-OCN Generator) is a parameterizable and powerful OCN (on-chip network) generator to generate synthesizable Verilog for different OCNs based on user-specified configurations (e.g., network size, topology, number of virtual channels, routing strategy, switching arbitration, etc.). It comes with PyMTL implementation and is the first one to provide functional-level (FL), cycle-level (CL), and register-transfer-level (RTL) modeling for building OCNs. Furthermore, POSH OCN Generator is open-source with a modular design and standardized interfaces between modules. The configurability and extensibility are maximized by its parametrization system to fit in various research and industrial needs.
 
