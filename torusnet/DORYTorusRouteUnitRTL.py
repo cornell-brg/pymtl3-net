@@ -60,20 +60,20 @@ class DORYTorusRouteUnitRTL( Component ):
     @s.update
     def up_ns_dist():
       if s.get.msg.dst_y < s.pos.pos_y:
-        s.south_dist = s.pos.pos_y - s.get.msg.dst_y
-        s.north_dist = s.last_row_id - s.pos.pos_y + ns_dist_type(1) + s.get.msg.dst_y
+        s.south_dist = ns_dist_type(s.pos.pos_y) - ns_dist_type(s.get.msg.dst_y)
+        s.north_dist = s.last_row_id - ns_dist_type(s.pos.pos_y) + ns_dist_type(1) + ns_dist_type(s.get.msg.dst_y)
       else:
-        s.south_dist = s.pos.pos_y + ns_dist_type(1) + s.last_row_id - s.get.msg.dst_y
-        s.north_dist = s.get.msg.dst_y - s.pos.pos_y
+        s.south_dist = ns_dist_type(s.pos.pos_y) + ns_dist_type(1) + s.last_row_id - ns_dist_type(s.get.msg.dst_y)
+        s.north_dist = ns_dist_type(s.get.msg.dst_y) - ns_dist_type(s.pos.pos_y)
 
     @s.update
     def up_we_dist():
       if s.get.msg.dst_x < s.pos.pos_x:
-        s.west_dist = s.pos.pos_x - s.get.msg.dst_x
-        s.east_dist = s.last_col_id - s.pos.pos_x + ns_dist_type(1) + s.get.msg.dst_x
+        s.west_dist = we_dist_type(s.pos.pos_x) - we_dist_type(s.get.msg.dst_x)
+        s.east_dist = s.last_col_id - we_dist_type(s.pos.pos_x) + we_dist_type(1) + we_dist_type(s.get.msg.dst_x)
       else:
-        s.west_dist = s.pos.pos_x + ns_dist_type(1) + s.last_col_id - s.get.msg.dst_x
-        s.east_dist = s.get.msg.dst_x - s.pos.pos_x
+        s.west_dist = we_dist_type(s.pos.pos_x) + we_dist_type(1) + s.last_col_id - we_dist_type(s.get.msg.dst_x)
+        s.east_dist = we_dist_type(s.get.msg.dst_x) - we_dist_type(s.pos.pos_x)
 
     # Routing logic
 
@@ -97,7 +97,9 @@ class DORYTorusRouteUnitRTL( Component ):
 
         # Turning logic
 
-        s.turning = ( s.get.msg.src_x == s.pos.pos_x ) & ( s.get.msg.src_y != s.pos.pos_y ) & ( s.out_dir == WEST | s.out_dir == EAST )
+        s.turning = ( s.get.msg.src_x == s.pos.pos_x ) & \
+                    ( s.get.msg.src_y != s.pos.pos_y ) & \
+                    ( s.out_dir == WEST ) | ( s.out_dir == EAST )
 
         # Dateline logic
 
@@ -106,18 +108,18 @@ class DORYTorusRouteUnitRTL( Component ):
 
         if s.pos.pos_x == posx_type(0) and s.out_dir == WEST:
           s.give_msg_wire.vc_id = b1(1)
-        elif s.pos.pos_x == s.last_col_id and s.out_dir == EAST:
+        elif s.pos.pos_x == posx_type(s.last_col_id) and s.out_dir == EAST:
           s.give_msg_wire.vc_id = b1(1)
         elif s.pos.pos_y == posy_type(0) and s.out_dir == SOUTH:
           s.give_msg_wire.vc_id = b1(1)
-        elif s.pos.pos_y == s.last_col_id and s.out_dir == NORTH:
+        elif s.pos.pos_y == posy_type(s.last_col_id) and s.out_dir == NORTH:
           s.give_msg_wire.vc_id = b1(1)
 
         s.give[ s.out_dir ].rdy = b1(1)
 
     @s.update
     def up_ru_get_en():
-      s.get.en = s.give_ens > 0
+      s.get.en = s.give_ens > b5(0)
 
   # Line trace
 

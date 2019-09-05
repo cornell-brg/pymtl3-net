@@ -51,8 +51,6 @@ seed(0xdeadbeef)
 # Command line processing
 #-------------------------------------------------------------------------
 
-#--------------------------------------------------------------------------
-
 def generate( topology, terminals, dimension, channel_latency ):
   model = "RTL"
   perform( "generate", model, topology, terminals, dimension,

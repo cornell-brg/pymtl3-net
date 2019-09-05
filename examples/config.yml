@@ -12,8 +12,8 @@
 #-------------------------------------------------------------------------
 # Topology information for specific network.
 #network         : 'Ring'
-network         : 'Bfly'
-#network         : 'CMesh'
+#network         : 'Bfly'
+network         : 'Torus'
 terminal        : 16
 dimension       : 4
 channel_latency : 0
