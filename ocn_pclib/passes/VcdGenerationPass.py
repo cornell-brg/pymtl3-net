@@ -169,7 +169,6 @@ class VcdGenerationPass( BasePass ):
             vcdmeta.clock_net_idx = len(trimmed_value_nets)
 
       if new_net:
-#        print( new_net[0] )
         trimmed_value_nets.append( new_net )
 
     # Generate symbol for existing nets
@@ -238,6 +237,7 @@ class VcdGenerationPass( BasePass ):
         # "subtract" host component's name from signal's full name
         # to get the actual name like enq.rdy
         # TODO struct
+
         signal_name = vcd_mangle_name( repr(signal)[ len(m_name)+1: ] )
         print( "{}$var {type} {nbits} {symbol} {name} $end".format( "    "*(level+1),
                 type='reg', nbits=signal._dsl.Type.nbits, symbol=symbol, name= signal_name),
