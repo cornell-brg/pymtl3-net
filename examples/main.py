@@ -16,16 +16,16 @@ import re
 from collections import deque
 from random      import seed, randint
 
-sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
-os.system(sim_dir)
-while sim_dir:
-  if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
-    sys.path.insert(0,sim_dir)
-    # include the pymtl environment here
-    # sys.path.insert(0,sim_dir + "/../pymtl3/")
-    break
-  sim_dir = os.path.dirname(sim_dir)
-  os.system(sim_dir)
+#sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
+#os.system(sim_dir)
+#while sim_dir:
+#  if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
+#    sys.path.insert(0,sim_dir)
+#    # include the pymtl environment here
+#    # sys.path.insert(0,sim_dir + "/../pymtl3/")
+#    break
+#  sim_dir = os.path.dirname(sim_dir)
+#  os.system(sim_dir)
 
 #from meshnet.MeshNetworkFL    import MeshNetworkFL
 #from crossbar.CrossbarRTL     import CrossbarRTL
