@@ -11,7 +11,7 @@
 # Topology
 #-------------------------------------------------------------------------
 # Topology information for specific network.
-network         : 'CMesh'
+network         : 'Ring'
 terminal        : 16
 dimension       : 4
 channel_latency : 0

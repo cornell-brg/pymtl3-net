@@ -26,6 +26,7 @@ class RingNetworkRTL( Component ):
 
     # Constants
     s.num_routers = num_routers
+#    IDType = mk_bits(clogs(num_routers))
 
     # Interface
     s.recv = [ RecvIfcRTL(PacketType) for _ in range(s.num_routers)]
@@ -50,13 +51,14 @@ class RingNetworkRTL( Component ):
       s.recv[i]                     //= s.recv_adp[i].recv
       s.recv_adp[i].send            //= s.routers[i].recv[SELF]
       s.routers[i].send[SELF]       //= s.send_adp[i].recv
-      s.send_adp[i].send            //= s.send[i]              
+      s.send_adp[i].send            //= s.send[i]
 
-    # FIXME: unable to connect a struct to a port.
-    @s.update
-    def up_pos():
-      for r in range( s.num_routers ):
-        s.routers[r].pos = PositionType( r )
+#    # FIXME: unable to connect a struct to a port.
+#    @s.update
+#    def up_pos():
+    for r in range( s.num_routers ):
+#      s.routers[y*mesh_wid+x].pos.pos_x //= XType(x)
+      s.routers[r].pos //= PositionType( r )
 
   def line_trace( s, level='simple' ):
 
