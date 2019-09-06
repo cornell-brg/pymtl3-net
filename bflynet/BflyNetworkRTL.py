@@ -96,8 +96,18 @@ class BflyNetworkRTL( Component ):
           terminal_id_send += 1
 
   def line_trace( s ):
-    trace = [ f"{s.send[i]}" for i in range( s.num_terminals ) ]
-    return "|".join( trace )
+      send_lst = []
+      recv_lst = []
+      for r in s.routers:
+        has_recv = any([ r.recv[i].en for i in range(s.k_ary) ])
+        has_send = any([ r.send[i].en for i in range(s.k_ary) ])
+        if has_send:
+          send_lst.append( f'{r.pos}' )
+        if has_recv:
+          recv_lst.append( f'{r.pos}')
+      send_str = ','.join( send_lst )
+      recv_str = ','.join( recv_lst )
+      return f' {send_str:2} -> {recv_str:2}'
 
   def elaborate_physical( s ):
 
