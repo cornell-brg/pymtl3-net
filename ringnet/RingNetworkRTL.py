@@ -58,7 +58,7 @@ class RingNetworkRTL( Component ):
       for r in range( s.num_routers ):
         s.routers[r].pos = PositionType( r )
 
-  def line_trace( s, level='simple' ):
+  def line_trace( s, level='1pkt' ):
 
     # Verbose line trace
     if level == 'verbose':
@@ -91,9 +91,23 @@ class RingNetworkRTL( Component ):
       return  " >>>>> ".join( [ "{} __XX__ {}".format( in_trace[i], out_trace[i] ) for i in range(s.num_routers)] )
 
     # Simple line trace
-    else:
+    elif level=='simple':
       in_trace  = [ str(s.recv[i]) for i in range( s.num_routers) ]
       out_trace = [ str(s.send[i]) for i in range( s.num_routers) ]
       in_str = "|".join( in_trace )
       out_str = "|".join( out_trace )
       return "{}(){}".format( in_str, out_str )
+
+    else:
+      send_lst = []
+      recv_lst = []
+      for r in s.routers:
+        has_recv = any([ r.recv[i].en for i in range(3) ])
+        has_send = any([ r.send[i].en for i in range(3) ])
+        if has_send:
+          send_lst.append( f'{r.pos}' )
+        if has_recv:
+          recv_lst.append( f'{r.pos}')
+      send_str = ','.join( send_lst )
+      recv_str = ','.join( recv_lst )
+      return f' {send_str:2} -> {recv_str:2}'
