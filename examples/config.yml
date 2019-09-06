@@ -1,19 +1,30 @@
 #=========================================================================
-#config.yml
+# config.yml
 #=========================================================================
-#Yaml-based configuratin file of PyOCN for modeling, testing,
-#and evaluating.
+# Yaml-based configuratin file of PyOCN for modeling, testing,
+# and evaluating.
 #
-#Author : Cheng Tan
-#  Date : July 30, 2019
-#
+# Author : Cheng Tan, Yanghui Ou
+#   Date : July 30, 2019
+
 #-------------------------------------------------------------------------
 # Topology
 #-------------------------------------------------------------------------
 # Topology information for specific network.
-#network         : 'Ring'
-#network         : 'Bfly'
-network         : 'Torus'
+# network        : Network topology. Available topologies are:
+#                  - 'Mesh'
+#                  - 'Torus'
+#                  - 'Ring'
+#                  - 'Bfly'
+#
+# terminal       : number of terminals in the network.
+# dimension      : number of rows (for mesh and torus) or number of arys (
+#                  for butterfly).
+# channel_latency: the latency of passing throung a channel (in number of
+#                  cycles). 0 means combinational channel, i.e., no
+#                  channel buffers.
+
+network         : 'Mesh'
 terminal        : 16
 dimension       : 4
 channel_latency : 0
@@ -21,25 +32,32 @@ channel_latency : 0
 #-------------------------------------------------------------------------
 # Action
 #-------------------------------------------------------------------------
-# Actions to generate synthesizable Verilog code, verify the models using
-# tests, simulate with single packet (from first terminal to the last one),
-# simulate with specific traffic pattern at different injection ratio.
+# A list of actions to do for the simulation script. Available actions are
+# listed as follow:
+# - generate           : generate verilog code.
+# - verify             : run a small test suite to test the correctness of
+#                        the generated network.
+# - simulate-1pkt      : run a 1-packet simulation and dump the waveform.
+# - simulatte-lat-vs-bw: run simulation on the generatted network with
+#                        different injection rate and calculates the
+#                        corresponding average latency.
+
 action:
   - generate
-    #  - verify
-    #  - simulate-1pkt
-    #  - simulate-lat-vs-bw
+  - verify
+  - simulate-1pkt
+  - simulate-lat-vs-bw
 
 #-------------------------------------------------------------------------
 # Pattern
 #-------------------------------------------------------------------------
-# Pattern is specific for simulation on latency vs. bandwidth
-# (simulate-lat-vs-bw).
-pattern:
-  #  - complement
-  - urandom
-  #  - partition
-  #  - opposite
-  #  - neighbor
-  #...
+# A list of traffic patterns to simulate (for simulate-lat-vs-bw).
+# Available traffic patterns are:
+# - complement
+# - urandom
+# - partition
+# - opposite
+# - neighbor
 
+pattern:
+  - urandom

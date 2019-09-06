@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 =========================================================================
-pyocn.py
+main.py
 =========================================================================
 Example of PyOCN for modeling, testing, and evaluating.
 
@@ -16,19 +16,6 @@ import re
 from collections import deque
 from random      import seed, randint
 
-#sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
-#os.system(sim_dir)
-#while sim_dir:
-#  if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
-#    sys.path.insert(0,sim_dir)
-#    # include the pymtl environment here
-#    # sys.path.insert(0,sim_dir + "/../pymtl3/")
-#    break
-#  sim_dir = os.path.dirname(sim_dir)
-#  os.system(sim_dir)
-
-#from meshnet.MeshNetworkFL    import MeshNetworkFL
-#from crossbar.CrossbarRTL     import CrossbarRTL
 from pymtl3                   import *
 from meshnet.MeshNetworkCL    import MeshNetworkCL
 from ringnet.RingNetworkRTL   import RingNetworkRTL
@@ -39,7 +26,6 @@ from bflynet.BflyNetworkRTL   import BflyNetworkRTL
 from ocn_pclib.ifcs.packets   import *
 from ocn_pclib.ifcs.positions import *
 from pymtl3.stdlib.test       import TestVectorSimulator
-#from pymtl3.passes.sverilog   import ImportPass, TranslationPass
 from pymtl3.passes.yosys      import ImportPass, TranslationPass
 from ocn_pclib.passes.PassGroups import SimulationPass
 
@@ -122,7 +108,6 @@ def perform( action, model, topology, terminals, dimension,
       PacketType = mk_ring_pkt_timestamp( routers, payload_nbits = 32,
                    nvcs = 2, max_time = NUM_SAMPLE_CYCLES )
       net        = NetModel( PacketType, RingPos, routers, channel_latency )
-#      net.set_param( "top.routers*.route_units*.construct", num_routers=routers)
 
     elif topology == "Mesh":
       NetModel    = MeshNetworkRTL
@@ -143,8 +128,6 @@ def perform( action, model, topology, terminals, dimension,
                     payload_nbits = 32, nvcs = 2,
                     max_time = NUM_SAMPLE_CYCLES )
       net         = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
-      # model.set_param('top.routers*.route_units*.construct', ncols=net_width )
-      # model.set_param('top.routers*.route_units*.construct', ndimension=net_height)
 
     elif topology == "CMesh":
       # TODO: need to provide parameters for different topology specifically.
@@ -316,8 +299,6 @@ def perform( action, model, topology, terminals, dimension,
         all_packets_received += 1
         if action == "verify":
           if net.send[i].msg.payload not in pkt_verify_queue[i]:
-#            print("\33[32m.\033[0m", end="")
-#          else:
             print("x")
             print("[VERIFY FAILED]")
             return
@@ -362,7 +343,6 @@ def perform( action, model, topology, terminals, dimension,
   if action == "verify":
     print("\33[32m.\033[0m", end="")
     sys.stdout.flush()
-#    print("\n[VERIFY DONE]: passed test cases")
 
   # return the calculated average_latency and count of packets received
 
