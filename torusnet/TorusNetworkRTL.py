@@ -80,10 +80,19 @@ class TorusNetworkRTL( Component ):
         s.routers[y*mesh_wid+x].pos.pos_y //= YType(y)
 
   def line_trace( s ):
-    in_trace  = "|".join([ str( s.recv[i] ) for i in range( s.num_terminals ) ])
-    out_trace = "|".join([ str( s.send[i] ) for i in range( s.num_terminals ) ])
+      send_lst = []
+      recv_lst = []
+      for r in s.routers:
+        has_recv = any([ r.recv[i].en for i in range(5) ])
+        has_send = any([ r.send[i].en for i in range(5) ])
+        if has_send:
+          send_lst.append( f'{r.pos}' )
+        if has_recv:
+          recv_lst.append( f'{r.pos}')
+      send_str = ','.join( send_lst )
+      recv_str = ','.join( recv_lst )
+      return f' {send_str:3} -> {recv_str:3}'
 
-    return f"{in_trace}_()_{out_trace}"
 
   def elaborate_physical( s ):
     # Initialize dimension for sub-modules.
