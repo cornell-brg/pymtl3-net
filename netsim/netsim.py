@@ -153,6 +153,9 @@ def parse_cmdline():
   parser.add_argument( "--sweep",
                        action  = "store_true"                              )
 
+  parser.add_argument( "--bisection",
+                       action  = "store_true"                              )
+
   # OCN related command line arguments
 
   parser.add_argument( "--model",
@@ -237,8 +240,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 10
-NUM_SAMPLE_CYCLES   = 50 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 100
+NUM_SAMPLE_CYCLES   = 500 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
@@ -381,6 +384,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
         # inject packet past the warmup period
 
         if ( NUM_WARMUP_CYCLES < ncycles < NUM_SAMPLE_CYCLES ):
+          pkts = []
           if opts.topology == "Ring":
             if dest < i and i - dest <= num_nodes/2:
               opaque = 0
@@ -390,16 +394,30 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
               opaque = 0
 
             pkt = PacketType( i, dest, 0, opaque, 98+i+ncycles, ncycles )
+            pkts.append( pkt )
 
           elif opts.topology == "Mesh":
 #            net_width = opts.routers / opts.rows
-            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 0, 6, ncycles )
+            if opts.bisection:
+              for _ in range(2):
+                pkt = PacketType( i%net_width, i/net_width, dest%net_width,
+                        dest/net_width, 0, 6, ncycles )
+                pkts.append( pkt )
+            else:
+              pkt = PacketType( i%net_width, i/net_width, dest%net_width,
+                      dest/net_width, 0, 6, ncycles )
+              pkts.append( pkt )
 
           elif opts.topology == "Torus":
-#            net_width = opts.routers / opts.rows
-            pkt = PacketType( i%net_width, i//net_width, dest%net_width,
-                    dest//net_width, 0, 0, 6, ncycles )
+            if opts.bisection:
+              for _ in range(4):
+                pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                        dest//net_width, 0, 0, 6, ncycles )
+                pkts.append( pkt )
+            else:
+              pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                      dest//net_width, 0, 0, 6, ncycles )
+              pkts.append( pkt )
 
           elif opts.topology == "CMesh":
             pkt = PacketType( (i/term_each)%net_width,
@@ -408,6 +426,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                               (dest/term_each)/net_width,
                               dest%term_each,
                               0, 6, ncycles )
+            pkts.append( pkt )
 
           elif opts.topology == "Butterfly":
             r_rows = k_ary ** ( n_fly - 1 )
@@ -428,14 +447,21 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                   bf_dst = bf_dst * 2
                 else:
                   bf_dst = bf_dst * k_ary
-            pkt = PacketType( i, bf_dst, 0, 6, ncycles )
+            if opts.bisection:
+              for _ in range(8):
+                pkt = PacketType( i, bf_dst, 0, 6, ncycles )
+                pkts.append( pkt )
+            else:
+              pkt = PacketType( i, bf_dst, 0, 6, ncycles )
+              pkts.append( pkt )
 
-          src[i].append( pkt )
+          src[i].extend( pkts )
           packets_generated += 1
 
         # packet injection during warmup or drain phases
 
         else:
+          pkts = []
           if opts.topology == "Ring":
             if dest < i and i - dest <= num_nodes/2:
               opaque = 0
@@ -444,14 +470,29 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             else:
               opaque = 0
             pkt = PacketType( i, dest, opaque, 0, 98+i+ncycles, INVALID_TIMESTAMP )
+            pkts.append(pkt)
 
           elif opts.topology == "Mesh":
-            pkt = PacketType( i%net_width, i//net_width, dest%net_width,
-                    dest//net_width, 0, 6, INVALID_TIMESTAMP )
+            if opts.bisection:
+              for _ in range(2):
+                pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                        dest//net_width, 0, 6, INVALID_TIMESTAMP )
+                pkts.append( pkt )
+            else:
+              pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                      dest//net_width, 0, 6, INVALID_TIMESTAMP )
+              pkts.append( pkt )
 
           elif opts.topology == "Torus":
-            pkt = PacketType( i%net_width, i//net_width, dest%net_width,
-                    dest//net_width, 0, 0, 6, INVALID_TIMESTAMP )
+            if opts.bisection:
+              for _ in range(4):
+                pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                        dest//net_width, 0, 0, 6, INVALID_TIMESTAMP )
+                pkts.append( pkt )
+            else:
+              pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                      dest//net_width, 0, 0, 6, INVALID_TIMESTAMP )
+              pkts.append( pkt )
 
           elif opts.topology == "CMesh":
             pkt = PacketType( (i/term_each)%net_width,
@@ -460,6 +501,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                               (dest/term_each)/net_width,
                               dest%term_each,
                               0, 6, INVALID_TIMESTAMP )
+            pkts.append(pkt)
 
           elif opts.topology == "Butterfly":
             r_rows = k_ary ** ( n_fly - 1 )
@@ -480,9 +522,15 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                   bf_dst = bf_dst * 2
                 else:
                   bf_dst = bf_dst * k_ary
-            pkt = PacketType( i, bf_dst, 0, 6, INVALID_TIMESTAMP )
+            if opts.bisection:
+              for _ in range(8):
+                pkt = PacketType( i, bf_dst, 0, 6, INVALID_TIMESTAMP )
+                pkts.append( pkt )
+            else:
+              pkt = PacketType( i, bf_dst, 0, 6, INVALID_TIMESTAMP )
+              pkts.append( pkt )
 
-          src[i].append( pkt )
+          src[i].extend( pkts )
           if ( ncycles < NUM_SAMPLE_CYCLES ):
             packets_generated += 1
 
