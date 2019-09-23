@@ -313,7 +313,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   elif opts.topology == "CMesh":
     NetModel = topology_dict[ "CMesh" ]
-    net_width = int(opts.routers/opts.rows)
+    net_width = opts.routers//opts.rows//opts.terminals_each
     net_height = opts.rows
     inports   = opts.router_inports
     outports  = opts.router_outports
@@ -402,10 +402,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                     dest//net_width, 0, 0, 6, ncycles )
 
           elif opts.topology == "CMesh":
-            pkt = PacketType( (i/term_each)%net_width,
-                              (i/term_each)/net_width,
-                              (dest/term_each)%net_width,
-                              (dest/term_each)/net_width,
+            pkt = PacketType( (i//term_each)%net_width,
+                              (i//term_each)//net_width,
+                              (dest//term_each)%net_width,
+                              (dest//term_each)//net_width,
                               dest%term_each,
                               0, 6, ncycles )
 
