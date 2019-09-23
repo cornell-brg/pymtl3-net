@@ -311,12 +311,12 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     PacketType = mk_mesh_pkt_timestamp( net_width, net_height, nvcs = 2,
             max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
-    # model.set_param('top.routers*.route_units*.construct', ncols=net_width )
-    # model.set_param('top.routers*.route_units*.construct', nrows=net_height)
+#    model.set_param('top.routers*.route_units*.construct', ncols=net_width )
+#    model.set_param('top.routers*.route_units*.construct', nrows=net_height)
 
   elif opts.topology == "CMesh":
     NetModel = topology_dict[ "CMesh" ]
-    net_width = int(opts.routers/opts.rows)
+    net_width = int(opts.routers/opts.rows/opts.terminals_each)
     net_height = opts.rows
     inports   = opts.router_inports
     outports  = opts.router_outports
@@ -372,8 +372,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
         if   pattern == "urandom":
           dest = randint( 0, num_nodes-1 )
         elif pattern == "partition2":
-          dest = ( randint( 0, num_nodes-1 ) ) & (num_nodes/2-1) |\
-                 ( i & (num_nodes/2) )
+          dest = ( randint( 0, num_nodes-1 ) ) & int(num_nodes/2-1) |\
+                 ( i & int(num_nodes/2) )
         elif pattern == "opposite":
           dest = ( i + 2 ) % num_nodes
         elif pattern == "neighbor":
@@ -420,10 +420,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
               pkts.append( pkt )
 
           elif opts.topology == "CMesh":
-            pkt = PacketType( (i/term_each)%net_width,
-                              (i/term_each)/net_width,
-                              (dest/term_each)%net_width,
-                              (dest/term_each)/net_width,
+            pkt = PacketType( (i//term_each)%net_width,
+                              (i//term_each)//net_width,
+                              (dest//term_each)%net_width,
+                              (dest//term_each)//net_width,
                               dest%term_each,
                               0, 6, ncycles )
             pkts.append( pkt )
@@ -495,10 +495,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
               pkts.append( pkt )
 
           elif opts.topology == "CMesh":
-            pkt = PacketType( (i/term_each)%net_width,
-                              (i/term_each)/net_width,
-                              (dest/term_each)%net_width,
-                              (dest/term_each)/net_width,
+            pkt = PacketType( (i//term_each)%net_width,
+                              (i//term_each)//net_width,
+                              (dest//term_each)%net_width,
+                              (dest//term_each)//net_width,
                               dest%term_each,
                               0, 6, INVALID_TIMESTAMP )
             pkts.append(pkt)
