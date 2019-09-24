@@ -72,6 +72,15 @@ setup(
 
   packages = find_packages(),
 
+  packge_data = [
+    'pymtl3_net/config.yml',
+    'pymtl3_net/README.md',
+  ],
+
+  entry_points = { 'console_scripts' : [
+    'pymtl3-net = pymtl3_net.__main__:main',
+  ] },
+
   install_requires = [
     'pymtl3',
     'ruamel.yaml'
