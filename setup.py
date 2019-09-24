@@ -21,7 +21,7 @@ def get_version():
   assert sys.version_info[0] > 2, "Python 2 is no longer supported!"
 
   result = "?"
-  with open("ocn_pclib/__init__.py") as f:
+  with open("pymtl3_net/__init__.py") as f:
     for line in f:
       if line.startswith("__version__"):
         _, result, _ = line.split('"')
