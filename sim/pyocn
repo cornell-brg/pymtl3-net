@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+"""
+==========================================================================
+pyocn
+==========================================================================
+Super script for simualting, generating, and testing on-chip networks.
+
+Author: Yanghui Ou
+  Date: Sep 24, 2019
+
+"""
+import argparse
+import sys
+import os
+
+from pymtl3 import *
+
+from utils import *
+import utils
+
+#-------------------------------------------------------------------------
+# Global variables
+#-------------------------------------------------------------------------
+
+#=========================================================================
+# Multi-level command line parser
+#=========================================================================
+
+class PyOCN:
+
+  def __init__( self ):
+    parser = argparse.ArgumentParser(
+      description = 'Utility script for PyOCN',
+      usage = '''./pyocn <command> [<args>]
+
+Available commands are:
+  sim  Simulate an OCN
+  gen  Generate an OCN
+''')
+
+    parser.add_argument( 'command', help = 'Commands to run' )
+
+    # Exclude all args after the first arg
+
+    args = parser.parse_args( sys.argv[1:2] )
+    getattr( self, args.command.replace( '-', '_' ) )()
+
+  #-----------------------------------------------------------------------
+  # sim
+  #-----------------------------------------------------------------------
+
+  def sim( self ):
+    # TODO: list all available topologies
+    p = argparse.ArgumentParser(
+      description = 'Simulation',
+      usage = './pyocn sim <topology> [<flags>]',
+    )
+    p.add_argument( 'topology' )
+
+    topo = p.parse_args( sys.argv[2:3] ).topology
+
+    # Argument parser specific to a network
+    np = mk_net_arg_parser( topo )
+
+    opts = np.parse_args( sys.argv[3:] )
+    utils.verbose = opts.verbose
+
+    # Instantiate network instance
+    net = mk_net_inst( topo, opts )
+
+    # Warm up
+
+    # Measure
+
+    # Drain
+
+    # Report stats
+
+  #-----------------------------------------------------------------------
+  # gen
+  #-----------------------------------------------------------------------
+
+  def gen( self ):
+    ...
+
+if __name__ == '__main__':
+  PyOCN()
