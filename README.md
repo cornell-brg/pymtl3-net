@@ -2,10 +2,10 @@
 =======================================
     ____        ____  _______   __
    / __ \__  __/ __ \/ ____/ | / /
-  / /_/ / / / / / / / /   /  |/ / 
- / ____/ /_/ / /_/ / /___/ /|  /  
-/_/    \__, /\____/\____/_/ |_/   
-      /____/                      
+  / /_/ / / / / / / / /   /  |/ /
+ / ____/ /_/ / /_/ / /___/ /|  /
+/_/    \__, /\____/\____/_/ |_/
+      /____/
 =======================================
 </pre>
 [![Build Status](https://travis-ci.com/cornell-brg/pymtl3-net.svg?branch=master)](https://travis-ci.com/cornell-brg/pymtl3-net)
@@ -21,9 +21,11 @@ We have a demo at repl.it (https://repl.it/@ChengTan/pymtl3-net-demo), which sho
 Related publications
 --------------------------------------------------------------------------
 
+- Cheng Tan, Yanghui Ou, Shunning Jiang, Peitian Pan, Christopher Torng, Shady Agwa, and Christopher Batten. _"PyOCN: A Unified Framework for Modeling, Testing, and Evaluating On-Chip Networks."_ 37th IEEE International Conference on Computer Design. (ICCD-37), Nov 2019.
+
 - Shunning Jiang, Christopher Torng, and Christopher Batten. _"An Open-Source Python-Based Hardware Generation, Simulation, and Verification Framework."_ First Workshop on Open-Source EDA Technology (WOSET'18) held in conjunction with ICCAD-37, Nov. 2018.
 
-- Shunning Jiang, Berkin Ilbeyi, and Christopher Batten. _"Mamba: Closing the Performance Gap in Productive Hardware Development Frameworks."_ 55th ACM/IEEE Design Automation Conf. (DAC-55), June 2018. 
+- Shunning Jiang, Berkin Ilbeyi, and Christopher Batten. _"Mamba: Closing the Performance Gap in Productive Hardware Development Frameworks."_ 55th ACM/IEEE Design Automation Conf. (DAC-55), June 2018.
 
 
 License
@@ -38,7 +40,7 @@ PyOCN is offered under the terms of the Open Source Initiative BSD
 
 Installation
 --------------------------------------------------------
-  
+
 PyOCN requires Python3.7 and has the following additional prerequisites:
 
  - graphviz, verilator
@@ -105,7 +107,7 @@ commands will create and activate the virtual environment:
  [5]: https://virtualenv.pypa.io/en/latest/
 
 ### Install PyMTL3 and Python requirements
- 
+
 ```
  % pip install pymtl3
  % pip install --upgrade pip setuptools twine
@@ -121,7 +123,7 @@ We can now use git to clone the PyOCN repo.
  % mkdir -p ${HOME}/cornell-brg
  % cd ${HOME}/cornell-brg
  % git clone --depth=50 https://github.com/cornell-brg/posh-ocn.git cornell-brg/posh-ocn
-```  
+```
 
 When you're done testing/developing, you can deactivate the virtualenv::
 
@@ -140,10 +142,10 @@ Quickview
 
 ### OCN generator design flow:
 <img src="docs/design_flow.png" width="500">
- 
+
 ### Generic network architecture:
 <img src="docs/noc_structure.png" width="400">
- 
+
 ### OCN generic router architecture:
 <img src="docs/router_structure.png" width="400">
 
