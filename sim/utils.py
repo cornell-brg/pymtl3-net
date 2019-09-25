@@ -122,7 +122,7 @@ def _gen_mesh_pkt( opts, timestamp, measure ):
   else:
     raise Exception( f'Unkonwn traffic pattern {opts.pattern}' )
 
-  return deepcopy( pkt )
+  return pkt
 
 #-------------------------------------------------------------------------
 # _gen_ring_net
@@ -142,7 +142,7 @@ def _gen_ring_pkt( opts, timestamp, measure ):
   else:
     raise Exception( f'Unkonwn traffic pattern {opts.pattern}' )
 
-  return deepcopy( pkt )
+  return pkt
 
 #-------------------------------------------------------------------------
 # dictionaries
@@ -209,9 +209,8 @@ def get_nports( topo,  opts ):
 @dataclass
 class SimResult:
   avg_latency    : float = 0.0
-  pkt_injected   : int = 0
+  mpkt_generated : int = 0
   mpkt_received  : int = 0
-  total_generated: int = 0
   total_received : int = 0
   sim_ncycles    : int = 0
 
@@ -241,9 +240,8 @@ def net_simulate( topo, opts ):
   vprint( f' - simulation starts' )
   injection_rate  = opts.injection_rate
   ncycles         = 0
-  pkt_injected    = 0
+  mpkt_generated  = 0
   mpkt_received   = 0
-  total_generated = 0
   total_received  = 0
   total_latency   = 0
   all_received    = 0
@@ -251,26 +249,27 @@ def net_simulate( topo, opts ):
     net.send[i].rdy = b1(1) # Always ready
     net.recv[i].msg = net.recv[i].MsgType()
 
+  # TODO: add timeout
   while True:
     for i in range( nports ):
 
       # Inject packets to source queue
       if randint(1,100) <= injection_rate:
-        total_generated += 1
 
+        # TODO: use number of packets
         # Warmup or drain phase - inject non-measure packet
         if ncycles <= warmup_ncycles or ncycles >= sample_ncycles:
           # FIXME: we may want to convert ncycles to bits
-          pkt = _pkt_gen_dict[ topo ]( opts, b32(0), measure=b1(0) )
+          pkt = _pkt_gen_dict[ topo ]( opts, 0, measure=b1(0) )
           src_q[i].append( pkt )
           if ncycles < sample_ncycles:
-            pkt_injected += 1
+            mpkt_generated += 1
 
         # Sample phase - inject measure packet
         else:
-          pkt = _pkt_gen_dict[ topo ]( opts, b32(ncycles), measure=b1(1) )
+          pkt = _pkt_gen_dict[ topo ]( opts, ncycles, measure=b1(1) )
           src_q[i].append( pkt )
-          pkt_injected += 1
+          mpkt_generated += 1
 
       # Inject packets from source queue to network
       if len( src_q[i] ) > 0 and net.recv[i].rdy:
@@ -292,12 +291,11 @@ def net_simulate( topo, opts ):
 
       # Check finish
 
-      if ncycles >= sample_ncycles and total_received == pkt_injected:
+      if ncycles >= sample_ncycles and total_received == mpkt_generated:
         result = SimResult()
         result.avg_latency     = float( total_latency ) / mpkt_received
-        result.pkt_injected    = pkt_injected
+        result.mpkt_generated  = mpkt_generated
         result.mpkt_received   = mpkt_received
-        result.total_generated = total_generated
         result.total_received  = total_received
         result.sim_ncycles     = ncycles
         return result
@@ -308,7 +306,7 @@ def net_simulate( topo, opts ):
       print( f'{ncycles:3}: {net.line_trace()}' )
 
     if opts.verbose and ncycles % 100 == 1:
-      print( f'{ncycles:4}: gen {pkt_injected}/{total_generated} recv {mpkt_received}/{total_received}' )
+      print( f'{ncycles:4}: gen {mpkt_generated} recv {mpkt_received}/{total_received}' )
 
     net.tick()
     ncycles += 1
