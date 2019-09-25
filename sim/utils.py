@@ -35,7 +35,7 @@ from measure_packets import mk_mesh_pkt, mk_ring_pkt
 #-------------------------------------------------------------------------
 
 verbose = False
-warmup_ncycles = 1000
+warmup_ncycles = 2000
 sample_ncycles = 1000 + warmup_ncycles
 
 #-------------------------------------------------------------------------
@@ -115,8 +115,10 @@ def _gen_mesh_pkt( opts, timestamp, measure ):
   pkt.measure = measure
   if opts.pattern == 'urandom':
     dst_id    = randint( 0, nports-1 )
-    pkt.dst_x = x_type( dst_id %  ncols )
-    pkt.dst_y = y_type( dst_id // ncols )
+    # pkt.dst_x = x_type( dst_id %  ncols )
+    # pkt.dst_y = y_type( dst_id // ncols )
+    pkt.dst_x = x_type( randint(0, ncols-1) )
+    pkt.dst_y = y_type( randint(0, nrows-1) )
   else:
     raise Exception( f'Unkonwn traffic pattern {opts.pattern}' )
 
@@ -207,7 +209,7 @@ def get_nports( topo,  opts ):
 @dataclass
 class SimResult:
   avg_latency    : float = 0.0
-  mpkt_generated : int = 0
+  pkt_injected   : int = 0
   mpkt_received  : int = 0
   total_generated: int = 0
   total_received : int = 0
@@ -239,7 +241,7 @@ def net_simulate( topo, opts ):
   vprint( f' - simulation starts' )
   injection_rate  = opts.injection_rate
   ncycles         = 0
-  mpkt_generated  = 0
+  pkt_injected    = 0
   mpkt_received   = 0
   total_generated = 0
   total_received  = 0
@@ -261,12 +263,14 @@ def net_simulate( topo, opts ):
           # FIXME: we may want to convert ncycles to bits
           pkt = _pkt_gen_dict[ topo ]( opts, b32(0), measure=b1(0) )
           src_q[i].append( pkt )
+          if ncycles < sample_ncycles:
+            pkt_injected += 1
 
         # Sample phase - inject measure packet
         else:
           pkt = _pkt_gen_dict[ topo ]( opts, b32(ncycles), measure=b1(1) )
           src_q[i].append( pkt )
-          mpkt_generated += 1
+          pkt_injected += 1
 
       # Inject packets from source queue to network
       if len( src_q[i] ) > 0 and net.recv[i].rdy:
@@ -285,31 +289,26 @@ def net_simulate( topo, opts ):
           timestamp = int(net.send[i].msg.payload)
           total_latency += ( ncycles - timestamp )
           mpkt_received += 1
-          all_received  += 1
-
-        # FIXME: don't know why I have to do this
-        elif ncycles > sample_ncycles:
-          all_received  += 1
 
       # Check finish
 
-      if ncycles >= sample_ncycles and all_received == mpkt_generated:
+      if ncycles >= sample_ncycles and total_received == pkt_injected:
         result = SimResult()
         result.avg_latency     = float( total_latency ) / mpkt_received
-        result.mpkt_generated  = mpkt_generated
+        result.pkt_injected    = pkt_injected
         result.mpkt_received   = mpkt_received
         result.total_generated = total_generated
         result.total_received  = total_received
         result.sim_ncycles     = ncycles
         return result
 
-      # Advance simulation
+    # Advance simulation
 
-      if opts.trace:
-        print( f'{ncycles:3}: {net.line_trace()}' )
+    if opts.trace:
+      print( f'{ncycles:3}: {net.line_trace()}' )
 
-      if opts.verbose and ncycles % 100 == 1:
-        print( f'{ncycles:4}: gen {mpkt_generated}/{total_generated} recv {mpkt_received}/{total_received}' )
+    if opts.verbose and ncycles % 100 == 1:
+      print( f'{ncycles:4}: gen {pkt_injected}/{total_generated} recv {mpkt_received}/{total_received}' )
 
-      net.tick()
-      ncycles += 1
+    net.tick()
+    ncycles += 1
