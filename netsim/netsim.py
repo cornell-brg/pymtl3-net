@@ -352,8 +352,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
     if opts.topology == "Mesh":
       XYType = mk_bits( clog2( net_width ) )
-      model.pos_x[i] = XYType(i%net_width)
-      model.pos_y[i] = XYType(i/net_height)
+      model.pos_x[i] = XYType( i% net_width  )
+      model.pos_y[i] = XYType( i//net_height )
 
   ncycles = 0
 
@@ -369,8 +369,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
         if   pattern == "urandom":
           dest = randint( 0, num_nodes-1 )
         elif pattern == "partition2":
-          dest = ( randint( 0, num_nodes-1 ) ) & (num_nodes/2-1) |\
-                 ( i & (num_nodes/2) )
+          dest = ( randint( 0, num_nodes-1 ) ) & (num_nodes//2-1) |\
+                 ( i & (num_nodes//2) )
         elif pattern == "opposite":
           dest = ( i + 2 ) % num_nodes
         elif pattern == "neighbor":
@@ -382,9 +382,9 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
         if ( NUM_WARMUP_CYCLES < ncycles < NUM_SAMPLE_CYCLES ):
           if opts.topology == "Ring":
-            if dest < i and i - dest <= num_nodes/2:
+            if dest < i and i - dest <= num_nodes//2:
               opaque = 0
-            elif dest > i and dest - i <= num_nodes/2:
+            elif dest > i and dest - i <= num_nodes//2:
               opaque = 0
             else:
               opaque = 0
@@ -393,8 +393,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
           elif opts.topology == "Mesh":
 #            net_width = opts.routers / opts.rows
-            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 0, 6, ncycles )
+            pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                    dest//net_width, 0, 6, ncycles )
 
           elif opts.topology == "Torus":
 #            net_width = opts.routers / opts.rows
@@ -420,7 +420,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             tmp = 0
             dst = dest
             for index in range( n_fly ):
-              tmp = dst / (k_ary**(n_fly-index-1))
+              tmp = dst // (k_ary**(n_fly-index-1))
               dst = dst % (k_ary**(n_fly-index-1))
               bf_dst = DstType(bf_dst | DstType(tmp))
               if index != n_fly - 1:
@@ -454,10 +454,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                     dest//net_width, 0, 0, 6, INVALID_TIMESTAMP )
 
           elif opts.topology == "CMesh":
-            pkt = PacketType( (i/term_each)%net_width,
-                              (i/term_each)/net_width,
-                              (dest/term_each)%net_width,
-                              (dest/term_each)/net_width,
+            pkt = PacketType( (i//term_each)%net_width,
+                              (i//term_each)//net_width,
+                              (dest//term_each)%net_width,
+                              (dest//term_each)//net_width,
                               dest%term_each,
                               0, 6, INVALID_TIMESTAMP )
 
@@ -472,7 +472,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             tmp = 0
             dst = dest
             for index in range( n_fly ):
-              tmp = dst / (k_ary**(n_fly-index-1))
+              tmp = dst // (k_ary**(n_fly-index-1))
               dst = dst % (k_ary**(n_fly-index-1))
               bf_dst = DstType(bf_dst | DstType(tmp))
               if index != n_fly - 1:
