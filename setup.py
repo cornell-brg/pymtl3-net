@@ -72,7 +72,7 @@ setup(
 
   packages = find_packages(),
 
-  packge_data = {
+  package_data = {
     'pymtl3_net' : [
       'config.yml',
       'README.md',
