@@ -35,8 +35,8 @@ from measure_packets import mk_mesh_pkt, mk_ring_pkt
 #-------------------------------------------------------------------------
 
 verbose = False
-warmup_ncycles = 500
-sample_ncycles = 500 + warmup_ncycles
+warmup_ncycles = 1000
+sample_ncycles = 1000 + warmup_ncycles
 
 #-------------------------------------------------------------------------
 # Verbose print
@@ -244,6 +244,7 @@ def net_simulate( topo, opts ):
   total_generated = 0
   total_received  = 0
   total_latency   = 0
+  all_received    = 0
   for i in range( nports ):
     net.send[i].rdy = b1(1) # Always ready
     net.recv[i].msg = net.recv[i].MsgType()
@@ -284,10 +285,15 @@ def net_simulate( topo, opts ):
           timestamp = int(net.send[i].msg.payload)
           total_latency += ( ncycles - timestamp )
           mpkt_received += 1
+          all_received  += 1
+
+        # FIXME: don't know why I have to do this
+        elif ncycles > sample_ncycles:
+          all_received  += 1
 
       # Check finish
 
-      if ncycles >= sample_ncycles and mpkt_received >= mpkt_generated-20:
+      if ncycles >= sample_ncycles and all_received == mpkt_generated:
         result = SimResult()
         result.avg_latency     = float( total_latency ) / mpkt_received
         result.mpkt_generated  = mpkt_generated
