@@ -289,7 +289,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     PacketType = mk_ring_pkt_timestamp( opts.routers, nvcs = 2,
             max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, RingPos, opts.routers, 0 )
-    model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
+#    model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
 
   elif opts.topology == "Mesh":
     NetModel = topology_dict[ "Mesh" ]
@@ -515,7 +515,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
       #print 'packets_generated: ', packets_generated
 
       if ( ncycles >= NUM_SAMPLE_CYCLES and
-           all_packets_received >= packets_generated ):
+           packets_received >= packets_generated ):
         average_latency = total_latency / float( packets_received )
         sim_done = True
         break
