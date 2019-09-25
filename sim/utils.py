@@ -12,6 +12,7 @@ import sys
 import os
 import argparse
 import subprocess
+from copy import deepcopy
 from collections import deque
 from dataclasses import dataclass
 from random import seed, randint
@@ -100,7 +101,7 @@ def _mk_ring_net( opts ):
 # _gen_mesh_net
 #-------------------------------------------------------------------------
 
-def _gen_mesh_pkt( opts, timestamp, measure=b1(0) ):
+def _gen_mesh_pkt( opts, timestamp, measure ):
   ncols = opts.ncols
   nrows = opts.nrows
   payload_nbits = opts.channel_bw
@@ -109,7 +110,7 @@ def _gen_mesh_pkt( opts, timestamp, measure=b1(0) ):
   x_type = mk_bits( clog2( opts.ncols ) )
   y_type = mk_bits( clog2( opts.nrows ) )
 
-  pkt = mk_mesh_pkt( mcols, nrows, nvcs=1, payload_nbits=payload_nbits )()
+  pkt = mk_mesh_pkt( ncols, nrows, nvcs=1, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
   pkt.measure = measure
   if opts.pattern == 'urandom':
@@ -119,23 +120,27 @@ def _gen_mesh_pkt( opts, timestamp, measure=b1(0) ):
   else:
     raise Exception( f'Unkonwn traffic pattern {opts.pattern}' )
 
+  return deepcopy( pkt )
+
 #-------------------------------------------------------------------------
 # _gen_ring_net
 #-------------------------------------------------------------------------
 
-def _gen_ring_pkt( opts, timestamp, measure=b1(0) ):
+def _gen_ring_pkt( opts, timestamp, measure ):
   payload_nbits = opts.channel_bw
   nports = opts.nterminals
 
   id_type = mk_bits( clog2( nports ) )
 
-  pkt = mk_ring_pkt( nterminals, nvcs=2, payload_nbits=payload_nbits )()
+  pkt = mk_ring_pkt( nports, nvcs=2, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
   pkt.measure = measure
-  if opt.pattern == 'urandom':
+  if opts.pattern == 'urandom':
     pkt.dst = id_type( randint( 0, nports-1 ) )
   else:
     raise Exception( f'Unkonwn traffic pattern {opts.pattern}' )
+
+  return deepcopy( pkt )
 
 #-------------------------------------------------------------------------
 # dictionaries
@@ -201,10 +206,12 @@ def get_nports( topo,  opts ):
 
 @dataclass
 class SimResult:
-  avg_latency   : float = 0.0
-  pkt_generated : int = 0
-  pkt_received  : int = 0
-  sim_ncycles   : int = 0
+  avg_latency    : float = 0.0
+  mpkt_generated : int = 0
+  mpkt_received  : int = 0
+  total_generated: int = 0
+  total_received : int = 0
+  sim_ncycles    : int = 0
 
 def net_simulate( topo, opts ):
   if not topo in _net_arg_dict:
@@ -224,37 +231,79 @@ def net_simulate( topo, opts ):
   vprint( f' - elaborating {topo}' )
   net.elaborate()
   net.apply( SimulationPass )
+  vprint( f' - resetting network')
   net.sim_reset()
 
   # Run simulation
 
-  ncycles        = 0
-  mpkt_generated = 0
-  mpkt_received  = 0
+  vprint( f' - simulation starts' )
+  injection_rate  = opts.injection_rate
+  ncycles         = 0
+  mpkt_generated  = 0
+  mpkt_received   = 0
+  total_generated = 0
+  total_received  = 0
+  total_latency   = 0
   for i in range( nports ):
     net.send[i].rdy = b1(1) # Always ready
+    net.recv[i].msg = net.recv[i].MsgType()
 
   while True:
     for i in range( nports ):
 
       # Inject packets to source queue
-      if randint(1,100) <= injectino_rate:
+      if randint(1,100) <= injection_rate:
+        total_generated += 1
 
         # Warmup or drain phase - inject non-measure packet
-        if ncycles < warmup_ncycles or ncycles > sample_ncycles:
+        if ncycles <= warmup_ncycles or ncycles >= sample_ncycles:
           # FIXME: we may want to convert ncycles to bits
-          pkt = _pkt_gen_dict[ topo ]( opts, ncycles, measure=b1(0) )
-          src[i].append( pkt )
+          pkt = _pkt_gen_dict[ topo ]( opts, b32(0), measure=b1(0) )
+          src_q[i].append( pkt )
 
         # Sample phase - inject measure packet
         else:
-          pkt = _pkt_gen_dict[ topo ]( opts, ncycles, measure=b1(1) )
-          src[i].append( pkt )
+          pkt = _pkt_gen_dict[ topo ]( opts, b32(ncycles), measure=b1(1) )
+          src_q[i].append( pkt )
           mpkt_generated += 1
 
-
       # Inject packets from source queue to network
+      if len( src_q[i] ) > 0 and net.recv[i].rdy:
+        recv_pkt = src_q[i].popleft()
+        net.recv[i].msg = recv_pkt
+        net.recv[i].en  = b1(1)
+      else:
+        net.recv[i].en  = b1(0)
 
       # Receive packets from network
+      if net.send[i].en:
+        total_received += 1
+        # if net.send[i].msg.measure:
+        if int(net.send[i].msg.payload) > 0:
+          # vprint( f'{i} received')
+          timestamp = int(net.send[i].msg.payload)
+          total_latency += ( ncycles - timestamp )
+          mpkt_received += 1
 
       # Check finish
+
+      if ncycles >= sample_ncycles and mpkt_received >= mpkt_generated-20:
+        result = SimResult()
+        result.avg_latency     = float( total_latency ) / mpkt_received
+        result.mpkt_generated  = mpkt_generated
+        result.mpkt_received   = mpkt_received
+        result.total_generated = total_generated
+        result.total_received  = total_received
+        result.sim_ncycles     = ncycles
+        return result
+
+      # Advance simulation
+
+      if opts.trace:
+        print( f'{ncycles:3}: {net.line_trace()}' )
+
+      if opts.verbose and ncycles % 100 == 1:
+        print( f'{ncycles:4}: gen {mpkt_generated}/{total_generated} recv {mpkt_received}/{total_received}' )
+
+      net.tick()
+      ncycles += 1

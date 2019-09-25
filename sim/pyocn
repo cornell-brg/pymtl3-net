@@ -70,19 +70,18 @@ Available commands are:
     utils.verbose = opts.verbose
 
     # Simulate
-    # TODO: Sweep
+    # TODO: Sweep, elapsed time
 
     result = net_simulate( topo, opts )
 
-    # Elaborate the network instance
-
-    # Warm up
-
-    # Measure
-
-    # Drain
-
     # Report stats
+    print()
+    print( f'injection rate    : {opts.injection_rate}'   )
+    print( f'average latency   : {result.avg_latency}'    )
+    print( f'simulated cycles  : {result.sim_ncycles}'    )
+    print( f'packets generated : {result.total_generated}')
+    print( f'packets received  : {result.total_received}' )
+    print( f'#measure packets  : {result.mpkt_received}'  )
 
   #-----------------------------------------------------------------------
   # gen
