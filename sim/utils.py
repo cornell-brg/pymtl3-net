@@ -100,7 +100,7 @@ def _mk_ring_net( opts ):
 # _gen_mesh_net
 #-------------------------------------------------------------------------
 
-def _gen_mesh_pkt( opts, timestamp, measure ):
+def _gen_mesh_pkt( opts, timestamp ):
   ncols = opts.ncols
   nrows = opts.nrows
   payload_nbits = opts.channel_bw
@@ -111,13 +111,10 @@ def _gen_mesh_pkt( opts, timestamp, measure ):
 
   pkt = mk_mesh_pkt( ncols, nrows, nvcs=1, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
-  pkt.measure = measure
   if opts.pattern == 'urandom':
     dst_id    = randint( 0, nports-1 )
-    # pkt.dst_x = x_type( dst_id %  ncols )
-    # pkt.dst_y = y_type( dst_id // ncols )
-    pkt.dst_x = x_type( randint(0, ncols-1) )
-    pkt.dst_y = y_type( randint(0, nrows-1) )
+    pkt.dst_x = x_type( dst_id %  ncols )
+    pkt.dst_y = y_type( dst_id // ncols )
   else:
     raise Exception( f'Unkonwn traffic pattern {opts.pattern}' )
 
@@ -127,7 +124,7 @@ def _gen_mesh_pkt( opts, timestamp, measure ):
 # _gen_ring_net
 #-------------------------------------------------------------------------
 
-def _gen_ring_pkt( opts, timestamp, measure ):
+def _gen_ring_pkt( opts, timestamp ):
   payload_nbits = opts.channel_bw
   nports = opts.nterminals
 
@@ -135,7 +132,6 @@ def _gen_ring_pkt( opts, timestamp, measure ):
 
   pkt = mk_ring_pkt( nports, nvcs=2, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
-  pkt.measure = measure
   if opts.pattern == 'urandom':
     pkt.dst = id_type( randint( 0, nports-1 ) )
   else:
@@ -225,7 +221,7 @@ class SimResult:
     print( f'elapsed time      : {self.elapsed_time:.2f} sec'  )
 
   def to_row( self ):
-    return f'| {self.injection_rate:3} | {self.avg_latency:5.2f} | {self.sim_ncycles/self.elapsed_time:3.1f} |'
+    return f'| {self.injection_rate:4} | {self.avg_latency:8.2f} | {self.sim_ncycles/self.elapsed_time:5.1f} |'
 
 #-------------------------------------------------------------------------
 # net_simulate
@@ -242,6 +238,7 @@ def net_simulate( topo, opts ):
 
   # Metadata
   nports = get_nports( topo, opts )
+  p_type = mk_bits( opts.channel_bw )
 
   # Infinite source queues
   src_q = [ deque() for _ in range( nports ) ]
@@ -257,7 +254,7 @@ def net_simulate( topo, opts ):
   # Constants
 
   warmup_ncycles   = opts.warmup_ncycles
-  measure_npackets = opts.measure_npackets
+  measure_npackets = opts.measure_npackets * 2
   timeout_ncycles  = opts.timeout_ncycles
 
 
@@ -275,9 +272,6 @@ def net_simulate( topo, opts ):
     net.send[i].rdy = b1(1) # Always ready
     net.recv[i].msg = net.recv[i].MsgType()
 
-  # TODO: add timeout
-  # TODO: remove measure field
-
   # Run simulation
 
   start_time = time.monotonic()
@@ -292,16 +286,16 @@ def net_simulate( topo, opts ):
         # Warmup phase - inject non-measure packet
         if ncycles <= warmup_ncycles:
           # FIXME: we may want to convert ncycles to bits
-          pkt = _pkt_gen_dict[ topo ]( opts, b32(0), measure=b1(0) )
+          pkt = _pkt_gen_dict[ topo ]( opts, p_type(0) )
 
         # Sample phase - inject measure packet
         elif mpkt_generated < measure_npackets:
-          pkt = _pkt_gen_dict[ topo ]( opts, b32(ncycles), measure=b1(1) )
+          pkt = _pkt_gen_dict[ topo ]( opts, b32(ncycles) )
           mpkt_generated += 1
 
         # Drain phase - just inject
         else:
-          pkt = _pkt_gen_dict[ topo ]( opts, b32(0), measure=b1(0) )
+          pkt = _pkt_gen_dict[ topo ]( opts, p_type(0) )
 
         total_generated += 1
         src_q[i].append( pkt )
@@ -326,7 +320,7 @@ def net_simulate( topo, opts ):
 
       # Check finish
 
-      if mpkt_received > measure_npackets * 0.5 and mpkt_generated == measure_npackets:
+      if mpkt_received >= opts.measure_npackets and mpkt_generated == measure_npackets:
         elapsed_time = time.monotonic() - start_time
         result = SimResult()
         result.injection_rate  = injection_rate
@@ -411,7 +405,14 @@ def net_simulate_sweep( topo, opts ):
     cur_inj += step
     pre_avg_lat = cur_avg_lat
 
-  # Print a table
+  # Print table TODO: more informative?
+
+  print()
+  print( '+------+----------+-------+' )
+  print( '| inj% | avg. lat | speed |' )
+  print( '+------+----------+-------+' )
 
   for r in result_lst:
     print( f'{r.to_row()}' )
+
+  print( '+------+----------+-------+' )
