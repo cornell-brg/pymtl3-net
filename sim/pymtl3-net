@@ -68,9 +68,9 @@ Available commands are:
     np.add_argument(       '--warmup-ncycles',  type=int, default=1000, help='Number of cycles for warmup.',  metavar='' )
     np.add_argument(       '--measure-npackets', type=int, default=200, help='Number of packets for measuring.',  metavar='' )
     np.add_argument(       '--timeout-ncycles', type=int, default=4000, help='Number of packets for measuring.',  metavar='' )
-    np.add_argument(       '--sweep',      action='store_true', help='Run in sweep mode.'    )
-    np.add_argument(       '--sweep-step', type=int, default=10, help='Injection rate step for sweep mode.' )
-    np.add_argument(       '--sweep-threash', type=float, default=100.0, help='Threashold for average latency in sweep mode.' )
+    np.add_argument(       '--sweep',      action='store_true', help='Run in sweep mode.' )
+    np.add_argument(       '--sweep-step', type=int, default=10, help='Injection rate step for sweep mode.',  metavar='' )
+    np.add_argument(       '--sweep-threash', type=float, default=100.0, help='Threashold for average latency in sweep mode.',  metavar='' )
     opts = np.parse_args( sys.argv[3:] )
 
     utils.verbose = opts.verbose
