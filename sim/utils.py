@@ -206,20 +206,26 @@ def get_nports( topo,  opts ):
 
 @dataclass
 class SimResult:
+  injection_rate : int   = 0
   avg_latency    : float = 0.0
   pkt_generated  : int   = 0
   mpkt_received  : int   = 0
   total_received : int   = 0
   sim_ncycles    : int   = 0
   elapsed_time   : float = 0.0
+  timeout        : bool  = False
 
   def print_result( self ):
-    print( f'average latency   : {self.avg_latency}'          )
-    print( f'simulated cycles  : {self.sim_ncycles}'          )
-    print( f'packets generated : {self.total_generated}'      )
-    print( f'packets received  : {self.total_received}'       )
-    print( f'#measure packets  : {self.mpkt_received}'        )
-    print( f'elapsed time      : {self.mpkt_received} sec' )
+    print( f'injection_rate    : {self.injection_rate} %' )
+    print( f'average latency   : {self.avg_latency:.2f}'   )
+    print( f'simulated cycles  : {self.sim_ncycles}'       )
+    print( f'packets generated : {self.total_generated}'   )
+    print( f'packets received  : {self.total_received}'    )
+    print( f'#measure packets  : {self.mpkt_received}'     )
+    print( f'elapsed time      : {self.elapsed_time:.2f} sec'  )
+
+  def to_row( self ):
+    return f'| {self.injection_rate:3} | {self.avg_latency:5.2f} | {self.sim_ncycles/self.elapsed_time:3.1f} |'
 
 #-------------------------------------------------------------------------
 # net_simulate
@@ -252,6 +258,7 @@ def net_simulate( topo, opts ):
 
   warmup_ncycles   = opts.warmup_ncycles
   measure_npackets = opts.measure_npackets
+  timeout_ncycles  = opts.timeout_ncycles
 
 
   vprint( f' - simulation starts' )
@@ -263,6 +270,7 @@ def net_simulate( topo, opts ):
   total_received  = 0
   total_latency   = 0
   all_received    = 0
+  mpkt_injected   = 0
   for i in range( nports ):
     net.send[i].rdy = b1(1) # Always ready
     net.recv[i].msg = net.recv[i].MsgType()
@@ -272,9 +280,7 @@ def net_simulate( topo, opts ):
 
   # Run simulation
 
-  start_time = time.clock()
-  print( f'{start_time}' )
-  mpkt_injected = 0
+  start_time = time.monotonic()
 
   while True:
     for i in range( nports ):
@@ -321,14 +327,29 @@ def net_simulate( topo, opts ):
       # Check finish
 
       if mpkt_received > measure_npackets * 0.5 and mpkt_generated == measure_npackets:
-        elapsed_time = time.clock() - float( start_time )
+        elapsed_time = time.monotonic() - start_time
         result = SimResult()
+        result.injection_rate  = injection_rate
         result.avg_latency     = float( total_latency ) / mpkt_received
         result.total_generated = total_generated
         result.mpkt_received   = mpkt_received
         result.total_received  = total_received
         result.sim_ncycles     = ncycles
         result.elapsed_time    = elapsed_time
+        return result
+
+      elif ncycles >= timeout_ncycles:
+        elapsed_time = time.monotonic() - start_time
+        result = SimResult()
+        result.injection_rate  = injection_rate
+        result.avg_latency     = float( total_latency ) / mpkt_received
+        result.total_generated = total_generated
+        result.mpkt_received   = mpkt_received
+        result.total_received  = total_received
+        result.sim_ncycles     = ncycles
+        result.elapsed_time    = elapsed_time
+        result.timeout         = True
+        vprint( ' - TIMEOUT!' )
         return result
 
     # Advance simulation
@@ -347,4 +368,50 @@ def net_simulate( topo, opts ):
 #-------------------------------------------------------------------------
 
 def net_simulate_sweep( topo, opts ):
-  ...
+
+  print( f'Pattern: {opts.pattern}' )
+
+  result_lst = []
+
+  cur_inj       = 0
+  pre_inj       = 0
+  cur_avg_lat   = 0.0
+  pre_avg_lat   = 0.0
+  zero_load_lat = 0.0
+  slope         = 0.0
+  step          = opts.sweep_step
+  threashold    = opts.sweep_threash
+
+  while cur_avg_lat <= threashold and cur_inj <= 100:
+    new_opts = deepcopy( opts )
+    new_opts.injection_rate = max( 1, cur_inj )
+
+    # vprint( '\n' )
+    vprint( '-'*74 )
+    vprint( f'injection_rate : {cur_inj} %' )
+    vprint( '-'*74 )
+
+    result = net_simulate( topo, new_opts )
+    result_lst.append( result )
+
+    if opts.verbose:
+      result.print_result()
+
+    cur_avg_lat = result.avg_latency
+
+    if cur_inj == 0:
+      zero_load_lat = cur_avg_lat
+
+    else:
+      slope = ( cur_avg_lat - pre_avg_lat ) / ( cur_inj - pre_inj )
+      if slope >= 1.0:
+        step = max( 1, step // 2 )
+
+    pre_inj =  cur_inj
+    cur_inj += step
+    pre_avg_lat = cur_avg_lat
+
+  # Print a table
+
+  for r in result_lst:
+    print( f'{r.to_row()}' )

@@ -63,11 +63,14 @@ Available commands are:
     np = mk_net_arg_parser( topo )
     np.add_argument( '-v', '--verbose', action='store_true', help='Run in verbose mode.' )
     np.add_argument( '-s', '--trace',   action='store_true', help='Show line trace.'    )
-    np.add_argument(       '--sweep',   action='store_true', help='Run in sweep mode.'    )
     np.add_argument(       '--injection-rate', type=int, default=10, help='Injection rate in percentage. Default is 10.', metavar='' )
     np.add_argument(       '--pattern', type=str, default='urandom', help='Traffic pattern. Default is urandom.',  metavar='' )
     np.add_argument(       '--warmup-ncycles',  type=int, default=1000, help='Number of cycles for warmup.',  metavar='' )
     np.add_argument(       '--measure-npackets', type=int, default=200, help='Number of packets for measuring.',  metavar='' )
+    np.add_argument(       '--timeout-ncycles', type=int, default=4000, help='Number of packets for measuring.',  metavar='' )
+    np.add_argument(       '--sweep',      action='store_true', help='Run in sweep mode.'    )
+    np.add_argument(       '--sweep-step', type=int, default=10, help='Injection rate step for sweep mode.' )
+    np.add_argument(       '--sweep-threash', type=float, default=100.0, help='Threashold for average latency in sweep mode.' )
     opts = np.parse_args( sys.argv[3:] )
 
     utils.verbose = opts.verbose
@@ -75,12 +78,15 @@ Available commands are:
     # Simulate
     # TODO: Sweep, elapsed time
 
-    result = net_simulate( topo, opts )
+    if not opts.sweep:
+      result = net_simulate( topo, opts )
 
-    # Report stats
-    print()
-    print( f'injection rate    : {opts.injection_rate}%'   )
-    result.print_result()
+      # Report stats
+      print()
+      result.print_result()
+
+    else:
+      net_simulate_sweep( topo, opts )
 
   #-----------------------------------------------------------------------
   # gen
