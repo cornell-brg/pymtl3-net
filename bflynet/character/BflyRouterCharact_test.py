@@ -6,6 +6,8 @@
 # Author : Cheng Tan
 #   Date : June 16, 2019
 
+import pytest
+
 from pymtl3                         import *
 from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
 from ocn_pclib.test.net_sinks       import TestNetSinkRTL
@@ -141,6 +143,9 @@ def run_sim( test_harness, max_cycles=1000 ):
 
 def set_dst(k_ary, n_fly, vec_dst):
 
+  if k_ary == 1:
+    DstType = mk_bits(1)
+    return DstType(0)
   DstType = mk_bits( clog2( k_ary ) * n_fly )
   bf_dst = DstType(0)
   tmp = 0
@@ -150,32 +155,41 @@ def set_dst(k_ary, n_fly, vec_dst):
     dst = dst %  (k_ary**(n_fly-i-1))
     bf_dst = DstType(bf_dst | DstType(tmp))
     if i != n_fly - 1:
-      if k_ary == 1:
-        bf_dst = bf_dst * 2
+      if k_ary>2:
+        bf_dst = bf_dst * clog2(k_ary)**2
       else:
-        bf_dst = bf_dst * k_ary
+        bf_dst = bf_dst * 2
   return bf_dst
 
-def test_random():
+@pytest.mark.parametrize(
+  "src_number",
+  # [ 0, 1, 2, 3, 4, 5, 6, 7 ]
+  list(range(5))
+)
+def test_random( src_number ):
 
-  k_ary = 4
-  n_fly = 3
+  k_ary = 10
+  n_fly = 1
   num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
   src_packets   = [ [] for _ in range(k_ary) ]
   sink_packets  = [ [] for _ in range(k_ary) ]
-  payload_wid   = 8
+  payload_wid   = 32
   BEGIN = clog2( k_ary ) * n_fly - clog2( k_ary )
   END = clog2( k_ary ) * n_fly
-  for _ in range(500):
-    src = random.randint( 0, k_ary - 1 )
-    dst = random.randint( 0, num_terminals - 1 )
+  src = src_number
+  pkt_n = 25
+  for index in range(pkt_n // k_ary):
+    for di in range(k_ary):
+      dst = di*(k_ary**(n_fly-1))
+#    src = random.randint( 0, k_ary - 1 )
+#    dst = random.randint( 0, num_terminals - 1 )
 
-    PacketType  = mk_bfly_pkt( k_ary, n_fly )
-    bf_dst = set_dst( k_ary, n_fly, dst)
-    payload = random.randint( 0, 2**payload_wid )
-    pkt = PacketType( src, bf_dst, 0, payload)
-    src_packets [ src%k_ary ].append( pkt )
-    sink_packets[ pkt.dst[ BEGIN : END ] ].append( pkt )
+      PacketType  = mk_bfly_pkt( k_ary, n_fly )
+      bf_dst = set_dst( k_ary, n_fly, dst)
+      payload = random.randint( 0, 2**payload_wid )
+      pkt = PacketType( src, bf_dst, 0, payload)
+      src_packets [ src%k_ary ].append( pkt )
+      sink_packets[ pkt.dst[ BEGIN : END ] ].append( pkt )
 
   pos_row = 1
   pos_fly = 0
