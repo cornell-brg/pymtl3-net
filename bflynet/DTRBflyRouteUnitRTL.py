@@ -24,10 +24,7 @@ class DTRBflyRouteUnitRTL( Component ):
     rows     = k_ary ** ( n_fly - 1 )
     EnType  = mk_bits( s.num_outports )
     DstType = mk_bits( clog2(k_ary) * n_fly )
-    if rows == 1:
-      RowWidth = 1
-    else:
-      RowWidth = clog2( k_ary )
+    RowWidth = clog2( k_ary )
     END = n_fly * RowWidth
     BEGIN = END - RowWidth
 
