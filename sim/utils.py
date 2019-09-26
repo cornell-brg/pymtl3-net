@@ -118,8 +118,8 @@ def _mk_torus_net( opts ):
   channel_lat   = opts.channel_lat
 
   Pos = mk_mesh_pos( ncols, nrows )
-  Pkt = mk_mesh_pkt( ncols, nrows, nvcs=1, payload_nbits=payload_nbits )
-  net = MeshNetworkRTL( Pkt, Pos, ncols, nrows, channel_lat )
+  Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2, payload_nbits=payload_nbits )
+  net = TorusNetworkRTL( Pkt, Pos, ncols, nrows, channel_lat, nvcs=2, credit_line=2 )
   return net
 
 #-------------------------------------------------------------------------
@@ -166,27 +166,55 @@ def _gen_ring_pkt( opts, timestamp ):
   return pkt
 
 #-------------------------------------------------------------------------
+# _gen_mesh_net
+#-------------------------------------------------------------------------
+
+def _gen_torus_pkt( opts, timestamp ):
+  ncols = opts.ncols
+  nrows = opts.nrows
+  payload_nbits = opts.channel_bw
+  nports = ncols * nrows
+
+  x_type = mk_bits( clog2( opts.ncols ) )
+  y_type = mk_bits( clog2( opts.nrows ) )
+
+  pkt = mk_mesh_pkt( ncols, nrows, nvcs=2, payload_nbits=payload_nbits )()
+  pkt.payload = timestamp
+  if opts.pattern == 'urandom':
+    dst_id    = randint( 0, nports-1 )
+    pkt.dst_x = x_type( dst_id %  ncols )
+    pkt.dst_y = y_type( dst_id // ncols )
+  else:
+    raise Exception( f'Unkonwn traffic pattern {opts.pattern}' )
+
+  return pkt
+
+#-------------------------------------------------------------------------
 # dictionaries
 #-------------------------------------------------------------------------
 
 _net_arg_dict = {
-  'mesh' : _add_mesh_arg,
-  'ring' : _add_ring_arg,
+  'mesh'  : _add_mesh_arg,
+  'ring'  : _add_ring_arg,
+  'torus' : _add_torus_arg,
 }
 
 _net_inst_dict = {
   'mesh' : _mk_mesh_net,
   'ring' : _mk_ring_net,
+  'torus': _mk_torus_net,
 }
 
 _net_nports_dict = {
-  'mesh' : lambda opts: opts.ncols * opts.nrows,
-  'ring' : lambda opts: opts.nterminals,
+  'mesh'  : lambda opts: opts.ncols * opts.nrows,
+  'ring'  : lambda opts: opts.nterminals,
+  'torus' : lambda opts: opts.ncols * opts.nrows,
 }
 
 _pkt_gen_dict = {
-  'mesh' : _gen_mesh_pkt,
-  'ring' : _gen_ring_pkt,
+  'mesh'  : _gen_mesh_pkt,
+  'ring'  : _gen_ring_pkt,
+  'torus' : _gen_torus_pkt,
 }
 
 #-------------------------------------------------------------------------
@@ -409,6 +437,7 @@ def net_simulate_sweep( topo, opts ):
     vprint()
     vprint( '-'*74 )
     vprint( f'injection_rate : {cur_inj} %' )
+    vprint( '-'*74 )
     vprint()
 
     result = net_simulate( topo, new_opts )
