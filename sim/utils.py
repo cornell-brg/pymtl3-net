@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) )
 from ocn_pclib.ifcs.positions import mk_mesh_pos, mk_ring_pos, mk_bfly_pos
 from meshnet import MeshNetworkRTL
 from ringnet import RingNetworkRTL
+from torusnet import TorusNetworkRTL
 
 from measure_packets import mk_mesh_pkt, mk_ring_pkt
 
@@ -41,7 +42,7 @@ verbose = False
 # Verbose print
 #-------------------------------------------------------------------------
 
-def vprint( msg, value=None ):
+def vprint( msg='', value=None ):
   if verbose:
     if value is not None:
       print( msg, value )
@@ -64,6 +65,16 @@ def _add_mesh_arg( p ):
 
 def _add_ring_arg( p ):
   p.add_argument( '--nterminals',  type=int, default=4, metavar='' )
+  p.add_argument( '--channel-lat', type=int, default=0, metavar='' )
+  p.add_argument( '--channel-bw',  type=int, default=32, metavar='' )
+
+#-------------------------------------------------------------------------
+# add_torus_arg
+#-------------------------------------------------------------------------
+
+def _add_torus_arg( p ):
+  p.add_argument( '--ncols', type=int, default=2, metavar='' )
+  p.add_argument( '--nrows', type=int, default=2, metavar='' )
   p.add_argument( '--channel-lat', type=int, default=0, metavar='' )
   p.add_argument( '--channel-bw',  type=int, default=32, metavar='' )
 
@@ -94,6 +105,21 @@ def _mk_ring_net( opts ):
   Pos = mk_ring_pos( nterminals )
   Pkt = mk_ring_pkt( nterminals, nvcs=2, payload_nbits=payload_nbits )
   net = RingNetworkRTL( Pkt, Pos, nterminals, channel_lat, nvcs=2, credit_line=2 )
+  return net
+
+#-------------------------------------------------------------------------
+# _mk_torus_net
+#-------------------------------------------------------------------------
+
+def _mk_torus_net( opts ):
+  ncols = opts.ncols
+  nrows = opts.nrows
+  payload_nbits = opts.channel_bw
+  channel_lat   = opts.channel_lat
+
+  Pos = mk_mesh_pos( ncols, nrows )
+  Pkt = mk_mesh_pkt( ncols, nrows, nvcs=1, payload_nbits=payload_nbits )
+  net = MeshNetworkRTL( Pkt, Pos, ncols, nrows, channel_lat )
   return net
 
 #-------------------------------------------------------------------------
@@ -380,10 +406,10 @@ def net_simulate_sweep( topo, opts ):
     new_opts = deepcopy( opts )
     new_opts.injection_rate = max( 1, cur_inj )
 
-    # vprint( '\n' )
+    vprint()
     vprint( '-'*74 )
     vprint( f'injection_rate : {cur_inj} %' )
-    vprint( '-'*74 )
+    vprint()
 
     result = net_simulate( topo, new_opts )
     result_lst.append( result )
