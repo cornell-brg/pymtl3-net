@@ -20,8 +20,7 @@ from router.InputUnitRTL            import InputUnitRTL
 from router.OutputUnitRTL           import OutputUnitRTL
 from router.SwitchUnitRTL           import SwitchUnitRTL
 from pymtl3.passes                  import DynamicSim
-from pymtl3.passes.yosys            import ImportPass, TranslationPass, ImportConfigs
-
+from pymtl3.passes.yosys            import ImportPass, TranslationPass, TranslationImportPass, ImportConfigs
 import random
 
 random.seed( 'deadbeef' )
@@ -32,17 +31,17 @@ random.seed( 'deadbeef' )
 
 class TestHarness( Component ):
 
-  def construct( s,
-                 MsgType       = None,
+  def construct( s, 
+                 MsgType       = None, 
                  k_ary         = 2,
                  n_fly         = 2,
                  pos_r         = 0,
                  pos_f         = 0,
-                 src_msgs      = [],
-                 sink_msgs     = [],
-                 src_initial   = 0,
-                 src_interval  = 0,
-                 sink_initial  = 0,
+                 src_msgs      = [], 
+                 sink_msgs     = [], 
+                 src_initial   = 0, 
+                 src_interval  = 0, 
+                 sink_initial  = 0, 
                  sink_interval = 0,
                  arrival_time  =[None, None, None, None, None]
                ):
@@ -71,7 +70,7 @@ class TestHarness( Component ):
       s.srcs[i].send //= s.dut.recv[i]
       s.dut.send[i]  //= s.sinks[i].recv
 
-    #TODO: provide pos for router...
+    #TODO: provide pos for router... 
     @s.update
     def up_pos():
       s.dut.pos = BflyPos( pos_r, pos_f )
@@ -94,7 +93,7 @@ class TestHarness( Component ):
   def line_trace( s ):
     return "{}".format(
       s.dut.line_trace(),
-      #'|'.join( [ s.sinks[i].line_trace() for i in range(5) ] ),
+      #'|'.join( [ s.sinks[i].line_trace() for i in range(5) ] ), 
     )
 
 #-------------------------------------------------------------------------
@@ -105,17 +104,16 @@ def run_sim( test_harness, max_cycles=1000 ):
 
   # Create a simulator
   test_harness.elaborate()
-
-#  test_harness.dut.yosys_translate = True
+  test_harness.dut.yosys_translate = True
   # Check timeout
-#  test_harness.dut.yosys_import = ImportConfigs(
-#      vl_trace = True,
-#      vl_trace_timescale  = "1ps",
-#      vl_trace_cycle_time = 2000,
-#    )
+  test_harness.dut.yosys_import = ImportConfigs(
+     vl_trace = True,
+     vl_trace_timescale  = "1ps",
+     vl_trace_cycle_time = 2000,
+   )
   # test_harness.dut.dump_vcd = True
-#  test_harness.apply( TranslationPass() )
-#  test_harness = ImportPass()( test_harness )
+  test_harness.apply( TranslationPass() )
+  test_harness = ImportPass()( test_harness )
   test_harness.apply( DynamicSim )
   test_harness.sim_reset()
 
@@ -128,8 +126,6 @@ def run_sim( test_harness, max_cycles=1000 ):
     test_harness.tick()
     ncycles += 1
     print( "{}:{}".format( ncycles, test_harness.line_trace() ) )
-
-  # Check timeout
 
   assert ncycles < max_cycles
 
@@ -168,7 +164,7 @@ def set_dst(k_ary, n_fly, vec_dst):
 )
 def test_random( src_number ):
 
-  k_ary = 10
+  k_ary = 2
   n_fly = 1
   num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
   src_packets   = [ [] for _ in range(k_ary) ]
@@ -193,11 +189,12 @@ def test_random( src_number ):
 
   pos_row = 1
   pos_fly = 0
-
-  th = TestHarness( PacketType, k_ary, n_fly, pos_row, pos_fly,
-                    src_packets, sink_packets, 0, 0, 0, 0 )
+  th = TestHarness( PacketType, k_ary, n_fly, pos_row, pos_fly, 
+                  src_packets, sink_packets, 0, 0, 0, 0 )
 
   th.set_param( "top.dut.route_units*.construct", n_fly=n_fly )
   th.set_param( "top.dut.line_trace",  )
 
   run_sim( th )
+
+

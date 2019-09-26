@@ -57,13 +57,32 @@ class DTRBflyRouteUnitRTL( Component ):
         s.out_dir = s.get.msg.dst[ BEGIN : END]
         s.give_rdy[ s.out_dir ] = b1(1)
 
+    # Hack to work-around the yosys translation issue
+
+    # Generate the slicing range for `dst` field
+
+    # print(PacketType.fields)
+    assert 'dst' in map(lambda x: x[0], PacketType.fields)
+    dst_lower, dst_upper = 0, 0
+    packet_bitstruct = deepcopy(PacketType.fields)
+    packet_bitstruct.reverse()
+    for field_name, Type in packet_bitstruct:
+      if field_name != 'dst':
+        dst_lower += Type.nbits
+      else:
+        dst_upper = dst_lower + Type.nbits
+        assert Type.nbits == DstType.nbits
+        break
+    # print(f"Found dst boundaries: {dst_lower}, {dst_upper}")
+
     @s.update
     def up_ru_get_en():
       s.get.en = s.give_ens > EnType(0)
       for i in range( s.num_outports ):
         s.give[i].msg = deepcopy( s.get.msg )
       if s.get.rdy:
-        s.give[ s.out_dir ].msg.dst = DstType(s.get.msg.dst << RowWidth)
+        # s.give[ s.out_dir ].msg.dst = DstType(s.get.msg.dst << RowWidth)
+        s.give[ s.out_dir ].msg[dst_lower:dst_upper] = DstType(s.get.msg.dst << RowWidth)
 
   # Line trace
 
