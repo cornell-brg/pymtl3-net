@@ -268,7 +268,6 @@ def net_simulate( topo, opts ):
     net.recv[i].msg = net.recv[i].MsgType()
 
   # TODO: add timeout
-  # TODO: report elapsed time
   # TODO: remove measure field
 
   # Run simulation
