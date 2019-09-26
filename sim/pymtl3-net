@@ -66,8 +66,8 @@ Available commands are:
     np.add_argument(       '--sweep',   action='store_true', help='Run in sweep mode.'    )
     np.add_argument(       '--injection-rate', type=int, default=10, help='Injection rate in percentage. Default is 10.', metavar='' )
     np.add_argument(       '--pattern', type=str, default='urandom', help='Traffic pattern. Default is urandom.',  metavar='' )
-    np.add_argument(       '--warmup-ncycles',  type=int, default=1500, help='Number of cycles for warmup.',  metavar='' )
-    np.add_argument(       '--measure-ncycles', type=int, default=1500, help='Number of cycles for measuring.',  metavar='' )
+    np.add_argument(       '--warmup-ncycles',  type=int, default=1000, help='Number of cycles for warmup.',  metavar='' )
+    np.add_argument(       '--measure-npackets', type=int, default=200, help='Number of packets for measuring.',  metavar='' )
     opts = np.parse_args( sys.argv[3:] )
 
     utils.verbose = opts.verbose
@@ -79,12 +79,8 @@ Available commands are:
 
     # Report stats
     print()
-    print( f'injection rate    : {opts.injection_rate}'   )
-    print( f'average latency   : {result.avg_latency}'    )
-    print( f'simulated cycles  : {result.sim_ncycles}'    )
-    print( f'packets generated : {result.total_generated}')
-    print( f'packets received  : {result.total_received}' )
-    print( f'#measure packets  : {result.mpkt_received}'  )
+    print( f'injection rate    : {opts.injection_rate}%'   )
+    result.print_result()
 
   #-----------------------------------------------------------------------
   # gen

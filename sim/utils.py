@@ -12,6 +12,7 @@ import sys
 import os
 import argparse
 import subprocess
+import time
 from copy import deepcopy
 from collections import deque
 from dataclasses import dataclass
@@ -35,8 +36,6 @@ from measure_packets import mk_mesh_pkt, mk_ring_pkt
 #-------------------------------------------------------------------------
 
 verbose = False
-warmup_ncycles = 2000
-sample_ncycles = 1000 + warmup_ncycles
 
 #-------------------------------------------------------------------------
 # Verbose print
@@ -202,17 +201,30 @@ def get_nports( topo,  opts ):
   return _net_nports_dict[ topo ]( opts )
 
 #-------------------------------------------------------------------------
-# net_simulate
+# SimResult
 #-------------------------------------------------------------------------
-# TODO: dump vcd
 
 @dataclass
 class SimResult:
   avg_latency    : float = 0.0
-  mpkt_generated : int = 0
-  mpkt_received  : int = 0
-  total_received : int = 0
-  sim_ncycles    : int = 0
+  pkt_generated  : int   = 0
+  mpkt_received  : int   = 0
+  total_received : int   = 0
+  sim_ncycles    : int   = 0
+  elapsed_time   : float = 0.0
+
+  def print_result( self ):
+    print( f'average latency   : {self.avg_latency}'          )
+    print( f'simulated cycles  : {self.sim_ncycles}'          )
+    print( f'packets generated : {self.total_generated}'      )
+    print( f'packets received  : {self.total_received}'       )
+    print( f'#measure packets  : {self.mpkt_received}'        )
+    print( f'elapsed time      : {self.mpkt_received} sec' )
+
+#-------------------------------------------------------------------------
+# net_simulate
+#-------------------------------------------------------------------------
+# TODO: dump vcd
 
 def net_simulate( topo, opts ):
   if not topo in _net_arg_dict:
@@ -234,12 +246,18 @@ def net_simulate( topo, opts ):
   net.apply( SimulationPass )
   vprint( f' - resetting network')
   net.sim_reset()
+  net.tick()
 
-  # Run simulation
+  # Constants
+
+  warmup_ncycles   = opts.warmup_ncycles
+  measure_npackets = opts.measure_npackets
+
 
   vprint( f' - simulation starts' )
   injection_rate  = opts.injection_rate
   ncycles         = 0
+  total_generated = 0
   mpkt_generated  = 0
   mpkt_received   = 0
   total_received  = 0
@@ -250,6 +268,15 @@ def net_simulate( topo, opts ):
     net.recv[i].msg = net.recv[i].MsgType()
 
   # TODO: add timeout
+  # TODO: report elapsed time
+  # TODO: remove measure field
+
+  # Run simulation
+
+  start_time = time.clock()
+  print( f'{start_time}' )
+  mpkt_injected = 0
+
   while True:
     for i in range( nports ):
 
@@ -257,47 +284,52 @@ def net_simulate( topo, opts ):
       if randint(1,100) <= injection_rate:
 
         # TODO: use number of packets
-        # Warmup or drain phase - inject non-measure packet
-        if ncycles <= warmup_ncycles or ncycles >= sample_ncycles:
+        # Warmup phase - inject non-measure packet
+        if ncycles <= warmup_ncycles:
           # FIXME: we may want to convert ncycles to bits
-          pkt = _pkt_gen_dict[ topo ]( opts, 0, measure=b1(0) )
-          src_q[i].append( pkt )
-          if ncycles < sample_ncycles:
-            mpkt_generated += 1
+          pkt = _pkt_gen_dict[ topo ]( opts, b32(0), measure=b1(0) )
 
         # Sample phase - inject measure packet
-        else:
-          pkt = _pkt_gen_dict[ topo ]( opts, ncycles, measure=b1(1) )
-          src_q[i].append( pkt )
+        elif mpkt_generated < measure_npackets:
+          pkt = _pkt_gen_dict[ topo ]( opts, b32(ncycles), measure=b1(1) )
           mpkt_generated += 1
+
+        # Drain phase - just inject
+        else:
+          pkt = _pkt_gen_dict[ topo ]( opts, b32(0), measure=b1(0) )
+
+        total_generated += 1
+        src_q[i].append( pkt )
 
       # Inject packets from source queue to network
       if len( src_q[i] ) > 0 and net.recv[i].rdy:
         recv_pkt = src_q[i].popleft()
         net.recv[i].msg = recv_pkt
         net.recv[i].en  = b1(1)
+        if int(recv_pkt.payload) > 0:
+          mpkt_injected += 1
       else:
         net.recv[i].en  = b1(0)
 
       # Receive packets from network
       if net.send[i].en:
         total_received += 1
-        # if net.send[i].msg.measure:
         if int(net.send[i].msg.payload) > 0:
-          # vprint( f'{i} received')
           timestamp = int(net.send[i].msg.payload)
           total_latency += ( ncycles - timestamp )
           mpkt_received += 1
 
       # Check finish
 
-      if ncycles >= sample_ncycles and total_received == mpkt_generated:
+      if mpkt_received > measure_npackets * 0.5 and mpkt_generated == measure_npackets:
+        elapsed_time = time.clock() - float( start_time )
         result = SimResult()
         result.avg_latency     = float( total_latency ) / mpkt_received
-        result.mpkt_generated  = mpkt_generated
+        result.total_generated = total_generated
         result.mpkt_received   = mpkt_received
         result.total_received  = total_received
         result.sim_ncycles     = ncycles
+        result.elapsed_time    = elapsed_time
         return result
 
     # Advance simulation
@@ -306,7 +338,14 @@ def net_simulate( topo, opts ):
       print( f'{ncycles:3}: {net.line_trace()}' )
 
     if opts.verbose and ncycles % 100 == 1:
-      print( f'{ncycles:4}: gen {mpkt_generated} recv {mpkt_received}/{total_received}' )
+      print( f'{ncycles:4}: gen {mpkt_generated}/{mpkt_injected}/{total_generated} recv {mpkt_received}/{total_received}' )
 
     net.tick()
     ncycles += 1
+
+#-------------------------------------------------------------------------
+# net_simulate_sweep
+#-------------------------------------------------------------------------
+
+def net_simulate_sweep( topo, opts ):
+  ...
