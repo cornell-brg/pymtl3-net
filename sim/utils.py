@@ -26,11 +26,11 @@ seed( 0xfaceb00c )
 sys.path.insert(0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 
 from ocn_pclib.ifcs.positions import mk_mesh_pos, mk_ring_pos, mk_bfly_pos
+from ocn_pclib.ifcs.packets import mk_mesh_pkt, mk_ring_pkt
 from meshnet import MeshNetworkRTL
 from ringnet import RingNetworkRTL
 from torusnet import TorusNetworkRTL
 
-from measure_packets import mk_mesh_pkt, mk_ring_pkt
 
 #-------------------------------------------------------------------------
 # module level variable
@@ -417,7 +417,7 @@ def net_simulate( topo, opts ):
 
 def net_simulate_sweep( topo, opts ):
 
-  print( f'Pattern: {opts.pattern}' )
+  print( f'Topology: {topo} Pattern: {opts.pattern}' )
 
   result_lst = []
 
