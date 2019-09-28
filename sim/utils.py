@@ -123,10 +123,28 @@ def _mk_torus_net( opts ):
   return net
 
 #-------------------------------------------------------------------------
+# _gen_dst_id
+#-------------------------------------------------------------------------
+
+def _gen_dst_id( pattern, nports, src_id ):
+  if pattern == 'urandom':
+    return randint( 0, nports-1 )
+  elif pattern == 'partition':
+    return randint( 0, nports-1 ) & ( nports//2 - 1 ) | ( src_id & ( nports//2 ) )
+  elif pattern == 'opposite':
+    return ( src_id + nports//2 ) % nports
+  elif pattern == 'neighbor':
+    return ( src_id + 1 ) % nports
+  elif pattern == 'complement':
+    return ( nports-1 ) - src_id
+  else:
+    raise Exception( f'Unkonwn traffic pattern {pattern}' )
+
+#-------------------------------------------------------------------------
 # _gen_mesh_net
 #-------------------------------------------------------------------------
 
-def _gen_mesh_pkt( opts, timestamp ):
+def _gen_mesh_pkt( opts, timestamp, src_id ):
   ncols = opts.ncols
   nrows = opts.nrows
   payload_nbits = opts.channel_bw
@@ -137,12 +155,12 @@ def _gen_mesh_pkt( opts, timestamp ):
 
   pkt = mk_mesh_pkt( ncols, nrows, nvcs=1, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
-  if opts.pattern == 'urandom':
-    dst_id    = randint( 0, nports-1 )
-    pkt.dst_x = x_type( dst_id %  ncols )
-    pkt.dst_y = y_type( dst_id // ncols )
-  else:
-    raise Exception( f'Unkonwn traffic pattern {opts.pattern}' )
+
+  dst_id    = _gen_dst_id( opts.pattern, nports, src_id )
+  pkt.src_x = x_type( src_id %  ncols )
+  pkt.src_y = y_type( src_id // ncols )
+  pkt.dst_x = x_type( dst_id %  ncols )
+  pkt.dst_y = y_type( dst_id // ncols )
 
   return pkt
 
@@ -150,7 +168,7 @@ def _gen_mesh_pkt( opts, timestamp ):
 # _gen_ring_net
 #-------------------------------------------------------------------------
 
-def _gen_ring_pkt( opts, timestamp ):
+def _gen_ring_pkt( opts, timestamp, src_id ):
   payload_nbits = opts.channel_bw
   nports = opts.nterminals
 
@@ -158,10 +176,10 @@ def _gen_ring_pkt( opts, timestamp ):
 
   pkt = mk_ring_pkt( nports, nvcs=2, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
-  if opts.pattern == 'urandom':
-    pkt.dst = id_type( randint( 0, nports-1 ) )
-  else:
-    raise Exception( f'Unkonwn traffic pattern {opts.pattern}' )
+
+  dst_id  = _gen_dst_id( opts.pattern, nports, src_id )
+  pkt.src = id_type( src_id )
+  pkt.dst = id_type( dst_id )
 
   return pkt
 
@@ -169,7 +187,7 @@ def _gen_ring_pkt( opts, timestamp ):
 # _gen_mesh_net
 #-------------------------------------------------------------------------
 
-def _gen_torus_pkt( opts, timestamp ):
+def _gen_torus_pkt( opts, timestamp, src_id ):
   ncols = opts.ncols
   nrows = opts.nrows
   payload_nbits = opts.channel_bw
@@ -180,12 +198,13 @@ def _gen_torus_pkt( opts, timestamp ):
 
   pkt = mk_mesh_pkt( ncols, nrows, nvcs=2, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
-  if opts.pattern == 'urandom':
-    dst_id    = randint( 0, nports-1 )
-    pkt.dst_x = x_type( dst_id %  ncols )
-    pkt.dst_y = y_type( dst_id // ncols )
-  else:
-    raise Exception( f'Unkonwn traffic pattern {opts.pattern}' )
+
+  dst_id    = _gen_dst_id( opts.pattern, nports, src_id )
+  pkt.src_x = x_type( src_id %  ncols )
+  pkt.src_y = y_type( src_id // ncols )
+  pkt.dst_x = x_type( dst_id %  ncols )
+  pkt.dst_y = y_type( dst_id // ncols )
+  pkt.vc_id = b1(0)
 
   return pkt
 
@@ -340,16 +359,16 @@ def net_simulate( topo, opts ):
         # Warmup phase - inject non-measure packet
         if ncycles <= warmup_ncycles:
           # FIXME: we may want to convert ncycles to bits
-          pkt = _pkt_gen_dict[ topo ]( opts, p_type(0) )
+          pkt = _pkt_gen_dict[ topo ]( opts, p_type(0), i )
 
         # Sample phase - inject measure packet
         elif mpkt_generated < measure_npackets:
-          pkt = _pkt_gen_dict[ topo ]( opts, b32(ncycles) )
+          pkt = _pkt_gen_dict[ topo ]( opts, b32(ncycles), i )
           mpkt_generated += 1
 
         # Drain phase - just inject
         else:
-          pkt = _pkt_gen_dict[ topo ]( opts, p_type(0) )
+          pkt = _pkt_gen_dict[ topo ]( opts, p_type(0), i )
 
         total_generated += 1
         src_q[i].append( pkt )
