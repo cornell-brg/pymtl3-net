@@ -26,7 +26,7 @@ seed( 0xfaceb00c )
 sys.path.insert(0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 
 from ocn_pclib.ifcs.positions import mk_mesh_pos, mk_ring_pos, mk_bfly_pos
-from ocn_pclib.ifcs.packets import mk_mesh_pkt, mk_ring_pkt
+from ocn_pclib.ifcs.packets import mk_mesh_pkt, mk_ring_pkt, mk_cmesh_pkt
 from meshnet import MeshNetworkRTL
 from ringnet import RingNetworkRTL
 from torusnet import TorusNetworkRTL
@@ -244,7 +244,7 @@ def _gen_torus_pkt( opts, timestamp, src_id ):
 def _gen_cmesh_pkt( opts, timestamp, src_id ):
   ncols = opts.ncols
   nrows = opts.nrows
-  nterminals_each = otps.nterminals_each
+  nterminals_each = opts.nterminals_each
   payload_nbits   = opts.channel_bw
   nports          = ncols * nrows * nterminals_each
 
@@ -299,6 +299,7 @@ _pkt_gen_dict = {
   'mesh'  : _gen_mesh_pkt,
   'ring'  : _gen_ring_pkt,
   'torus' : _gen_torus_pkt,
+  'cmesh' : _gen_cmesh_pkt,
 }
 
 #-------------------------------------------------------------------------
