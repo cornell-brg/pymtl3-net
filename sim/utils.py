@@ -30,7 +30,7 @@ from ocn_pclib.ifcs.packets import mk_mesh_pkt, mk_ring_pkt
 from meshnet import MeshNetworkRTL
 from ringnet import RingNetworkRTL
 from torusnet import TorusNetworkRTL
-
+from cmeshnet import CMeshNetworkRTL
 
 #-------------------------------------------------------------------------
 # module level variable
@@ -54,29 +54,40 @@ def vprint( msg='', value=None ):
 #-------------------------------------------------------------------------
 
 def _add_mesh_arg( p ):
-  p.add_argument( '--ncols', type=int, default=2, metavar='' )
-  p.add_argument( '--nrows', type=int, default=2, metavar='' )
-  p.add_argument( '--channel-lat', type=int, default=0, metavar='' )
-  p.add_argument( '--channel-bw',  type=int, default=32, metavar='' )
+  p.add_argument( '--ncols', type=int, default=2, metavar='', help='Number of columns.' )
+  p.add_argument( '--nrows', type=int, default=2, metavar='', help='Number of rows.' )
+  p.add_argument( '--channel-lat', type=int, default=0,  metavar='', help='Channel latency in cycles. 0 means combinational channel.' )
+  p.add_argument( '--channel-bw',  type=int, default=32, metavar='', help='Channel bandwidth in bits.' )
 
 #-------------------------------------------------------------------------
 # add_ring_arg
 #-------------------------------------------------------------------------
 
 def _add_ring_arg( p ):
-  p.add_argument( '--nterminals',  type=int, default=4, metavar='' )
-  p.add_argument( '--channel-lat', type=int, default=0, metavar='' )
-  p.add_argument( '--channel-bw',  type=int, default=32, metavar='' )
-
+  p.add_argument( '--nterminals',  type=int, default=4, metavar='', help='Number of terminals' )
+  p.add_argument( '--channel-lat', type=int, default=0,  metavar='', help='Channel latency. 0 means combinational channel.' )
+  p.add_argument( '--channel-bw',  type=int, default=32, metavar='', help='Channel bandwidth in bits.' )
 #-------------------------------------------------------------------------
 # add_torus_arg
 #-------------------------------------------------------------------------
 
 def _add_torus_arg( p ):
-  p.add_argument( '--ncols', type=int, default=2, metavar='' )
-  p.add_argument( '--nrows', type=int, default=2, metavar='' )
-  p.add_argument( '--channel-lat', type=int, default=0, metavar='' )
-  p.add_argument( '--channel-bw',  type=int, default=32, metavar='' )
+  p.add_argument( '--ncols', type=int, default=2, metavar='', help='Number of columns.' )
+  p.add_argument( '--nrows', type=int, default=2, metavar='', help='Number of rows.' )
+  p.add_argument( '--channel-lat', type=int, default=0,  metavar='', help='Channel latency. 0 means combinational channel.' )
+  p.add_argument( '--channel-bw',  type=int, default=32, metavar='', help='Channel bandwidth in bits.' )
+
+
+#-------------------------------------------------------------------------
+# add_cmesh_arg
+#-------------------------------------------------------------------------
+
+def _add_cmesh_arg( p ):
+  p.add_argument( '--ncols', type=int, default=2, metavar='', help='Number of columns.' )
+  p.add_argument( '--nrows', type=int, default=2, metavar='', help='Number of rows.' )
+  p.add_argument( '--nterminals-each', type=int, default=2, metavar='', help='Number of terminals per router.' )
+  p.add_argument( '--channel-lat', type=int, default=0,  metavar='', help='Channel latency. 0 means combinational channel.' )
+  p.add_argument( '--channel-bw',  type=int, default=32, metavar='', help='Channel bandwidth in bits.' )
 
 #-------------------------------------------------------------------------
 # _mk_mesh_net
@@ -120,6 +131,24 @@ def _mk_torus_net( opts ):
   Pos = mk_mesh_pos( ncols, nrows )
   Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2, payload_nbits=payload_nbits )
   net = TorusNetworkRTL( Pkt, Pos, ncols, nrows, channel_lat, nvcs=2, credit_line=2 )
+  return net
+
+#-------------------------------------------------------------------------
+# _mk_cmesh_net
+#-------------------------------------------------------------------------
+
+def _mk_cmesh_net( opts ):
+  ncols = opts.ncols
+  nrows = opts.nrows
+  payload_nbits = opts.channel_bw
+  channel_lat   = opts.channel_lat
+  router_ninports  = opts.nterminals_each + 4
+  router_noutports = opts.nterminals_each + 4
+
+  Pos = mk_mesh_pos( ncols, nrows )
+  Pkt = mk_cmesh_pkt( ncols, nrows, router_ninports, router_noutports,
+                      nvcs=1, payload_nbits=payload_nbits )
+  net = CMeshNetworkRTL( Pkt, Pos, ncols, nrows, opts.nterminals_each, channel_lat )
   return net
 
 #-------------------------------------------------------------------------
@@ -184,7 +213,7 @@ def _gen_ring_pkt( opts, timestamp, src_id ):
   return pkt
 
 #-------------------------------------------------------------------------
-# _gen_mesh_net
+# _gen_torus_net
 #-------------------------------------------------------------------------
 
 def _gen_torus_pkt( opts, timestamp, src_id ):
@@ -209,6 +238,37 @@ def _gen_torus_pkt( opts, timestamp, src_id ):
   return pkt
 
 #-------------------------------------------------------------------------
+# _gen_cmesh_net
+#-------------------------------------------------------------------------
+
+def _gen_cmesh_pkt( opts, timestamp, src_id ):
+  ncols = opts.ncols
+  nrows = opts.nrows
+  nterminals_each = otps.nterminals_each
+  payload_nbits   = opts.channel_bw
+  nports          = ncols * nrows * nterminals_each
+
+  router_ninports  = opts.nterminals_each + 4
+  router_noutports = opts.nterminals_each + 4
+
+  x_type = mk_bits( clog2( ncols ) )
+  y_type = mk_bits( clog2( nrows ) )
+  t_type = mk_bits( clog2( nterminals_each ) )
+
+  pkt = mk_cmesh_pkt( ncols, nrows, router_ninports, router_noutports,
+                      nvcs=1, payload_nbits=payload_nbits )()
+  pkt.payload = timestamp
+
+  dst_id      = _gen_dst_id( opts.pattern, nports, src_id )
+  pkt.src_x   = x_type( ( src_id//nterminals_each ) %  ncols )
+  pkt.src_y   = y_type( ( src_id//nterminals_each ) // ncols )
+  pkt.dst_x   = x_type( ( dst_id//nterminals_each ) %  ncols )
+  pkt.dst_y   = y_type( ( src_id//nterminals_each ) // ncols )
+  pkt.dst_ter = t_type( dst_id % nterminals_each )
+
+  return pkt
+
+#-------------------------------------------------------------------------
 # dictionaries
 #-------------------------------------------------------------------------
 
@@ -216,18 +276,23 @@ _net_arg_dict = {
   'mesh'  : _add_mesh_arg,
   'ring'  : _add_ring_arg,
   'torus' : _add_torus_arg,
+  'cmesh' : _add_cmesh_arg,
 }
 
 _net_inst_dict = {
-  'mesh' : _mk_mesh_net,
-  'ring' : _mk_ring_net,
-  'torus': _mk_torus_net,
+  'mesh'  : _mk_mesh_net,
+  'ring'  : _mk_ring_net,
+  'torus' : _mk_torus_net,
+  'cmesh' : _mk_cmesh_net,
+
 }
 
 _net_nports_dict = {
   'mesh'  : lambda opts: opts.ncols * opts.nrows,
   'ring'  : lambda opts: opts.nterminals,
   'torus' : lambda opts: opts.ncols * opts.nrows,
+  'cmesh' : lambda opts: opts.ncols * opts.nrows * opts.nterminals_each,
+
 }
 
 _pkt_gen_dict = {
