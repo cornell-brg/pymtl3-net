@@ -6,8 +6,8 @@ Utility functions for pyocn script.
 
 Author: Yanghui Ou
   Date: Sep 24, 2019
-"""
 
+"""
 import sys
 import os
 import argparse
@@ -26,11 +26,14 @@ seed( 0xfaceb00c )
 sys.path.insert(0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 
 from ocn_pclib.ifcs.positions import mk_mesh_pos, mk_ring_pos, mk_bfly_pos
-from ocn_pclib.ifcs.packets import mk_mesh_pkt, mk_ring_pkt, mk_cmesh_pkt
-from meshnet import MeshNetworkRTL
-from ringnet import RingNetworkRTL
+from ocn_pclib.ifcs.packets import mk_mesh_pkt, mk_ring_pkt, mk_cmesh_pkt, mk_bfly_pkt
+from meshnet  import MeshNetworkRTL, MeshNetworkCL
+from ringnet  import RingNetworkRTL
 from torusnet import TorusNetworkRTL
 from cmeshnet import CMeshNetworkRTL
+from bflynet  import BflyNetworkRTL
+
+from CLNetWrapper import CLNetWrapper
 
 #-------------------------------------------------------------------------
 # module level variable
@@ -67,6 +70,7 @@ def _add_ring_arg( p ):
   p.add_argument( '--nterminals',  type=int, default=4, metavar='', help='Number of terminals' )
   p.add_argument( '--channel-lat', type=int, default=0,  metavar='', help='Channel latency. 0 means combinational channel.' )
   p.add_argument( '--channel-bw',  type=int, default=32, metavar='', help='Channel bandwidth in bits.' )
+
 #-------------------------------------------------------------------------
 # add_torus_arg
 #-------------------------------------------------------------------------
@@ -90,18 +94,34 @@ def _add_cmesh_arg( p ):
   p.add_argument( '--channel-bw',  type=int, default=32, metavar='', help='Channel bandwidth in bits.' )
 
 #-------------------------------------------------------------------------
+# add_cmesh_arg
+#-------------------------------------------------------------------------
+
+def _add_bfly_arg( p ):
+  p.add_argument( '--kary', type=int, default=2, metavar='', help='Radix for each router.' )
+  p.add_argument( '--nfly', type=int, default=2, metavar='', help='Number of stages.' )
+  p.add_argument( '--channel-lat', type=int, default=0,  metavar='', help='Channel latency. 0 means combinational channel.' )
+  p.add_argument( '--channel-bw',  type=int, default=32, metavar='', help='Channel bandwidth in bits.' )
+
+
+#-------------------------------------------------------------------------
 # _mk_mesh_net
 #-------------------------------------------------------------------------
 
 def _mk_mesh_net( opts ):
-  ncols = opts.ncols
-  nrows = opts.nrows
+  ncols  = opts.ncols
+  nrows  = opts.nrows
+  nports = opts.ncols * opts.nrows
   payload_nbits = opts.channel_bw
   channel_lat   = opts.channel_lat
 
   Pos = mk_mesh_pos( ncols, nrows )
   Pkt = mk_mesh_pkt( ncols, nrows, nvcs=1, payload_nbits=payload_nbits )
-  net = MeshNetworkRTL( Pkt, Pos, ncols, nrows, channel_lat )
+  if opts.cl:
+    cl_net = MeshNetworkCL( Pkt, Pos, ncols, nrows, channel_lat )
+    net    = CLNetWrapper( Pkt, cl_net, nports )
+  else:
+    net = MeshNetworkRTL( Pkt, Pos, ncols, nrows, channel_lat )
   return net
 
 #-------------------------------------------------------------------------
@@ -149,6 +169,24 @@ def _mk_cmesh_net( opts ):
   Pkt = mk_cmesh_pkt( ncols, nrows, router_ninports, router_noutports,
                       nvcs=1, payload_nbits=payload_nbits )
   net = CMeshNetworkRTL( Pkt, Pos, ncols, nrows, opts.nterminals_each, channel_lat )
+  return net
+
+#-------------------------------------------------------------------------
+# _mk_bfly_net
+#-------------------------------------------------------------------------
+
+def _mk_bfly_net( opts ):
+  kary = opts.kary
+  nfly = opts.nfly
+  payload_nbits = opts.channel_bw
+  channel_lat   = opts.channel_lat
+
+  Pos = mk_bfly_pos( kary, nfly )
+  Pkt = mk_bfly_pkt( kary, nfly, nvcs=1, payload_nbits=payload_nbits )
+  net = BflyNetworkRTL( Pkt, Pos, kary, nfly, channel_lat )
+  net.set_param( "top.routers*.construct", k_ary=kary )
+  net.set_param( "top.routers*.route_units*.construct", n_fly=nfly )
+
   return net
 
 #-------------------------------------------------------------------------
@@ -269,6 +307,27 @@ def _gen_cmesh_pkt( opts, timestamp, src_id ):
   return pkt
 
 #-------------------------------------------------------------------------
+# _gen_bfly_net
+#-------------------------------------------------------------------------
+
+def _gen_bfly_pkt( opts, timestamp, src_id ):
+  kary          = opts.kary
+  nfly          = opts.nfly
+  payload_nbits = opts.channel_bw
+  nports        = opts.kary ** opts.nfly
+
+  id_type = mk_bits( clog2( nports ) )
+
+  pkt = mk_bfly_pkt( kary, nfly, nvcs=1, payload_nbits=payload_nbits )()
+  pkt.payload = timestamp
+
+  dst_id  = _gen_dst_id( opts.pattern, nports, src_id )
+  pkt.src = id_type( src_id )
+  pkt.dst = id_type( dst_id )
+
+  return pkt
+
+#-------------------------------------------------------------------------
 # dictionaries
 #-------------------------------------------------------------------------
 
@@ -277,6 +336,7 @@ _net_arg_dict = {
   'ring'  : _add_ring_arg,
   'torus' : _add_torus_arg,
   'cmesh' : _add_cmesh_arg,
+  'bfly'  : _add_bfly_arg,
 }
 
 _net_inst_dict = {
@@ -284,7 +344,7 @@ _net_inst_dict = {
   'ring'  : _mk_ring_net,
   'torus' : _mk_torus_net,
   'cmesh' : _mk_cmesh_net,
-
+  'bfly'  : _mk_bfly_net,
 }
 
 _net_nports_dict = {
@@ -292,7 +352,7 @@ _net_nports_dict = {
   'ring'  : lambda opts: opts.nterminals,
   'torus' : lambda opts: opts.ncols * opts.nrows,
   'cmesh' : lambda opts: opts.ncols * opts.nrows * opts.nterminals_each,
-
+  'bfly'  : lambda opts: opts.kary ** opts.nfly,
 }
 
 _pkt_gen_dict = {
@@ -300,6 +360,7 @@ _pkt_gen_dict = {
   'ring'  : _gen_ring_pkt,
   'torus' : _gen_torus_pkt,
   'cmesh' : _gen_cmesh_pkt,
+  'bfly'  : _gen_bfly_pkt,
 }
 
 #-------------------------------------------------------------------------
@@ -407,9 +468,9 @@ def net_simulate( topo, opts ):
   total_latency   = 0
   all_received    = 0
   mpkt_injected   = 0
+
   for i in range( nports ):
     net.send[i].rdy = b1(1) # Always ready
-    net.recv[i].msg = net.recv[i].MsgType()
 
   # Run simulation
 
@@ -497,6 +558,134 @@ def net_simulate( topo, opts ):
     ncycles += 1
 
 #-------------------------------------------------------------------------
+# net_simulate_cl
+#-------------------------------------------------------------------------
+
+def net_simulate_cl( topo, opts ):
+  if not topo in _net_arg_dict:
+    raise Exception( f'Unkonwn network topology {topo}' )
+
+  # Instantiate network instance
+  vprint( f' - instantiating {topo}')
+  net = mk_net_inst( topo, opts )
+
+  # Metadata
+  nports = get_nports( topo, opts )
+  p_type = mk_bits( opts.channel_bw )
+
+  # Infinite source queues
+  src_q = [ deque() for _ in range( nports ) ]
+
+  # Elaborating network instance
+  vprint( f' - elaborating {topo}' )
+  net.elaborate()
+  net.apply( SimulationPass )
+  vprint( f' - resetting network')
+  net.sim_reset()
+  net.tick()
+
+  # Constants
+
+  warmup_ncycles   = opts.warmup_ncycles
+  measure_npackets = opts.measure_npackets * 2
+  timeout_ncycles  = opts.timeout_ncycles
+
+
+  vprint( f' - simulation starts' )
+  injection_rate  = opts.injection_rate
+  ncycles         = 0
+  total_generated = 0
+  mpkt_generated  = 0
+  mpkt_received   = 0
+  total_received  = 0
+  total_latency   = 0
+  all_received    = 0
+  mpkt_injected   = 0
+
+  # Run simulation
+
+  start_time = time.monotonic()
+
+  while True:
+    for i in range( nports ):
+
+      # Inject packets to source queue
+      if randint(1,100) <= injection_rate:
+
+        # TODO: use number of packets
+        # Warmup phase - inject non-measure packet
+        if ncycles <= warmup_ncycles:
+          # FIXME: we may want to convert ncycles to bits
+          pkt = _pkt_gen_dict[ topo ]( opts, p_type(0), i )
+
+        # Sample phase - inject measure packet
+        elif mpkt_generated < measure_npackets:
+          pkt = _pkt_gen_dict[ topo ]( opts, b32(ncycles), i )
+          mpkt_generated += 1
+
+        # Drain phase - just inject
+        else:
+          pkt = _pkt_gen_dict[ topo ]( opts, p_type(0), i )
+
+        total_generated += 1
+        src_q[i].append( pkt )
+
+      # Inject packets from source queue to network
+      if len( src_q[i] ) > 0 and net.recv[i].rdy():
+        recv_pkt = src_q[i].popleft()
+        net.recv[i]( recv_pkt )
+        if int(recv_pkt.payload) > 0:
+          mpkt_injected += 1
+
+      # Receive packets from network
+      if net.give[i].rdy():
+        total_received += 1
+        recv_pkt = net.give[i]()
+        if int(recv_pkt.payload) > 0:
+          timestamp = int(recv_pkt.payload)
+          total_latency += ( ncycles - timestamp )
+          mpkt_received += 1
+
+      # Check finish
+
+      if mpkt_received >= opts.measure_npackets and mpkt_generated == measure_npackets:
+        elapsed_time = time.monotonic() - start_time
+        result = SimResult()
+        result.injection_rate  = injection_rate
+        result.avg_latency     = float( total_latency ) / mpkt_received
+        result.total_generated = total_generated
+        result.mpkt_received   = mpkt_received
+        result.total_received  = total_received
+        result.sim_ncycles     = ncycles
+        result.elapsed_time    = elapsed_time
+        return result
+
+      elif ncycles >= timeout_ncycles:
+        elapsed_time = time.monotonic() - start_time
+        result = SimResult()
+        result.injection_rate  = injection_rate
+        result.avg_latency     = float( total_latency ) / mpkt_received
+        result.total_generated = total_generated
+        result.mpkt_received   = mpkt_received
+        result.total_received  = total_received
+        result.sim_ncycles     = ncycles
+        result.elapsed_time    = elapsed_time
+        result.timeout         = True
+        vprint( ' - TIMEOUT!' )
+        return result
+
+    # Advance simulation
+
+    if opts.trace:
+      print( f'{ncycles:3}: {net.line_trace()}' )
+
+    if opts.verbose and ncycles % 100 == 1:
+      print( f'{ncycles:4}: gen {mpkt_generated}/{mpkt_injected}/{total_generated} recv {mpkt_received}/{total_received}' )
+
+    net.tick()
+    ncycles += 1
+
+#-------------------------------------------------------------------------
 # net_simulate_sweep
 #-------------------------------------------------------------------------
 
@@ -515,6 +704,8 @@ def net_simulate_sweep( topo, opts ):
   step          = opts.sweep_step
   threashold    = opts.sweep_threash
 
+  sim_func = net_simulate if not opts.cl else net_simulate_cl
+
   while cur_avg_lat <= threashold and cur_inj <= 100:
     new_opts = deepcopy( opts )
     new_opts.injection_rate = max( 1, cur_inj )
@@ -525,7 +716,7 @@ def net_simulate_sweep( topo, opts ):
     vprint( '-'*74 )
     vprint()
 
-    result = net_simulate( topo, new_opts )
+    result = sim_func( topo, new_opts )
     result_lst.append( result )
 
     if opts.verbose:

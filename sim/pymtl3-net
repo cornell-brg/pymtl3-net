@@ -63,6 +63,7 @@ Available commands are:
     np = mk_net_arg_parser( topo )
     np.add_argument( '-v', '--verbose', action='store_true', help='Run in verbose mode.' )
     np.add_argument( '-s', '--trace',   action='store_true', help='Show line trace.'    )
+    np.add_argument(       '--cl',      action='store_true', help='Run cycle level model instead of RTL.' )
     np.add_argument(       '--injection-rate', type=int, default=10, help='Injection rate in percentage. Default is 10.', metavar='' )
     np.add_argument(       '--pattern', type=str, default='urandom', help='Traffic pattern. Default is urandom.',  metavar='' )
     np.add_argument(       '--warmup-ncycles',  type=int, default=1000, help='Number of cycles for warmup.',  metavar='' )
