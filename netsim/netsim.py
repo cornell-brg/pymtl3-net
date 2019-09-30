@@ -1,13 +1,4 @@
 #!/usr/bin/env python
-"""
-=========================================================================
-netsim.py
-=========================================================================
-A simple implementation of network simulation.
-
-Author : Cheng Tan
-  Date : July 30, 2019
-"""
 
 #=========================================================================
 # netsim.py [options]
@@ -237,8 +228,8 @@ def parse_cmdline():
 # Global Constants
 #--------------------------------------------------------------------------
 
-NUM_WARMUP_CYCLES   = 10
-NUM_SAMPLE_CYCLES   = 50 + NUM_WARMUP_CYCLES
+NUM_WARMUP_CYCLES   = 300
+NUM_SAMPLE_CYCLES   = 1000 + NUM_WARMUP_CYCLES
 INVALID_TIMESTAMP   = 0
 
 #--------------------------------------------------------------------------
@@ -289,11 +280,11 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     PacketType = mk_ring_pkt_timestamp( opts.routers, nvcs = 2,
             max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, RingPos, opts.routers, 0 )
-    model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
+#    model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
 
   elif opts.topology == "Mesh":
     NetModel = topology_dict[ "Mesh" ]
-    net_width = int(opts.routers/opts.rows)
+    net_width = opts.routers//opts.rows
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
     PacketType = mk_mesh_pkt_timestamp( net_width, net_height,
@@ -302,7 +293,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
   elif opts.topology == "Torus":
     NetModel = topology_dict[ "Torus" ]
-    net_width = int(opts.routers/opts.rows)
+    net_width = opts.routers//opts.rows
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
     PacketType = mk_mesh_pkt_timestamp( net_width, net_height, nvcs = 2,
@@ -353,9 +344,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     if opts.topology == "Mesh":
       XYType = mk_bits( clog2( net_width ) )
       model.pos_x[i] = XYType(i%net_width)
-      model.pos_y[i] = XYType(i/net_height)
+      model.pos_y[i] = XYType(i//net_height)
 
   ncycles = 0
+  all_packets_generated = 0
 
   while not sim_done:
     # Iterate over all terminals
@@ -369,8 +361,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
         if   pattern == "urandom":
           dest = randint( 0, num_nodes-1 )
         elif pattern == "partition2":
-          dest = ( randint( 0, num_nodes-1 ) ) & (num_nodes/2-1) |\
-                 ( i & (num_nodes/2) )
+          dest = ( randint( 0, num_nodes-1 ) ) & (num_nodes//2-1) |\
+                 ( i & (num_nodes//2) )
         elif pattern == "opposite":
           dest = ( i + 2 ) % num_nodes
         elif pattern == "neighbor":
@@ -393,8 +385,8 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
           elif opts.topology == "Mesh":
 #            net_width = opts.routers / opts.rows
-            pkt = PacketType( i%net_width, i/net_width, dest%net_width,
-                    dest/net_width, 0, 6, ncycles )
+            pkt = PacketType( i%net_width, i//net_width, dest%net_width,
+                    dest//net_width, 0, 6, ncycles )
 
           elif opts.topology == "Torus":
 #            net_width = opts.routers / opts.rows
@@ -431,6 +423,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             pkt = PacketType( i, bf_dst, 0, 6, ncycles )
 
           src[i].append( pkt )
+          all_packets_generated += 1
           packets_generated += 1
 
         # packet injection during warmup or drain phases
@@ -454,10 +447,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
                     dest//net_width, 0, 0, 6, INVALID_TIMESTAMP )
 
           elif opts.topology == "CMesh":
-            pkt = PacketType( (i/term_each)%net_width,
-                              (i/term_each)/net_width,
-                              (dest/term_each)%net_width,
-                              (dest/term_each)/net_width,
+            pkt = PacketType( (i//term_each)%net_width,
+                              (i//term_each)//net_width,
+                              (dest//term_each)%net_width,
+                              (dest//term_each)//net_width,
                               dest%term_each,
                               0, 6, INVALID_TIMESTAMP )
 
@@ -472,7 +465,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             tmp = 0
             dst = dest
             for index in range( n_fly ):
-              tmp = dst / (k_ary**(n_fly-index-1))
+              tmp = dst // (k_ary**(n_fly-index-1))
               dst = dst % (k_ary**(n_fly-index-1))
               bf_dst = DstType(bf_dst | DstType(tmp))
               if index != n_fly - 1:
@@ -483,8 +476,9 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
             pkt = PacketType( i, bf_dst, 0, 6, INVALID_TIMESTAMP )
 
           src[i].append( pkt )
-          if ( ncycles < NUM_SAMPLE_CYCLES ):
-            packets_generated += 1
+          all_packets_generated += 1
+#          if ( ncycles < NUM_SAMPLE_CYCLES ):
+#            packets_generated += 1
 
       # Inject from source queue
 
@@ -511,18 +505,22 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
           average_latency = total_latency / float( packets_received )
 
       # Check if finished - drain phase
-      #print 'all_packets_received: ', all_packets_received
-      #print 'packets_generated: ', packets_generated
+#      print ('all_received: ', all_packets_received, end='->')
+#      print ('all_generated: ', all_packets_generated, end='; ')
+#      print ('pkt_received: ', packets_received, end='->')
+#      print ('pkt_generated: ', packets_generated)
 
-      if ( ncycles >= NUM_SAMPLE_CYCLES and
-           all_packets_received >= packets_generated ):
+      if ( ( ncycles >= NUM_SAMPLE_CYCLES 
+             and packets_received >= packets_generated )
+           or (ncycles >= NUM_SAMPLE_CYCLES + 500) ):
+#          and all_packets_received >= packets_generated ):
         average_latency = total_latency / float( packets_received )
         sim_done = True
         break
 
       # Pop the source queue
 
-      if ( model.recv[i].rdy == 1 ) and ( len( src[i] ) > 0 ):
+      if ( model.recv[i].rdy ) and ( len( src[i] ) > 0 ):
         src[i].popleft()
 
     # print line trace if enables
