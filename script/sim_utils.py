@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) )
 
 from ocn_pclib.ifcs.positions import mk_mesh_pos, mk_ring_pos, mk_bfly_pos
 from ocn_pclib.ifcs.packets import mk_mesh_pkt, mk_ring_pkt, mk_cmesh_pkt, mk_bfly_pkt
+from ocn_pclib.passes.PassGroups import SimulationPass
 from meshnet  import MeshNetworkRTL, MeshNetworkCL
 from ringnet  import RingNetworkRTL
 from torusnet import TorusNetworkRTL
@@ -455,7 +456,7 @@ def net_simulate( topo, opts ):
   if opts.dump_vcd:
     vprint( f' - enabling vcd dumping' )
     net.dump_vcd = True
-    net.vcd_file_name = f'{topo}-{nports}-{opts.injection_rate}.vcd'
+    net.vcd_file_name = f'{topo}-{nports}-{opts.injection_rate}'
 
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )
@@ -474,6 +475,8 @@ def net_simulate( topo, opts ):
 
 
   vprint( f' - simulation starts' )
+  vprint( f' - #measure generated / #measure injected / total generated ---- #measure received / total received')
+
   injection_rate  = opts.injection_rate
   ncycles         = 0
   total_generated = 0
@@ -606,8 +609,8 @@ def net_simulate_cl( topo, opts ):
   measure_npackets = opts.measure_npackets * 2
   timeout_ncycles  = opts.timeout_ncycles
 
-
   vprint( f' - simulation starts' )
+  vprint( f' - #measure generated / #measure injected / total generated  #measure received / total received')
   injection_rate  = opts.injection_rate
   ncycles         = 0
   total_generated = 0
@@ -803,7 +806,7 @@ def smoke_test( topo, opts ):
   if opts.dump_vcd:
     vprint( f' - enabling vcd dumping' )
     net.dump_vcd = True
-    net.vcd_file_name = f'{topo}-{nports}-test.vcd'
+    net.vcd_file_name = f'{topo}-{nports}-test'
 
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )
