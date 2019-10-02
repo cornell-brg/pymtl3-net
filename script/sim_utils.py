@@ -34,7 +34,6 @@ from torusnet import TorusNetworkRTL
 from cmeshnet import CMeshNetworkRTL
 from bflynet  import BflyNetworkRTL
 
-
 from CLNetWrapper import CLNetWrapper
 
 #-------------------------------------------------------------------------
@@ -453,15 +452,15 @@ def net_simulate( topo, opts ):
   # Infinite source queues
   src_q = [ deque() for _ in range( nports ) ]
 
-  # Elaborating network instance
-  vprint( f' - elaborating {topo}' )
-  net.elaborate()
-  net.apply( SimulationPass )
-
   if opts.dump_vcd:
     vprint( f' - enabling vcd dumping' )
     net.dump_vcd = True
     net.vcd_file_name = f'{topo}-{nports}-{opts.injection_rate}.vcd'
+
+  # Elaborating network instance
+  vprint( f' - elaborating {topo}' )
+  net.elaborate()
+  net.apply( SimulationPass )
 
   vprint( f' - resetting network')
   net.sim_reset()
@@ -801,15 +800,15 @@ def smoke_test( topo, opts ):
   vprint( f' - instantiating {topo} with {nports} terminals')
   net = mk_net_inst( topo, opts )
 
-  # Elaborating network instance
-  vprint( f' - elaborating {topo}' )
-  net.elaborate()
-  net.apply( SimulationPass )
-
   if opts.dump_vcd:
     vprint( f' - enabling vcd dumping' )
     net.dump_vcd = True
     net.vcd_file_name = f'{topo}-{nports}-test.vcd'
+
+  # Elaborating network instance
+  vprint( f' - elaborating {topo}' )
+  net.elaborate()
+  net.apply( SimulationPass )
 
   vprint( f' - resetting network')
   net.sim_reset()
