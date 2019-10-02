@@ -44,6 +44,14 @@ from CLNetWrapper import CLNetWrapper
 verbose = False
 
 #-------------------------------------------------------------------------
+# convenience variable
+#-------------------------------------------------------------------------
+
+_green = '\33[32m'
+_reset = '\033[0m'
+_red   = '\033[31m'
+
+#-------------------------------------------------------------------------
 # Verbose print
 #-------------------------------------------------------------------------
 
@@ -775,4 +783,59 @@ def gen_verilog( topo, opts ):
 #-------------------------------------------------------------------------
 
 def smoke_test( topo, opts ):
-  ...
+  if not topo in _net_arg_dict:
+    raise Exception( f'Unkonwn network topology {topo}' )
+
+  # Instantiate network instance
+  vprint( f' - instantiating {topo}')
+  net = mk_net_inst( topo, opts )
+
+  # Metadata
+  nports = get_nports( topo, opts )
+  p_type = mk_bits( opts.channel_bw )
+
+  # Elaborating network instance
+  vprint( f' - elaborating {topo}' )
+  net.elaborate()
+  net.apply( SimulationPass )
+  vprint( f' - resetting network')
+  net.sim_reset()
+  net.tick()
+
+  vprint( f' - simulation starts' )
+  ncycles = 0
+
+  for i in range( nports ):
+    net.send[i].rdy = b1(1) # Always ready
+
+  # Inject a packet to port 0
+  while not net.recv[0].rdy:
+    if opts.trace:
+      print( f'{ncycles:3}: {net.line_trace()}' )
+    net.tick()
+    ncycles += 1
+
+  pkt_opts = deepcopy( opts )
+  pkt_opts.pattern = 'complement'
+  pkt = _pkt_gen_dict[ topo ]( pkt_opts, p_type(1024), 0 )
+  net.recv[0].msg = pkt
+  net.recv[0].en  = b1(1)
+
+  # Tick one cycle and stops injecting
+  if opts.trace:
+    print( f'{ncycles:3}: {net.line_trace()}' )
+  net.tick()
+  ncycles += 1
+  net.recv[0].en = b1(0)
+
+  # Wait until packets arrives
+  while not net.send[ nports-1 ].en:
+    if opts.trace:
+      print( f'{ncycles:3}: {net.line_trace()}' )
+    net.tick()
+    ncycles += 1
+
+  if net.send[ nports-1 ].msg.payload == p_type(1024):
+    print( f' - [{_green}passed{_reset}]' )
+  else:
+    print( f' - [{_green}FAILED{_reset}]' )

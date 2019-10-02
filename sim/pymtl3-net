@@ -71,9 +71,10 @@ Available topologies:
 
     # Argument parser specific to a network
     np = mk_net_arg_parser( topo )
-    np.add_argument( '-v', '--verbose', action='store_true', help='Run in verbose mode.' )
-    np.add_argument( '-s', '--trace',   action='store_true', help='Show line trace.'    )
-    np.add_argument(       '--cl',      action='store_true', help='Run cycle level model instead of RTL.' )
+    np.add_argument( '-v', '--verbose',  action='store_true', help='Run in verbose mode.' )
+    np.add_argument( '-s', '--trace',    action='store_true', help='Show line trace.'    )
+    np.add_argument(       '--cl',       action='store_true', help='Run cycle level model instead of RTL.' )
+    np.add_argument(       '--dump-vcd', action='store_true', help='Dump out waveform in vcd format.' )
     np.add_argument(       '--injection-rate', type=int, default=10, help='Injection rate in percentage. Default is 10.', metavar='' )
     np.add_argument(       '--pattern', type=str, default='urandom', help='Traffic pattern. Default is urandom.',  metavar='' )
     np.add_argument(       '--warmup-ncycles',  type=int, default=1000, help='Number of cycles for warmup.',  metavar='' )
@@ -107,7 +108,7 @@ Available topologies:
     p = argparse.ArgumentParser(
       description = 'Verilog generation.',
       usage = '''\
-./pyocn sim <topology> [<flags>]'
+./pyocn gen <topology> [<flags>]'
 
 Available topologies:
   ring   Ring network.
@@ -128,15 +129,44 @@ Available topologies:
     gen_verilog( topo, opts )
 
   #-----------------------------------------------------------------------
+  # test
+  #-----------------------------------------------------------------------
+
+  def test( self ):
+    p = argparse.ArgumentParser(
+      description = 'Smoke test generated network.',
+      usage = '''\
+./pyocn test <topology> [<flags>]'
+
+Available topologies:
+  ring   Ring network.
+  mesh   Mesh network.
+  cmesh  Concentrated mesh network.
+  torus  Torus network.
+  bfly   Butterfly network.
+''' )
+    p.add_argument( 'topology' )
+    topo = p.parse_args( sys.argv[2:3] ).topology
+
+    np = mk_net_arg_parser( topo )
+    np.add_argument( '-v', '--verbose', action='store_true', help='Run in verbose mode.' )
+    np.add_argument( '-s', '--trace',    action='store_true', help='Show line trace.'    )
+    np.add_argument(       '--cl',       action='store_true', help='Run cycle level model instead of RTL.' )
+
+    opts = np.parse_args( sys.argv[3:] )
+
+    smoke_test( topo, opts )
+
+  #-----------------------------------------------------------------------
   # help
   #-----------------------------------------------------------------------
 
   def help( self ):
     self.parser.print_help()
 
-#-------------------------------------------------------------------------
+#=========================================================================
 # main
-#-------------------------------------------------------------------------
+#=========================================================================
 
 if __name__ == '__main__':
   PyOCN()
