@@ -3,7 +3,7 @@
 ==========================================================================
 pyocn
 ==========================================================================
-Super script for simualting, generating, and testing on-chip networks.
+Frontend script for simualting, generating, and testing on-chip networks.
 
 Author: Yanghui Ou
   Date: Sep 24, 2019
@@ -54,9 +54,17 @@ Available commands are:
   def sim( self ):
     # TODO: list all available topologies
     p = argparse.ArgumentParser(
-      description = 'Simulation',
-      usage = './pyocn sim <topology> [<flags>]',
-    )
+      description = 'Network simulation.',
+      usage = '''\
+./pyocn sim <topology> [<flags>]'
+
+Available topologies:
+  ring   Ring network.
+  mesh   Mesh network.
+  cmesh  Concentrated mesh network.
+  torus  Torus network.
+  bfly   Butterfly network.
+''' )
     p.add_argument( 'topology' )
 
     topo = p.parse_args( sys.argv[2:3] ).topology
@@ -90,6 +98,38 @@ Available commands are:
 
     else:
       net_simulate_sweep( topo, opts )
+
+  #-----------------------------------------------------------------------
+  # gen
+  #-----------------------------------------------------------------------
+
+  def gen( self ):
+    p = argparse.ArgumentParser(
+      description = 'Verilog generation.',
+      usage = '''\
+./pyocn sim <topology> [<flags>]'
+
+Available topologies:
+  ring   Ring network.
+  mesh   Mesh network.
+  cmesh  Concentrated mesh network.
+  torus  Torus network.
+  bfly   Butterfly network.
+''' )
+    p.add_argument( 'topology' )
+    topo = p.parse_args( sys.argv[2:3] ).topology
+
+    np = mk_net_arg_parser( topo )
+    np.add_argument( '-v', '--verbose', action='store_true', help='Run in verbose mode.' )
+    opts = np.parse_args( sys.argv[3:] )
+
+    sim_utils.verbose = opts.verbose
+
+    gen_verilog( topo, opts )
+
+  #-----------------------------------------------------------------------
+  # help
+  #-----------------------------------------------------------------------
 
   def help( self ):
     self.parser.print_help()

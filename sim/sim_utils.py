@@ -18,6 +18,7 @@ from collections import deque
 from dataclasses import dataclass
 from random import seed, randint
 from pymtl3 import *
+from pymtl3.passes.yosys import ImportPass, TranslationPass
 
 seed( 0xfaceb00c )
 
@@ -32,6 +33,7 @@ from ringnet  import RingNetworkRTL
 from torusnet import TorusNetworkRTL
 from cmeshnet import CMeshNetworkRTL
 from bflynet  import BflyNetworkRTL
+
 
 from CLNetWrapper import CLNetWrapper
 
@@ -749,11 +751,24 @@ def net_simulate_sweep( topo, opts ):
   print( '+------+----------+-------+' )
 
 #-------------------------------------------------------------------------
-# generate
+# gen_verilog
 #-------------------------------------------------------------------------
 
-def generate( topo, opts ):
-  ...
+def gen_verilog( topo, opts ):
+  os.system(f'[ ! -e {topo}.sv ] || rm {topo}.sv')
+
+  vprint( f' - instantiating {topo}')
+  net = mk_net_inst( topo, opts )
+
+  vprint( f' - elaborating {topo}')
+  net.elaborate()
+
+  vprint( f' - applying translation pass' )
+  net.yosys_translate = True
+  net.apply( TranslationPass() )
+
+  net_vname = f'{topo[0].upper()}{topo[1:]}'
+  os.system(f'mv {net_vname}*.sv {topo}.sv')
 
 #-------------------------------------------------------------------------
 # smoke_test
