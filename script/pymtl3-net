@@ -35,8 +35,10 @@ class PyOCN:
 ./pyocn <command> [<args>]
 
 Available commands are:
+  help Display help message
   sim  Simulate an OCN
   gen  Generate an OCN
+  test Smoke test an OCN
 ''')
 
     parser.add_argument( 'command', help = 'Commands to run' )
