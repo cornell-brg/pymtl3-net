@@ -611,7 +611,7 @@ def net_simulate_cl( topo, opts ):
 
   vprint( f' - simulation starts' )
   vprint( f' - #measure generated / #measure injected / total generated  #measure received / total received')
-  injection_rate  = opts.injection_rate
+  injection_rate  = max( 1, opts.injection_rate )
   ncycles         = 0
   total_generated = 0
   mpkt_generated  = 0
