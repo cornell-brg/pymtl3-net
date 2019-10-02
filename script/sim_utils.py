@@ -127,7 +127,7 @@ def _mk_mesh_net( opts ):
 
   Pos = mk_mesh_pos( ncols, nrows )
   Pkt = mk_mesh_pkt( ncols, nrows, nvcs=1, payload_nbits=payload_nbits )
-  if opts.cl:
+  if hasattr( opts, 'cl' ) and opts.cl:
     cl_net = MeshNetworkCL( Pkt, Pos, ncols, nrows, channel_lat )
     net    = CLNetWrapper( Pkt, cl_net, nports )
   else:
@@ -442,13 +442,13 @@ def net_simulate( topo, opts ):
   if not topo in _net_arg_dict:
     raise Exception( f'Unkonwn network topology {topo}' )
 
-  # Instantiate network instance
-  vprint( f' - instantiating {topo}')
-  net = mk_net_inst( topo, opts )
-
   # Metadata
   nports = get_nports( topo, opts )
   p_type = mk_bits( opts.channel_bw )
+
+  # Instantiate network instance
+  vprint( f' - instantiating {topo} with {nports} terminals')
+  net = mk_net_inst( topo, opts )
 
   # Infinite source queues
   src_q = [ deque() for _ in range( nports ) ]
@@ -457,6 +457,12 @@ def net_simulate( topo, opts ):
   vprint( f' - elaborating {topo}' )
   net.elaborate()
   net.apply( SimulationPass )
+
+  if opts.dump_vcd:
+    vprint( f' - enabling vcd dumping' )
+    net.dump_vcd = True
+    net.vcd_file_name = f'{topo}-{nports}-{opts.injection_rate}.vcd'
+
   vprint( f' - resetting network')
   net.sim_reset()
   net.tick()
@@ -575,13 +581,13 @@ def net_simulate_cl( topo, opts ):
   if not topo in _net_arg_dict:
     raise Exception( f'Unkonwn network topology {topo}' )
 
-  # Instantiate network instance
-  vprint( f' - instantiating {topo}')
-  net = mk_net_inst( topo, opts )
-
   # Metadata
   nports = get_nports( topo, opts )
   p_type = mk_bits( opts.channel_bw )
+
+  # Instantiate network instance
+  vprint( f' - instantiating {topo} with {nports} terminals')
+  net = mk_net_inst( topo, opts )
 
   # Infinite source queues
   src_q = [ deque() for _ in range( nports ) ]
@@ -590,6 +596,7 @@ def net_simulate_cl( topo, opts ):
   vprint( f' - elaborating {topo}' )
   net.elaborate()
   net.apply( SimulationPass )
+
   vprint( f' - resetting network')
   net.sim_reset()
   net.tick()
@@ -786,18 +793,24 @@ def smoke_test( topo, opts ):
   if not topo in _net_arg_dict:
     raise Exception( f'Unkonwn network topology {topo}' )
 
-  # Instantiate network instance
-  vprint( f' - instantiating {topo}')
-  net = mk_net_inst( topo, opts )
-
   # Metadata
   nports = get_nports( topo, opts )
   p_type = mk_bits( opts.channel_bw )
+
+  # Instantiate network instance
+  vprint( f' - instantiating {topo} with {nports} terminals')
+  net = mk_net_inst( topo, opts )
 
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )
   net.elaborate()
   net.apply( SimulationPass )
+
+  if opts.dump_vcd:
+    vprint( f' - enabling vcd dumping' )
+    net.dump_vcd = True
+    net.vcd_file_name = f'{topo}-{nports}-test.vcd'
+
   vprint( f' - resetting network')
   net.sim_reset()
   net.tick()

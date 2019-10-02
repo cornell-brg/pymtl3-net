@@ -153,9 +153,12 @@ Available topologies:
     np = mk_net_arg_parser( topo )
     np.add_argument( '-v', '--verbose', action='store_true', help='Run in verbose mode.' )
     np.add_argument( '-s', '--trace',    action='store_true', help='Show line trace.'    )
+    np.add_argument(       '--dump-vcd', action='store_true', help='Dump out waveform in vcd format.' )
     np.add_argument(       '--cl',       action='store_true', help='Run cycle level model instead of RTL.' )
 
     opts = np.parse_args( sys.argv[3:] )
+
+    sim_utils.verbose = opts.verbose
 
     smoke_test( topo, opts )
 
