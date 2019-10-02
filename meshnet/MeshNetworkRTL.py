@@ -4,7 +4,7 @@ MeshNetworkRTL.py
 =========================================================================
 Mesh network implementation.
 
-Author : Cheng Tan
+Author : Yanghui Ou, Cheng Tan
   Date : Mar 10, 2019
 """
 from pymtl3                         import *
