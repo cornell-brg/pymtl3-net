@@ -15,8 +15,8 @@ import os
 
 from pymtl3 import *
 
-from utils import *
-import utils
+from sim_utils import *
+import sim_utils
 
 #-------------------------------------------------------------------------
 # Global variables
@@ -76,7 +76,7 @@ Available commands are:
     np.add_argument(       '--sweep-threash', type=float, default=100.0, help='Threashold for average latency in sweep mode.',  metavar='' )
     opts = np.parse_args( sys.argv[3:] )
 
-    utils.verbose = opts.verbose
+    sim_utils.verbose = opts.verbose
 
     # Simulate
     # TODO: Sweep, elapsed time
