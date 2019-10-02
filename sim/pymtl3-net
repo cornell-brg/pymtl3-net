@@ -30,8 +30,9 @@ class PyOCN:
 
   def __init__( self ):
     parser = argparse.ArgumentParser(
-      description = 'Utility script for PyOCN',
-      usage = '''./pyocn <command> [<args>]
+      description = 'Frontend script for PyOCN',
+      usage = '''\
+./pyocn <command> [<args>]
 
 Available commands are:
   sim  Simulate an OCN
@@ -39,6 +40,7 @@ Available commands are:
 ''')
 
     parser.add_argument( 'command', help = 'Commands to run' )
+    self.parser = parser
 
     # Exclude all args after the first arg
 
@@ -89,12 +91,8 @@ Available commands are:
     else:
       net_simulate_sweep( topo, opts )
 
-  #-----------------------------------------------------------------------
-  # gen
-  #-----------------------------------------------------------------------
-
-  def gen( self ):
-    ...
+  def help( self ):
+    self.parser.print_help()
 
 #-------------------------------------------------------------------------
 # main
