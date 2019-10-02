@@ -128,7 +128,7 @@ def test_srcsink_mesh4x4():
 
   PacketType = mk_mesh_pkt( mesh_wid, mesh_ht )
   for (src, dst, payload) in test_msgs:
-    pkt = PacketType( src%mesh_wid, src/mesh_wid, dst%mesh_wid, dst/mesh_wid, 1, payload )
+    pkt = PacketType( src%mesh_wid, src//mesh_wid, dst%mesh_wid, dst//mesh_wid, 1, payload )
     src_packets [src].append( pkt )
     sink_packets[dst].append( pkt )
 

@@ -73,11 +73,11 @@ class TestHarness( Component ):
     @s.update
     def up_give_en():
       if s.dut.give.rdy and s.sink.recv.rdy:
-        s.dut.give.en  = 1
-        s.sink.recv.en = 1
+        s.dut.give.en  = b1(1)
+        s.sink.recv.en = b1(1)
       else:
-        s.dut.give.en  = 0
-        s.sink.recv.en = 0
+        s.dut.give.en  = b1(0)
+        s.sink.recv.en = b1(0)
 
   def done( s ):
     return s.src.done() and s.sink.done()
