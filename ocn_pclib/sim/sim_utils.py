@@ -35,7 +35,7 @@ from torusnet import TorusNetworkRTL
 from cmeshnet import CMeshNetworkRTL
 from bflynet  import BflyNetworkRTL
 
-from CLNetWrapper import CLNetWrapper
+from ocn_pclib.sim.CLNetWrapper import CLNetWrapper
 
 #-------------------------------------------------------------------------
 # module level variable
