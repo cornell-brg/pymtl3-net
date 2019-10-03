@@ -15,8 +15,8 @@ import os
 
 from pymtl3 import *
 
-from sim_utils import *
-import sim_utils
+from ocn_pclib.sim.sim_utils import *
+from ocn_pclib.sim import sim_utils
 
 #-------------------------------------------------------------------------
 # Global variables
