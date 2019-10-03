@@ -15,6 +15,11 @@ import os
 
 from pymtl3 import *
 
+# Hack to add the top level directory to PYTHONPATH if this script was
+# called directly from the repo.
+if os.path.abspath(os.path.dirname(__file__)).split('/')[-1] == "script":
+  sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
+
 from ocn_pclib.sim.sim_utils import *
 from ocn_pclib.sim import sim_utils
 
