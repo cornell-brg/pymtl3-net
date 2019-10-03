@@ -21,7 +21,7 @@ def get_version():
   assert sys.version_info[0] > 2, "Python 2 is no longer supported!"
 
   result = "?"
-  with open("pymtl3_net/__init__.py") as f:
+  with open("ocn_pclib/__init__.py") as f:
     for line in f:
       if line.startswith("__version__"):
         _, result, _ = line.split('"')
@@ -72,16 +72,7 @@ setup(
 
   packages = find_packages(),
 
-  package_data = {
-    'pymtl3_net' : [
-      'config.yml',
-      'README.md',
-    ],
-  },
-
-  entry_points = { 'console_scripts' : [
-    'pymtl3-net = pymtl3_net.__main__:main',
-  ] },
+  scripts = [ 'script/pymtl3-net' ],
 
   install_requires = [
     'pymtl3',
