@@ -1,16 +1,1 @@
-pytest >= 4.4
-hypothesis >= 4.18.3
-pytest-xdist
-cffi
-greenlet
-pyparsing
-graphviz
-
-# CI dependencies
-autoflake
-flake8
-future
-isort
-pytest-cov
-pyupgrade
-codecov
+pymtl3
