@@ -16,33 +16,28 @@ from .DORYTorusRouteUnitRTL     import DORYTorusRouteUnitRTL
 
 class TorusRouterRTL( Component ):
 
-  def construct( s,
-    PacketType,
-    PositionType,
-    InputUnitType=InputUnitCreditRTL,
-    RouteUnitType=DORYTorusRouteUnitRTL,
-    SwitchUnitType=SwitchUnitRTL,
-    OutputUnitType=OutputUnitCreditRTL,
-    ncols=2,
-    nrows=2,
-    nvcs=2,
-    credit_line=2,
+  def construct( s, PacketType, PositionType,
+                    InputUnitType=InputUnitCreditRTL,
+                    RouteUnitType=DORYTorusRouteUnitRTL,
+                    SwitchUnitType=SwitchUnitRTL,
+                    OutputUnitType=OutputUnitCreditRTL,
+                    ncols=2, nrows=2, vc=2, credit_line=2,
   ):
 
     s.num_inports  = 5
     s.num_outports = 5
-    s.nvcs = nvcs
-    s.num_route_units = s.num_inports * s.nvcs
+    s.vc = vc
+    s.num_route_units = s.num_inports * s.vc
 
     # Interface
 
     s.pos  = InPort( PositionType )
-    s.recv = [ CreditRecvIfcRTL( PacketType, s.nvcs ) for _ in range( s.num_inports  ) ]
-    s.send = [ CreditSendIfcRTL( PacketType, s.nvcs ) for _ in range( s.num_outports ) ]
+    s.recv = [ CreditRecvIfcRTL( PacketType, s.vc ) for _ in range( s.num_inports  ) ]
+    s.send = [ CreditSendIfcRTL( PacketType, s.vc ) for _ in range( s.num_outports ) ]
 
     # Components
 
-    s.input_units  = [ InputUnitType( PacketType, nvcs=nvcs, credit_line=credit_line )
+    s.input_units  = [ InputUnitType( PacketType, vc=vc, credit_line=credit_line )
                       for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PacketType, PositionType, ncols, nrows )
@@ -58,8 +53,8 @@ class TorusRouterRTL( Component ):
 
     for i in range( s.num_inports ):
       s.recv[i] //= s.input_units[i].recv
-      for j in range( s.nvcs ):
-        ru_idx = i * s.nvcs + j
+      for j in range( s.vc ):
+        ru_idx = i * s.vc + j
         s.input_units[i].give[j] //= s.route_units[ru_idx].get
         s.pos                    //= s.route_units[ru_idx].pos
 
@@ -74,21 +69,11 @@ class TorusRouterRTL( Component ):
   # Line trace
 
   def line_trace( s ):
-    in_trace  = [ "" for _ in range( s.num_inports  ) ]
-    out_trace = [ "" for _ in range( s.num_outports ) ]
-
-    for i in range( s.num_inports ):
-      in_trace[i]  = "{}".format( s.recv[i] )
-    for i in range( s.num_outports ):
-      out_trace[i] = "{}".format( s.send[i] )
-
-    return "{}_({})_{}".format(
-      "|".join( in_trace ),
+    return "{}({}){}".format(
+      "|".join( [ f"{str(x)}" for x in s.recv ] ),
       s.pos,
-      # " I ".join([ "SU{}".format(i)+str( s.route_units[i].line_trace() ) for i in range(10) ]),
-      "|".join( out_trace ),
+      "|".join( [ f"{str(x)}" for x in s.send ] )
     )
-
   def elaborate_physical( s ):
     s.dim.w = 50
     s.dim.h = 50

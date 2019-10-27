@@ -22,7 +22,7 @@ class TorusRouterFL( object ):
     s.route_unit = RouteUnitDorFL( pos_x, pos_y, ncols, nrows, dimension='y' )
 
   #-----------------------------------------------------------------------
-  # arrabge_src_pkts
+  # arrange_src_pkts
   #-----------------------------------------------------------------------
   # A helper function that puts each packet in [lst] into corresponding
   # source.

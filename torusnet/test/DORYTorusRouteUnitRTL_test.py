@@ -116,7 +116,7 @@ class RouteUnitDorRTL_Tests( object ):
     mesh_wid = 4
     mesh_ht  = 4
 
-    Pkt = mk_mesh_pkt( mesh_wid, mesh_ht, nvcs=2 )
+    Pkt = mk_mesh_pkt( mesh_wid, mesh_ht, vc=2 )
 
     src_pkts = [
       #   src_x  y  dst_x  y  opq  vc  payload
