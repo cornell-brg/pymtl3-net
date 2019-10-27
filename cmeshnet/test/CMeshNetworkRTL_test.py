@@ -167,11 +167,11 @@ def test_srcsink_mesh2x2():
   inports = outports = 6
 
   opaque_nbits = 1
-  nvcs = 1
+  vc = 1
   payload_nbits = 32
 
   PacketType = mk_cmesh_pkt(  mesh_wid, mesh_ht, inports, outports,
-                              opaque_nbits, nvcs, payload_nbits )
+                              opaque_nbits, vc, payload_nbits )
   pkt = PacketType( 0, 0, 1, 1, 1, 0, 0xface )
 
   src_packets  = [ [pkt], [], [], [], [], [], [], [] ]

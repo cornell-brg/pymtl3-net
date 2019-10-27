@@ -30,8 +30,8 @@ class TestHarness( Component ):
   def construct( s, Type, src_msgs, sink_msgs, credit_line=2 ):
 
     s.src = TestSrcRTL( Type, src_msgs )
-    s.src_adapter = RecvRTL2CreditSendRTL( Type, nvcs=2, credit_line=credit_line )
-    s.sink_adapter = CreditRecvRTL2SendRTL( Type, nvcs=2, credit_line=credit_line, QType=NormalQueueRTL )
+    s.src_adapter = RecvRTL2CreditSendRTL( Type, vc=2, credit_line=credit_line )
+    s.sink_adapter = CreditRecvRTL2SendRTL( Type, vc=2, credit_line=credit_line, QType=NormalQueueRTL )
     s.sink = TestNetSinkRTL( Type, sink_msgs )
 
     s.src.send          //= s.src_adapter.recv
@@ -68,7 +68,7 @@ class TestHarness( Component ):
 #-------------------------------------------------------------------------
 
 def test_simple():
-  Pkt = mk_generic_pkt( nvcs=2 )
+  Pkt = mk_generic_pkt( vc=2 )
   msgs = [
     Pkt( 0, 1, 0x04, 0, 0xdeadbabe ),
     Pkt( 0, 2, 0x02, 1, 0xfaceb00c ),
@@ -80,7 +80,7 @@ def test_simple():
   th.run_sim()
 
 def test_backpresure():
-  Pkt = mk_generic_pkt( nvcs=2 )
+  Pkt = mk_generic_pkt( vc=2 )
   msgs = [
      # src dst opq vc_id  payload
     Pkt( 0, 1, 0x04, 0, 0xdeadbabe ),

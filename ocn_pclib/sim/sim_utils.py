@@ -126,7 +126,7 @@ def _mk_mesh_net( opts ):
   channel_lat   = opts.channel_lat
 
   Pos = mk_mesh_pos( ncols, nrows )
-  Pkt = mk_mesh_pkt( ncols, nrows, nvcs=1, payload_nbits=payload_nbits )
+  Pkt = mk_mesh_pkt( ncols, nrows, vc=1, payload_nbits=payload_nbits )
   if hasattr( opts, 'cl' ) and opts.cl:
     cl_net = MeshNetworkCL( Pkt, Pos, ncols, nrows, channel_lat )
     net    = CLNetWrapper( Pkt, cl_net, nports )
@@ -144,8 +144,8 @@ def _mk_ring_net( opts ):
   channel_lat   = opts.channel_lat
 
   Pos = mk_ring_pos( nterminals )
-  Pkt = mk_ring_pkt( nterminals, nvcs=2, payload_nbits=payload_nbits )
-  net = RingNetworkRTL( Pkt, Pos, nterminals, channel_lat, nvcs=2, credit_line=2 )
+  Pkt = mk_ring_pkt( nterminals, vc=2, payload_nbits=payload_nbits )
+  net = RingNetworkRTL( Pkt, Pos, nterminals, channel_lat, vc=2, credit_line=2 )
   return net
 
 #-------------------------------------------------------------------------
@@ -159,8 +159,8 @@ def _mk_torus_net( opts ):
   channel_lat   = opts.channel_lat
 
   Pos = mk_mesh_pos( ncols, nrows )
-  Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2, payload_nbits=payload_nbits )
-  net = TorusNetworkRTL( Pkt, Pos, ncols, nrows, channel_lat, nvcs=2, credit_line=2 )
+  Pkt = mk_mesh_pkt( ncols, nrows, vc=2, payload_nbits=payload_nbits )
+  net = TorusNetworkRTL( Pkt, Pos, ncols, nrows, channel_lat, vc=2, credit_line=2 )
   return net
 
 #-------------------------------------------------------------------------
@@ -177,7 +177,7 @@ def _mk_cmesh_net( opts ):
 
   Pos = mk_mesh_pos( ncols, nrows )
   Pkt = mk_cmesh_pkt( ncols, nrows, router_ninports, router_noutports,
-                      nvcs=1, payload_nbits=payload_nbits )
+                      vc=1, payload_nbits=payload_nbits )
   net = CMeshNetworkRTL( Pkt, Pos, ncols, nrows, opts.nterminals_each, channel_lat )
   return net
 
@@ -192,7 +192,7 @@ def _mk_bfly_net( opts ):
   channel_lat   = opts.channel_lat
 
   Pos = mk_bfly_pos( kary, nfly )
-  Pkt = mk_bfly_pkt( kary, nfly, nvcs=1, payload_nbits=payload_nbits )
+  Pkt = mk_bfly_pkt( kary, nfly, vc=1, payload_nbits=payload_nbits )
   net = BflyNetworkRTL( Pkt, Pos, kary, nfly, channel_lat )
   net.set_param( "top.routers*.construct", k_ary=kary )
   net.set_param( "top.routers*.route_units*.construct", n_fly=nfly )
@@ -230,7 +230,7 @@ def _gen_mesh_pkt( opts, timestamp, src_id ):
   x_type = mk_bits( clog2( opts.ncols ) )
   y_type = mk_bits( clog2( opts.nrows ) )
 
-  pkt = mk_mesh_pkt( ncols, nrows, nvcs=1, payload_nbits=payload_nbits )()
+  pkt = mk_mesh_pkt( ncols, nrows, vc=1, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
 
   dst_id    = _gen_dst_id( opts.pattern, nports, src_id )
@@ -251,7 +251,7 @@ def _gen_ring_pkt( opts, timestamp, src_id ):
 
   id_type = mk_bits( clog2( nports ) )
 
-  pkt = mk_ring_pkt( nports, nvcs=2, payload_nbits=payload_nbits )()
+  pkt = mk_ring_pkt( nports, vc=2, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
 
   dst_id  = _gen_dst_id( opts.pattern, nports, src_id )
@@ -273,7 +273,7 @@ def _gen_torus_pkt( opts, timestamp, src_id ):
   x_type = mk_bits( clog2( opts.ncols ) )
   y_type = mk_bits( clog2( opts.nrows ) )
 
-  pkt = mk_mesh_pkt( ncols, nrows, nvcs=2, payload_nbits=payload_nbits )()
+  pkt = mk_mesh_pkt( ncols, nrows, vc=2, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
 
   dst_id    = _gen_dst_id( opts.pattern, nports, src_id )
@@ -304,7 +304,7 @@ def _gen_cmesh_pkt( opts, timestamp, src_id ):
   t_type = mk_bits( clog2( nterminals_each ) )
 
   pkt = mk_cmesh_pkt( ncols, nrows, router_ninports, router_noutports,
-                      nvcs=1, payload_nbits=payload_nbits )()
+                      vc=1, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
 
   dst_id      = _gen_dst_id( opts.pattern, nports, src_id )
@@ -328,7 +328,7 @@ def _gen_bfly_pkt( opts, timestamp, src_id ):
 
   id_type = mk_bits( clog2( nports ) )
 
-  pkt = mk_bfly_pkt( kary, nfly, nvcs=1, payload_nbits=payload_nbits )()
+  pkt = mk_bfly_pkt( kary, nfly, vc=1, payload_nbits=payload_nbits )()
   pkt.payload = timestamp
 
   dst_id  = _gen_dst_id( opts.pattern, nports, src_id )
