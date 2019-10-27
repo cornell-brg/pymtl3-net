@@ -20,7 +20,7 @@ class RingNetworkRTL( Component ):
     PositionType,
     num_routers=4,
     chl_lat=0,
-    nvcs=2,
+    vc=2,
     credit_line=2,
    ):
 
@@ -33,12 +33,12 @@ class RingNetworkRTL( Component ):
     s.send = [ SendIfcRTL(PacketType) for _ in range(s.num_routers)]
 
     # Components
-    s.routers    = [ RingRouterRTL( PacketType, PositionType, num_routers, nvcs=nvcs )
+    s.routers    = [ RingRouterRTL( PacketType, PositionType, num_routers, vc=vc )
                      for i in range( num_routers ) ]
 
-    s.recv_adp = [ RecvRTL2CreditSendRTL( PacketType, nvcs=nvcs, credit_line=credit_line )
+    s.recv_adp = [ RecvRTL2CreditSendRTL( PacketType, vc=vc, credit_line=credit_line )
                         for _ in range( num_routers ) ]
-    s.send_adp = [ CreditRecvRTL2SendRTL( PacketType, nvcs=nvcs, credit_line=credit_line )
+    s.send_adp = [ CreditRecvRTL2SendRTL( PacketType, vc=vc, credit_line=credit_line )
                         for _ in range( num_routers ) ]
 
     # Connect s.routers together in ring
