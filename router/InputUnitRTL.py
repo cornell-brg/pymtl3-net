@@ -23,14 +23,7 @@ class InputUnitRTL( Component ):
 
     # Component
 
-    s.queue = QueueType( PacketType )
-    
-    # Connections
-
-    s.recv          //= s.queue.enq
-    s.queue.deq.msg //= s.give.msg
-    s.queue.deq.en  //= s.give.en
-    s.queue.deq.rdy //= s.give.rdy
+    s.queue = QueueType( PacketType )( enq = s.recv, deq = s.give )
 
   def line_trace( s ):
-    return "{}({}){}".format( s.recv, s.queue.count, s.give )
+    return f"{s.recv}({s.queue.count}){s.give}"

@@ -18,44 +18,38 @@ from ocn_pclib.ifcs.CreditIfc import CreditRecvIfcRTL
 class InputUnitCreditRTL( Component ):
 
   def construct( s, PacketType, QueueType = NormalQueueRTL,
-                 nvcs=2, credit_line=2 ):
+                 vc=2, credit_line=2 ):
 
     # Local paramters
-    s.nvcs = nvcs
+    s.vc = vc
 
     # Interface
-    s.recv = CreditRecvIfcRTL( PacketType, nvcs=nvcs )
-    s.give = [ GiveIfcRTL( PacketType ) for _ in range( nvcs ) ]
+    s.recv = CreditRecvIfcRTL( PacketType, vc=vc )
+    s.give = [ GiveIfcRTL( PacketType ) for _ in range( vc ) ]
 
     # Component
-    VcIDType   = mk_bits( clog2( nvcs ) if nvcs > 1 else 1 )
+    VcIDType = mk_bits( clog2( vc ) ) if vc > 1 else Bits1
 
     s.buffers = [ QueueType( PacketType, num_entries=credit_line )
-                  for _ in range( nvcs ) ]
+                  for _ in range( vc ) ]
 
-    for i in range( nvcs ):
-#      s.connect( s.buffers[i].enq.msg, s.recv.msg )
-#      s.connect( s.buffers[i].deq,     s.give[i]  )
+    for i in range( vc ):
       s.buffers[i].enq.msg //= s.recv.msg
       s.buffers[i].deq     //= s.give[i]
+      s.recv.yum[i]        //= s.give[i].en
 
     @s.update
     def up_enq():
       if s.recv.en:
-        for i in range( nvcs ):
+        for i in range( vc ):
           s.buffers[i].enq.en = s.recv.msg.vc_id == VcIDType(i)
       else:
-        for i in range( nvcs ):
+        for i in range( vc ):
           s.buffers[i].enq.en = b1(0)
-
-    @s.update
-    def up_yummy():
-      for i in range( nvcs ):
-        s.recv.yum[i] = s.buffers[i].deq.en
 
   def line_trace( s ):
     return "{}({}){}".format(
       s.recv,
-      ",".join([ str( s.buffers[i].count ) for i in range( s.nvcs ) ]),
-      "|".join([ str(s.give[i]) for i in range( s.nvcs ) ]),
+      ",".join([ str(s.buffers[i].count) for i in range( s.vc ) ]),
+      "|".join([ str(s.give[i]) for i in range( s.vc ) ]),
     )

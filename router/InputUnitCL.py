@@ -21,12 +21,7 @@ class InputUnitCL( Component ):
 
     # Component
 
-    s.queue = QueueType( num_entries=2 )
-
-    # Connections
-
-    s.recv      //= s.queue.enq
-    s.queue.deq //= s.give
+    s.queue = QueueType( num_entries=2 )( enq = s.recv, deq = s.give )
 
   def line_trace( s ):
-    return "{}(){}".format( s.recv, s.give )
+    return f"{s.recv}(){s.give}"

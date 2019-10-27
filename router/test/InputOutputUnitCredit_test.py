@@ -22,20 +22,20 @@ from ..OutputUnitCreditRTL        import OutputUnitCreditRTL
 #-------------------------------------------------------------------------
 
 class TestHarness( Component ):
-  def construct( s, Type, src_msgs, sink_msgs, nvcs=2, credit_line=2 ):
+  def construct( s, Type, src_msgs, sink_msgs, vc=2, credit_line=2 ):
 
     s.src   = TestSrcRTL( Type, src_msgs )
     s.src_q = BypassQueueRTL( Type, num_entries=1 )
-    s.output_unit = OutputUnitCreditRTL( Type, nvcs=nvcs, credit_line=credit_line )
-    s.input_unit  = InputUnitCreditRTL( Type, nvcs=nvcs, credit_line=credit_line )
-    s.switch_unit = SwitchUnitRTL( Type, num_inports=nvcs )
+    s.output_unit = OutputUnitCreditRTL( Type, vc=vc, credit_line=credit_line )
+    s.input_unit  = InputUnitCreditRTL( Type, vc=vc, credit_line=credit_line )
+    s.switch_unit = SwitchUnitRTL( Type, num_inports=vc )
     s.sink = TestNetSinkRTL( Type, sink_msgs )
 
     s.src.send             //= s.src_q.enq
     s.src_q.deq            //= s.output_unit.get
     s.output_unit.send     //= s.input_unit.recv
     s.switch_unit.give.msg //= s.sink.recv.msg
-    for i in range( nvcs ):
+    for i in range( vc ):
       s.input_unit.give[i] //= s.switch_unit.get[i]
 
     @s.update
@@ -74,11 +74,11 @@ class TestHarness( Component ):
 #-------------------------------------------------------------------------
 
 def test_simple():
-  Pkt = mk_generic_pkt( nvcs=2 )
+  Pkt = mk_generic_pkt( vc=2 )
   msgs = [
-    Pkt( b2(0), b2(1), b8(0x04), b1(0), 0xdeadbabe ),
-    Pkt( b2(0), b2(2), b8(0x02), b1(1), 0xfaceb00c ),
-    Pkt( b2(0), b2(3), b8(0x03), b1(0), 0xdeadface ),
+    Pkt( 0, 1, 0x04, 0, 0xdeadbabe ),
+    Pkt( 0, 2, 0x02, 1, 0xfaceb00c ),
+    Pkt( 0, 3, 0x03, 0, 0xdeadface ),
   ]
   th = TestHarness( Pkt, msgs, msgs )
   th.elaborate()
@@ -87,19 +87,19 @@ def test_simple():
   th.run_sim()
 
 def test_backpresure():
-  Pkt = mk_generic_pkt( nvcs=2 )
+  Pkt = mk_generic_pkt( vc=2 )
   msgs = [
-        # src   dst    opq       vc_id  payload
-    Pkt( b2(0), b2(1), b8(0x04), b1(0), 0xdeadbabe ),
-    Pkt( b2(0), b2(2), b8(0x02), b1(1), 0xfaceb00c ),
-    Pkt( b2(0), b2(3), b8(0x03), b1(0), 0xdeadface ),
-    Pkt( b2(0), b2(3), b8(0x03), b1(1), 0xdeadface ),
-    Pkt( b2(0), b2(3), b8(0x03), b1(1), 0xdeadface ),
-    Pkt( b2(0), b2(3), b8(0x03), b1(0), 0xdeadface ),
-    Pkt( b2(0), b2(3), b8(0x03), b1(0), 0xdeadface ),
+      # src dst opq vc_id payload
+    Pkt( 0, 1, 0x04, 0, 0xdeadbabe ),
+    Pkt( 0, 2, 0x02, 1, 0xfaceb00c ),
+    Pkt( 0, 3, 0x03, 0, 0xdeadface ),
+    Pkt( 0, 3, 0x03, 1, 0xdeadface ),
+    Pkt( 0, 3, 0x03, 1, 0xdeadface ),
+    Pkt( 0, 3, 0x03, 0, 0xdeadface ),
+    Pkt( 0, 3, 0x03, 0, 0xdeadface ),
   ]
   th = TestHarness( Pkt, msgs, msgs )
-  th.set_param( "top.sink.construct", initial_delay=20)
+  th.set_param( "top.sink.construct", initial_delay=20 )
   th.elaborate()
   th.apply( SimulationPass )
   th.sim_reset()
