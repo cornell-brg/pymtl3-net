@@ -25,10 +25,10 @@ class TestHarness( Component ):
                  src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    mesh_wid = 4
-    mesh_ht  = 4
+    mesh_width = 4
+    mesh_height  = 4
 
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    MeshPos = mk_mesh_pos( mesh_width, mesh_height )
     s.dut = DORYMeshRouteUnitRTL( MsgType, MeshPos )
     s.dut.pos = MeshPos( 1, 1 )
 

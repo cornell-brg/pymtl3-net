@@ -15,23 +15,19 @@ class DORYMeshRouteUnitRTL( Component ):
 
   def construct( s, MsgType, PositionType, num_outports = 5 ):
 
-    # Constants
-
-    s.num_outports = num_outports
-
     # Interface
 
     s.get  = GetIfcRTL( MsgType )
-    s.give = [ GiveIfcRTL (MsgType) for _ in range ( s.num_outports ) ]
+    s.give = [ GiveIfcRTL (MsgType) for _ in range ( num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Componets
 
-    s.give_ens = Wire( mk_bits( s.num_outports ) )
+    s.give_ens = Wire( mk_bits( num_outports ) )
 
     # Connections
 
-    for i in range( s.num_outports ):
+    for i in range( num_outports ):
       s.get.msg     //= s.give[i].msg
       s.give_ens[i] //= s.give[i].en
 
@@ -63,5 +59,5 @@ class DORYMeshRouteUnitRTL( Component ):
   # Line trace
   def line_trace( s ):
 
-    out_str = "|".join([ str(s.give[i]) for i in range( s.num_outports ) ])
+    out_str = "|".join([ str(x) for x in s.give ])
     return f"{s.get}(){out_str}"
