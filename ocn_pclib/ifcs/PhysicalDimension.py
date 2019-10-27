@@ -13,10 +13,10 @@
 class PhysicalDimension( object ):
 
   def __init__( s ):
-    s.x     = 0
-    s.y     = 0
-    s.w     = 0
-    s.h     = 0
+    s.x = 0
+    s.y = 0
+    s.w = 0
+    s.h = 0
 
   def __str__( s ):
     return "({},{}|{},{}|{},{})".format( s.x, s.y, s.w, s.h,
