@@ -13,14 +13,14 @@ from channel.ChannelCL      import ChannelCL
 
 class TorusNetworkCL( Component ):
   def construct( s, PacketType, PositionType,
-                    mesh_width=4, mesh_height=4, chl_lat=0 ):
+                    ncols=4, nrows=4, chl_lat=0 ):
 
     # Constants
 
-    s.mesh_width    = mesh_width
-    s.mesh_height   = mesh_height
-    s.num_routers   = mesh_width * mesh_height
-    num_channels    = mesh_height * mesh_width * 4
+    s.ncols    = ncols
+    s.nrows   = nrows
+    s.num_routers   = ncols * nrows
+    num_channels    = nrows * ncols * 4
     s.num_terminals = s.num_routers
 
     # Interface
@@ -41,22 +41,22 @@ class TorusNetworkCL( Component ):
     chl_id  = 0
     for i in range (s.num_routers):
 
-      s_idx = (i-mesh_height+s.num_routers) % s.num_routers
+      s_idx = (i-nrows+s.num_routers) % s.num_routers
       s.routers[i].send[SOUTH] //= s.channels[chl_id].recv
       s.channels[chl_id].send  //= s.routers[s_idx].recv[NORTH]
       chl_id += 1
 
-      n_idx = (i+mesh_height+s.num_routers) % s.num_routers
+      n_idx = (i+nrows+s.num_routers) % s.num_routers
       s.routers[i].send[NORTH] //= s.channels[chl_id].recv
       s.channels[chl_id].send  //= s.routers[n_idx].recv[SOUTH]
       chl_id += 1
 
-      w_idx = i - ( i % mesh_width - (i-1) % mesh_width )
+      w_idx = i - ( i % ncols - (i-1) % ncols )
       s.routers[i].send[WEST] //= s.channels[chl_id].recv
       s.channels[chl_id].send //= s.routers[w_idx].recv[EAST]
       chl_id += 1
 
-      e_idx = i + (i+1) % mesh_width - i % mesh_width
+      e_idx = i + (i+1) % ncols - i % ncols
       s.routers[i].send[EAST] //= s.channels[chl_id].recv
       s.channels[chl_id].send //= s.routers[e_idx].recv[WEST]
       chl_id += 1
@@ -68,9 +68,9 @@ class TorusNetworkCL( Component ):
 
     @s.update
     def up_pos():
-      for y in range( mesh_height ):
-        for x in range( mesh_width ):
-          idx = y * mesh_width + x
+      for y in range( nrows ):
+        for x in range( ncols ):
+          idx = y * ncols + x
           s.routers[idx].pos = PositionType( x, y )
 
   def line_trace( s ):
@@ -84,8 +84,8 @@ class TorusNetworkCL( Component ):
     BOUNDARY = 10
 
     for i, r in enumerate( s.routers ):
-      r.dim.x = BOUNDARY + i % s.mesh_width * ( r.dim.w + s.channels[0].dim.w )
-      r.dim.y = BOUNDARY + i / s.mesh_width * ( r.dim.h + s.channels[0].dim.w )
+      r.dim.x = BOUNDARY + i % s.ncols * ( r.dim.w + s.channels[0].dim.w )
+      r.dim.y = BOUNDARY + i / s.ncols * ( r.dim.h + s.channels[0].dim.w )
 
-    s.dim.w = 2 * BOUNDARY + s.mesh_width * ( r.dim.w + s.channels[0].dim.w )
-    s.dim.h = 2 * BOUNDARY + s.mesh_height  * ( r.dim.h + s.channels[0].dim.w )
+    s.dim.w = 2 * BOUNDARY + s.ncols * ( r.dim.w + s.channels[0].dim.w )
+    s.dim.h = 2 * BOUNDARY + s.nrows  * ( r.dim.h + s.channels[0].dim.w )

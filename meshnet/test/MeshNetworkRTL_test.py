@@ -26,13 +26,13 @@ from pymtl3.passes.sverilog           import ImportPass, TranslationPass
 
 class TestHarness( Component ):
 
-  def construct( s, MsgType, mesh_width, mesh_height, src_msgs, sink_msgs,
+  def construct( s, MsgType, ncols, nrows, src_msgs, sink_msgs,
                  src_initial, src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    MeshPos = mk_mesh_pos( mesh_width, mesh_height )
-    s.num_routers = mesh_width * mesh_height
-    s.dut = MeshNetworkRTL( MsgType, MeshPos, mesh_width, mesh_height, 0)
+    MeshPos = mk_mesh_pos( ncols, nrows )
+    s.num_routers = ncols * nrows
+    s.dut = MeshNetworkRTL( MsgType, MeshPos, ncols, nrows, 0)
     match_func = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
@@ -123,12 +123,12 @@ def test_srcsink_mesh4x4():
                    [6], [4], [4], [6],
                    [8], [6], [6], [8]]
 
-  mesh_width = 4
-  mesh_height  = 4
+  ncols = 4
+  nrows  = 4
 
-  PacketType = mk_mesh_pkt( mesh_width, mesh_height )
+  PacketType = mk_mesh_pkt( ncols, nrows )
   for (src, dst, payload) in test_msgs:
-    pkt = PacketType( src%mesh_width, src//mesh_width, dst%mesh_width, dst//mesh_width, 1, payload )
+    pkt = PacketType( src%ncols, src//ncols, dst%ncols, dst//ncols, 1, payload )
     src_packets [src].append( pkt )
     sink_packets[dst].append( pkt )
 
@@ -136,6 +136,6 @@ def test_srcsink_mesh4x4():
     print("src", i, [str(y) for y in x] )
   for i,x in enumerate(sink_packets):
     print("sink", i, [str(y) for y in x] )
-  th = TestHarness( PacketType, mesh_width, mesh_height, src_packets, sink_packets,
+  th = TestHarness( PacketType, ncols, nrows, src_packets, sink_packets,
                     0, 0, 0, 0, arrival_pipes )
   run_sim( th )

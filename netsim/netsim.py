@@ -1,14 +1,4 @@
 #!/usr/bin/env python
-"""
-=========================================================================
-netsim.py
-=========================================================================
-A simple implementation of network simulation.
-
-Author : Cheng Tan
-  Date : July 30, 2019
-"""
-
 #=========================================================================
 # netsim.py [options]
 #=========================================================================
@@ -66,8 +56,6 @@ Author : Cheng Tan
 # Author : Cheng Tan
 # Date   : April 14, 2018
 
-#from __future__ import print_function
-
 # Hack to add project root to python path
 
 import os
@@ -79,15 +67,11 @@ from collections import deque
 from random      import seed, randint
 
 sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
-os.system(sim_dir)
 while sim_dir:
   if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
     sys.path.insert(0,sim_dir)
-    # include the pymtl environment here
-    # sys.path.insert(0,sim_dir + "/../pymtl3/")
     break
   sim_dir = os.path.dirname(sim_dir)
-  os.system(sim_dir)
 
 #from meshnet.MeshNetworkFL    import MeshNetworkFL
 #from crossbar.CrossbarRTL     import CrossbarRTL
@@ -286,7 +270,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   if opts.topology == "Ring":
     NetModel = topology_dict[ "Ring" ]
     RingPos = mk_ring_pos( opts.routers )
-    PacketType = mk_ring_pkt_timestamp( opts.routers, nvcs = 2,
+    PacketType = mk_ring_pkt_timestamp( opts.routers, vc = 2,
             max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, RingPos, opts.routers, 0 )
 #    model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
@@ -305,7 +289,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     net_width = int(opts.routers/opts.rows)
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
-    PacketType = mk_mesh_pkt_timestamp( net_width, net_height, nvcs = 2,
+    PacketType = mk_mesh_pkt_timestamp( net_width, net_height, vc = 2,
             max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
     # model.set_param('top.routers*.route_units*.construct', ncols=net_width )
@@ -338,7 +322,6 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     model.set_param( "top.routers*.construct", k_ary=k_ary )
     model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
 
-#  model.elaborate()
   sim = model.apply( DynamicSim )
 
   # Source Queues - Modeled as Bypass Queues
@@ -350,10 +333,10 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   for i in range( num_nodes ):
     model.send[i].rdy = 1
 
-    if opts.topology == "Mesh":
-      XYType = mk_bits( clog2( net_width ) )
-      model.pos_x[i] = XYType( i% net_width  )
-      model.pos_y[i] = XYType( i//net_height )
+    # if opts.topology == "Mesh":
+      # XYType = mk_bits( clog2( net_width ) )
+      # model.pos_x[i] = XYType( i% net_width  )
+      # model.pos_y[i] = XYType( i//net_height )
 
   ncycles = 0
 
@@ -508,7 +491,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
         if ( timestamp != INVALID_TIMESTAMP ):
           total_latency    += ( ncycles - timestamp )
           packets_received += 1
-          average_latency = total_latency / float( packets_received )
+          average_latency = int(total_latency) / packets_received
 
       # Check if finished - drain phase
       #print 'all_packets_received: ', all_packets_received
@@ -516,7 +499,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
 
       if ( ncycles >= NUM_SAMPLE_CYCLES and
            packets_received >= packets_generated ):
-        average_latency = total_latency / float( packets_received )
+        average_latency = int(total_latency) / packets_received
         sim_done = True
         break
 

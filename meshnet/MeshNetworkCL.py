@@ -14,13 +14,13 @@ from .MeshRouterCL           import MeshRouterCL
 
 class MeshNetworkCL( Component ):
   def construct( s, PacketType, PositionType,
-                 mesh_width = 4, mesh_height = 4, chl_lat = 0 ):
+                 ncols = 4, nrows = 4, chl_lat = 0 ):
 
     # Constants
 
-    s.num_routers = mesh_width * mesh_height
+    s.num_routers = ncols * nrows
     s.num_terminals = s.num_routers
-    num_channels  = (mesh_height*(mesh_width-1)+mesh_width*(mesh_height-1)) * 2
+    num_channels  = (nrows*(ncols-1)+ncols*(nrows-1)) * 2
     chl_lat       =  0
 
     # Interface
@@ -40,22 +40,22 @@ class MeshNetworkCL( Component ):
 
     chl_id  = 0
     for i in range( s.num_routers ):
-      if i // mesh_width > 0:
+      if i // ncols > 0:
         s.routers[i].send[SOUTH] //= s.channels[chl_id].recv
-        s.channels[chl_id].send  //= s.routers[i-mesh_width].recv[NORTH]
+        s.channels[chl_id].send  //= s.routers[i-ncols].recv[NORTH]
         chl_id += 1
 
-      if i // mesh_width < mesh_height - 1:
+      if i // ncols < nrows - 1:
         s.routers[i].send[NORTH] //= s.channels[chl_id].recv
-        s.channels[chl_id].send  //= s.routers[i+mesh_width].recv[SOUTH]
+        s.channels[chl_id].send  //= s.routers[i+ncols].recv[SOUTH]
         chl_id += 1
 
-      if i % mesh_width > 0:
+      if i % ncols > 0:
         s.routers[i].send[WEST] //= s.channels[chl_id].recv
         s.channels[chl_id].send //= s.routers[i-1].recv[EAST]
         chl_id += 1
 
-      if i % mesh_width < mesh_width - 1:
+      if i % ncols < ncols - 1:
         s.routers[i].send[EAST] //= s.channels[chl_id].recv
         s.channels[chl_id].send //= s.routers[i+1].recv[WEST]
         chl_id += 1
@@ -70,24 +70,24 @@ class MeshNetworkCL( Component ):
         return lambda : False
 
       # FIXME: this doesn't work!
-      if i // mesh_width == 0:
+      if i // ncols == 0:
         s.routers[i].send[SOUTH].rdy.method = dummy_rdy()
 
-      if i // mesh_width == mesh_height - 1:
+      if i // ncols == nrows - 1:
         s.routers[i].send[NORTH].rdy.method = dummy_rdy()
 
-      if i % mesh_width == 0:
+      if i % ncols == 0:
         s.routers[i].send[WEST].rdy.method = dummy_rdy()
 
-      if i % mesh_width == mesh_width - 1:
+      if i % ncols == ncols - 1:
         s.routers[i].send[EAST].rdy.method = dummy_rdy()
 
     # FIXME: unable to connect a struct to a port.
     @s.update
     def up_pos():
-      for y in range( mesh_height ):
-        for x in range( mesh_width ):
-          idx = y * mesh_width + x
+      for y in range( nrows ):
+        for x in range( ncols ):
+          idx = y * ncols + x
           s.routers[idx].pos = PositionType( x, y )
 
   def line_trace( s ):
@@ -103,14 +103,14 @@ class WrappedMeshNetCL( Component ):
   def construct( s,
     PacketType,
     PositionType,
-    mesh_width=4,
-    mesh_height=4,
+    ncols=4,
+    nrows=4,
     chl_lat = 0
   ):
-    s.nterminals = mesh_height * mesh_width
+    s.nterminals = nrows * ncols
     s.recv = [ NonBlockingCalleeIfc( PacketType )  for _ in range( s.nterminals ) ]
     s.give = [ NonBlockingCalleeIfc( PacketType )  for _ in range( s.nterminals ) ]
-    s.net = MeshNetworkCL( PacketType, PositionType, mesh_width, mesh_height, chl_lat )
+    s.net = MeshNetworkCL( PacketType, PositionType, ncols, nrows, chl_lat )
     s.out_q = [ BypassQueueCL( num_entries=1 ) for _ in range( s.nterminals ) ]
     for i in range( s.nterminals ):
       s.recv[i]      //= s.net.recv[i]

@@ -8,13 +8,13 @@
 
 from pymtl3 import *
 
-def mk_mesh_pos( mesh_width, mesh_height ):
-  assert mesh_width > 0 and mesh_height > 0
+def mk_mesh_pos( ncols, nrows ):
+  assert ncols > 0 and nrows > 0
 
-  XType = mk_bits(clog2( mesh_width  )) if mesh_width  != 1 else Bits1
-  YType = mk_bits(clog2( mesh_height )) if mesh_height != 1 else Bits1
+  XType = mk_bits(clog2( ncols  )) if ncols  != 1 else Bits1
+  YType = mk_bits(clog2( nrows )) if nrows != 1 else Bits1
 
-  return mk_bitstruct( f"MeshPosition_{mesh_width}x{mesh_height}", {
+  return mk_bitstruct( f"MeshPosition_{ncols}x{nrows}", {
     'pos_x': XType,
     'pos_y': YType
   })

@@ -23,16 +23,16 @@ from router.InputUnitCL           import InputUnitCL
 
 class TestHarness( Component ):
 
-  def construct( s, PktType, mesh_width, mesh_height,
+  def construct( s, PktType, ncols, nrows,
                  src_msgs, sink_msgs,
                  src_initial, src_interval,
                  sink_initial, sink_interval ):
 
-    s.nrouters = mesh_width * mesh_height
+    s.nrouters = ncols * nrows
 
-    MeshPos = mk_mesh_pos( mesh_width, mesh_height )
+    MeshPos = mk_mesh_pos( ncols, nrows )
     match_func = lambda a, b : a==b
-    s.dut = MeshNetworkCL( PktType, MeshPos, mesh_width, mesh_height, 0 )
+    s.dut = MeshNetworkCL( PktType, MeshPos, ncols, nrows, 0 )
 
     s.srcs  = [ TestSrcCL( PktType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range( s.nrouters ) ]
@@ -92,15 +92,15 @@ def run_sim( test_harness, max_cycles=100 ):
 # Helper functions
 #-------------------------------------------------------------------------
 
-def mk_src_sink_msgs( PktType, msgs, mesh_width, mesh_height ):
-  nrouters = mesh_width * mesh_height
+def mk_src_sink_msgs( PktType, msgs, ncols, nrows ):
+  nrouters = ncols * nrows
   src_msgs  = [ [] for _ in range( nrouters ) ]
   sink_msgs = [ [] for _ in range( nrouters ) ]
 
   for msg in msgs:
     src_x, src_y, dst_x, dst_y, opq, payload = msg
-    src_id  = src_y * mesh_width + src_x
-    sink_id = dst_y * mesh_width + dst_x
+    src_id  = src_y * ncols + src_x
+    sink_id = dst_y * ncols + dst_x
 
     src_msgs [ src_id ] .append( PktType(*msg) )
     sink_msgs[ sink_id ].append( PktType(*msg) )
@@ -161,8 +161,8 @@ test_case_table = mk_test_case_table([
 
 @pytest.mark.parametrize( **test_case_table )
 def test_mesh_simple( test_params ):
-  PktType = mk_mesh_pkt( mesh_width=test_params.wid,
-                         mesh_height=test_params.ht, vc=1 )
+  PktType = mk_mesh_pkt( ncols=test_params.wid,
+                         nrows=test_params.ht, vc=1 )
 
   src_msgs, sink_msgs = mk_src_sink_msgs( PktType, test_params.msg_list,
                                           test_params.wid, test_params.ht )

@@ -31,8 +31,8 @@ class TestHarness( Component ):
 
   def construct( s,
                  MsgType       = None,
-                 mesh_width      = 2,
-                 mesh_height       = 2 ,
+                 ncols      = 2,
+                 nrows       = 2 ,
                  pos_x         = 0,
                  pos_y         = 0,
                  src_msgs      = [],
@@ -44,7 +44,7 @@ class TestHarness( Component ):
                  arrival_time  =[None, None, None, None, None]
                ):
 
-    MeshPos = mk_mesh_pos( mesh_width, mesh_height )
+    MeshPos = mk_mesh_pos( ncols, nrows )
     s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = InputUnitRTL,
         RouteUnitType = DORYMeshRouteUnitRTL )
     match_func = lambda a, b : a.payload == b.payload
@@ -143,13 +143,13 @@ def test_self_simple():
   run_sim( th )
 
 def test_h1():
-  pos_x, pos_y, mesh_width, mesh_height = 0, 0, 2, 2
-  PacketType = mk_mesh_pkt( mesh_width, mesh_height )
+  pos_x, pos_y, ncols, nrows = 0, 0, 2, 2
+  PacketType = mk_mesh_pkt( ncols, nrows )
   pkt0 = PacketType( 0, 0, 0, 1, 0, 0xdead )
   src_pkts  = [ [],     [], [], [], [pkt0] ]
   sink_pkts = [ [pkt0], [], [], [], []     ]
   th = TestHarness(
-    PacketType, mesh_width, mesh_height, pos_x, pos_y,
+    PacketType, ncols, nrows, pos_x, pos_y,
     src_pkts, sink_pkts
   )
   th.set_param(
@@ -159,8 +159,8 @@ def test_h1():
   run_sim( th )
 
 def test_h2():
-  pos_x, pos_y, mesh_width, mesh_height = 0, 0, 2, 2
-  PacketType = mk_mesh_pkt( mesh_width, mesh_height )
+  pos_x, pos_y, ncols, nrows = 0, 0, 2, 2
+  PacketType = mk_mesh_pkt( ncols, nrows )
   pkt0 = PacketType( 0, 0, 1, 0, 0, 0xdead )
   pkt1 = PacketType( 0, 1, 1, 0, 1, 0xbeef )
   pkt2 = PacketType( 0, 1, 1, 0, 2, 0xcafe )
@@ -168,7 +168,7 @@ def test_h2():
   src_pkts  = [ [pkt1, pkt2], [], [], [],                 [pkt0] ]
   sink_pkts = [ [],           [], [], [pkt1, pkt0, pkt2], []     ]
   th = TestHarness(
-    PacketType, mesh_width, mesh_height, pos_x, pos_y,
+    PacketType, ncols, nrows, pos_x, pos_y,
     src_pkts, sink_pkts
   )
   th.set_param(
@@ -178,14 +178,14 @@ def test_h2():
   run_sim( th, 10 )
 
 def test_h3():
-  pos_x, pos_y, mesh_width, mesh_height = 0, 1, 2, 2
-  PacketType = mk_mesh_pkt( mesh_width, mesh_height )
+  pos_x, pos_y, ncols, nrows = 0, 1, 2, 2
+  PacketType = mk_mesh_pkt( ncols, nrows )
   pkt0 = PacketType( 0, 1, 0, 0, 0, 0xdead )
               # N   S   W   E   self
   src_pkts  = [ [], [], [], [], [pkt0] ]
   sink_pkts = [ [], [pkt0], [], [], [] ]
   th = TestHarness(
-    PacketType, mesh_width, mesh_height, pos_x, pos_y,
+    PacketType, ncols, nrows, pos_x, pos_y,
     src_pkts, sink_pkts
   )
   th.set_param(

@@ -15,16 +15,16 @@ from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 class MeshNetworkRTL( Component ):
   def construct( s, PacketType, PositionType,
-                 mesh_width=4, mesh_height=4, chl_lat=0 ):
+                 ncols=4, nrows=4, chl_lat=0 ):
 
     # Local parameters
 
-    s.num_routers   = mesh_width * mesh_height
+    s.num_routers   = ncols * nrows
     s.num_terminals = s.num_routers
-    num_channels    = (mesh_height*(mesh_width-1)+mesh_width*(mesh_height-1)) * 2
+    num_channels    = (nrows*(ncols-1)+ncols*(nrows-1)) * 2
     chl_lat         =  0
-    XType           = mk_bits( clog2(mesh_width) )
-    YType           = mk_bits( clog2(mesh_height ) )
+    XType           = mk_bits( clog2(ncols) )
+    YType           = mk_bits( clog2(nrows ) )
 
     # Interface
 
@@ -41,10 +41,10 @@ class MeshNetworkRTL( Component ):
 
     # Wire the position ports of router
 
-    for y in range( mesh_height ):
-      for x in range( mesh_width ):
-        s.routers[y*mesh_width+x].pos.pos_x //= x
-        s.routers[y*mesh_width+x].pos.pos_y //= y
+    for y in range( nrows ):
+      for x in range( ncols ):
+        s.routers[y*ncols+x].pos.pos_x //= x
+        s.routers[y*ncols+x].pos.pos_y //= y
 
     # Connect routers together in Mesh
     # NOTE: for now we put all channels in a single list. In the future we
@@ -53,22 +53,22 @@ class MeshNetworkRTL( Component ):
 
     chl_id  = 0
     for i in range( s.num_routers ):
-      if i // mesh_width > 0:
+      if i // ncols > 0:
         s.routers[i].send[SOUTH] //= s.channels[chl_id].recv
-        s.channels[chl_id].send  //= s.routers[i-mesh_width].recv[NORTH]
+        s.channels[chl_id].send  //= s.routers[i-ncols].recv[NORTH]
         chl_id += 1
 
-      if i // mesh_width < mesh_height - 1:
+      if i // ncols < nrows - 1:
         s.routers[i].send[NORTH] //= s.channels[chl_id].recv
-        s.channels[chl_id].send  //= s.routers[i+mesh_width].recv[SOUTH]
+        s.channels[chl_id].send  //= s.routers[i+ncols].recv[SOUTH]
         chl_id += 1
 
-      if i % mesh_width > 0:
+      if i % ncols > 0:
         s.routers[i].send[WEST] //= s.channels[chl_id].recv
         s.channels[chl_id].send //= s.routers[i-1].recv[EAST]
         chl_id += 1
 
-      if i % mesh_width < mesh_width - 1:
+      if i % ncols < ncols - 1:
         s.routers[i].send[EAST] //= s.channels[chl_id].recv
         s.channels[chl_id].send //= s.routers[i+1].recv[WEST]
         chl_id += 1
@@ -82,22 +82,22 @@ class MeshNetworkRTL( Component ):
       # FIXME: for now we hackily ground the payload field so that pymtl
       # won't complain about net need driver.
 
-      if i // mesh_width == 0:
+      if i // ncols == 0:
         s.routers[i].send[SOUTH].rdy         //= 0
         s.routers[i].recv[SOUTH].en          //= 0
         s.routers[i].recv[SOUTH].msg.payload //= 0
 
-      if i // mesh_width == mesh_height - 1:
+      if i // ncols == nrows - 1:
         s.routers[i].send[NORTH].rdy         //= 0
         s.routers[i].recv[NORTH].en          //= 0
         s.routers[i].recv[NORTH].msg.payload //= 0
 
-      if i % mesh_width == 0:
+      if i % ncols == 0:
         s.routers[i].send[WEST].rdy          //= 0
         s.routers[i].recv[WEST].en           //= 0
         s.routers[i].recv[WEST].msg.payload  //= 0
 
-      if i % mesh_width == mesh_width - 1:
+      if i % ncols == ncols - 1:
         s.routers[i].send[EAST].rdy          //= 0
         s.routers[i].recv[EAST].en           //= 0
         s.routers[i].recv[EAST].msg.payload  //= 0

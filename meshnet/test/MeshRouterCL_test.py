@@ -32,14 +32,14 @@ class TestHarness( Component ):
     MsgType   = None,
     src_msgs  = [],
     sink_msgs = [],
-    mesh_width  = 2,
-    mesh_height   = 2 ,
+    ncols  = 2,
+    nrows   = 2 ,
     pos_x     = 0,
     pos_y     = 0,
   ):
 
-    MeshPos = mk_mesh_pos( mesh_width, mesh_height )
-    s.nrouters = mesh_width * mesh_height
+    MeshPos = mk_mesh_pos( ncols, nrows )
+    s.nrouters = ncols * nrows
     match_func = lambda a, b : a.src_x == a.src_x and a.src_y == b.src_y and \
                                a.dst_x == b.dst_x and a.dst_y == b.dst_y and \
                                a.opaque == b.opaque and a.payload == b.payload
@@ -79,14 +79,14 @@ class TestHarness( Component ):
 #-------------------------------------------------------------------------
 
 @st.composite
-def mesh_pkt_strat( draw, mesh_width, mesh_height, opaque_nbits=8, vc=1, payload_nbits=32 ):
-  dst_x = draw( st.integers(0, mesh_width-1) )
-  dst_y = draw( st.integers(0, mesh_height -1) )
-  src_x = draw( st.integers(0, mesh_width-1) )
-  src_y = draw( st.integers(0, mesh_height -1) )
+def mesh_pkt_strat( draw, ncols, nrows, opaque_nbits=8, vc=1, payload_nbits=32 ):
+  dst_x = draw( st.integers(0, ncols-1) )
+  dst_y = draw( st.integers(0, nrows -1) )
+  src_x = draw( st.integers(0, ncols-1) )
+  src_y = draw( st.integers(0, nrows -1) )
   opaque  = draw( pst.bits( opaque_nbits ) )
   payload = draw( st.sampled_from([ 0, 0xdeadbeef, 0xfaceb00c, 0xc001cafe ]) )
-  Pkt = mk_mesh_pkt( mesh_width, mesh_height, opaque_nbits, vc, payload_nbits )
+  Pkt = mk_mesh_pkt( ncols, nrows, opaque_nbits, vc, payload_nbits )
   if vc==1:
     return Pkt( src_x, src_y, dst_x, dst_y, opaque, payload )
   else:
@@ -128,23 +128,23 @@ class MeshRouterCL_Tests( object ):
     product( [ 0, 1, 2, 3 ], [ 0, 1, 2, 3 ] ),
   )
   def test_simple4x4( s, pos_x, pos_y ):
-    mesh_width = 4
-    mesh_height  = 4
-    Pkt = mk_mesh_pkt( mesh_width, mesh_height )
+    ncols = 4
+    nrows  = 4
+    Pkt = mk_mesh_pkt( ncols, nrows )
     router_fl = MeshRouterFL( pos_x, pos_y, dimension='x' )
     src_pkts = router_fl.arrange_src_pkts([
       #   src_x  y dst_x  y  opq payload
       Pkt(    0, 0,    3, 3, 0,  0xdeaddead ),
     ])
     dst_pkts = router_fl.route( src_pkts )
-    th = s.TestHarness( Pkt, src_pkts, dst_pkts, mesh_width, mesh_height, pos_x, pos_y )
+    th = s.TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
     s.run_sim( th )
 
   # Failing test cases captured by hypothesis
 
   def test_h0( s ):
-    pos_x = 0; pos_y = 0; mesh_width = 2; mesh_height = 2
-    Pkt = mk_mesh_pkt( mesh_width, mesh_height )
+    pos_x = 0; pos_y = 0; ncols = 2; nrows = 2
+    Pkt = mk_mesh_pkt( ncols, nrows )
     router_fl = MeshRouterFL( pos_x, pos_y, dimension='x' )
     src_pkts = router_fl.arrange_src_pkts([
       #   src_x  y dst_x  y  opq payload
@@ -152,19 +152,19 @@ class MeshRouterCL_Tests( object ):
       Pkt(    0, 0,    1, 0, 0,  0xdeadface ),
     ])
     dst_pkts = router_fl.route( src_pkts )
-    th = s.TestHarness( Pkt, src_pkts, dst_pkts, mesh_width, mesh_height, pos_x, pos_y )
+    th = s.TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
     s.run_sim( th )
 
   def test_h1( s ):
-    pos_x = 0; pos_y = 0; mesh_width = 2; mesh_height = 2
-    Pkt = mk_mesh_pkt( mesh_width, mesh_height )
+    pos_x = 0; pos_y = 0; ncols = 2; nrows = 2
+    Pkt = mk_mesh_pkt( ncols, nrows )
     router_fl = MeshRouterFL( pos_x, pos_y, dimension='x' )
     src_pkts = router_fl.arrange_src_pkts([
       #   src_x  y dst_x  y  opq payload
       Pkt(    0, 0,    0, 1, 0,  0xdeadbabe ),
     ])
     dst_pkts = router_fl.route( src_pkts )
-    th = s.TestHarness( Pkt, src_pkts, dst_pkts, mesh_width, mesh_height, pos_x, pos_y )
+    th = s.TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
     s.run_sim( th )
 
 #-------------------------------------------------------------------------
@@ -173,8 +173,8 @@ class MeshRouterCL_Tests( object ):
 
   @hypothesis.settings( deadline = None )
   @hypothesis.given(
-    mesh_width   = st.integers(2, 16),
-    mesh_height    = st.integers(2, 16),
+    ncols   = st.integers(2, 16),
+    nrows    = st.integers(2, 16),
     routing    = st.sampled_from(['x']), # TODO: add y after implementing DORY route unit
     pos_x      = st.data(),
     pos_y      = st.data(),
@@ -184,20 +184,20 @@ class MeshRouterCL_Tests( object ):
     sink_init  = st.integers(0, 20),
     sink_inter = st.integers(0, 5 ),
   )
-  def test_hypothesis( s, mesh_width, mesh_height, routing, pos_x, pos_y, pkts,
+  def test_hypothesis( s, ncols, nrows, routing, pos_x, pos_y, pkts,
       src_init, src_inter, sink_init, sink_inter ):
     # Draw some numbers
-    pos_x = pos_x.draw( st.integers(0,mesh_width-1), label="pos_x" )
-    pos_y = pos_y.draw( st.integers(0,mesh_width-1), label="pos_y" )
-    Pkt   = mk_mesh_pkt( mesh_width, mesh_height )
+    pos_x = pos_x.draw( st.integers(0,ncols-1), label="pos_x" )
+    pos_y = pos_y.draw( st.integers(0,ncols-1), label="pos_y" )
+    Pkt   = mk_mesh_pkt( ncols, nrows )
     router_fl = MeshRouterFL( pos_x, pos_y, dimension='x' )
     msgs  = pkts.draw(
-      st.lists( mesh_pkt_strat( mesh_width, mesh_height ), min_size = 1, max_size = 50 ),
+      st.lists( mesh_pkt_strat( ncols, nrows ), min_size = 1, max_size = 50 ),
       label = "msgs"
     )
     src_pkts = router_fl.arrange_src_pkts( msgs )
     dst_pkts = router_fl.route( src_pkts )
-    th = s.TestHarness( Pkt, src_pkts, dst_pkts, mesh_width, mesh_height, pos_x, pos_y )
+    th = s.TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
     th.set_param( "top.src*.construct", initial_delay=src_init, interval_delay=src_init )
     th.set_param( "top.sink*.construct", initial_delay=sink_init, interval_delay=sink_init )
     s.run_sim( th, max_cycles=5000 )
