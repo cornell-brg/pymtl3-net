@@ -15,6 +15,9 @@ __pycache__/
 .nfs*
 .pytest_cache
 .hypothesis
+*.v
+*.sv
+*.egg-info
 
 # arm-mc build script
 

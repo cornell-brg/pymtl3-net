@@ -378,11 +378,11 @@ _pkt_gen_dict = {
 
 def mk_net_arg_parser( topo ):
   if not topo in _net_arg_dict:
-    raise Exception( f'Unkonwn network topology {topo}' )
+    raise Exception( f'Unknown network topology {topo}' )
 
   p = argparse.ArgumentParser(
     # description = f'{topo}',
-    usage = f'./pyocn sim {topo} [<flags>]',
+    usage = f'./pymtl-net sim {topo} [<flags>]',
   )
   _net_arg_dict[ topo ]( p )
   return p
@@ -720,11 +720,11 @@ def net_simulate_sweep( topo, opts ):
   zero_load_lat = 0.0
   slope         = 0.0
   step          = opts.sweep_step
-  threashold    = opts.sweep_threash
+  threshold    = opts.sweep_thresh
 
   sim_func = net_simulate if not opts.cl else net_simulate_cl
 
-  while cur_avg_lat <= threashold and cur_inj <= 100:
+  while cur_avg_lat <= threshold and cur_inj <= 100:
     new_opts = deepcopy( opts )
     new_opts.injection_rate = max( 1, cur_inj )
 
@@ -783,8 +783,7 @@ def gen_verilog( topo, opts ):
   net.yosys_translate = True
   net.apply( TranslationPass() )
 
-  net_vname = f'{topo[0].upper()}{topo[1:]}'
-  os.system(f'mv {net_vname}*.sv {topo}.sv')
+  os.system(f'mv {net.translated_top_module_name}.sv {topo}.sv')
 
 #-------------------------------------------------------------------------
 # smoke_test
