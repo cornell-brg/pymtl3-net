@@ -28,7 +28,6 @@ sys.path.insert(0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) )
 
 from ocn_pclib.ifcs.positions import mk_mesh_pos, mk_ring_pos, mk_bfly_pos
 from ocn_pclib.ifcs.packets import mk_mesh_pkt, mk_ring_pkt, mk_cmesh_pkt, mk_bfly_pkt
-# from ocn_pclib.passes.PassGroups import SimulationPass
 from meshnet  import MeshNetworkRTL, MeshNetworkCL
 from ringnet  import RingNetworkRTL
 from torusnet import TorusNetworkRTL
