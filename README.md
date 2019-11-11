@@ -12,7 +12,7 @@
 
 PyOCN (PyMTL3-net) is a parameterizable and powerful OCN (on-chip network) generator to generate synthesizable Verilog for different OCNs based on user-specified configurations (e.g., network size, topology, number of virtual channels, routing strategy, switching arbitration, etc.). It comes with PyMTL implementation and is the first one to provide functional-level (FL), cycle-level (CL), and register-transfer-level (RTL) modeling for building OCNs. Furthermore, PyOCN is open-source with a modular design and standardized interfaces between modules. The configurability and extensibility are maximized by its parametrization system to fit in various research and industrial needs.
 
-PyOCN supports OCN characterization by providing scripts (https://github.com/cornell-brg/alloy-asic) that semi-automatically takes the generated Verilog and net activity file to drive a standard-cell-based electronic-design- automation (EDA) toolflow for area, energy, and timing analysis. 
+PyOCN supports OCN characterization by providing scripts (https://github.com/cornell-brg/mflowgen) that semi-automatically takes the generated Verilog and net activity file to drive a standard-cell-based electronic-design- automation (EDA) toolflow for area, energy, and timing analysis. 
 
 Demo
 --------------------------------------------------------
