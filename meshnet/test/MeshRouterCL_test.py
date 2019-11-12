@@ -188,7 +188,7 @@ class MeshRouterCL_Tests( object ):
       src_init, src_inter, sink_init, sink_inter ):
     # Draw some numbers
     pos_x = pos_x.draw( st.integers(0,ncols-1), label="pos_x" )
-    pos_y = pos_y.draw( st.integers(0,ncols-1), label="pos_y" )
+    pos_y = pos_y.draw( st.integers(0,nrows-1), label="pos_y" )
     Pkt   = mk_mesh_pkt( ncols, nrows )
     router_fl = MeshRouterFL( pos_x, pos_y, dimension='x' )
     msgs  = pkts.draw(
