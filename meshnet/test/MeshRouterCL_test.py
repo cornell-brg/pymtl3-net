@@ -102,7 +102,7 @@ class MeshRouterCL_Tests( object ):
   def setup_class( s ):
     s.TestHarness = TestHarness
 
-  def run_sim( s, th, max_cycles=100 ):
+  def run_sim( s, th, max_cycles=1000 ):
 
     # Create a simulator
 

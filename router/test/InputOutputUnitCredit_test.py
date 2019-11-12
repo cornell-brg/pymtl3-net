@@ -55,7 +55,7 @@ class TestHarness( Component ):
   def done( s ):
     return s.src.done() and s.sink.done()
 
-  def run_sim( s, max_cycles=50 ):
+  def run_sim( s, max_cycles=1000 ):
     # Run simulation
     print("")
     ncycles = 0

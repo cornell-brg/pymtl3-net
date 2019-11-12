@@ -86,7 +86,7 @@ def torus_pkt_strat( draw, ncols, nrows ):
 
 class TorusNetwork_Tests( object ):
 
-  def run_sim( s, th, max_cycles=200 ):
+  def run_sim( s, th, max_cycles=1000 ):
     th.elaborate()
     th.apply( SimulationPass )
     th.sim_reset()
@@ -166,4 +166,4 @@ class TorusNetwork_Tests( object ):
     src_pkts = mk_src_pkts( ncols, nrows, pkts_lst )
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    s.run_sim( th, max_cycles=20 )
+    s.run_sim( th, max_cycles=5000 )

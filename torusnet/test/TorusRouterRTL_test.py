@@ -93,7 +93,7 @@ def mk_srcsink_pkts( pos_x, pos_y, ncols, nrows, lst ):
 
 class TorusRouterRTL_Tests( object ):
 
-  def run_sim( s, th, max_cycles=100 ):
+  def run_sim( s, th, max_cycles=1000 ):
     # Create a simulator
     th.apply( DynamicSim )
     th.sim_reset()

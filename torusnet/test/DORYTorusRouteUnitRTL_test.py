@@ -90,7 +90,7 @@ class RouteUnitDorRTL_Tests( object ):
   def setup_method( cls ):
     pass
 
-  def run_sim( s, th, max_cycles=100 ):
+  def run_sim( s, th, max_cycles=1000 ):
     # Create a simulator
     th.apply( DynamicSim )
     th.sim_reset()
