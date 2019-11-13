@@ -27,7 +27,6 @@ from ocn_pclib.ifcs.packets   import *
 from ocn_pclib.ifcs.positions import *
 from pymtl3.stdlib.test       import TestVectorSimulator
 from pymtl3.passes.yosys      import ImportPass, TranslationPass
-from ocn_pclib.passes.PassGroups import SimulationPass
 
 import time
 

@@ -77,7 +77,7 @@ def torus_pkt_strat( draw, ncols, nrows ):
   dst_x = draw( st.integers(0, ncols-1), label="dst_x" )
   dst_y = draw( st.integers(0, nrows-1), label="dst_y" )
   payload = draw( st.sampled_from([ 0xdeadface, 0xfaceb00c, 0xdeadbabe ]) )
-  Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+  Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
   return Pkt( src_x, src_y, dst_x, dst_y, 0, 0, payload )
 
 #=========================================================================
@@ -86,7 +86,7 @@ def torus_pkt_strat( draw, ncols, nrows ):
 
 class TorusNetwork_Tests( object ):
 
-  def run_sim( s, th, max_cycles=200 ):
+  def run_sim( s, th, max_cycles=1000 ):
     th.elaborate()
     th.apply( SimulationPass )
     th.sim_reset()
@@ -107,7 +107,7 @@ class TorusNetwork_Tests( object ):
     ncols = 2
     nrows = 2
 
-    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+    Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
 
     src_pkts = mk_src_pkts( ncols, nrows, [
       #    src_x  y  dst_x  y   opq vc payload
@@ -122,7 +122,7 @@ class TorusNetwork_Tests( object ):
     ncols = 3
     nrows = 3
 
-    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+    Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
 
     src_pkts = mk_src_pkts( ncols, nrows, [
       #    src_x  y  dst_x  y   opq vc payload
@@ -137,7 +137,7 @@ class TorusNetwork_Tests( object ):
     ncols = 5
     nrows = 5
 
-    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+    Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
 
     src_pkts = mk_src_pkts( ncols, nrows, [
       #    src_x  y  dst_x  y   opq vc payload
@@ -156,7 +156,7 @@ class TorusNetwork_Tests( object ):
     pkts  = st.data(),
   )
   def test_hypothesis( s, ncols, nrows, pkts ):
-    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+    Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
 
     pkts_lst = pkts.draw(
       st.lists( torus_pkt_strat( ncols, nrows ), max_size=4 ),
@@ -166,4 +166,4 @@ class TorusNetwork_Tests( object ):
     src_pkts = mk_src_pkts( ncols, nrows, pkts_lst )
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    s.run_sim( th, max_cycles=20 )
+    s.run_sim( th, max_cycles=5000 )

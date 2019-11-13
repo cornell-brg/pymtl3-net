@@ -57,7 +57,7 @@ class SwitchUnitCL_Tests( object ):
   def setup_class( cls ):
     cls.TestHarness = TestHarness
 
-  def run_sim( s, th, max_cycles=100 ):
+  def run_sim( s, th, max_cycles=1000 ):
 
     # Create a simulator
     th.apply( DynamicSim )

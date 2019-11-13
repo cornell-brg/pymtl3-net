@@ -13,7 +13,7 @@ from pymtl3 import *
 class Counter( Component ):
 
   def construct( s, Type, reset_value=0 ):
-    
+
     # Interface
 
     s.incr       = InPort ( Bits1 )
@@ -24,23 +24,20 @@ class Counter( Component ):
 
     # Logic
 
-    @s.update_on_edge
+    @s.update_ff
     def up_count():
 
       if s.reset:
-        s.count = Type( reset_value )
+        s.count <<= Type( reset_value )
 
       elif s.load:
-        s.count = s.load_value
+        s.count <<= s.load_value
 
       elif s.incr & ~s.decr:
-        s.count = s.count + Type(1)
+        s.count <<= s.count + Type(1)
 
       elif ~s.incr & s.decr:
-        s.count = s.count - Type(1)
-
-      else:
-        s.count = s.count
+        s.count <<= s.count - Type(1)
 
   def line_trace( s ):
     return "{}".format( s.count )

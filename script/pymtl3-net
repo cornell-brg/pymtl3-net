@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
 ==========================================================================
-pyocn
+pymtl3-net
 ==========================================================================
-Frontend script for simualting, generating, and testing on-chip networks.
+Frontend script for simulating, generating, and testing on-chip networks.
 
 Author: Yanghui Ou
   Date: Sep 24, 2019
@@ -37,7 +37,7 @@ class PyOCN:
     parser = argparse.ArgumentParser(
       description = 'Frontend script for PyOCN',
       usage = '''\
-./pyocn <command> [<args>]
+./pymtl3-net <command> [<args>]
 
 Available commands are:
   help Display help message
@@ -63,7 +63,7 @@ Available commands are:
     p = argparse.ArgumentParser(
       description = 'Network simulation.',
       usage = '''\
-./pyocn sim <topology> [<flags>]'
+./pymtl3-net sim <topology> [<flags>]'
 
 Available topologies:
   ring   Ring network.
@@ -89,7 +89,7 @@ Available topologies:
     np.add_argument(       '--timeout-ncycles', type=int, default=4000, help='Number of packets for measuring.',  metavar='' )
     np.add_argument(       '--sweep',      action='store_true', help='Run in sweep mode.' )
     np.add_argument(       '--sweep-step', type=int, default=10, help='Injection rate step for sweep mode.',  metavar='' )
-    np.add_argument(       '--sweep-threash', type=float, default=100.0, help='Threashold for average latency in sweep mode.',  metavar='' )
+    np.add_argument(       '--sweep-thresh', type=float, default=100.0, help='Threshold for average latency in sweep mode.',  metavar='' )
     opts = np.parse_args( sys.argv[3:] )
 
     sim_utils.verbose = opts.verbose
@@ -115,7 +115,7 @@ Available topologies:
     p = argparse.ArgumentParser(
       description = 'Verilog generation.',
       usage = '''\
-./pyocn gen <topology> [<flags>]'
+./pymtl3-net gen <topology> [<flags>]'
 
 Available topologies:
   ring   Ring network.
@@ -143,7 +143,7 @@ Available topologies:
     p = argparse.ArgumentParser(
       description = 'Smoke test generated network.',
       usage = '''\
-./pyocn test <topology> [<flags>]'
+./pymtl3-net test <topology> [<flags>]'
 
 Available topologies:
   ring   Ring network.

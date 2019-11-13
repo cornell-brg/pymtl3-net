@@ -45,9 +45,9 @@ class TestHarness( Component ):
     s.sinks = [ TestNetSinkRTL( PktType, sink_msgs[i], match_func=match_func )
                 for i in range( 5 ) ]
 
-    s.src_adapters  = [ RecvRTL2CreditSendRTL( PktType, nvcs=2 )
+    s.src_adapters  = [ RecvRTL2CreditSendRTL( PktType, vc=2 )
                         for _ in range( 5 ) ]
-    s.sink_adapters = [ CreditRecvRTL2SendRTL( PktType, nvcs=2 )
+    s.sink_adapters = [ CreditRecvRTL2SendRTL( PktType, vc=2 )
                         for _ in range( 5 ) ]
 
     # Connections
@@ -93,7 +93,7 @@ def mk_srcsink_pkts( pos_x, pos_y, ncols, nrows, lst ):
 
 class TorusRouterRTL_Tests( object ):
 
-  def run_sim( s, th, max_cycles=100 ):
+  def run_sim( s, th, max_cycles=1000 ):
     # Create a simulator
     th.apply( DynamicSim )
     th.sim_reset()
@@ -118,7 +118,7 @@ class TorusRouterRTL_Tests( object ):
     ncols = 4
     nrows = 4
 
-    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+    Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
 
     src_pkts, sink_pkts = mk_srcsink_pkts( pos_x, pos_y, ncols, nrows,[
       #   src_x  y  dst_x  y  opq  vc  payload
@@ -143,7 +143,7 @@ class TorusRouterRTL_Tests( object ):
     ncols = 5
     nrows = 5
 
-    Pkt = mk_mesh_pkt( ncols, nrows, nvcs=2 )
+    Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
 
     src_pkts, sink_pkts = mk_srcsink_pkts( pos_x, pos_y, ncols, nrows,[
       #   src_x  y  dst_x  y  opq  vc  payload

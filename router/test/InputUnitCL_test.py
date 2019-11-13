@@ -59,7 +59,7 @@ class InputUnitCL_Tests( object ):
     cls.TestHarness = TestHarness
     cls.qtypes      = [ NormalQueueCL, BypassQueueCL, PipeQueueCL ]
 
-  def run_sim( s, th, max_cycles=100 ):
+  def run_sim( s, th, max_cycles=1000 ):
 
     # Create a simulator
     th.apply( DynamicSim )
@@ -99,5 +99,5 @@ class InputUnitCL_Tests( object ):
       th.set_param( "top.sink.construct", initial_delay=sink_init )
       th.set_param( "top.dut.construct", QueueType = qtype )
       th.set_param( "top.dut.queue.construct", num_entries=qsize )
-      s.run_sim( th, max_cycles=200 )
+      s.run_sim( th, max_cycles=5000 )
     actual_test()

@@ -15,24 +15,20 @@ class DORXMeshRouteUnitRTL( Component ):
 
   def construct( s, PacketType, PositionType, num_outports ):
 
-    # Constants
-
-    s.num_outports = num_outports
-
     # Interface
 
     s.get  = GetIfcRTL( PacketType )
-    s.give  = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
-    s.pos   = InPort( PositionType )
+    s.give = [ GiveIfcRTL(PacketType) for _ in range (num_outports) ]
+    s.pos  = InPort( PositionType )
 
     # Componets
 
-    s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
-    s.give_ens = Wire( mk_bits( s.num_outports ) )
+    s.out_dir  = Wire( mk_bits( clog2(num_outports) ) )
+    s.give_ens = Wire( mk_bits( num_outports ) )
 
     # Connections
 
-    for i in range( s.num_outports ):
+    for i in range( num_outports ):
       s.get.msg     //= s.give[i].msg
       s.give_ens[i] //= s.give[i].en
 
@@ -41,7 +37,7 @@ class DORXMeshRouteUnitRTL( Component ):
     def up_ru_routing():
 
       s.out_dir = Bits3(0)
-      for i in range( s.num_outports ):
+      for i in range( num_outports ):
         s.give[i].rdy = Bits1(0)
 
       if s.get.rdy:
@@ -63,5 +59,5 @@ class DORXMeshRouteUnitRTL( Component ):
 
   # Line trace
   def line_trace( s ):
-    out_str = "|".join([ str(s.give[i]) for i in range( s.num_outports ) ])
+    out_str = "|".join([ str(x) for x in s.give ])
     return f"{s.get}({s.out_dir}){out_str}"

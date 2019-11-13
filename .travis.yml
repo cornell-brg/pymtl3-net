@@ -33,11 +33,7 @@ install:
  - verilator --version
 
  # Install PyMTL3
- - pip install pymtl3
-
- # Install Python requirements
- - pip install --upgrade pip setuptools twine
- - pip install --requirement requirements.txt
+ - pip install --requirement requirements.txt --constraint constraints.txt
  - pip list
 
 #------------------------------------------------------------------------
@@ -55,11 +51,8 @@ script:
  # - python --version | grep "Python 3" && futurize --write --stage2 ./pymtl3 &> /dev/null || true
  - mkdir -p build
  - cd build
- - py.test --cov-report xml --cov=pymtl3 ../ $CONFIG
+ - py.test ../ $CONFIG
 
 #-------------------------------------------------------------------------
 # after success
 #-------------------------------------------------------------------------
-
-after_success:
-  - codecov

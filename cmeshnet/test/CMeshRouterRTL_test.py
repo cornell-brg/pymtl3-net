@@ -11,7 +11,7 @@ from pymtl3                         import *
 from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
 from ocn_pclib.test.net_sinks       import TestNetSinkRTL
 from ocn_pclib.ifcs.positions       import *
-from ocn_pclib.ifcs.packets         import * 
+from ocn_pclib.ifcs.packets         import *
 from pymtl3.stdlib.test             import TestVectorSimulator
 from cmeshnet.CMeshRouterRTL        import CMeshRouterRTL
 from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
@@ -22,19 +22,19 @@ from test_helpers                   import dor_routing
 # Test Vector
 #-------------------------------------------------------------------------
 
-def run_vector_test( model, PacketType, test_vectors, 
-                     mesh_wid=4, mesh_ht=4, pos_x=1, pos_y=1 ):
- 
+def run_vector_test( model, PacketType, test_vectors,
+                     ncols=4, nrows=4, pos_x=1, pos_y=1 ):
+
   def tv_in( model, test_vector ):
 
-    MeshPos    = mk_mesh_pos( mesh_wid, mesh_ht )
+    MeshPos    = mk_mesh_pos( ncols, nrows )
     model.pos  = MeshPos( pos_x, pos_y )
 
     for i in range( model.num_outports ):
       if model.recv[i].rdy and test_vector[3][i]:
-        pkt = PacketType( 0, 0, test_vector[0][i]%4, test_vector[0][i]//4, 
+        pkt = PacketType( 0, 0, test_vector[0][i]%4, test_vector[0][i]//4,
                       test_vector[1], 1, test_vector[2][i] )
-  
+
         model.recv[i].msg = pkt
         model.recv[i].en = 1
       elif model.recv[i].rdy == 0:
@@ -49,17 +49,17 @@ def run_vector_test( model, PacketType, test_vectors,
       if model.send[i].en == 1:
         pkt = model.send[i].msg
         assert pkt.payload == test_vector[4][i]
-  
+
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
 
 def test_vector_router4x4():
 
-  mesh_wid = mesh_ht = 4
+  ncols = nrows = 4
   inports = outports = 8
   pos_x    = 1
   pos_y    = 1
-  
+
   xx = 'x'
   inputs_buffer= [
 #     [dst]   term     payload          recv_rdy               send_msg
@@ -68,12 +68,12 @@ def test_vector_router4x4():
   [[4,4,7,8,5],2,[31,32,33,34,35],[0,0,0,0,1,0,0,0],[24,xx,21,23,xx,25,xx,xx]],
   ]
 
-  MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-  PacketType = mk_cmesh_pkt( mesh_wid, mesh_ht, inports, outports )
+  MeshPos = mk_mesh_pos( ncols, nrows )
+  PacketType = mk_cmesh_pkt( ncols, nrows, inports, outports )
   model = CMeshRouterRTL( PacketType, MeshPos, inports, outports )
   model.set_param("top.output_units*.construct", QueueType=None )
 
-  run_vector_test( model, PacketType, inputs_buffer, mesh_wid, mesh_ht, 
+  run_vector_test( model, PacketType, inputs_buffer, ncols, nrows,
                    pos_x, pos_y )
 
 #-------------------------------------------------------------------------
@@ -82,18 +82,18 @@ def test_vector_router4x4():
 
 class TestHarness( Component ):
 
-  def construct( s, MsgType, mesh_wid, mesh_ht, src_msgs, sink_msgs, 
+  def construct( s, MsgType, ncols, nrows, src_msgs, sink_msgs,
                  src_initial, src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
-    s.dut = CMeshRouterRTL( MsgType, MeshPos, 8, 8, 
+    MeshPos = mk_mesh_pos( ncols, nrows )
+    s.dut = CMeshRouterRTL( MsgType, MeshPos, 8, 8,
                             RouteUnitType = DORYCMeshRouteUnitRTL )
     match_func = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL ( MsgType, src_msgs[i], src_initial, src_interval )
               for i in range ( 8 ) ]
-    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial, 
+    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial,
               sink_interval, match_func=match_func ) for i in range ( 8 ) ]
 
     # Connections
@@ -124,7 +124,7 @@ class TestHarness( Component ):
 # run_rtl_sim
 #-------------------------------------------------------------------------
 
-def run_sim( test_harness, max_cycles=100 ):
+def run_sim( test_harness, max_cycles=1000 ):
 
   # Create a simulator
 
@@ -162,9 +162,9 @@ result_msgs = [[],[],[],[],[],[],[],[]]
 
 def test_normal_simple():
 
-  mesh_wid = mesh_ht = 4
+  ncols = nrows = 4
   inports = outports = 5
-  PacketType = mk_cmesh_pkt( mesh_wid, mesh_ht, 8, 8 )
+  PacketType = mk_cmesh_pkt( ncols, nrows, 8, 8 )
   src_packets = [[],[],[],[],[],[],[],[]]
   for item in test_msgs:
     for i in range( len( item ) ):
@@ -176,7 +176,7 @@ def test_normal_simple():
       else:
         result_msgs[dir_out].append( pkt )
 
-  th = TestHarness( PacketType, mesh_wid, mesh_ht, 
+  th = TestHarness( PacketType, ncols, nrows,
                     src_packets, result_msgs, 0, 0, 0, 0 )
 
   run_sim( th )

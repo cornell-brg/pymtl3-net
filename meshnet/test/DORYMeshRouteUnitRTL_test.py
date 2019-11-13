@@ -25,10 +25,10 @@ class TestHarness( Component ):
                  src_interval, sink_initial, sink_interval,
                  arrival_time=None ):
 
-    mesh_wid = 4
-    mesh_ht  = 4
+    ncols = 4
+    nrows = 4
 
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    MeshPos = mk_mesh_pos( ncols, nrows )
     s.dut = DORYMeshRouteUnitRTL( MsgType, MeshPos )
     s.dut.pos = MeshPos( 1, 1 )
 
@@ -71,7 +71,7 @@ class TestHarness( Component ):
 # run_sim
 #-------------------------------------------------------------------------
 
-def run_sim( test_harness, max_cycles=100 ):
+def run_sim( test_harness, max_cycles=1000 ):
 
   # Create a simulator
 

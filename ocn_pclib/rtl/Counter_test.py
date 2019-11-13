@@ -11,8 +11,8 @@ Author : Yanghui Ou
 from pymtl3 import *
 from .Counter import Counter
 
-def test_simple():
-  print
+def _test_simple():
+  print()
   dut = Counter( Bits4, reset_value=9 )
   dut.apply( SimpleSim )
   dut.incr = b1(0)
@@ -49,7 +49,7 @@ def test_simple():
   print( dut.line_trace() )
   assert dut.count == b4(9)
 
-def test_load():
+def _test_load():
   print
   dut = Counter( Bits4, reset_value=9 )
   dut.apply( SimpleSim )

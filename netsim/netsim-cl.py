@@ -69,7 +69,6 @@ from collections             import deque
 from random                  import seed, randint
 
 sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
-os.system(sim_dir)
 while sim_dir:
   if os.path.exists( sim_dir + os.path.sep + ".pymtl-python-path" ):
     sys.path.insert(0,sim_dir)
@@ -77,7 +76,6 @@ while sim_dir:
     # sys.path.insert(0,sim_dir + "/../pymtl3/")
     break
   sim_dir = os.path.dirname(sim_dir)
-  os.system(sim_dir)
 
 from pymtl3                   import *
 
@@ -257,7 +255,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
   if opts.topology == "Ring":
     NetModel = topology_dict[ "Ring" ]
     RingPos = mk_ring_pos( opts.routers )
-    PacketType = mk_ring_pkt_timestamp( opts.routers, nvcs = 2,
+    PacketType = mk_ring_pkt_timestamp( opts.routers, vc = 2,
             max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, RingPos, opts.routers, 0 )
     model.set_param( "top.routers*.route_units*.construct", num_routers=opts.routers)
@@ -276,7 +274,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     net_width = opts.routers/opts.rows
     net_height = opts.rows
     MeshPos = mk_mesh_pos( net_width, net_height )
-    PacketType = mk_mesh_pkt_timestamp( net_width, net_height, nvcs = 2,
+    PacketType = mk_mesh_pkt_timestamp( net_width, net_height, vc = 2,
             max_time = NUM_SAMPLE_CYCLES )
     model = NetModel( PacketType, MeshPos, net_width, net_height, 0 )
 

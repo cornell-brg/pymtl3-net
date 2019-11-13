@@ -28,9 +28,6 @@ class ValRdy2EnRdy( RTLComponent ):
     @s.update
     def comb_logic1():
       s.out.en  = s.out.rdy and s.in_.val
-
-    @s.update
-    def comb_logic2():
       s.out.msg = s.in_.msg
 
   def line_trace( s ):
@@ -55,9 +52,6 @@ class EnRdy2ValRdy( RTLComponent ):
     @s.update
     def comb_logic1():
       s.out.val = s.in_.en
-
-    @s.update
-    def comb_logic2():
       s.out.msg = s.in_.msg
 
   def line_trace( s ):

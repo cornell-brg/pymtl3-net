@@ -24,10 +24,10 @@ from torusnet.RouteUnitDorFL        import RouteUnitDorFL
 
 class TestHarness( Component ):
 
-  def construct( s, PktType, src_msgs, sink_msgs, mesh_wid=2, mesh_ht=2, pos_x=0, pos_y=0 ):
+  def construct( s, PktType, src_msgs, sink_msgs, ncols=2, nrows=2, pos_x=0, pos_y=0 ):
 
     outports = 5
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    MeshPos = mk_mesh_pos( ncols, nrows )
 
     match_func = lambda a, b : a.src_x == b.src_x and a.src_y == b.src_y and \
                                a.dst_y == b.dst_y and a.payload == b.payload
@@ -35,7 +35,7 @@ class TestHarness( Component ):
 
     s.src   = TestSrcRTL( PktType, src_msgs )
     s.src_q = BypassQueueRTL( PktType, num_entries=1 )
-    s.dut   = DORYTorusRouteUnitRTL( PktType, MeshPos, ncols=mesh_wid, nrows=mesh_ht )
+    s.dut   = DORYTorusRouteUnitRTL( PktType, MeshPos, ncols=ncols, nrows=nrows )
     s.sinks = [ TestNetSinkRTL( PktType, sink_msgs[i], match_func=match_func )
                 for i in range ( outports ) ]
 
@@ -90,7 +90,7 @@ class RouteUnitDorRTL_Tests( object ):
   def setup_method( cls ):
     pass
 
-  def run_sim( s, th, max_cycles=100 ):
+  def run_sim( s, th, max_cycles=1000 ):
     # Create a simulator
     th.apply( DynamicSim )
     th.sim_reset()
@@ -113,10 +113,10 @@ class RouteUnitDorRTL_Tests( object ):
   )
   def test_simple_4x4( s, pos_x, pos_y ):
 
-    mesh_wid = 4
-    mesh_ht  = 4
+    ncols = 4
+    nrows  = 4
 
-    Pkt = mk_mesh_pkt( mesh_wid, mesh_ht, nvcs=2 )
+    Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
 
     src_pkts = [
       #   src_x  y  dst_x  y  opq  vc  payload
@@ -125,6 +125,6 @@ class RouteUnitDorRTL_Tests( object ):
       Pkt(    0, 0,     1, 0,   0,  0, 0xdeadface ),
       Pkt(    0, 0,     3, 3,   0,  0, 0xdeadface ),
     ]
-    dst_pkts = mk_dst_pkts( pos_x, pos_y, mesh_wid, mesh_ht, src_pkts )
-    th = TestHarness( Pkt, src_pkts, dst_pkts, mesh_wid, mesh_ht, pos_x, pos_y )
+    dst_pkts = mk_dst_pkts( pos_x, pos_y, ncols, nrows, src_pkts )
+    th = TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
     s.run_sim( th )

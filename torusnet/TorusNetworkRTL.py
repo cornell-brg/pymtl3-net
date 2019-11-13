@@ -15,53 +15,48 @@ from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRT
 
 class TorusNetworkRTL( Component ):
 
-  def construct( s,
-    PacketType,
-    PositionType,
-    mesh_wid=4,
-    mesh_ht=4,
-    chl_lat=0,
-    nvcs=2,
-    credit_line=2,
-  ):
+  def construct( s, PacketType, PositionType,
+                 ncols=4, nrows=4, chl_lat=0, vc=2, credit_line=2 ):
 
     # Constants
 
-    s.mesh_wid      = mesh_wid
-    s.mesh_ht       = mesh_ht
-    s.num_routers   = mesh_wid * mesh_ht
-    num_channels    = mesh_ht * mesh_wid * 4
+    s.ncols = ncols
+    s.nrows = nrows
+    s.num_routers   = ncols * nrows
+    num_channels    = nrows * ncols * 4
     s.num_terminals = s.num_routers
-    XType           = mk_bits( clog2(mesh_wid) )
-    YType           = mk_bits( clog2(mesh_ht ) )
+    XType           = mk_bits( clog2(ncols) )
+    YType           = mk_bits( clog2(nrows ) )
 
     # Interface
 
-    s.recv       = [ RecvIfcRTL(PacketType) for _ in range(s.num_terminals)]
-    s.send       = [ SendIfcRTL(PacketType) for _ in range(s.num_terminals)]
+    s.recv = [ RecvIfcRTL(PacketType) for _ in range(s.num_terminals)]
+    s.send = [ SendIfcRTL(PacketType) for _ in range(s.num_terminals)]
 
     # Components
 
-    s.routers    = [ TorusRouterRTL( PacketType, PositionType, ncols=mesh_wid, nrows=mesh_ht, nvcs=nvcs, credit_line=credit_line )
+    s.routers = [ TorusRouterRTL( PacketType, PositionType,
+                                  ncols=ncols, nrows=nrows,
+                                  vc=vc, credit_line=credit_line )
                      for i in range( s.num_routers ) ]
 
-    s.recv_adapters = [ RecvRTL2CreditSendRTL( PacketType, nvcs=nvcs,
+    s.recv_adapters = [ RecvRTL2CreditSendRTL( PacketType, vc=vc,
         credit_line=credit_line ) for _ in range( s.num_routers ) ]
-    s.send_adapters = [ CreditRecvRTL2SendRTL( PacketType, nvcs=nvcs,
+    s.send_adapters = [ CreditRecvRTL2SendRTL( PacketType, vc=vc,
         credit_line=credit_line ) for _ in range( s.num_routers ) ]
 
     # Connect s.routers together in Torus
 
     chl_id  = 0
     for i in range (s.num_routers):
-      s_idx = (i-mesh_ht+s.num_routers) % s.num_routers
+      s_idx = (i-nrows+s.num_routers) % s.num_routers
       s.routers[i].send[SOUTH] //= s.routers[s_idx].recv[NORTH]
       s.routers[i].send[NORTH] //=\
-        s.routers[(i+mesh_wid+s.num_routers)%s.num_routers].recv[SOUTH]
+        s.routers[(i+ncols+s.num_routers)%s.num_routers].recv[SOUTH]
       s.routers[i].send[WEST]  //=\
-        s.routers[i-(i%mesh_wid-(i-1)%mesh_wid)].recv[EAST]
+        s.routers[i-(i%ncols-(i-1)%ncols)].recv[EAST]
       s.routers[i].send[EAST]  //=\
-        s.routers[i+(i+1)%mesh_wid-i%mesh_wid].recv[WEST]
+        s.routers[i+(i+1)%ncols-i%ncols].recv[WEST]
 
       # Connect the self port (with Network Interface)
       s.recv[i]               //= s.recv_adapters[i].recv
@@ -72,12 +67,12 @@ class TorusNetworkRTL( Component ):
 
 #    @s.update
 #    def up_pos():
-    for y in range( mesh_ht ):
-      for x in range( mesh_wid ):
-#          idx = y * mesh_wid + x
+    for y in range( nrows ):
+      for x in range( ncols ):
+#          idx = y * ncols + x
 #          s.routers[idx].pos = PositionType( x, y )
-        s.routers[y*mesh_wid+x].pos.pos_x //= XType(x)
-        s.routers[y*mesh_wid+x].pos.pos_y //= YType(y)
+        s.routers[y*ncols+x].pos.pos_x //= XType(x)
+        s.routers[y*ncols+x].pos.pos_y //= YType(y)
 
   def line_trace( s ):
       send_lst = []
@@ -99,9 +94,9 @@ class TorusNetworkRTL( Component ):
     BOUNDARY = 10
 
     for i, r in enumerate( s.routers ):
-      r.dim.x = BOUNDARY + i % s.mesh_wid * ( r.dim.w + s.channels[0].dim.w )
-      r.dim.y = BOUNDARY + i / s.mesh_wid * ( r.dim.h + s.channels[0].dim.w )
+      r.dim.x = BOUNDARY + i % s.ncols * ( r.dim.w + s.channels[0].dim.w )
+      r.dim.y = BOUNDARY + i / s.ncols * ( r.dim.h + s.channels[0].dim.w )
 
-    s.dim.w = 2 * BOUNDARY + s.mesh_wid * ( r.dim.w + s.channels[0].dim.w )
-    s.dim.h = 2 * BOUNDARY + s.mesh_ht  * ( r.dim.h + s.channels[0].dim.w )
+    s.dim.w = 2 * BOUNDARY + s.ncols * ( r.dim.w + s.channels[0].dim.w )
+    s.dim.h = 2 * BOUNDARY + s.nrows  * ( r.dim.h + s.channels[0].dim.w )
 

@@ -23,16 +23,16 @@ from router.InputUnitCL           import InputUnitCL
 
 class TestHarness( Component ):
 
-  def construct( s, PktType, mesh_wid, mesh_ht,
+  def construct( s, PktType, ncols, nrows,
                  src_msgs, sink_msgs,
                  src_initial, src_interval,
                  sink_initial, sink_interval ):
 
-    s.nrouters = mesh_wid * mesh_ht
+    s.nrouters = ncols * nrows
 
-    MeshPos = mk_mesh_pos( mesh_wid, mesh_ht )
+    MeshPos = mk_mesh_pos( ncols, nrows )
     match_func = lambda a, b : a==b
-    s.dut = MeshNetworkCL( PktType, MeshPos, mesh_wid, mesh_ht, 0 )
+    s.dut = MeshNetworkCL( PktType, MeshPos, ncols, nrows, 0 )
 
     s.srcs  = [ TestSrcCL( PktType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range( s.nrouters ) ]
@@ -62,7 +62,7 @@ class TestHarness( Component ):
 # run_rtl_sim
 #-------------------------------------------------------------------------
 
-def run_sim( test_harness, max_cycles=100 ):
+def run_sim( test_harness, max_cycles=1000 ):
 
   # Create a simulator
   test_harness.elaborate()
@@ -92,16 +92,18 @@ def run_sim( test_harness, max_cycles=100 ):
 # Helper functions
 #-------------------------------------------------------------------------
 
-def mk_src_sink_msgs( pkts, mesh_wid, mesh_ht ):
-  nrouters = mesh_wid * mesh_ht
+def mk_src_sink_msgs( PktType, msgs, ncols, nrows ):
+  nrouters = ncols * nrows
   src_msgs  = [ [] for _ in range( nrouters ) ]
   sink_msgs = [ [] for _ in range( nrouters ) ]
 
-  for pkt in pkts:
-    src_id  = pkt.src_y * mesh_wid + pkt.src_x
-    sink_id = pkt.dst_y * mesh_wid + pkt.dst_x
-    src_msgs [ src_id ].append( pkt )
-    sink_msgs[ sink_id ].append( pkt )
+  for msg in msgs:
+    src_x, src_y, dst_x, dst_y, opq, payload = msg
+    src_id  = src_y * ncols + src_x
+    sink_id = dst_y * ncols + dst_x
+
+    src_msgs [ src_id ] .append( PktType(*msg) )
+    sink_msgs[ sink_id ].append( PktType(*msg) )
 
   return src_msgs, sink_msgs
 
@@ -116,43 +118,41 @@ def mk_pkt_list( PktType, lst ):
 # Test cases
 #-------------------------------------------------------------------------
 
-def simple_msg( PktType, mesh_wid=2, mesh_ht=2 ):
-  return mk_pkt_list( PktType, [
-  #   src_x src_y dst_x dst_y opq   payload
-    ( 0,    0,    0,    1,    0x00, 0x0010  ),
-    ( 1,    0,    1,    1,    0x01, 0x0020  ),
-  ])
+simple_2x2 = [
+#   src_x src_y dst_x dst_y opq   payload
+  ( 0,    0,    0,    1,    0x00, 0x0010  ),
+  ( 1,    0,    1,    1,    0x01, 0x0020  ),
+]
 
-def simple_4x4( PktType, mesh_wid=2, mesh_ht=2 ):
-  return mk_pkt_list( PktType, [
-  #   src_x src_y dst_x dst_y opq   payload
-    ( 0,    0,    0,    1,    0x00, 0x0010  ),
-    ( 1,    0,    1,    1,    0x01, 0x0020  ),
-    ( 3,    2,    1,    1,    0x02, 0x0020  ),
-    ( 1,    0,    1,    1,    0x03, 0x0020  ),
-    ( 1,    3,    2,    1,    0x04, 0x0020  ),
-    ( 3,    3,    1,    0,    0x05, 0x0020  ),
-  ])
+simple_4x4 = [
+#   src_x src_y dst_x dst_y opq   payload
+  ( 0,    0,    0,    1,    0x00, 0x0010  ),
+  ( 1,    0,    1,    1,    0x01, 0x0020  ),
+  ( 3,    2,    1,    1,    0x02, 0x0020  ),
+  ( 1,    0,    1,    1,    0x03, 0x0020  ),
+  ( 1,    3,    2,    1,    0x04, 0x0020  ),
+  ( 3,    3,    1,    0,    0x05, 0x0020  ),
+]
 
-def simple_8x8( PktType, mesh_wid=2, mesh_ht=2 ):
-  return mk_pkt_list( PktType, [
-  #   src_x src_y dst_x dst_y opq   payload
-    ( 0,    0,    0,    1,    0x00, 0x0010  ),
-    ( 1,    0,    1,    1,    0x01, 0x0020  ),
-    ( 3,    2,    1,    1,    0x02, 0x0020  ),
-    ( 1,    0,    1,    1,    0x03, 0x0020  ),
-    ( 1,    3,    2,    1,    0x04, 0x0020  ),
-    ( 3,    5,    1,    0,    0x05, 0x0020  ),
-  ])
+simple_8x8 = [
+#   src_x src_y dst_x dst_y opq   payload
+  ( 0,    0,    0,    1,    0x00, 0x0010  ),
+  ( 1,    0,    1,    1,    0x01, 0x0020  ),
+  ( 3,    2,    1,    1,    0x02, 0x0020  ),
+  ( 1,    0,    1,    1,    0x03, 0x0020  ),
+  ( 1,    3,    2,    1,    0x04, 0x0020  ),
+  ( 3,    5,    1,    0,    0x05, 0x0020  ),
+]
+
 #-------------------------------------------------------------------------
 # test case table
 #-------------------------------------------------------------------------
 
 test_case_table = mk_test_case_table([
-  (            "msg_func    wid  ht  src_init src_intv sink_init sink_intv"),
-  ["simle2x2", simple_msg, 2,   2,  0,       0,       0,        0         ],
-  ["simle4x4", simple_4x4, 4,   4,  0,       0,       0,        0         ],
-  ["simle8x8", simple_8x8, 8,   8,  0,       0,       0,        0         ],
+  (            "msg_list    wid  ht  src_init src_intv sink_init sink_intv"),
+  ["simple2x2", simple_2x2, 2,   2,  0,       0,       0,        0         ],
+  ["simple4x4", simple_4x4, 4,   4,  0,       0,       0,        0         ],
+  ["simple8x8", simple_8x8, 8,   8,  0,       0,       0,        0         ],
 ])
 
 #-------------------------------------------------------------------------
@@ -161,13 +161,11 @@ test_case_table = mk_test_case_table([
 
 @pytest.mark.parametrize( **test_case_table )
 def test_mesh_simple( test_params ):
-  PktType = mk_mesh_pkt(
-    mesh_wid=test_params.wid,
-    mesh_ht =test_params.ht,
-    nvcs=1,
-  )
-  pkt_list = test_params.msg_func( PktType, test_params.wid, test_params.ht )
-  src_msgs, sink_msgs = mk_src_sink_msgs( pkt_list, test_params.wid, test_params.ht )
+  PktType = mk_mesh_pkt( ncols=test_params.wid,
+                         nrows=test_params.ht, vc=1 )
+
+  src_msgs, sink_msgs = mk_src_sink_msgs( PktType, test_params.msg_list,
+                                          test_params.wid, test_params.ht )
   th = TestHarness(
     PktType,
     test_params.wid,

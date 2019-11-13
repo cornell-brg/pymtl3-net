@@ -25,7 +25,7 @@ class RingRouterRTL( Router ):
     RouteUnitType=RingRouteUnitRTL,
     SwitchUnitType=SwitchUnitRTL,
     OutputUnitType=OutputUnitCreditRTL,
-    nvcs=2,
+    vc=2,
     credit_line=2,
   ):
 
@@ -33,18 +33,18 @@ class RingRouterRTL( Router ):
 
     s.num_inports  = 3
     s.num_outports = 3
-    s.nvcs = nvcs
-    s.num_route_units = s.num_inports * s.nvcs
+    s.vc = vc
+    s.num_route_units = s.num_inports * s.vc
 
     # Interface
 
     s.pos  = InPort( PositionType )
-    s.recv = [ CreditRecvIfcRTL( PacketType, s.nvcs ) for _ in range( s.num_inports  ) ]
-    s.send = [ CreditSendIfcRTL( PacketType, s.nvcs ) for _ in range( s.num_outports ) ]
+    s.recv = [ CreditRecvIfcRTL( PacketType, s.vc ) for _ in range( s.num_inports  ) ]
+    s.send = [ CreditSendIfcRTL( PacketType, s.vc ) for _ in range( s.num_outports ) ]
 
     # Components
 
-    s.input_units  = [ InputUnitType( PacketType, nvcs=nvcs, credit_line=credit_line )
+    s.input_units  = [ InputUnitType( PacketType, vc=vc, credit_line=credit_line )
                        for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PacketType, PositionType, num_routers )
@@ -60,8 +60,8 @@ class RingRouterRTL( Router ):
 
     for i in range( s.num_inports ):
       s.recv[i] //= s.input_units[i].recv
-      for j in range( s.nvcs ):
-        ru_idx = i * s.nvcs + j
+      for j in range( s.vc ):
+        ru_idx = i * s.vc + j
         s.input_units[i].give[j] //= s.route_units[ru_idx].get
         s.pos                    //= s.route_units[ru_idx].pos
 

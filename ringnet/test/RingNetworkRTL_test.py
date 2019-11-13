@@ -77,7 +77,7 @@ class RingNetwork_Tests( object ):
   def setup_class( cls ):
     cls.DutType = RingNetworkRTL
 
-  def run_sim( s, th, max_cycles=20 ):
+  def run_sim( s, th, max_cycles=1000 ):
     th.elaborate()
     th.apply( SimulationPass )
     th.sim_reset()

@@ -58,7 +58,7 @@ setup(
   license='BSD',
 
   # Pip will block installation on unsupported versions of Python
-  python_requires=">=3.6",
+  python_requires=">=3.7",
 
   # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
   classifiers=[
