@@ -17,7 +17,7 @@ PyOCN supports OCN characterization by providing scripts (https://github.com/cor
 Demo
 --------------------------------------------------------
 
-We have a demo at repl.it (https://repl.it/@ChengTan/pymtl3-net-demo), which shows the key features of PyOCN.
+We have a demo at repl.it (https://repl.it/@ChengTan/pyocn-demo), which shows the key features of PyOCN.
 
 
 Related publications
