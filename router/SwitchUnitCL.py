@@ -41,7 +41,8 @@ class SwitchUnitCL( Component ):
   def give( s ):
     for i in s.priority:
       if s.get[i].rdy():
-        s.priority.append( s.priority.pop(i) )
+        s.priority.remove( i )
+        s.priority.append( i )
         return s.get[i]()
 
   # CL line trace
