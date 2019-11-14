@@ -132,22 +132,3 @@ When you're done testing/developing, you can deactivate the virtualenv::
 ```
  % deactivate
 ```
-
-Quickview
---------------------------------------------------------
-
-### OCN generator hierarchy:
-<img src="docs/code_hierarchy.png" width="400">
-
-### Test with a set of simple tests:
-![test table](docs/test.png)
-
-### OCN generator design flow:
-<img src="docs/design_flow.png" width="500">
-
-### Generic network architecture:
-<img src="docs/noc_structure.png" width="400">
-
-### OCN generic router architecture:
-<img src="docs/router_structure.png" width="400">
-
