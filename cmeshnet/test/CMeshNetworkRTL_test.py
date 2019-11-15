@@ -7,6 +7,10 @@ Test for CMeshNetworkRTL
 Author : Cheng Tan, Yanghui Ou
   Date : April 16, 2019
 """
+
+import itertools
+import pytest
+import random
 import tempfile
 from pymtl3                         import *
 from meshnet.MeshNetworkRTL         import MeshNetworkRTL
@@ -178,5 +182,53 @@ def test_srcsink_mesh2x2():
   sink_packets = [ [], [], [], [], [], [], [], [pkt] ]
 
   th = TestHarness( PacketType, 2, 2, src_packets, sink_packets, 0, 0, 0, 0 )
+
+  run_sim( th )
+
+#-------------------------------------------------------------------------
+# Test cases random simple
+#-------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+  "ncols, nrows, nports",
+  list(itertools.product(
+    # list(range(2, 8)),
+    # list(range(2, 8)),
+    # list(range(4, 10, 2)),
+    [2, 4],
+    [2, 4],
+    [6],
+  ))
+)
+def test_srcsink_random_simple( ncols, nrows, nports ):
+  n_pkts = 3
+  inports = outports = nports
+  node_per_cnode = nports - 4
+  opaque_nbits = 1
+  vc = 1
+  payload_nbits = 32
+
+  PacketType = mk_cmesh_pkt(  ncols, nrows, inports, outports,
+                              opaque_nbits, vc, payload_nbits )
+
+  # src_x y, dst_x y, dst_ter, opq, payload
+  pkts = [PacketType(random.randint(0, ncols-1), \
+                     random.randint(0, nrows-1), \
+                     random.randint(0, ncols-1), \
+                     random.randint(0, nrows-1), \
+                     random.randint(0, node_per_cnode-1),  \
+                     random.randint(0, 2**opaque_nbits-1), \
+                     random.randint(0, 2**32-1)) for _ in range(n_pkts)]
+  src_packets  = [[] for _ in range(ncols * nrows * node_per_cnode)]
+  sink_packets = [[] for _ in range(ncols * nrows * node_per_cnode)]
+
+  for pkt in pkts:
+    # Assuming always using the first node in a concentrated node
+    src_idx  = (int(pkt.src_y) * ncols + int(pkt.src_x)) * node_per_cnode
+    sink_idx = (int(pkt.dst_y) * ncols + int(pkt.dst_x)) * node_per_cnode + int(pkt.dst_ter)
+    src_packets[src_idx].append(pkt)
+    sink_packets[sink_idx].append(pkt)
+
+  th = TestHarness( PacketType, ncols, nrows, src_packets, sink_packets, 0, 0, 0, 0 )
 
   run_sim( th )

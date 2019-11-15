@@ -6,6 +6,9 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : April 8, 2019
 
+import itertools
+import pytest
+import random
 from pymtl3                        import *
 from pymtl3.stdlib.rtl.queues      import NormalQueueRTL
 from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
@@ -258,6 +261,47 @@ def test_srcsink_4ary_2fly():
                     [],[],[],[] ]
   k_ary = 4
   n_fly = 2
+  for (vec_src, vec_dst, payload) in test_msgs:
+    PacketType  = mk_bfly_pkt( k_ary, n_fly )
+    bf_dst = set_dst( k_ary, n_fly, vec_dst)
+    pkt = PacketType( vec_src, bf_dst, 0, payload)
+    src_packets [vec_src].append( pkt )
+    sink_packets[vec_dst].append( pkt )
+
+  th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets,
+                    0, 0, 0, 0 )
+
+  th.set_param( "top.dut.routers*.route_units*.construct", n_fly=n_fly )
+  th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
+  th.set_param( "top.dut.line_trace",  )
+
+  run_sim( th )
+  th.dut.elaborate_physical()
+
+#-------------------------------------------------------------------------
+# Test cases random simple
+#-------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+  "k_ary, n_fly",
+  list(itertools.product(
+    # list(range(2, 5)),
+    # list(range(2, 5)),
+    [2, 4],
+    [2, 4],
+  ))
+)
+def test_srcsink_random_simple( k_ary, n_fly ):
+  m = k_ary ** n_fly
+  n_pkts = 10
+  src_packets  = [[] for _ in range(m)]
+  sink_packets = [[] for _ in range(m)]
+
+  # src, dst, payload
+  test_msgs = [(random.randint(0, m-1), \
+                random.randint(0, m-1), \
+                random.randint(0, 2**32-1)) for _ in range(n_pkts)]
+
   for (vec_src, vec_dst, payload) in test_msgs:
     PacketType  = mk_bfly_pkt( k_ary, n_fly )
     bf_dst = set_dst( k_ary, n_fly, vec_dst)

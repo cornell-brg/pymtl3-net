@@ -7,6 +7,9 @@
 #   Date : July 1, 2019
 
 import hypothesis
+import itertools
+import pytest
+import random
 from hypothesis                   import strategies as st
 from pymtl3                       import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
@@ -144,6 +147,27 @@ class TorusNetwork_Tests( object ):
       Pkt(     1, 0,     0, 4,  0,  0, 0xfaceb00c ),
       #Pkt(     1, 1,     1, 0,  0,  0, 0xdeadface ),
     ])
+    dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
+    th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
+    s.run_sim( th )
+
+  @pytest.mark.parametrize(
+    "ncols,nrows",
+    list(itertools.product(
+      list(range(2, 9)),
+      list(range(2, 9)),
+    ))
+  )
+  def test_random_simple( s, ncols, nrows ):
+    n_pkts = 10
+    Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
+
+    # src_x y, dst_x y, opq, vc, payload
+    pkts = [Pkt(random.randint(0, ncols-1), \
+                random.randint(0, nrows-1), \
+                0, 0, random.randint(0, 2**32-1)) for _ in range(n_pkts)]
+
+    src_pkts = mk_src_pkts( ncols, nrows, pkts )
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
     s.run_sim( th )

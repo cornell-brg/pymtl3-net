@@ -7,6 +7,10 @@ Test for NetworkRTL
 Author : Yanghui Ou, Cheng Tan
   Date : Mar 20, 2019
 """
+
+import itertools
+import pytest
+import random
 from pymtl3                           import *
 from pymtl3.stdlib.rtl.queues         import NormalQueueRTL
 from pymtl3.stdlib.test.test_srcs     import TestSrcRTL
@@ -138,4 +142,39 @@ def test_srcsink_mesh4x4():
     print("sink", i, [str(y) for y in x] )
   th = TestHarness( PacketType, ncols, nrows, src_packets, sink_packets,
                     0, 0, 0, 0, arrival_pipes )
+  run_sim( th )
+
+#-------------------------------------------------------------------------
+# Test cases random simple
+#-------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+  "ncols, nrows",
+  list(itertools.product(
+    list(range(3, 8)),
+    list(range(3, 8)),
+  ))
+)
+def test_srcsink_random_simple( ncols, nrows ):
+  n_pkts = ncols * nrows
+
+  # src, dst, payload
+  test_msgs = [(random.randint(0, ncols*nrows-1), \
+                random.randint(0, ncols*nrows-1), \
+                random.randint(0, 2**32-1)) for _ in range(n_pkts)]
+  src_packets  = [[] for _ in range(ncols * nrows)]
+  sink_packets = [[] for _ in range(ncols * nrows)]
+
+  PacketType = mk_mesh_pkt( ncols, nrows )
+  for (src, dst, payload) in test_msgs:
+    pkt = PacketType( src%ncols, src//ncols, dst%ncols, dst//ncols, 1, payload )
+    src_packets [src].append( pkt )
+    sink_packets[dst].append( pkt )
+
+  for i,x in enumerate(src_packets):
+    print("src", i, [str(y) for y in x] )
+  for i,x in enumerate(sink_packets):
+    print("sink", i, [str(y) for y in x] )
+  th = TestHarness( PacketType, ncols, nrows, src_packets, sink_packets,
+                    0, 0, 0, 0, None )
   run_sim( th )

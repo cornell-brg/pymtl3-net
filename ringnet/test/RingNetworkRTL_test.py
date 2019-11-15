@@ -7,6 +7,10 @@ Test for RingNetworkRTL
 Author : Yanghui Ou, Cheng Tan
   Date : June 28, 2019
 """
+
+import itertools
+import pytest
+import random
 from pymtl3                       import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from ocn_pclib.test.net_sinks     import TestNetSinkRTL
@@ -129,6 +133,28 @@ class RingNetwork_Tests( object ):
       Pkt( 2,   1,  2,  0, 0xbaadface ),
       Pkt( 3,   2,  0,  0, 0xfaceb00c ),
     ])
+    dst_pkts = ringnet_fl( src_pkts )
+    th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
+    s.run_sim( th )
+
+  @pytest.mark.parametrize(
+    "nterminals, max_opq",
+    list(itertools.product(
+      list(range(3, 8)),
+      list(range(3, 6)),
+    ))
+  )
+  def test_random_simple( s, nterminals, max_opq ):
+    n_pkts = 10
+    Pkt = mk_ring_pkt( nterminals )
+
+    # src, dst, opq, vc, payload
+    pkts = [Pkt(random.randint(0, nterminals-1), \
+                random.randint(0, nterminals-1), \
+                random.randint(0, max_opq),      \
+                0, random.randint(0, 2**32-1)) for _ in range(n_pkts)]
+
+    src_pkts = mk_src_pkts( nterminals, pkts )
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
     s.run_sim( th )
