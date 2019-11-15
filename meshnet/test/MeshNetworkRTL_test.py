@@ -149,19 +149,19 @@ def test_srcsink_mesh4x4():
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize(
-  "ncols, nrows",
+  "ncols, nrows, npkts",
   list(itertools.product(
     list(range(3, 8)),
     list(range(3, 8)),
+    [10, 50],
   ))
 )
-def test_srcsink_random_simple( ncols, nrows ):
-  n_pkts = ncols * nrows
+def test_srcsink_random_simple( ncols, nrows, npkts ):
 
   # src, dst, payload
   test_msgs = [(random.randint(0, ncols*nrows-1), \
                 random.randint(0, ncols*nrows-1), \
-                random.randint(0, 2**32-1)) for _ in range(n_pkts)]
+                random.randint(0, 2**32-1)) for _ in range(npkts)]
   src_packets  = [[] for _ in range(ncols * nrows)]
   sink_packets = [[] for _ in range(ncols * nrows)]
 

@@ -283,24 +283,24 @@ def test_srcsink_4ary_2fly():
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize(
-  "k_ary, n_fly",
+  "k_ary, n_fly, npkts",
   list(itertools.product(
     # list(range(2, 5)),
     # list(range(2, 5)),
     [2, 4],
     [2, 4],
+    [10, 50],
   ))
 )
-def test_srcsink_random_simple( k_ary, n_fly ):
+def test_srcsink_random_simple( k_ary, n_fly, npkts ):
   m = k_ary ** n_fly
-  n_pkts = 10
   src_packets  = [[] for _ in range(m)]
   sink_packets = [[] for _ in range(m)]
 
   # src, dst, payload
   test_msgs = [(random.randint(0, m-1), \
                 random.randint(0, m-1), \
-                random.randint(0, 2**32-1)) for _ in range(n_pkts)]
+                random.randint(0, 2**32-1)) for _ in range(npkts)]
 
   for (vec_src, vec_dst, payload) in test_msgs:
     PacketType  = mk_bfly_pkt( k_ary, n_fly )

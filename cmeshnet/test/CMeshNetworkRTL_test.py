@@ -190,18 +190,18 @@ def test_srcsink_mesh2x2():
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize(
-  "ncols, nrows, nports",
+  "ncols, nrows, nports, npkts",
   list(itertools.product(
     # list(range(2, 8)),
     # list(range(2, 8)),
     # list(range(4, 10, 2)),
     [2, 4],
     [2, 4],
-    [6],
+    [6],       # I couldn't figure out how to test nports != 6...
+    [10, 50],
   ))
 )
-def test_srcsink_random_simple( ncols, nrows, nports ):
-  n_pkts = 3
+def test_srcsink_random_simple( ncols, nrows, nports, npkts ):
   inports = outports = nports
   node_per_cnode = nports - 4
   opaque_nbits = 1
@@ -218,7 +218,7 @@ def test_srcsink_random_simple( ncols, nrows, nports ):
                      random.randint(0, nrows-1), \
                      random.randint(0, node_per_cnode-1),  \
                      random.randint(0, 2**opaque_nbits-1), \
-                     random.randint(0, 2**32-1)) for _ in range(n_pkts)]
+                     random.randint(0, 2**32-1)) for _ in range(npkts)]
   src_packets  = [[] for _ in range(ncols * nrows * node_per_cnode)]
   sink_packets = [[] for _ in range(ncols * nrows * node_per_cnode)]
 

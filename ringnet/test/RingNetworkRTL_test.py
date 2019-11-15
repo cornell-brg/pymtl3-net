@@ -138,21 +138,21 @@ class RingNetwork_Tests( object ):
     s.run_sim( th )
 
   @pytest.mark.parametrize(
-    "nterminals, max_opq",
+    "nterminals, max_opq, npkts",
     list(itertools.product(
       list(range(3, 8)),
       list(range(3, 6)),
+      [10, 50],
     ))
   )
-  def test_random_simple( s, nterminals, max_opq ):
-    n_pkts = 10
+  def test_random_simple( s, nterminals, max_opq, npkts ):
     Pkt = mk_ring_pkt( nterminals )
 
     # src, dst, opq, vc, payload
     pkts = [Pkt(random.randint(0, nterminals-1), \
                 random.randint(0, nterminals-1), \
                 random.randint(0, max_opq),      \
-                0, random.randint(0, 2**32-1)) for _ in range(n_pkts)]
+                0, random.randint(0, 2**32-1)) for _ in range(npkts)]
 
     src_pkts = mk_src_pkts( nterminals, pkts )
     dst_pkts = ringnet_fl( src_pkts )

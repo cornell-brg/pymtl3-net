@@ -152,20 +152,20 @@ class TorusNetwork_Tests( object ):
     s.run_sim( th )
 
   @pytest.mark.parametrize(
-    "ncols,nrows",
+    "ncols, nrows, npkts",
     list(itertools.product(
-      list(range(2, 9)),
-      list(range(2, 9)),
+      list(range(2, 5)),
+      list(range(2, 5)),
+      [10, 50],
     ))
   )
-  def test_random_simple( s, ncols, nrows ):
-    n_pkts = 10
+  def test_random_simple( s, ncols, nrows, npkts ):
     Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
 
     # src_x y, dst_x y, opq, vc, payload
     pkts = [Pkt(random.randint(0, ncols-1), \
                 random.randint(0, nrows-1), \
-                0, 0, random.randint(0, 2**32-1)) for _ in range(n_pkts)]
+                0, 0, random.randint(0, 2**32-1)) for _ in range(npkts)]
 
     src_pkts = mk_src_pkts( ncols, nrows, pkts )
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
