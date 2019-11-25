@@ -75,7 +75,7 @@ class RingRouteUnitRTL( Component ):
         if dist_type(s.pos) == s.last_idx and s.out_dir == dir_type(RIGHT):
           s.give_msg_wire.vc_id = b1(1)
         elif s.pos == id_type(0) and s.out_dir == dir_type(LEFT):
-          s.give_msg_wire.vc_id = b1(1)
+          s.give_msg_wire.vc_id = b1(0)
 
         s.give[ s.out_dir ].rdy = b1(1)
         s.give[ s.out_dir ].msg = s.give_msg_wire
