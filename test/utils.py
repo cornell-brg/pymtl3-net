@@ -13,6 +13,7 @@ import os
 import math
 import subprocess
 import random
+from collections import deque
 from dataclasses import dataclass
 #from numpy.fft import fft
 
@@ -80,15 +81,22 @@ class TestReport:
 # objects
 
 #def do_test( Type, N, x, trace=False ):
-def do_test():
-  MsgType = Pkt = mk_ring_pkt( 4 )
-  RingPos = mk_ring_pos( 4 )
-  dut = RingNetworkRTL( MsgType, RingPos, 4, 0)
+def do_test( num_nodes, trace_size ):
+  PktType = Pkt = mk_ring_pkt( num_nodes )
+  RingPos = mk_ring_pos( num_nodes )
+  dut = RingNetworkRTL( PktType, RingPos, num_nodes, 0)
 
-  pkt = MsgType( 0, 2, 0, 0, 0 )
-  src_queue = []
-  dst_queue = []
-  src_queue.append( pkt )
+  src_queue = [ deque() for x in range( num_nodes ) ]
+  dst_queue = [ deque() for x in range( num_nodes ) ]
+
+  for _ in range( trace_size ):
+    src = random.randint( 0, num_nodes - 1 )
+    dst = random.randint( 0, num_nodes - 1 )
+    data = random.randint( 0, 65535 )
+    pkt = PktType( src, dst, 0, 0, data )
+    print( "see src: ", src )
+    src_queue[src].append( pkt )
+    dst_queue[dst].append( pkt )
 
   try:
     dut.elaborate()
@@ -101,26 +109,39 @@ def do_test():
   dut.apply( SimulationPass )
   dut.sim_reset()
 
-  for i in range( 4 ):
+  for i in range( num_nodes ):
     dut.send[i].rdy = 1
 
   dut.tick()
 
-  if len( src_queue ) > 0:
-    if dut.recv[0].rdy:
-      dut.recv[0].msg = src_queue[0]
-      dut.recv[0].en = 1
-      print( "enabled~!" )
-    else:
-      dut.recv[0].en = 0
-  else:
-    model.recv[i].en = 0
+  while 1:
+    for i in range( num_nodes ):
+      if len( src_queue[i] ) > 0:
+        if dut.recv[i].rdy:
+          dut.recv[i].msg = src_queue[i].popleft()
+          print( "cheng: enabled msg ", dut.recv[i].msg )
+          dut.recv[i].en = 1
+        else:
+          dut.recv[i].en = 0
+      else:
+        dut.recv[i].en = 0
+  
+    for i in range( num_nodes ):
+      if dut.send[i].en == 1:
+        msg = dut.send[i].msg
+        print( "I got it....", msg )
+        for pkt in dst_queue[i]:
+          if pkt.payload == msg.payload:
+            dst_queue[i].remove( pkt )
+            break
 
-  while len( dst_queue ) < 1:
-    if dut.send[2].en == 1:
-      print( "I got it...." )
-      msg = dut.send[2].msg
-      dst_queue.append( msg )
+    stop_flag = True
+    for i in range( num_nodes ):
+      if len( dst_queue[i] ) > 0:
+        stop_flag = False
+
+    if stop_flag:
+      break
 
     dut.tick()
 
@@ -170,7 +191,7 @@ def run_random_test( opts ):
 #    complex_t  = mk_complex_fixed( nbits, frac_nbits )
     min_value  = opts.min_value
     max_value  = opts.max_value
-    do_test()
+    do_test( 4, 10 )
 #    x = rand_sequence( complex_t, N, min_value, max_value )
 #
 #    if opts.verbose:
