@@ -90,10 +90,8 @@ Available methods are:
     if rpt.failed:
       print( f' - bug found with {rpt.num_test_cases} test cases' )
       print( f' - failing test case:' )
-      print( f'     + N          = {rpt.N}'          )
-      print( f'     + frac_nbits = {rpt.frac_nbits}' )
-      print( f'     + int_nbits  = {rpt.int_nbits}'  )
-      print( f'     + x          = {rpt.seq}' )
+      print( f'     + nrouters   = {rpt.nrouters}'          )
+      print( f'     + ntrans     = {rpt.ntrans}' )
 
     else:
       print( f' - {rpt.num_test_cases} test cases passed.' )
@@ -125,10 +123,8 @@ Available methods are:
     if rpt.failed:
       print( f' - bug found with {rpt.num_test_cases} test cases' )
       print( f' - failing test case:' )
-      print( f'     + N          = {rpt.N}'          )
-      print( f'     + frac_nbits = {rpt.frac_nbits}' )
-      print( f'     + int_nbits  = {rpt.int_nbits}'  )
-      print( f'     + x          = {rpt.seq}' )
+      print( f'     + nrouters   = {rpt.nrouters}'          )
+      print( f'     + ntrans     = {rpt.ntrans}' )
 
     else:
       print( f' - {rpt.num_test_cases} test cases passed.' )
@@ -159,10 +155,8 @@ Available methods are:
     if rpt.failed:
       print( f' - bug found with {rpt.num_test_cases} test cases' )
       print( f' - failing test case:' )
-      print( f'     + N          = {rpt.N}'          )
-      print( f'     + frac_nbits = {rpt.frac_nbits}' )
-      print( f'     + int_nbits  = {rpt.int_nbits}'  )
-      print( f'     + x          = {rpt.seq}' )
+      print( f'     + nrouters   = {rpt.nrouters}'          )
+      print( f'     + ntrans     = {rpt.ntrans}' )
 
     else:
       print( f' - {rpt.num_test_cases} test cases passed.' )

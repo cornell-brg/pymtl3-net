@@ -15,18 +15,21 @@ import subprocess
 import random
 from collections import deque
 from dataclasses import dataclass
-#from numpy.fft import fft
+from pymtl3      import *
 
 # Hacky way to add the project root directory to path
 sys.path.insert( 0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 
-from pymtl3 import *
-from ringnet.RingNetworkRTL   import RingNetworkRTL
-from ocn_pclib.ifcs.packets   import mk_ring_pkt
-from ocn_pclib.ifcs.positions import mk_ring_pos
-#from fft_gen.utils import *
-#from fft_gen.FFTUnit import FFTUnit
-#from datatypes.complex_fixed import mk_complex_fixed
+import hypothesis
+import hypothesis.strategies as st
+
+from ringnet.RingNetworkRTL       import RingNetworkRTL
+from ringnet.RingNetworkFL        import ringnet_fl
+from ocn_pclib.ifcs.packets       import mk_ring_pkt
+from ocn_pclib.ifcs.positions     import mk_ring_pos
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from ocn_pclib.test.net_sinks     import TestNetSinkRTL
+
 
 #-------------------------------------------------------------------------
 # TestFailed
@@ -62,112 +65,119 @@ def run_cmd( cmd ):
 class TestReport:
   num_test_cases : int  = None
   error_msg      : str  = None
-  seq            : list = None
-  N              : int  = None
-  frac_nbits     : int  = None
-  int_nbits      : int  = None
+  ntrans         : int  = None
+  nrouters       : int  = None
   failed         : bool = True
 
-  def avg_magnitude( self ):
-    acc = 0.0
-    for c in self.seq:
-      acc += math.sqrt( c.real ** 2 + c.imag ** 2 )
-    return acc / len( self.seq )
+#  def avg_magnitude( self ):
+#    acc = 0.0
+#    for c in self.seq:
+#      acc += math.sqrt( c.real ** 2 + c.imag ** 2 )
+#    return acc / len( self.seq )
+
+#-------------------------------------------------------------------------
+# TestHarness()
+#-------------------------------------------------------------------------
+# Test harness for ring topology
+
+class TestHarness( Component ):
+
+  def construct( s, MsgType, nrouters, src_msgs, sink_msgs ):
+
+    s.nrouters = nrouters
+    RingPos = mk_ring_pos( nrouters )
+
+    match_func = lambda a, b : (a.payload == b.payload and
+                 a.src == b.src and a.dst == b.dst)
+
+    s.srcs  = [ TestSrcRTL( MsgType, src_msgs[i] )
+              for i in range( nrouters ) ]
+
+    s.dut   = RingNetworkRTL( MsgType, RingPos, nrouters, 0)
+
+    s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i],
+              match_func = match_func )
+              for i in range( nrouters ) ]
+
+    # Connections
+    for i in range ( s.dut.num_routers ):
+
+      s.srcs[i].send //= s.dut.recv[i]
+      s.dut.send[i]  //= s.sinks[i].recv
+
+  def done( s ):
+
+    srcs_done = True
+    sinks_done = True
+
+    for i in range( s.nrouters ):
+      srcs_done = srcs_done and s.srcs[i].done()
+      sinks_done = sinks_done and s.sinks[i].done()
+
+    return srcs_done and sinks_done
+
+  def line_trace( s ):
+
+    return s.dut.line_trace()
+
+#-------------------------------------------------------------------------
+# mk_src_pkts
+#-------------------------------------------------------------------------
+
+def mk_src_pkts( nrouters, lst ):
+  src_pkts = [ [] for _ in range( nrouters ) ]
+  src = 0
+  for pkt in lst:
+    src = pkt.src
+    src_pkts[ src ].append( pkt )
+
+  return src_pkts
 
 #-------------------------------------------------------------------------
 # do_test
 #-------------------------------------------------------------------------
-# x needs to be a list of complex numbers rather than complex fixed
-# objects
 
-#def do_test( Type, N, x, trace=False ):
-def do_test( num_nodes, trace_size ):
-  PktType = Pkt = mk_ring_pkt( num_nodes )
-  RingPos = mk_ring_pos( num_nodes )
-  dut = RingNetworkRTL( PktType, RingPos, num_nodes, 0)
+def do_test( nrouters, trace_size, trace=False ):
 
-  src_queue = [ deque() for x in range( num_nodes ) ]
-  dst_queue = [ deque() for x in range( num_nodes ) ]
+  global failed
+
+  PktType = Pkt = mk_ring_pkt( nrouters )
+  src_pkts = [ [] for _ in range( nrouters ) ]
 
   for _ in range( trace_size ):
-    src = random.randint( 0, num_nodes - 1 )
-    dst = random.randint( 0, num_nodes - 1 )
+    src = random.randint( 0, nrouters - 1 )
+    dst = random.randint( 0, nrouters - 1 )
     data = random.randint( 0, 65535 )
     pkt = PktType( src, dst, 0, 0, data )
-    print( "see src: ", src )
-    src_queue[src].append( pkt )
-    dst_queue[dst].append( pkt )
+    src_pkts[ src ].append( pkt )
 
-  try:
-    dut.elaborate()
+  dst_pkts = ringnet_fl( src_pkts )
+  dut = TestHarness( PktType, nrouters, src_pkts, dst_pkts )
 
-  except:
-    if trace:
-      print( ' - elaboration failed! skipping test!' )
-    return
+  dut.elaborate()
 
   dut.apply( SimulationPass )
   dut.sim_reset()
 
-  for i in range( num_nodes ):
-    dut.send[i].rdy = 1
+  # Run simulation
+  max_cycles = trace_size + 2 * nrouters
+  ncycles = 0
 
-  dut.tick()
+  if trace:
+    print()
+    print( "{:3}:{}".format( ncycles, dut.line_trace() ))
 
-  while 1:
-    for i in range( num_nodes ):
-      if len( src_queue[i] ) > 0:
-        if dut.recv[i].rdy:
-          dut.recv[i].msg = src_queue[i].popleft()
-          print( "cheng: enabled msg ", dut.recv[i].msg )
-          dut.recv[i].en = 1
-        else:
-          dut.recv[i].en = 0
-      else:
-        dut.recv[i].en = 0
-  
-    for i in range( num_nodes ):
-      if dut.send[i].en == 1:
-        msg = dut.send[i].msg
-        print( "I got it....", msg )
-        for pkt in dst_queue[i]:
-          if pkt.payload == msg.payload:
-            dst_queue[i].remove( pkt )
-            break
-
-    stop_flag = True
-    for i in range( num_nodes ):
-      if len( dst_queue[i] ) > 0:
-        stop_flag = False
-
-    if stop_flag:
-      break
-
+  while not dut.done() and ncycles < max_cycles:
     dut.tick()
+    ncycles += 1
+    if trace:
+      print( "{:3}:{}".format( ncycles, dut.line_trace() ))
 
-  print( "cheng: can exit..." )
-  exit()
-
-#  dut_in = mk_fft_in( Type, x )
-#  set_fft_in( dut, dut_in )
-#  dut.tick()
-#
-#  if trace:
-#    print( dut.line_trace() )
-#
-#  res = get_fft_out( dut )
-#
-#  ref = fft( x )
-#
-#  for a, b in zip( res, ref ):
-#    if not almost_equal( a, b ):
-#      err_msg = f'''\
-# - Test failed!
-# - x   = {x}
-# - ref = {ref}
-# - {a} != {b}
-#'''
-#      raise TestFailed( err_msg )
+  # Check timeout
+  if ncycles >= max_cycles:
+    print( "cheng... failed in time checking..." )
+    failed = True
+    raise TestFailed( f'Failed with {trace_size} transactions' )
 
 #-------------------------------------------------------------------------
 # run_random_test
@@ -175,235 +185,145 @@ def do_test( num_nodes, trace_size ):
 
 def run_random_test( opts ):
 
-  min_frac_nbits = opts.min_frac_nbits
-  max_frac_nbits = opts.max_frac_nbits
-  min_int_nbits  = opts.min_int_nbits
-  max_int_nbits  = opts.max_int_nbits
-  min_exp        = clog2( opts.min_N )
-  max_exp        = clog2( opts.max_N )
-
   for i in range( opts.max_examples ):
 
-    frac_nbits = random.randint( min_frac_nbits, max_frac_nbits )
-    int_nbits  = random.randint( min_int_nbits,  max_int_nbits  )
-    nbits      = int_nbits + frac_nbits
-    N          = 2 ** random.randint( min_exp, max_exp )
-#    complex_t  = mk_complex_fixed( nbits, frac_nbits )
-    min_value  = opts.min_value
-    max_value  = opts.max_value
-    do_test( 4, 10 )
-#    x = rand_sequence( complex_t, N, min_value, max_value )
-#
-#    if opts.verbose:
-#      print()
-#      print( '-'*74 )
-#      print( f' test case #{i+1}' )
-#      print( '-'*74 )
-#      print( f' - frac_nbits = {frac_nbits}' )
-#      print( f' - int_nbits  = {int_nbits}' )
-#      print( f' - N          = {N}' )
-#      print( f' - x          = {x}' )
-#
-#    try:
-#      do_test( complex_t, N, x, opts.trace )
-#
-#    except TestFailed as e:
-#
-#      rpt = TestReport(
-#        num_test_cases = i+1,
-#        error_msg      = f'{e}',
-#        seq            = x,
-#        N              = N,
-#        frac_nbits     = frac_nbits,
-#        int_nbits      = int_nbits,
-#      )
-#
-#      if opts.verbose:
-#        print( f'{e}' )
-#
-#      return rpt
-#
-#  return TestReport( num_test_cases = opts.max_examples, failed = False )
-#
-##-------------------------------------------------------------------------
-## run_iter_test
-##-------------------------------------------------------------------------
-#
-#def run_iter_test( opts ):
-#
-#  min_frac_nbits = opts.min_frac_nbits
-#  max_frac_nbits = opts.max_frac_nbits
-#  min_int_nbits  = opts.min_int_nbits
-#  max_int_nbits  = opts.max_int_nbits
-#  min_exp        = clog2( opts.min_N )
-#  max_exp        = clog2( opts.max_N )
-#  tests_per_step = opts.tests_per_step
-#
-#  test_idx = 1
-#
-#  for exp in range( min_exp, max_exp ):
-#    for frac_nbits in range( min_frac_nbits, max_frac_nbits ):
-#      for int_nbits in range( min_int_nbits, max_int_nbits ):
-#        for _ in range( tests_per_step ):
-#
-#          nbits     = int_nbits + frac_nbits
-#          N         = 2 ** exp
-#          complex_t = mk_complex_fixed( nbits, frac_nbits )
-#          min_value = opts.min_value
-#          max_value = opts.max_value
-#
-#          x = rand_sequence( complex_t, N, min_value, max_value )
-#
-#          if opts.verbose:
-#            print()
-#            print( '-'*74 )
-#            print( f' test case #{test_idx}' )
-#            print( '-'*74 )
-#            print( f' - frac_nbits = {frac_nbits}' )
-#            print( f' - int_nbits  = {int_nbits}' )
-#            print( f' - N          = {N}' )
-#            print( f' - x          = {x}' )
-#
-#          try:
-#            do_test( complex_t, N, x, opts.trace )
-#            test_idx += 1
-#
-#          except TestFailed as e:
-#
-#            rpt = TestReport(
-#              num_test_cases = test_idx,
-#              error_msg      = f'{e}',
-#              seq            = x,
-#              N              = N,
-#              frac_nbits     = frac_nbits,
-#              int_nbits      = int_nbits,
-#            )
-#
-#            if opts.verbose:
-#              print( f'{e}' )
-#
-#            return rpt
-#
-#  return TestReport( num_test_cases = test_idx, failed = False )
-#
-##-------------------------------------------------------------------------
-## global variable for hypothesis
-##-------------------------------------------------------------------------
-## Hacky
-#
-#test_idx = 1
-#failed   = False
-#rpt      = TestReport()
-#
-##-------------------------------------------------------------------------
-## run_hypothesis_test
-##-------------------------------------------------------------------------
-#
-#def run_hypothesis_test( opts ):
-#
-#  min_frac_nbits = opts.min_frac_nbits
-#  max_frac_nbits = opts.max_frac_nbits
-#  min_int_nbits  = opts.min_int_nbits
-#  max_int_nbits  = opts.max_int_nbits
-#  min_exp        = clog2( opts.min_N )
-#  max_exp        = clog2( opts.max_N )
-#
-#  def _do_test( Type, N, x, trace=False, verbose=False ):
-#    global failed
-#
-#    dut = FFTUnit( N, Type )
-#    dut.elaborate()
-#    dut.apply( SimulationPass )
-#    dut.sim_reset()
-#
-#    dut_in = mk_fft_in( Type, x )
-#    set_fft_in( dut, dut_in )
-#    dut.tick()
-#
-#    if trace:
-#      print( dut.line_trace() )
-#
-#    res = get_fft_out( dut )
-#
-#    ref = fft( x )
-#
-#    for a, b in zip( res, ref ):
-#      if not almost_equal( a, b ):
-#        err_msg = f'''\
-#   - Test failed!
-#   - x   = {x}
-#   - ref = {ref}
-#   - {a} != {b}
-#'''
-#        failed = True
-#
-#        if verbose:
-#          print( 'Failed!' )
-#          print( err_msg )
-#
-#        raise TestFailed( err_msg )
-#
-#  # Generate a hypothesis test
-#
-#  @hypothesis.settings( deadline = None, max_examples = opts.max_examples )
-#  @hypothesis.given(
-#    exp        = st.integers( min_exp, max_exp ),
-#    frac_nbits = st.integers( min_frac_nbits, max_frac_nbits ),
-#    int_nbits  = st.integers( min_int_nbits,  max_int_nbits  ),
-#    seq        = st.data()
-#  )
-#  def _run( exp, frac_nbits, int_nbits, seq ):
-#    global test_idx
-#    global failed
-#    global rpt
-#
-#    nbits      = frac_nbits + int_nbits
-#    N          = 2 ** exp
-#    complex_t  = mk_complex_fixed( nbits, frac_nbits )
-#    min_value  = opts.min_value
-#    max_value  = opts.max_value
-#
+    nrouters = random.randint( 2, 16 )
+    ntrans   = random.randint( 1, 100 )
+
+    if opts.verbose:
+      print()
+      print( '-'*74 )
+      print( f' test case #{i+1}' )
+      print( '-'*74 )
+      print( f' - nrouters    = {nrouters}' )
+      print( f' - ntrans      = {ntrans}' )
+
+    try:
+      do_test( nrouters, ntrans, opts.trace )
+
+    except TestFailed as e:
+
+      rpt = TestReport(
+        num_test_cases = i+1,
+        error_msg      = f'{e}',
+        ntrans         = ntrans,
+        nrouters       = nrouters,
+      )
+
+      if opts.verbose:
+        print( f'{e}' )
+
+      return rpt
+
+  return TestReport( num_test_cases = opts.max_examples, failed = False )
+
+#-------------------------------------------------------------------------
+# run_iter_test
+#-------------------------------------------------------------------------
+
+def run_iter_test( opts ):
+
+  tests_per_step = opts.tests_per_step
+
+  test_idx = 1
+
+  for nrouters in range( 8, 64, 8 ):
+
+    for ntrans in range( tests_per_step, 10 * tests_per_step, tests_per_step ):
+
+       if opts.verbose:
+         print()
+         print( '-'*74 )
+         print( f' test case #{test_idx}' )
+         print( '-'*74 )
+         print( f' - nrouters   = {nrouters}' )
+         print( f' - ntrans     = {ntrans}' )
+
+       try:
+         do_test( nrouters, ntrans, opts.trace )
+         test_idx += 1
+
+       except TestFailed as e:
+
+         rpt = TestReport(
+           num_test_cases = test_idx,
+           error_msg      = f'{e}',
+           ntrans         = ntrans,
+           nrouters       = nrouters,
+         )
+
+         if opts.verbose:
+           print( f'{e}' )
+
+         return rpt
+
+  return TestReport( num_test_cases = test_idx, failed = False )
+
+#-------------------------------------------------------------------------
+# global variable for hypothesis
+#-------------------------------------------------------------------------
+# Hacky
+
+test_idx = 1
+failed   = False
+rpt      = TestReport()
+
+#-------------------------------------------------------------------------
+# run_hypothesis_test
+#-------------------------------------------------------------------------
+
+def run_hypothesis_test( opts ):
+  # Generate a hypothesis test
+
+  @hypothesis.settings( deadline = None, max_examples = opts.max_examples )
+  @hypothesis.given(
+#    nrouters   = st.integers( 2, 64  ),
+    hypothesis_nrouters   = st.data(),
+    ntrans                = st.integers( 1, 100 )
+  )
+  def _run( hypothesis_nrouters, ntrans ):
+    global test_idx
+    global failed
+    global rpt
+
 #    x = seq.draw( sequence_strat( complex_t, N, min_value, max_value ) )
 #    x = [ c.to_complex() for c in x ]
-#
-#    if opts.verbose:
-#      print()
-#      print( '-'*74 )
-#
-#      if not failed:
-#        print( f' test case #{test_idx}' )
-#      else:
-#        print( ' shrinking...' )
-#
-#      print( '-'*74 )
-#      print( f' - frac_nbits = {frac_nbits}' )
-#      print( f' - int_nbits  = {int_nbits}' )
-#      print( f' - N          = {N}' )
-#      print( f' - x          = {x}' )
-#
-#    _do_test( complex_t, N, x, opts.trace )
-#
-#    # Exploring phase
-#
-#    if not failed:
-#      test_idx += 1
-#
-#    # Shrinking phase - record data
-#
-#    else:
-#      rpt = TestReport(
-#        num_test_cases = test_idx,
-#        error_msg      = f'hypothesis error',
-#        seq            = x,
-#        N              = N,
-#        frac_nbits     = frac_nbits,
-#        int_nbits      = int_nbits,
-#      )
-#
-#  try:
-#    _run()
-#    return TestReport( num_test_cases = test_idx, failed = False )
-#
-#  except TestFailed as e:
-#    rpt.error_msg = f'{e}'
-#    return rpt
+    nrouters = hypothesis_nrouters.draw(st.integers(min_value=2, max_value=64))
+
+    if opts.verbose:
+      print()
+      print( '-'*74 )
+
+      if not failed:
+        print( f' test case #{test_idx}' )
+      else:
+        print( ' shrinking...' )
+
+      print( '-'*74 )
+      print( f' - nrouters   = {nrouters}' )
+      print( f' - ntrans     = {ntrans}' )
+
+    # Exploring phase
+
+    if not failed:
+      test_idx += 1
+
+    # Shrinking phase - record data
+
+    else:
+      rpt = TestReport(
+        num_test_cases = test_idx,
+        error_msg      = f'hypothesis error',
+        ntrans         = ntrans,
+        nrouters       = nrouters,
+      )
+
+    do_test( nrouters, ntrans, opts.trace )
+
+  try:
+    _run()
+    return TestReport( num_test_cases = test_idx, failed = False )
+
+  except TestFailed as e:
+    rpt.error_msg = f'{e}'
+    return rpt
