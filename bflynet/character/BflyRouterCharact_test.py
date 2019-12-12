@@ -6,23 +6,24 @@
 # Author : Cheng Tan
 #   Date : June 16, 2019
 
+import random
+
 import pytest
 
-from pymtl3                         import *
-from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
-from ocn_pclib.test.net_sinks       import TestNetSinkRTL
-from ocn_pclib.ifcs.positions       import mk_bfly_pos
-from ocn_pclib.ifcs.packets         import mk_bfly_pkt
-from pymtl3.stdlib.test             import TestVectorSimulator
-from bflynet.BflyRouterRTL          import BflyRouterRTL
-from bflynet.DTRBflyRouteUnitRTL    import DTRBflyRouteUnitRTL
-from router.InputUnitRTL            import InputUnitRTL
-from router.OutputUnitRTL           import OutputUnitRTL
-from router.SwitchUnitRTL           import SwitchUnitRTL
-from pymtl3.passes                  import DynamicSim
-from pymtl3.passes.yosys            import ImportPass, TranslationPass, ImportConfigs
-
-import random
+from bflynet.BflyRouterRTL import BflyRouterRTL
+from bflynet.DTRBflyRouteUnitRTL import DTRBflyRouteUnitRTL
+from ocn_pclib.ifcs.packets import mk_bfly_pkt
+from ocn_pclib.ifcs.positions import mk_bfly_pos
+from ocn_pclib.test import run_sim
+from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from pymtl3 import *
+from pymtl3.passes.backends.yosys import (ImportConfigs, ImportPass,
+                                          TranslationPass)
+from pymtl3.stdlib.test import TestVectorSimulator
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from router.InputUnitRTL import InputUnitRTL
+from router.OutputUnitRTL import OutputUnitRTL
+from router.SwitchUnitRTL import SwitchUnitRTL
 
 random.seed( 'deadbeef' )
 
@@ -96,46 +97,6 @@ class TestHarness( Component ):
       s.dut.line_trace(),
       #'|'.join( [ s.sinks[i].line_trace() for i in range(5) ] ),
     )
-
-#-------------------------------------------------------------------------
-# run_rtl_sim
-#-------------------------------------------------------------------------
-
-def run_sim( test_harness, max_cycles=1000 ):
-
-  # Create a simulator
-  test_harness.elaborate()
-
-#  test_harness.dut.yosys_translate = True
-  # Check timeout
-#  test_harness.dut.yosys_import = ImportConfigs(
-#      vl_trace = True,
-#      vl_trace_timescale  = "1ps",
-#      vl_trace_cycle_time = 2000,
-#    )
-  # test_harness.dut.dump_vcd = True
-#  test_harness.apply( TranslationPass() )
-#  test_harness = ImportPass()( test_harness )
-  test_harness.apply( DynamicSim )
-  test_harness.sim_reset()
-
-  # Run simulation
-
-  ncycles = 0
-  print( "" )
-  print( "{}:{}".format( ncycles, test_harness.line_trace() ) )
-  while not test_harness.done() and ncycles < max_cycles:
-    test_harness.tick()
-    ncycles += 1
-    print( "{}:{}".format( ncycles, test_harness.line_trace() ) )
-
-  # Check timeout
-
-  assert ncycles < max_cycles
-
-  test_harness.tick()
-  test_harness.tick()
-  test_harness.tick()
 
 #-------------------------------------------------------------------------
 # Test cases

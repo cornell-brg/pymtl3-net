@@ -10,6 +10,7 @@
 from pymtl3 import *
 from pymtl3.stdlib.cl.queues import NormalQueueCL
 
+
 class ChannelCL( Component ):
 
   def construct( s, PacketType, QueueType = NormalQueueCL, latency = 0 ):

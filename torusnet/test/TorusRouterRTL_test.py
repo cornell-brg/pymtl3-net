@@ -7,16 +7,20 @@ Tests for TorusRouterRTL.
 Author : Yanghui Ou, Cheng Tan
   Date : June 28, 2019
 """
+from itertools import product
+
 import pytest
-from itertools                    import product
-from pymtl3                       import *
+
+from ocn_pclib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
+                                      RecvRTL2CreditSendRTL)
+from ocn_pclib.ifcs.packets import mk_mesh_pkt
+from ocn_pclib.ifcs.positions import mk_mesh_pos
+from ocn_pclib.test import run_sim
+from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from pymtl3 import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-from ocn_pclib.test.net_sinks     import TestNetSinkRTL
-from ocn_pclib.ifcs.positions     import mk_mesh_pos
-from ocn_pclib.ifcs.packets       import mk_mesh_pkt
-from ocn_pclib.ifcs.CreditIfc     import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
-from torusnet.TorusRouterFL       import TorusRouterFL
-from torusnet.TorusRouterRTL      import TorusRouterRTL
+from torusnet.TorusRouterFL import TorusRouterFL
+from torusnet.TorusRouterRTL import TorusRouterRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -91,24 +95,7 @@ def mk_srcsink_pkts( pos_x, pos_y, ncols, nrows, lst ):
 # Test cases
 #-------------------------------------------------------------------------
 
-class TorusRouterRTL_Tests( object ):
-
-  def run_sim( s, th, max_cycles=1000 ):
-    # Create a simulator
-    th.apply( DynamicSim )
-    th.sim_reset()
-
-    # Run simulation
-    ncycles = 0
-    print()
-    print( "{:3}:{}".format( ncycles, th.line_trace() ))
-    while not th.done() and ncycles < max_cycles:
-      th.tick()
-      ncycles += 1
-      print( "{:3}:{}".format( ncycles, th.line_trace() ))
-
-    # Check timeout
-    assert ncycles < max_cycles
+class TorusRouterRTL_Tests:
 
   @pytest.mark.parametrize(
     'pos_x, pos_y',
@@ -133,7 +120,7 @@ class TorusRouterRTL_Tests( object ):
       ncols=ncols, nrows=nrows,
       pos_x=pos_x, pos_y=pos_y,
     )
-    s.run_sim( th )
+    run_sim( th )
 
   @pytest.mark.parametrize(
     'pos_x, pos_y',
@@ -155,4 +142,4 @@ class TorusRouterRTL_Tests( object ):
       ncols=ncols, nrows=nrows,
       pos_x=pos_x, pos_y=pos_y,
     )
-    s.run_sim( th )
+    run_sim( th )

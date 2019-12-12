@@ -57,4 +57,3 @@ class EnRdy2ValRdy( RTLComponent ):
   def line_trace( s ):
 
     return f"{s.in_}(){s.out}"
-

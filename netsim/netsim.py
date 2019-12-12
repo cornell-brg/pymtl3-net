@@ -322,7 +322,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     model.set_param( "top.routers*.construct", k_ary=k_ary )
     model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
 
-  sim = model.apply( DynamicSim )
+  sim = model.apply( SimulationPass() )
 
   # Source Queues - Modeled as Bypass Queues
   src = [ deque() for x in range( num_nodes ) ]

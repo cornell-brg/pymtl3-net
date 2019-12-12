@@ -7,20 +7,21 @@ Test for CMeshNetworkRTL
 Author : Cheng Tan, Yanghui Ou
   Date : April 16, 2019
 """
-import tempfile
-from pymtl3                         import *
-from meshnet.MeshNetworkRTL         import MeshNetworkRTL
-from cmeshnet.CMeshNetworkRTL       import CMeshNetworkRTL
-from pymtl3.stdlib.rtl.queues       import NormalQueueRTL
-from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
-from ocn_pclib.test.net_sinks       import TestNetSinkRTL
-from pymtl3.stdlib.test             import TestVectorSimulator
-from ocn_pclib.ifcs.packets         import *
-from ocn_pclib.ifcs.positions       import *
-from meshnet.DORYMeshRouteUnitRTL   import DORYMeshRouteUnitRTL
-from meshnet.DORXMeshRouteUnitRTL   import DORXMeshRouteUnitRTL
+from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
 from cmeshnet.DORXCMeshRouteUnitRTL import DORXCMeshRouteUnitRTL
 from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
+from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from meshnet.MeshNetworkRTL import MeshNetworkRTL
+from ocn_pclib.ifcs.packets import *
+from ocn_pclib.ifcs.positions import *
+from ocn_pclib.test import run_sim
+from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from pymtl3 import *
+from pymtl3.stdlib.rtl.queues import NormalQueueRTL
+from pymtl3.stdlib.test import TestVectorSimulator
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+
 
 #-------------------------------------------------------------------------
 # Test Vector
@@ -127,35 +128,6 @@ class TestHarness( Component ):
     return srcs_done and sinks_done
   def line_trace( s ):
     return s.dut.line_trace()
-
-#-------------------------------------------------------------------------
-# run_rtl_sim
-#-------------------------------------------------------------------------
-
-def run_sim( test_harness, max_cycles=1000 ):
-
-  # Create a simulator
-
-  test_harness.apply( SimpleSim )
-  test_harness.sim_reset()
-
-  # Run simulation
-
-  ncycles = 0
-  print()
-  print( "{}:{}".format( ncycles, test_harness.line_trace() ))
-  while not test_harness.done() and ncycles < max_cycles:
-    test_harness.tick()
-    ncycles += 1
-    print( "{}:{}".format( ncycles, test_harness.line_trace() ))
-
-  # Check timeout
-
-  assert ncycles < max_cycles
-
-  test_harness.tick()
-  test_harness.tick()
-  test_harness.tick()
 
 #-------------------------------------------------------------------------
 # Test cases (specific for 2x2 cmesh)

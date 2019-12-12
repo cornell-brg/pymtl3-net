@@ -6,12 +6,13 @@
 # Author : Cheng Tan
 #   Date : May 20, 2019
 
+from DORYTorusRouteUnitCL import DORYTorusRouteUnitCL
 from pymtl3 import *
-from router.Router         import Router
-from router.InputUnitCL    import InputUnitCL
-from router.SwitchUnitCL   import SwitchUnitCL
-from router.OutputUnitCL   import OutputUnitCL
-from DORYTorusRouteUnitCL  import DORYTorusRouteUnitCL
+from router.InputUnitCL import InputUnitCL
+from router.OutputUnitCL import OutputUnitCL
+from router.Router import Router
+from router.SwitchUnitCL import SwitchUnitCL
+
 
 class TorusRouterCL( Router ):
 

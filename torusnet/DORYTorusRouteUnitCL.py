@@ -6,8 +6,9 @@
 # Author : Cheng Tan
 #   Date : May 20, 2019
 
-from pymtl3 import *
 from directions import *
+from pymtl3 import *
+
 
 class DORYTorusRouteUnitCL( Component ):
 

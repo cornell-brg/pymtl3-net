@@ -10,25 +10,24 @@ Author : Cheng Tan
 """
 import os
 import sys
-import argparse
-import re
-
-from collections import deque
-from random      import seed, randint
-
-from pymtl3                   import *
-from meshnet.MeshNetworkCL    import MeshNetworkCL
-from ringnet.RingNetworkRTL   import RingNetworkRTL
-from meshnet.MeshNetworkRTL   import MeshNetworkRTL
-from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
-from torusnet.TorusNetworkRTL import TorusNetworkRTL
-from bflynet.BflyNetworkRTL   import BflyNetworkRTL
-from ocn_pclib.ifcs.packets   import *
-from ocn_pclib.ifcs.positions import *
-from pymtl3.stdlib.test       import TestVectorSimulator
-from pymtl3.passes.yosys      import ImportPass, TranslationPass
-
 import time
+from collections import deque
+from pathlib import Path
+from random import randint, seed
+
+from ruamel.yaml import YAML
+
+from bflynet.BflyNetworkRTL import BflyNetworkRTL
+from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
+from meshnet.MeshNetworkCL import MeshNetworkCL
+from meshnet.MeshNetworkRTL import MeshNetworkRTL
+from ocn_pclib.ifcs.packets import *
+from ocn_pclib.ifcs.positions import *
+from pymtl3 import *
+from pymtl3.passes.yosys import ImportPass, TranslationPass
+from pymtl3.stdlib.test import TestVectorSimulator
+from ringnet.RingNetworkRTL import RingNetworkRTL
+from torusnet.TorusNetworkRTL import TorusNetworkRTL
 
 seed(0xdeadbeef)
 
@@ -351,8 +350,6 @@ def perform( action, model, topology, terminals, dimension,
 # Main
 #-------------------------------------------------------------------------
 
-from ruamel.yaml import YAML
-from pathlib import Path
 
 def main():
 
@@ -435,9 +432,9 @@ def main():
 
           print( "|{:<8}|{:<11}|{:<8}|{:<7}|{:<7}|{:<6}|{:<8}|{:<10}|".\
                   format(topology, pattern, max(inj, 1),
-                      "{0:.1f}".format(results[0]), results[1], results[2],
-                      "{0:.1f}".format(end_time - start_time),
-                      "{0:.1f}".format(results[2]/(end_time - start_time))) )
+                      "{:.1f}".format(results[0]), results[1], results[2],
+                      "{:.1f}".format(end_time - start_time),
+                      "{:.1f}".format(results[2]/(end_time - start_time))) )
 
           if inj == 0:
             zero_load_lat = avg_lat
@@ -458,4 +455,3 @@ def main():
       print()
 
 main()
-

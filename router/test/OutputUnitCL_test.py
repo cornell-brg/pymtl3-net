@@ -7,18 +7,18 @@ Test cases for OutputUnitCL.
 Author : Yanghui Ou
   Date : Feb 28, 2019
 """
-import pytest
 import hypothesis
+import pytest
 from hypothesis import strategies as st
 
 from pymtl3 import *
-from pymtl3.passes.PassGroups import SimpleSim
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
-from pymtl3.stdlib.test.test_sinks import TestSinkCL
-from pymtl3.stdlib.cl.queues import NormalQueueCL, BypassQueueCL, PipeQueueCL
 from pymtl3.datatypes import strategies as pst
-
+from pymtl3.stdlib.cl.queues import BypassQueueCL, NormalQueueCL, PipeQueueCL
+from pymtl3.stdlib.test.test_sinks import TestSinkCL
+from pymtl3.stdlib.test.test_srcs import TestSrcCL
 from router.OutputUnitCL import OutputUnitCL
+
+from .InputUnitCL_test import InputUnitCL_Tests as BaseTests
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -52,7 +52,6 @@ class TestHarness( Component ):
 # TestHarness
 #-------------------------------------------------------------------------
 
-from .InputUnitCL_test import InputUnitCL_Tests as BaseTests
 
 class OutputUnitCL_Tests( BaseTests ):
 

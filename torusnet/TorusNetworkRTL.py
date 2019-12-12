@@ -6,12 +6,15 @@
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
 
-from pymtl3                   import *
-from channel.ChannelRTL       import ChannelRTL
-from .directions              import *
-from pymtl3.stdlib.ifcs       import SendIfcRTL, RecvIfcRTL
-from .TorusRouterRTL          import TorusRouterRTL
-from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
+from channel.ChannelRTL import ChannelRTL
+from ocn_pclib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
+                                      RecvRTL2CreditSendRTL)
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+
+from .directions import *
+from .TorusRouterRTL import TorusRouterRTL
+
 
 class TorusNetworkRTL( Component ):
 
@@ -99,4 +102,3 @@ class TorusNetworkRTL( Component ):
 
     s.dim.w = 2 * BOUNDARY + s.ncols * ( r.dim.w + s.channels[0].dim.w )
     s.dim.h = 2 * BOUNDARY + s.nrows  * ( r.dim.h + s.channels[0].dim.w )
-

@@ -7,11 +7,14 @@ Ring network implementation.
 Author : Yanghui Ou, Cheng Tan
   Date : June 22, 2019
 """
-from pymtl3                   import *
-from pymtl3.stdlib.ifcs       import SendIfcRTL, RecvIfcRTL
-from .RingRouterRTL           import RingRouterRTL
-from .directions              import *
-from ocn_pclib.ifcs.CreditIfc import RecvRTL2CreditSendRTL, CreditRecvRTL2SendRTL
+from ocn_pclib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
+                                      RecvRTL2CreditSendRTL)
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+
+from .directions import *
+from .RingRouterRTL import RingRouterRTL
+
 
 class RingNetworkRTL( Component ):
 

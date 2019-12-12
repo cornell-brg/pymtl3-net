@@ -8,11 +8,13 @@ Author : Cheng Tan, Yanghui Ou
   Date : April 6, 2019
 """
 from pymtl3 import *
-from router.Router        import Router
-from router.InputUnitRTL  import InputUnitRTL
-from router.SwitchUnitRTL import SwitchUnitRTL
+from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
+from router.Router import Router
+from router.SwitchUnitRTL import SwitchUnitRTL
+
 from .DTRBflyRouteUnitRTL import DTRBflyRouteUnitRTL
+
 
 class BflyRouterRTL( Router ):
 
@@ -25,7 +27,7 @@ class BflyRouterRTL( Router ):
     SwitchUnitType = SwitchUnitRTL
   ):
 
-    super( BflyRouterRTL, s ).construct(
+    super().construct(
       PacketType,
       PositionType,
       k_ary,

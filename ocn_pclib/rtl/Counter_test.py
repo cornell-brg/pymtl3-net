@@ -9,12 +9,14 @@ Author : Yanghui Ou
 """
 
 from pymtl3 import *
+
 from .Counter import Counter
 
-def _test_simple():
+
+def test_simple():
   print()
   dut = Counter( Bits4, reset_value=9 )
-  dut.apply( SimpleSim )
+  dut.apply( SimulationPass() )
   dut.incr = b1(0)
   dut.decr = b1(0)
   dut.load = b1(0)
@@ -23,6 +25,7 @@ def _test_simple():
   dut.sim_reset()
   print( dut.line_trace() )
   dut.incr = b1(1)
+  dut.eval_combinational()
   dut.tick()
   print( dut.line_trace() )
   assert dut.count == b4(10)
@@ -34,11 +37,13 @@ def _test_simple():
   assert dut.count == b4(12)
 
   dut.decr = b1(1)
+  dut.eval_combinational()
   dut.tick()
   print( dut.line_trace() )
   assert dut.count == b4(12)
 
   dut.incr = b1(0)
+  dut.eval_combinational()
   dut.tick()
   print( dut.line_trace() )
   assert dut.count == b4(11)
@@ -52,7 +57,7 @@ def _test_simple():
 def _test_load():
   print
   dut = Counter( Bits4, reset_value=9 )
-  dut.apply( SimpleSim )
+  dut.apply( SimulationPass() )
   dut.incr = b1(0)
   dut.decr = b1(0)
   dut.load = b1(0)
@@ -63,10 +68,12 @@ def _test_load():
   dut.incr = b1(1)
   dut.load = b1(1)
   dut.load_value = b4(3)
+  dut.eval_combinational()
   dut.tick()
   print( dut.line_trace() )
   assert dut.count == b4(3)
   dut.load = b1(0)
+  dut.eval_combinational()
   dut.tick()
   print( dut.line_trace() )
   assert dut.count == b4(4)
@@ -75,11 +82,13 @@ def _test_load():
   assert dut.count == b4(5)
 
   dut.decr = b1(1)
+  dut.eval_combinational()
   dut.tick()
   print( dut.line_trace() )
   assert dut.count == b4(5)
 
   dut.incr = b1(0)
+  dut.eval_combinational()
   dut.tick()
   print( dut.line_trace() )
   assert dut.count == b4(4)

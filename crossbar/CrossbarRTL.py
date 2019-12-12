@@ -7,12 +7,13 @@ Crossbar implementation.
 Author : Cheng Tan
   Date : April 6, 2019
 """
-from pymtl3 import *
-from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
-from router.InputUnitRTL import InputUnitRTL
-from router.SwitchUnitRTL import SwitchUnitRTL
-from router.OutputUnitRTL import OutputUnitRTL
 from CrossbarRouteUnitRTL import CrossbarRouteUnitRTL
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+from router.InputUnitRTL import InputUnitRTL
+from router.OutputUnitRTL import OutputUnitRTL
+from router.SwitchUnitRTL import SwitchUnitRTL
+
 
 class CrossbarRTL( Component ):
   def construct( s, PacketType, num_terminals=4,

@@ -1,2 +1,2 @@
+from .MeshNetworkCL import MeshNetworkCL
 from .MeshNetworkRTL import MeshNetworkRTL
-from .MeshNetworkCL  import MeshNetworkCL

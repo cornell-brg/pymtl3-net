@@ -8,17 +8,26 @@ Author: Yanghui Ou
   Date: Sep 24, 2019
 
 """
-import sys
-import os
 import argparse
-import subprocess
+import os
+import sys
 import time
-from copy import deepcopy
 from collections import deque
+from copy import deepcopy
 from dataclasses import dataclass
-from random import seed, randint
+from random import randint, seed
+
+from bflynet import BflyNetworkRTL
+from cmeshnet import CMeshNetworkRTL
+from meshnet import MeshNetworkCL, MeshNetworkRTL
+from ocn_pclib.ifcs.packets import (mk_bfly_pkt, mk_cmesh_pkt, mk_mesh_pkt,
+                                    mk_ring_pkt)
+from ocn_pclib.ifcs.positions import mk_bfly_pos, mk_mesh_pos, mk_ring_pos
+from ocn_pclib.sim.CLNetWrapper import CLNetWrapper
 from pymtl3 import *
 from pymtl3.passes.yosys import ImportPass, TranslationPass
+from ringnet import RingNetworkRTL
+from torusnet import TorusNetworkRTL
 
 seed( 0xfaceb00c )
 
@@ -26,15 +35,7 @@ seed( 0xfaceb00c )
 # TODO: remove this line and use globally installed pymtl3-net
 sys.path.insert(0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 
-from ocn_pclib.ifcs.positions import mk_mesh_pos, mk_ring_pos, mk_bfly_pos
-from ocn_pclib.ifcs.packets import mk_mesh_pkt, mk_ring_pkt, mk_cmesh_pkt, mk_bfly_pkt
-from meshnet  import MeshNetworkRTL, MeshNetworkCL
-from ringnet  import RingNetworkRTL
-from torusnet import TorusNetworkRTL
-from cmeshnet import CMeshNetworkRTL
-from bflynet  import BflyNetworkRTL
 
-from ocn_pclib.sim.CLNetWrapper import CLNetWrapper
 
 #-------------------------------------------------------------------------
 # module level variable

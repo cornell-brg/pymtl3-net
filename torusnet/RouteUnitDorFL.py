@@ -7,10 +7,12 @@ FL route unit that implements dimension order routing.
 Author : Yanghui Ou
   Date : June 30, 2019
 """
-from pymtl3      import *
+from pymtl3 import *
+
 from .directions import *
 
-class RouteUnitDorFL( object ):
+
+class RouteUnitDorFL:
 
   def __init__( s, pos_x, pos_y, ncols, nrows, dimension='y' ):
     s.pos_x = pos_x

@@ -7,11 +7,12 @@ Author: Yanghui Ou
   Date: July 2, 2019
 """
 import pytest
-from pymtl3                       import *
+
+from ocn_pclib.test.net_sinks import TestNetSinkCL as TestSinkCL
+from pymtl3 import *
+from pymtl3.stdlib.cl.queues import BypassQueueCL
 from pymtl3.stdlib.test.test_srcs import TestSrcCL
-from pymtl3.stdlib.cl.queues      import BypassQueueCL
-from ocn_pclib.test.net_sinks     import TestNetSinkCL as TestSinkCL
-from router.SwitchUnitCL          import SwitchUnitCL
+from router.SwitchUnitCL import SwitchUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -51,30 +52,11 @@ class TestHarness( Component ):
 # Test cases
 #-------------------------------------------------------------------------
 
-class SwitchUnitCL_Tests( object ):
+class SwitchUnitCL_Tests:
 
   @classmethod
   def setup_class( cls ):
     cls.TestHarness = TestHarness
-
-  def run_sim( s, th, max_cycles=1000 ):
-
-    # Create a simulator
-    th.apply( DynamicSim )
-    th.sim_reset()
-
-    # Run simulation
-
-    ncycles = 0
-    print()
-    print( "{:3}:{}".format( ncycles, th.line_trace() ))
-    while not th.done() and ncycles < max_cycles:
-      th.tick()
-      ncycles += 1
-      print( "{:3}:{}".format( ncycles, th.line_trace() ))
-
-    # Check timeout
-    assert ncycles < max_cycles
 
   def test_su5_simple( s ):
     src_msgs    = [ [] for _ in range(5) ]
@@ -85,4 +67,4 @@ class SwitchUnitCL_Tests( object ):
     src_msgs[4] = [ b16(8), b16(23) ]
     sink_msg = [ msg for i in range(5) for msg in src_msgs[i]  ]
     th = s.TestHarness( Bits16, src_msgs, sink_msg, num_inports=5 )
-    s.run_sim( th )
+    run_sim( th )

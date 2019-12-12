@@ -7,16 +7,17 @@ Test cases for InputUnitCL.
 Author: Yanghui Ou
   Date: May 16, 2019
 """
-import pytest
 import hypothesis
-from hypothesis                    import strategies as st
-from pymtl3                        import *
-from pymtl3.passes.PassGroups      import SimpleSim
-from pymtl3.stdlib.test.test_srcs  import TestSrcCL
+import pytest
+from hypothesis import strategies as st
+
+from ocn_pclib.test import run_sim
+from pymtl3 import *
+from pymtl3.datatypes import strategies as pst
+from pymtl3.stdlib.cl.queues import BypassQueueCL, NormalQueueCL, PipeQueueCL
 from pymtl3.stdlib.test.test_sinks import TestSinkCL
-from pymtl3.stdlib.cl.queues       import NormalQueueCL, BypassQueueCL, PipeQueueCL
-from pymtl3.datatypes              import strategies as pst
-from router.InputUnitCL            import InputUnitCL
+from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from router.InputUnitCL import InputUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -52,38 +53,19 @@ class TestHarness( Component ):
 # Test cases
 #-------------------------------------------------------------------------
 
-class InputUnitCL_Tests( object ):
+class InputUnitCL_Tests:
 
   @classmethod
   def setup_class( cls ):
     cls.TestHarness = TestHarness
     cls.qtypes      = [ NormalQueueCL, BypassQueueCL, PipeQueueCL ]
 
-  def run_sim( s, th, max_cycles=1000 ):
-
-    # Create a simulator
-    th.apply( DynamicSim )
-    th.sim_reset()
-
-    # Run simulation
-
-    ncycles = 0
-    print()
-    print( "{:3}:{}".format( ncycles, th.line_trace() ))
-    while not th.done() and ncycles < max_cycles:
-      th.tick()
-      ncycles += 1
-      print( "{:3}:{}".format( ncycles, th.line_trace() ))
-
-    # Check timeout
-    assert ncycles < max_cycles
-
   def test_normal2_simple( s ):
     test_msgs = [ b16( 4 ), b16( 1 ), b16( 2 ), b16( 3 ) ]
     arrival_time = [ 2, 3, 4, 5 ]
     th = s.TestHarness( Bits16, test_msgs, test_msgs )
     th.set_param( "top.sink.construct", arrival_time=arrival_time )
-    s.run_sim( th )
+    run_sim( th )
 
   def test_hypothesis( s ):
     @hypothesis.given(
@@ -99,5 +81,5 @@ class InputUnitCL_Tests( object ):
       th.set_param( "top.sink.construct", initial_delay=sink_init )
       th.set_param( "top.dut.construct", QueueType = qtype )
       th.set_param( "top.dut.queue.construct", num_entries=qsize )
-      s.run_sim( th, max_cycles=5000 )
+      run_sim( th, max_cycles=5000 )
     actual_test()
