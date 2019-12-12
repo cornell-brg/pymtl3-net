@@ -17,6 +17,7 @@ sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
 sim     = sim_dir + os.path.sep + 'pymtl3-net'
 
 def command( cmd ):
+  print(" ".join(cmd))
   try:
     result = check_output( cmd ).strip()
   except CalledProcessError as e:

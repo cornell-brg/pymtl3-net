@@ -310,7 +310,7 @@ def _gen_cmesh_pkt( opts, timestamp, src_id ):
   pkt.src_x   = x_type( ( src_id//nterminals_each ) %  ncols )
   pkt.src_y   = y_type( ( src_id//nterminals_each ) // ncols )
   pkt.dst_x   = x_type( ( dst_id//nterminals_each ) %  ncols )
-  pkt.dst_y   = y_type( ( src_id//nterminals_each ) // ncols )
+  pkt.dst_y   = y_type( ( dst_id//nterminals_each ) // ncols )
   pkt.dst_ter = t_type( dst_id % nterminals_each )
 
   return pkt
