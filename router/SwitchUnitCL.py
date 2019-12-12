@@ -9,6 +9,7 @@ Author : Yanghui Ou
 """
 from pymtl3 import *
 
+
 class SwitchUnitCL( Component ):
 
   def construct( s, PacketType, num_inports=5 ):

@@ -10,7 +10,7 @@
 # Dimension information used for floorplanning and topology demo
 #-------------------------------------------------------------------------
 
-class PhysicalDimension( object ):
+class PhysicalDimension:
 
   def __init__( s ):
     s.x = 0
@@ -21,4 +21,3 @@ class PhysicalDimension( object ):
   def __str__( s ):
     return "({},{}|{},{}|{},{})".format( s.x, s.y, s.w, s.h,
             s.x + s.w, s.y + s.h )
-

@@ -8,6 +8,7 @@
 
 from pymtl3 import *
 
+
 def mk_mesh_pos( ncols, nrows ):
   assert ncols > 0 and nrows > 0
 

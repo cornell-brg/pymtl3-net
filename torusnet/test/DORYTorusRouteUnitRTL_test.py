@@ -7,16 +7,19 @@ Test for DORYTorusRouteUnitRTL
 Author : Yanghui Ou
   Date : June 28, 2019
 """
+from itertools import product
+
 import pytest
-from itertools                      import product
-from pymtl3                         import *
-from pymtl3.stdlib.test.test_srcs   import TestSrcRTL
-from pymtl3.stdlib.rtl.queues       import BypassQueueRTL
-from ocn_pclib.ifcs.positions       import mk_mesh_pos
-from ocn_pclib.ifcs.packets         import mk_mesh_pkt
-from ocn_pclib.test.net_sinks       import TestNetSinkRTL
+
+from ocn_pclib.ifcs.packets import mk_mesh_pkt
+from ocn_pclib.ifcs.positions import mk_mesh_pos
+from ocn_pclib.test import run_sim
+from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from pymtl3 import *
+from pymtl3.stdlib.rtl.queues import BypassQueueRTL
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from torusnet.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
-from torusnet.RouteUnitDorFL        import RouteUnitDorFL
+from torusnet.RouteUnitDorFL import RouteUnitDorFL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -84,28 +87,11 @@ def mk_dst_pkts( pos_x, pos_y, ncols, nrows, src_pkts ):
 #=========================================================================
 # TODO: Test DORX as well.
 
-class RouteUnitDorRTL_Tests( object ):
+class RouteUnitDorRTL_Tests:
 
   @classmethod
   def setup_method( cls ):
     pass
-
-  def run_sim( s, th, max_cycles=1000 ):
-    # Create a simulator
-    th.apply( DynamicSim )
-    th.sim_reset()
-
-    # Run simulation
-    ncycles = 0
-    print()
-    print( "{:3}:{}".format( ncycles, th.line_trace() ))
-    while not th.done() and ncycles < max_cycles:
-      th.tick()
-      ncycles += 1
-      print( "{:3}:{}".format( ncycles, th.line_trace() ))
-
-    # Check timeout
-    assert ncycles < max_cycles
 
   @pytest.mark.parametrize(
     'pos_x, pos_y',
@@ -127,4 +113,4 @@ class RouteUnitDorRTL_Tests( object ):
     ]
     dst_pkts = mk_dst_pkts( pos_x, pos_y, ncols, nrows, src_pkts )
     th = TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
-    s.run_sim( th )
+    run_sim( th )

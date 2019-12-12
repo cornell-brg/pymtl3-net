@@ -8,12 +8,16 @@ Author: Yanghui Ou
   Date: Mar 24, 2019
 """
 import pytest
-from pymtl3                        import *
-from pymtl3.stdlib.test.test_srcs  import TestSrcRTL
+
+from pymtl3 import *
+from pymtl3.stdlib.rtl.queues import (BypassQueueRTL, NormalQueueRTL,
+                                      PipeQueueRTL)
+from pymtl3.stdlib.test import TestVectorSimulator
 from pymtl3.stdlib.test.test_sinks import TestSinkRTL
-from pymtl3.stdlib.test            import TestVectorSimulator
-from pymtl3.stdlib.rtl.queues      import NormalQueueRTL, BypassQueueRTL, PipeQueueRTL
-from router.InputUnitRTL           import InputUnitRTL
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from router.InputUnitRTL import InputUnitRTL
+
+from .InputUnitCL_test import InputUnitCL_Tests as BaseTests
 
 #-------------------------------------------------------------------------
 # TestVectorSimulator test
@@ -93,7 +97,6 @@ class TestHarness( Component ):
 # Test cases
 #-------------------------------------------------------------------------
 
-from .InputUnitCL_test import InputUnitCL_Tests as BaseTests
 
 class InputUnitRTL_Tests( BaseTests ):
 

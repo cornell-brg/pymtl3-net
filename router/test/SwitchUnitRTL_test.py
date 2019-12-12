@@ -7,11 +7,11 @@ Test for SwitchUnitRTL.
  Author : Yanghui Ou, Cheng Tan
    Date : June 22, 2019
 """
-from pymtl3                        import *
-from pymtl3.stdlib.test.test_srcs  import TestSrcCL
+from ocn_pclib.ifcs.packets import mk_generic_pkt
+from pymtl3 import *
 from pymtl3.stdlib.test.test_sinks import TestSinkCL
-from ocn_pclib.ifcs.packets        import mk_generic_pkt
-from router.SwitchUnitRTL          import SwitchUnitRTL
+from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from router.SwitchUnitRTL import SwitchUnitRTL
 
 #-------------------------------------------------------------------------
 # Test cases
@@ -20,7 +20,7 @@ from router.SwitchUnitRTL          import SwitchUnitRTL
 def test_switch_unit_simpe():
   dut = SwitchUnitRTL( Bits32, num_inports=5 )
   dut.elaborate()
-  dut.apply( SimulationPass )
+  dut.apply( SimulationPass() )
   dut.sim_reset()
 
   print("")
@@ -31,12 +31,14 @@ def test_switch_unit_simpe():
   dut.get[4].rdy = b1(1)
   dut.get[4].msg = b32(0xbaadbeef)
   dut.give.en = b1(0)
+  dut.eval_combinational()
   dut.tick()
   print( dut.line_trace() )
 
   for i in range( 3 ):
     assert dut.give.rdy
+    assert dut.give.msg in { b32(0xfaceb00c), b32(0xdeadface), b32(0xbaadbeef)  }
     dut.give.en = b1(1)
-    assert dut.give.msg in set( [b32(0xfaceb00c), b32(0xdeadface), b32(0xbaadbeef) ] )
+    dut.eval_combinational()
     dut.tick()
     print( dut.line_trace() )

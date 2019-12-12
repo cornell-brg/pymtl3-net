@@ -1,6 +1,5 @@
 import pytest
-import sys
-import os
+
 # sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),"pymtl3") )
 
 def pytest_addoption(parser):

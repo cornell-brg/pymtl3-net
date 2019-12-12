@@ -8,9 +8,11 @@ destination tag routing.
 Author : Yanghui Ou, Cheng Tan
   Date : April 6, 2019
 """
-from pymtl3             import *
-from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 from copy import deepcopy
+
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
+
 
 class DTRBflyRouteUnitRTL( Component ):
 

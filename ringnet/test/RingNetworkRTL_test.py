@@ -7,14 +7,15 @@ Test for RingNetworkRTL
 Author : Yanghui Ou, Cheng Tan
   Date : June 28, 2019
 """
-from pymtl3                       import *
+from ocn_pclib.ifcs.packets import mk_ring_pkt
+from ocn_pclib.ifcs.positions import mk_ring_pos
+from ocn_pclib.test import run_sim
+from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from pymtl3 import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-from ocn_pclib.test.net_sinks     import TestNetSinkRTL
-from ocn_pclib.ifcs.packets       import mk_ring_pkt
-from ocn_pclib.ifcs.positions     import mk_ring_pos
-from ringnet.RingNetworkRTL       import RingNetworkRTL
-from ..RingNetworkFL              import ringnet_fl
-from copy                         import deepcopy
+from ringnet.RingNetworkRTL import RingNetworkRTL
+
+from ..RingNetworkFL import ringnet_fl
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -71,28 +72,11 @@ def mk_src_pkts( nterminals, lst ):
 # Test cases
 #=========================================================================
 
-class RingNetwork_Tests( object ):
+class RingNetwork_Tests:
 
   @classmethod
   def setup_class( cls ):
     cls.DutType = RingNetworkRTL
-
-  def run_sim( s, th, max_cycles=1000 ):
-    th.elaborate()
-    th.apply( SimulationPass )
-    th.sim_reset()
-
-    # Run simulation
-    ncycles = 0
-    print()
-    print( "{:3}:{}".format( ncycles, th.line_trace() ))
-    while not th.done() and ncycles < max_cycles:
-      th.tick()
-      ncycles += 1
-      print( "{:3}:{}".format( ncycles, th.line_trace() ))
-
-    # Check timeout
-    assert ncycles < max_cycles
 
   def test_simple( s ):
     nterminals = 4
@@ -103,7 +87,7 @@ class RingNetwork_Tests( object ):
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    s.run_sim( th )
+    run_sim( th )
 
   def test_cycle( s ):
     nterminals = 4
@@ -117,7 +101,7 @@ class RingNetwork_Tests( object ):
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    s.run_sim( th )
+    run_sim( th )
 
   def test_anti_cycle( s ):
     nterminals = 4
@@ -131,4 +115,4 @@ class RingNetwork_Tests( object ):
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    s.run_sim( th )
+    run_sim( th )

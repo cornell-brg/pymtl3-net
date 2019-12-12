@@ -7,11 +7,13 @@ Mesh network implementation.
 Author : Yanghui Ou, Cheng Tan
   Date : Mar 10, 2019
 """
-from pymtl3                         import *
-from .directions                    import *
-from channel.ChannelRTL             import ChannelRTL
-from .MeshRouterRTL                 import MeshRouterRTL
+from channel.ChannelRTL import ChannelRTL
+from pymtl3 import *
 from pymtl3.stdlib.ifcs.SendRecvIfc import *
+
+from .directions import *
+from .MeshRouterRTL import MeshRouterRTL
+
 
 class MeshNetworkRTL( Component ):
   def construct( s, PacketType, PositionType,
@@ -22,7 +24,6 @@ class MeshNetworkRTL( Component ):
     s.num_routers   = ncols * nrows
     s.num_terminals = s.num_routers
     num_channels    = (nrows*(ncols-1)+ncols*(nrows-1)) * 2
-    chl_lat         =  0
     XType           = mk_bits( clog2(ncols) )
     YType           = mk_bits( clog2(nrows ) )
 

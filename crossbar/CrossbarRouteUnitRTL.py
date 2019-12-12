@@ -7,8 +7,9 @@ A crossbar route unit with get/give interface.
 Author : Yanghui Ou, Cheng Tan
   Date : April 18, 2019
 """
-from pymtl          import *
 from ocn_pclib.ifcs import GetIfcRTL, GiveIfcRTL
+from pymtl import *
+
 
 class CrossbarRouteUnitRTL( Component ):
 

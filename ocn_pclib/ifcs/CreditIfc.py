@@ -7,12 +7,12 @@ Credit based interfaces.
 Author : Yanghui Ou
   Date : June 10, 2019
 """
-from pymtl3                     import *
-from pymtl3.stdlib.ifcs         import SendIfcRTL, RecvIfcRTL, enrdy_to_str
-from pymtl3.stdlib.rtl.Encoder  import Encoder
+from ocn_pclib.rtl import Counter
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL, enrdy_to_str
 from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
-from pymtl3.stdlib.rtl.queues   import BypassQueueRTL
-from ocn_pclib.rtl              import Counter
+from pymtl3.stdlib.rtl.Encoder import Encoder
+from pymtl3.stdlib.rtl.queues import BypassQueueRTL
 
 #-------------------------------------------------------------------------
 # RTL interfaces

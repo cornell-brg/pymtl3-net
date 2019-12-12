@@ -7,14 +7,16 @@
 #   Date : July 1, 2019
 
 import hypothesis
-from hypothesis                   import strategies as st
-from pymtl3                       import *
+from hypothesis import strategies as st
+
+from ocn_pclib.ifcs.packets import mk_mesh_pkt
+from ocn_pclib.ifcs.positions import mk_mesh_pos
+from ocn_pclib.test import run_sim
+from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from pymtl3 import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-from ocn_pclib.test.net_sinks     import TestNetSinkRTL
-from ocn_pclib.ifcs.packets       import mk_mesh_pkt
-from ocn_pclib.ifcs.positions     import mk_mesh_pos
-from torusnet.TorusNetworkRTL     import TorusNetworkRTL
-from torusnet.TorusNetworkFL      import torusnet_fl
+from torusnet.TorusNetworkFL import torusnet_fl
+from torusnet.TorusNetworkRTL import TorusNetworkRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -84,24 +86,7 @@ def torus_pkt_strat( draw, ncols, nrows ):
 # Test cases
 #=========================================================================
 
-class TorusNetwork_Tests( object ):
-
-  def run_sim( s, th, max_cycles=1000 ):
-    th.elaborate()
-    th.apply( SimulationPass )
-    th.sim_reset()
-
-    # Run simulation
-    ncycles = 0
-    print()
-    print( "{:3}:{}".format( ncycles, th.line_trace() ))
-    while not th.done() and ncycles < max_cycles:
-      th.tick()
-      ncycles += 1
-      print( "{:3}:{}".format( ncycles, th.line_trace() ))
-
-    # Check timeout
-    assert ncycles < max_cycles
+class TorusNetwork_Tests:
 
   def test_simple( s ):
     ncols = 2
@@ -116,7 +101,7 @@ class TorusNetwork_Tests( object ):
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    s.run_sim( th )
+    run_sim( th )
 
   def test_simple_3x3( s ):
     ncols = 3
@@ -131,7 +116,7 @@ class TorusNetwork_Tests( object ):
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    s.run_sim( th )
+    run_sim( th )
 
   def test_simple_5x5( s ):
     ncols = 5
@@ -146,7 +131,7 @@ class TorusNetwork_Tests( object ):
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    s.run_sim( th )
+    run_sim( th )
 
   @hypothesis.settings( deadline=None, max_examples=5 )
   # @hypothesis.reproduce_failure('4.24.4', 'AAMDAQEAAAQAAA==') #(1:0)>(0:4)
@@ -166,4 +151,4 @@ class TorusNetwork_Tests( object ):
     src_pkts = mk_src_pkts( ncols, nrows, pkts_lst )
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    s.run_sim( th, max_cycles=5000 )
+    run_sim( th, max_cycles=5000 )

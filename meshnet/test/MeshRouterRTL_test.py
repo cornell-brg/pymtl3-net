@@ -7,21 +7,22 @@
 #   Date : Mar 10, 2019
 
 import hypothesis
-from hypothesis                       import strategies as st
-from pymtl3                           import *
-from pymtl3.stdlib.test.test_srcs     import TestSrcRTL
-from ocn_pclib.test.net_sinks         import TestNetSinkRTL
-from ocn_pclib.ifcs.positions         import mk_mesh_pos
-from ocn_pclib.ifcs.packets           import mk_mesh_pkt
-from meshnet.MeshRouterRTL            import MeshRouterRTL
-from meshnet.DORXMeshRouteUnitRTL     import DORXMeshRouteUnitRTL
-from meshnet.DORYMeshRouteUnitRTL     import DORYMeshRouteUnitRTL
-from router.InputUnitRTL              import InputUnitRTL
-from router.OutputUnitRTL             import OutputUnitRTL
-from router.SwitchUnitRTL             import SwitchUnitRTL
-from test_helpers                     import dor_routing
-from pymtl3.passes.sverilog           import ImportPass, TranslationPass
-from pymtl3.passes                    import DynamicSim
+from hypothesis import strategies as st
+
+from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from meshnet.MeshRouterRTL import MeshRouterRTL
+from ocn_pclib.ifcs.packets import mk_mesh_pkt
+from ocn_pclib.ifcs.positions import mk_mesh_pos
+from ocn_pclib.test import run_sim
+from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from pymtl3 import *
+from pymtl3.passes.backends.sverilog import ImportPass, TranslationPass
+from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from router.InputUnitRTL import InputUnitRTL
+from router.OutputUnitRTL import OutputUnitRTL
+from router.SwitchUnitRTL import SwitchUnitRTL
+from test_helpers import dor_routing
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -79,36 +80,6 @@ class TestHarness( Component ):
 
   def line_trace( s ):
     return "{}".format( s.dut.line_trace() )
-
-#-------------------------------------------------------------------------
-# run_rtl_sim
-#-------------------------------------------------------------------------
-
-def run_sim( test_harness, max_cycles=1000 ):
-
-  # Create a simulator
-
-  test_harness.elaborate()
-  test_harness.apply( DynamicSim )
-  test_harness.sim_reset()
-
-  # Run simulation
-
-  ncycles = 0
-  print()
-  print( "{}:{}".format( ncycles, test_harness.line_trace() ))
-  while not test_harness.done() and ncycles < max_cycles:
-    test_harness.tick()
-    ncycles += 1
-    print( "{}:{}".format( ncycles, test_harness.line_trace() ))
-
-  # Check timeout
-
-  assert ncycles < max_cycles
-
-  test_harness.tick()
-  test_harness.tick()
-  test_harness.tick()
 
 #-------------------------------------------------------------------------
 # Test cases

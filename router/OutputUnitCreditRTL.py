@@ -7,11 +7,11 @@ An output unit with a credit based interface.
 Author : Yanghui Ou
   Date : June 22, 2019
 """
+from ocn_pclib.ifcs.CreditIfc import CreditSendIfcRTL
+from ocn_pclib.rtl import Counter
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, enrdy_to_str
 
-from ocn_pclib.ifcs.CreditIfc import CreditSendIfcRTL
-from ocn_pclib.rtl import Counter
 
 class OutputUnitCreditRTL( Component ):
 

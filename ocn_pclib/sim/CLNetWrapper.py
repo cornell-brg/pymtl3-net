@@ -11,6 +11,7 @@ Author: Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.cl.queues import BypassQueueCL
 
+
 class CLNetWrapper( Component ):
 
   def construct( s, PktType, net, nports ):

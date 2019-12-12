@@ -7,9 +7,11 @@ A DOR-Y route unit with get/give interface for CMesh.
 Author : Yanghui Ou, Cheng Tan
   Date : Mar 25, 2019
 """
-from pymtl3             import *
-from .directions        import *
+from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
+
+from .directions import *
+
 
 class DORYCMeshRouteUnitRTL( Component ):
 

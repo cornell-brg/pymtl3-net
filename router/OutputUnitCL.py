@@ -9,6 +9,7 @@ Author : Yanghui Ou
 """
 from pymtl3 import *
 
+
 class OutputUnitCL( Component ):
 
   def construct( s, PacketType, QueueType = None ):

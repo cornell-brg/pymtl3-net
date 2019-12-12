@@ -6,13 +6,13 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 8, 2019
 
-from pymtl3                         import *
-from router.Router                  import Router
-from router.InputUnitRTL            import InputUnitRTL
-from router.SwitchUnitRTL           import SwitchUnitRTL
-from router.OutputUnitRTL           import OutputUnitRTL
-
 from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
+from pymtl3 import *
+from router.InputUnitRTL import InputUnitRTL
+from router.OutputUnitRTL import OutputUnitRTL
+from router.Router import Router
+from router.SwitchUnitRTL import SwitchUnitRTL
+
 
 class CMeshRouterRTL( Router ):
 
@@ -21,7 +21,7 @@ class CMeshRouterRTL( Router ):
                  RouteUnitType  = DORYCMeshRouteUnitRTL,
                  SwitchUnitType = SwitchUnitRTL ):
 
-    super( CMeshRouterRTL, s ).construct(
+    super().construct(
       PacketType,
       PositionType,
       num_inports,

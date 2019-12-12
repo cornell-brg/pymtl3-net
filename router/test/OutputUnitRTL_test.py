@@ -8,11 +8,15 @@ Author : Yanghui Ou, Cheng Tan
   Date : June 22, 2019
 """
 import pytest
-from pymtl3                        import *
-from pymtl3.stdlib.test.test_srcs  import TestSrcCL
+
+from pymtl3 import *
+from pymtl3.stdlib.rtl.queues import (BypassQueueRTL, NormalQueueRTL,
+                                      PipeQueueRTL)
 from pymtl3.stdlib.test.test_sinks import TestSinkCL
-from pymtl3.stdlib.rtl.queues      import BypassQueueRTL, NormalQueueRTL, PipeQueueRTL
-from router.OutputUnitRTL          import OutputUnitRTL
+from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from router.OutputUnitRTL import OutputUnitRTL
+
+from .OutputUnitCL_test import OutputUnitCL_Tests as BaseTests
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -46,7 +50,6 @@ class TestHarness( Component ):
 # Test cases
 #-------------------------------------------------------------------------
 
-from .OutputUnitCL_test import OutputUnitCL_Tests as BaseTests
 
 class OutputUnitRTL_Tests( BaseTests ):
 

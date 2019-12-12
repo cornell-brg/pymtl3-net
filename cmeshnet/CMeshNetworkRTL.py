@@ -7,11 +7,13 @@ RTL implementation of concetrated mesh network.
 Author : Cheng Tan
   Date : Mar 10, 2019
 """
-from pymtl3                         import *
-from .directions                    import *
-from .CMeshRouterRTL                import CMeshRouterRTL
-from channel.ChannelRTL             import ChannelRTL
+from channel.ChannelRTL import ChannelRTL
+from pymtl3 import *
 from pymtl3.stdlib.ifcs.SendRecvIfc import *
+
+from .CMeshRouterRTL import CMeshRouterRTL
+from .directions import *
+
 
 class CMeshNetworkRTL( Component ):
   def construct( s, PacketType, PositionType,
@@ -24,7 +26,6 @@ class CMeshNetworkRTL( Component ):
     num_channels    = (nrows*(ncols-1)+ncols*(nrows-1)) * 2
     num_inports     = 4 + num_nodes_each
     num_outports    = 4 + num_nodes_each
-    chl_lat         = 0
     XType           = mk_bits( clog2(ncols) )
     YType           = mk_bits( clog2(nrows ) )
 

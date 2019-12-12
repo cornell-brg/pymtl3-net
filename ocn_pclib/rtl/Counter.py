@@ -10,6 +10,7 @@ Author : Yanghui Ou
 
 from pymtl3 import *
 
+
 class Counter( Component ):
 
   def construct( s, Type, reset_value=0 ):

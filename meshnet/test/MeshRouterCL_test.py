@@ -7,20 +7,22 @@ Test cases for MeshRouterCL.
 Author : Yanghui Ou
   Date : May 21, 2019
 """
-import pytest
-import hypothesis
-from hypothesis import strategies as st
 from itertools import product
 
-from pymtl3                        import *
-from pymtl3.stdlib.test.test_srcs  import TestSrcCL
-from pymtl3.datatypes              import strategies as pst
-from ocn_pclib.test.net_sinks      import TestNetSinkCL as TestSinkCL
-from ocn_pclib.ifcs.positions      import mk_mesh_pos
-from ocn_pclib.ifcs.packets        import mk_mesh_pkt
-from meshnet.MeshRouterFL          import MeshRouterFL
-from meshnet.MeshRouterCL          import MeshRouterCL
-from meshnet.DORXMeshRouteUnitCL   import DORXMeshRouteUnitCL
+import hypothesis
+import pytest
+from hypothesis import strategies as st
+
+from meshnet.DORXMeshRouteUnitCL import DORXMeshRouteUnitCL
+from meshnet.MeshRouterCL import MeshRouterCL
+from meshnet.MeshRouterFL import MeshRouterFL
+from ocn_pclib.ifcs.packets import mk_mesh_pkt
+from ocn_pclib.ifcs.positions import mk_mesh_pos
+from ocn_pclib.test import run_sim
+from ocn_pclib.test.net_sinks import TestNetSinkCL as TestSinkCL
+from pymtl3 import *
+from pymtl3.datatypes import strategies as pst
+from pymtl3.stdlib.test.test_srcs import TestSrcCL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -96,32 +98,11 @@ def mesh_pkt_strat( draw, ncols, nrows, opaque_nbits=8, vc=1, payload_nbits=32 )
 # Test cases
 #-------------------------------------------------------------------------
 
-class MeshRouterCL_Tests( object ):
+class MeshRouterCL_Tests:
 
   @classmethod
   def setup_class( s ):
     s.TestHarness = TestHarness
-
-  def run_sim( s, th, max_cycles=1000 ):
-
-    # Create a simulator
-
-    th.apply( DynamicSim )
-    th.sim_reset()
-
-    # Run simulation
-
-    ncycles = 0
-    print()
-    print( "{:3}:{}".format( ncycles, th.line_trace() ))
-    while not th.done() and ncycles < max_cycles:
-      th.tick()
-      ncycles += 1
-      print( "{:3}:{}".format( ncycles, th.line_trace() ))
-
-    # Check timeout
-
-    assert ncycles < max_cycles
 
   @pytest.mark.parametrize(
     'pos_x, pos_y',
@@ -138,7 +119,7 @@ class MeshRouterCL_Tests( object ):
     ])
     dst_pkts = router_fl.route( src_pkts )
     th = s.TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
-    s.run_sim( th )
+    run_sim( th )
 
   # Failing test cases captured by hypothesis
 
@@ -153,7 +134,7 @@ class MeshRouterCL_Tests( object ):
     ])
     dst_pkts = router_fl.route( src_pkts )
     th = s.TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
-    s.run_sim( th )
+    run_sim( th )
 
   def test_h1( s ):
     pos_x = 0; pos_y = 0; ncols = 2; nrows = 2
@@ -165,7 +146,7 @@ class MeshRouterCL_Tests( object ):
     ])
     dst_pkts = router_fl.route( src_pkts )
     th = s.TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
-    s.run_sim( th )
+    run_sim( th )
 
 #-------------------------------------------------------------------------
 # Hypothesis test
@@ -200,4 +181,4 @@ class MeshRouterCL_Tests( object ):
     th = s.TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
     th.set_param( "top.src*.construct", initial_delay=src_init, interval_delay=src_init )
     th.set_param( "top.sink*.construct", initial_delay=sink_init, interval_delay=sink_init )
-    s.run_sim( th, max_cycles=5000 )
+    run_sim( th, max_cycles=5000 )

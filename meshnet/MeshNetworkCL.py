@@ -6,11 +6,13 @@
 # Author : Yanghui Ou
 #   Date : May 21, 2019
 
-from pymtl3                  import *
+from channel.ChannelCL import ChannelCL
+from pymtl3 import *
 from pymtl3.stdlib.cl.queues import BypassQueueCL
-from .directions             import *
-from channel.ChannelCL       import ChannelCL
-from .MeshRouterCL           import MeshRouterCL
+
+from .directions import *
+from .MeshRouterCL import MeshRouterCL
+
 
 class MeshNetworkCL( Component ):
   def construct( s, PacketType, PositionType,

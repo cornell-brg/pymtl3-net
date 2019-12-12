@@ -8,11 +8,12 @@ Author : Yanghui Ou
   Date : May 16, 2019
 """
 from pymtl3 import *
-from router.Router       import Router
-from router.InputUnitCL  import InputUnitCL
-from router.SwitchUnitCL import SwitchUnitCL
+from RingRouteUnitCL import RingRouteUnitCL
+from router.InputUnitCL import InputUnitCL
 from router.OutputUnitCL import OutputUnitCL
-from RingRouteUnitCL     import RingRouteUnitCL
+from router.Router import Router
+from router.SwitchUnitCL import SwitchUnitCL
+
 
 class RingRouterCL( Router ):
 

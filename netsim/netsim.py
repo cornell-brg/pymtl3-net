@@ -58,13 +58,23 @@
 
 # Hack to add project root to python path
 
+import argparse
 import os
 import sys
-import argparse
-import re
-
+import time
 from collections import deque
-from random      import seed, randint
+from random import randint, seed
+
+from bflynet.BflyNetworkRTL import BflyNetworkRTL
+from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
+from meshnet.MeshNetworkCL import MeshNetworkCL
+from meshnet.MeshNetworkRTL import MeshNetworkRTL
+from ocn_pclib.ifcs.packets import *
+from ocn_pclib.ifcs.positions import *
+from pymtl3 import *
+from pymtl3.stdlib.test import TestVectorSimulator
+from ringnet.RingNetworkRTL import RingNetworkRTL
+from torusnet.TorusNetworkRTL import TorusNetworkRTL
 
 sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
 while sim_dir:
@@ -73,20 +83,7 @@ while sim_dir:
     break
   sim_dir = os.path.dirname(sim_dir)
 
-#from meshnet.MeshNetworkFL    import MeshNetworkFL
-#from crossbar.CrossbarRTL     import CrossbarRTL
-from pymtl3                   import *
-from meshnet.MeshNetworkCL    import MeshNetworkCL
-from ringnet.RingNetworkRTL   import RingNetworkRTL
-from meshnet.MeshNetworkRTL   import MeshNetworkRTL
-from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
-from torusnet.TorusNetworkRTL import TorusNetworkRTL
-from bflynet.BflyNetworkRTL   import BflyNetworkRTL
-from ocn_pclib.ifcs.packets   import *
-from ocn_pclib.ifcs.positions import *
-from pymtl3.stdlib.test       import TestVectorSimulator
 
-import time
 
 seed(0xdeadbeef)
 
@@ -322,7 +319,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     model.set_param( "top.routers*.construct", k_ary=k_ary )
     model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
 
-  sim = model.apply( DynamicSim )
+  sim = model.apply( SimulationPass() )
 
   # Source Queues - Modeled as Bypass Queues
   src = [ deque() for x in range( num_nodes ) ]
@@ -617,4 +614,3 @@ def main():
     print()
 
 main()
-

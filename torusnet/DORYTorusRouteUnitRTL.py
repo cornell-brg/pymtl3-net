@@ -7,10 +7,13 @@ A DOR route unit with get/give interface for Torus topology.
 Author : Yanghui Ou, Cheng Tan
   Date : June 29, 2019
 """
-from pymtl3             import *
-from .directions        import *
+from copy import deepcopy
+
+from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
-from copy               import deepcopy
+
+from .directions import *
+
 
 class DORYTorusRouteUnitRTL( Component ):
 

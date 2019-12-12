@@ -7,9 +7,10 @@ RTL implementation of OutputUnit.
 Author : Yanghui Ou, Cheng Tan
   Date : Feb 28, 2019
 """
-from pymtl3                   import *
-from pymtl3.stdlib.ifcs       import GetIfcRTL, SendIfcRTL
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL
 from pymtl3.stdlib.rtl.queues import NormalQueueRTL
+
 
 class OutputUnitRTL( Component ):
   def construct( s, PacketType, QueueType=None ):

@@ -7,10 +7,10 @@ An input unit with a recv interface as input and give interface as output.
 Author : Yanghui Ou, Cheng Tan
   Date : Mar 23, 2019
 """
-from pymtl3                   import *
-from pymtl3.stdlib.ifcs       import RecvIfcRTL
-from pymtl3.stdlib.ifcs       import GiveIfcRTL
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import GiveIfcRTL, RecvIfcRTL
 from pymtl3.stdlib.rtl.queues import NormalQueueRTL
+
 
 class InputUnitRTL( Component ):
 

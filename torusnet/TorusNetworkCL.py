@@ -6,10 +6,11 @@
 # Author : Yanghui Ou
 #   Date : Mar 21, 2019
 
+from channel.ChannelCL import ChannelCL
+from directions import *
 from pymtl3 import *
-from directions             import *
-from TorusRouterCL          import TorusRouterCL
-from channel.ChannelCL      import ChannelCL
+from TorusRouterCL import TorusRouterCL
+
 
 class TorusNetworkCL( Component ):
   def construct( s, PacketType, PositionType,
