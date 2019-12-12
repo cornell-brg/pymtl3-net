@@ -36,7 +36,7 @@ class RingNetworkRTL( Component ):
     s.send = [ SendIfcRTL(PacketType) for _ in range(s.num_routers)]
 
     # Components
-    s.routers    = [ RingRouterRTL( PacketType, PositionType, num_routers, vc=vc )
+    s.routers = [ RingRouterRTL( PacketType, PositionType, num_routers, vc=vc )
                      for i in range( num_routers ) ]
 
     s.recv_adp = [ RecvRTL2CreditSendRTL( PacketType, vc=vc, credit_line=credit_line )

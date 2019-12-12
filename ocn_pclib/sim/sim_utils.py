@@ -30,6 +30,7 @@ from ocn_pclib.ifcs.positions import mk_bfly_pos, mk_mesh_pos, mk_ring_pos
 from ocn_pclib.sim.CLNetWrapper import CLNetWrapper
 from pymtl3 import *
 from pymtl3.passes.backends.yosys import ImportPass, TranslationPass
+from pymtl3.passes import TracingConfigs
 from ringnet import RingNetworkRTL
 from torusnet import TorusNetworkRTL
 
@@ -803,8 +804,7 @@ def smoke_test( topo, opts ):
 
   if opts.dump_vcd:
     vprint( f' - enabling vcd dumping' )
-    net.dump_vcd = True
-    net.vcd_file_name = f'{topo}-{nports}-test'
+    net.config_tracing = TracingConfigs( tracing='vcd', vcd_file_name=f'{topo}-{nports}-test' )
 
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )

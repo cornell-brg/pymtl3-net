@@ -26,7 +26,6 @@ class CMeshNetworkRTL( Component ):
     num_channels    = (nrows*(ncols-1)+ncols*(nrows-1)) * 2
     num_inports     = 4 + num_nodes_each
     num_outports    = 4 + num_nodes_each
-    chl_lat         = 0
     XType           = mk_bits( clog2(ncols) )
     YType           = mk_bits( clog2(nrows ) )
 

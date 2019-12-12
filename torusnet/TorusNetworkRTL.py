@@ -26,7 +26,6 @@ class TorusNetworkRTL( Component ):
     s.ncols = ncols
     s.nrows = nrows
     s.num_routers   = ncols * nrows
-    num_channels    = nrows * ncols * 4
     s.num_terminals = s.num_routers
     XType           = mk_bits( clog2(ncols) )
     YType           = mk_bits( clog2(nrows ) )

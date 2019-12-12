@@ -37,3 +37,20 @@ def test_gen():
 def test_test():
   for net in nets:
     command( [ sim, 'test', net ] )
+
+def test_test_vcd():
+  for net in nets:
+
+    for f in os.listdir():
+      if f.endswith(".vcd"):
+        os.remove(f)
+
+    command( [ sim, 'test', net, '--dump-vcd' ] )
+
+    found = False
+    for f in os.listdir():
+      if f.startswith( net ) and f.endswith(".vcd"):
+        found = True
+        break
+
+    assert found, f"{net} test failed to output vcd"

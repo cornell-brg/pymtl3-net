@@ -24,7 +24,6 @@ class MeshNetworkRTL( Component ):
     s.num_routers   = ncols * nrows
     s.num_terminals = s.num_routers
     num_channels    = (nrows*(ncols-1)+ncols*(nrows-1)) * 2
-    chl_lat         =  0
     XType           = mk_bits( clog2(ncols) )
     YType           = mk_bits( clog2(nrows ) )
 
