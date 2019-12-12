@@ -7,6 +7,7 @@ Test for credit based interfaces.
 Author : Yanghui Ou
   Date : June 10, 2019
 """
+from ocn_pclib.test import run_sim
 from ocn_pclib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.stdlib.rtl.queues import NormalQueueRTL

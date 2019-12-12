@@ -7,7 +7,6 @@ https://github.com/pypa/sampleproject/blob/master/setup.py
 """
 
 from os import path
-from subprocess import check_output
 
 from setuptools import find_packages, setup
 

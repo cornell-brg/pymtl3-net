@@ -10,9 +10,11 @@ Author: Yanghui Ou
 
 """
 import argparse
-import sys
 import os
+import sys
 
+from ocn_pclib.sim import sim_utils
+from ocn_pclib.sim.sim_utils import *
 from pymtl3 import *
 
 # Hack to add the top level directory to PYTHONPATH if this script was
@@ -20,8 +22,6 @@ from pymtl3 import *
 if os.path.abspath(os.path.dirname(__file__)).split('/')[-1] == "script":
   sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
-from ocn_pclib.sim.sim_utils import *
-from ocn_pclib.sim import sim_utils
 
 #-------------------------------------------------------------------------
 # Global variables

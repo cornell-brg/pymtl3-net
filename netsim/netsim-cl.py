@@ -60,13 +60,25 @@
 
 # Hack to add project root to python path
 
-import os
-import sys
 import argparse
+import os
 import re
+import sys
+import time
+from collections import deque
+from random import randint, seed
 
-from collections             import deque
-from random                  import seed, randint
+from bflynet.BflyNetworkRTL import BflyNetworkRTL
+from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
+from meshnet.MeshNetworkCL import MeshNetworkCL, WrappedMeshNetCL
+from meshnet.MeshNetworkRTL import MeshNetworkRTL
+from ocn_pclib.ifcs.packets import *
+from ocn_pclib.ifcs.positions import *
+from pymtl3 import *
+from pymtl3.stdlib.test import TestVectorSimulator
+#from crossbar.CrossbarRTL     import CrossbarRTL
+from ringnet.RingNetworkRTL import RingNetworkRTL
+from torusnet.TorusNetworkRTL import TorusNetworkRTL
 
 sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
 while sim_dir:
@@ -77,23 +89,11 @@ while sim_dir:
     break
   sim_dir = os.path.dirname(sim_dir)
 
-from pymtl3                   import *
 
 #from meshnet.MeshNetworkFL    import MeshNetworkFL
 
-from meshnet.MeshNetworkCL    import MeshNetworkCL, WrappedMeshNetCL
 
-#from crossbar.CrossbarRTL     import CrossbarRTL
-from ringnet.RingNetworkRTL   import RingNetworkRTL
-from meshnet.MeshNetworkRTL   import MeshNetworkRTL
-from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
-from torusnet.TorusNetworkRTL import TorusNetworkRTL
-from bflynet.BflyNetworkRTL   import BflyNetworkRTL
-from ocn_pclib.ifcs.packets   import *
-from ocn_pclib.ifcs.positions import *
-from pymtl3.stdlib.test       import TestVectorSimulator
 
-import time
 
 seed(0xdeadbeef)
 
@@ -593,4 +593,3 @@ def main():
     print()
 
 main()
-
