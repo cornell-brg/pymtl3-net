@@ -24,7 +24,7 @@ from meshnet.MeshNetworkRTL import MeshNetworkRTL
 from ocn_pclib.ifcs.packets import *
 from ocn_pclib.ifcs.positions import *
 from pymtl3 import *
-from pymtl3.passes.yosys import ImportPass, TranslationPass
+from pymtl3.passes.backends.yosys import ImportPass, TranslationPass
 from pymtl3.stdlib.test import TestVectorSimulator
 from ringnet.RingNetworkRTL import RingNetworkRTL
 from torusnet.TorusNetworkRTL import TorusNetworkRTL
@@ -166,7 +166,7 @@ def perform( action, model, topology, terminals, dimension,
     os.system("[ ! -e "+topology+"NetworkRTL.sv ] || rm "+topology+"NetworkRTL.sv")
     net.yosys_translate = True
     net.apply( TranslationPass() )
-    sim = net.apply( SimulationPass )
+    sim = net.apply( SimulationPass() )
     os.system("mv "+topology+"*.sv "+topology+"NetworkRTL.sv")
     return
 
@@ -174,7 +174,7 @@ def perform( action, model, topology, terminals, dimension,
     net.dump_vcd = True
     net.vcd_file_name = topology+"_sim1pkt"
 
-  net.apply( SimulationPass )
+  net.apply( SimulationPass() )
 
   # Source Queues - Modeled as Bypass Queues
   src_queue = [ deque() for x in range( terminals ) ]
