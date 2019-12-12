@@ -30,7 +30,7 @@ def test_gen():
     filename = f"{net}.sv"
     if os.path.exists( filename ):
       os.remove( filename )
-    command( [ sim, 'gen', net, '--trace' ] )
+    command( [ sim, 'gen', net ] )
     assert os.path.exists( filename )
 
 def test_test():
