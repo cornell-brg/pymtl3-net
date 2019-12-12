@@ -455,8 +455,7 @@ def net_simulate( topo, opts ):
 
   if opts.dump_vcd:
     vprint( f' - enabling vcd dumping' )
-    net.dump_vcd = True
-    net.vcd_file_name = f'{topo}-{nports}-{opts.injection_rate}'
+    net.config_tracing = TracingConfigs( tracing='vcd', vcd_file_name=f'{topo}-{nports}-{opts.injection_rate}' )
 
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )

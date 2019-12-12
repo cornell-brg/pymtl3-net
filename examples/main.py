@@ -24,6 +24,7 @@ from meshnet.MeshNetworkRTL import MeshNetworkRTL
 from ocn_pclib.ifcs.packets import *
 from ocn_pclib.ifcs.positions import *
 from pymtl3 import *
+from pymtl3.passes import TracingConfigs
 from pymtl3.passes.backends.yosys import ImportPass, TranslationPass
 from pymtl3.stdlib.test import TestVectorSimulator
 from ringnet.RingNetworkRTL import RingNetworkRTL
@@ -171,8 +172,7 @@ def perform( action, model, topology, terminals, dimension,
     return
 
   if action == "simulate-1pkt":
-    net.dump_vcd = True
-    net.vcd_file_name = topology+"_sim1pkt"
+    net.config_tracing = TracingConfigs( tracing='vcd', vcd_file_name=f'{topology}-sim1pkt' )
 
   net.apply( SimulationPass() )
 
