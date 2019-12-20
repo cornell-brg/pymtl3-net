@@ -6,20 +6,19 @@
 # Author : Yanghui Ou
 #   Date : Feb 20, 2019
 
-from pymtl import *
-from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
-from pymtl3.stdlib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL, InValRdyIfc, OutValRdyIfc
 
 #-------------------------------------------------------------------------
 # ValRdy2EnRdy
 #-------------------------------------------------------------------------
 
-class ValRdy2EnRdy( RTLComponent ):
+class ValRdy2EnRdy( Component ):
 
   def construct( s, MsgType ):
 
     s.in_ = InValRdyIfc( MsgType )
-    s.out = OutEnRdyIfc( MsgType )
+    s.out = SendIfcRTL( MsgType )
 
     @s.update
     def comb_logic0():
@@ -38,11 +37,11 @@ class ValRdy2EnRdy( RTLComponent ):
 # EnRdy2ValRdy
 #-------------------------------------------------------------------------
 
-class EnRdy2ValRdy( RTLComponent ):
+class EnRdy2ValRdy( Component ):
 
   def construct( s, MsgType ):
 
-    s.in_ = InEnRdyIfc  ( MsgType )
+    s.in_ = RecvIfcRTL  ( MsgType )
     s.out = OutValRdyIfc( MsgType )
 
     @s.update
