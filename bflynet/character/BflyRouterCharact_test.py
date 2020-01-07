@@ -50,15 +50,16 @@ class TestHarness( Component ):
 
     print( "=" * 74 )
 
-    num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
+    num_routers     = n_fly * ( k_ary ** ( n_fly - 1 ) )
     s.num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
-    r_rows = k_ary ** ( n_fly - 1 )
-    BflyPos  = mk_bfly_pos( r_rows, n_fly )
+    r_rows          = k_ary ** ( n_fly - 1 )
+    BflyPos         = mk_bfly_pos( r_rows, n_fly )
 
     s.dut  = BflyRouterRTL( MsgType, BflyPos, k_ary )
 
-    match_func = lambda a,b : a.src==b.src and a.payload == b.payload\
-        and a.opaque == b.opaque
+    match_func = lambda a,b : a.src == b.src and \
+                              a.payload == b.payload and \
+                              a.opaque == b.opaque
 
     s.srcs  = [ TestSrcRTL ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( k_ary ) ]
@@ -159,6 +160,6 @@ def test_random( src_number ):
                     src_packets, sink_packets, 0, 0, 0, 0 )
 
   th.set_param( "top.dut.route_units*.construct", n_fly=n_fly )
-  th.set_param( "top.dut.line_trace",  )
+  # th.set_param( "top.dut.line_trace",  )
 
   run_sim( th )
