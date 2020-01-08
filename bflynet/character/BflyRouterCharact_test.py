@@ -163,3 +163,43 @@ def test_random( src_number ):
   # th.set_param( "top.dut.line_trace",  )
 
   run_sim( th )
+
+#-------------------------------------------------------------------------
+# test_char
+#-------------------------------------------------------------------------
+# FIXME: (5, 3), (6, 3) doesn't work
+
+@pytest.mark.parametrize(
+  'k_ary, n_fly',
+  [ (2, 6), (3, 4), (4, 3), (5, 2), (6, 2), (8, 2) ],
+)
+def test_char( k_ary, n_fly ):
+
+  num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
+  src_packets   = [ [] for _ in range(k_ary) ]
+  sink_packets  = [ [] for _ in range(k_ary) ]
+  payload_wid   = 32
+
+  BEGIN      = clog2( k_ary ) * n_fly - clog2( k_ary )
+  END        = clog2( k_ary ) * n_fly
+  src        = 0
+  PacketType = mk_bfly_pkt( k_ary, n_fly )
+  pkt_n      = 25
+
+  for _ in range( pkt_n ):
+    for di in range( k_ary ):
+      dst     = di*( k_ary**(n_fly-1) )
+      bf_dst  = set_dst( k_ary, n_fly, dst )
+      payload = random.randint( 0, 2**payload_wid )
+      pkt     = PacketType( src, bf_dst, 0, payload)
+      src_packets [ src % k_ary ].append( pkt )
+      # print( bf_dst, pkt.dst[ BEGIN : END ] )
+      sink_packets[ pkt.dst[ BEGIN : END ] ].append( pkt )
+
+  pos_row = 1
+  pos_fly = 0
+
+  th = TestHarness( PacketType, k_ary, n_fly, pos_row, pos_fly,
+                    src_packets, sink_packets, 0, 0, 0, 0 )
+
+  run_sim( th, translation='yosys' )
