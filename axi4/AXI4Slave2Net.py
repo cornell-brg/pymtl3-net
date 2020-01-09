@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-AXI4Slave2Net.py
+AXI4Slave2NetSend.py
 ==========================================================================
 Adapter that converts AXI4 transaction to mesh network packets. We use
 arid and awid to inidicate the destination terminal.
@@ -24,16 +24,16 @@ class AXI4Slave2Net( Component ):
     # AXI Slave interface
 
     s.read_addr = RecvIfcRTL( AXI4AddrRead )
-    s.read_data = SendIfcRTL( AXI4DataRead )
+    # s.read_data = SendIfcRTL( AXI4DataRead )
 
     s.write_addr = RecvIfcRTL( AXI4AddrWrite )
     s.write_data = RecvIfcRTL( AXI4DataWrite )
-    s.write_resp = SendIfcRTL( AXI4WriteResp )
+    # s.write_resp = SendIfcRTL( AXI4WriteResp )
 
     # Network interface
 
     s.net_send = SendIfcRTL( PktType )
-    s.net_recv = SendIfcRTL( PktType )
+    # s.net_recv = SendIfcRTL( PktType )
 
     # Constants
 
@@ -47,13 +47,13 @@ class AXI4Slave2Net( Component ):
     # Registers
 
     s.state    = Wire( Bits2  )
-    s.dst_x    = Wire( Bits3  )
-    s.dst_y    = Wire( Bits3  )
+    s.dst_x_r  = Wire( Bits3  )
+    s.dst_y_r  = Wire( Bits3  )
 
-    s.rd_req   = Wire( Bits1  )
-    s.wr_req   = Wire( Bits1  )
-    s.data_len = Wire( Bits8  )
-    s.addr_reg = Wire( Bits64 )
+    s.is_rd_r = Wire( Bits1  )
+    s.is_wr_r = Wire( Bits1  )
+    s.len_r  = Wire( Bits8  )
+    s.addr_r = Wire( Bits64 )
 
     # Wires
 
@@ -64,6 +64,7 @@ class AXI4Slave2Net( Component ):
     s.read_addr.rdy  //= lambda: ( s.state == s.HEADER ) & s.net_send.rdy
     s.write_addr.rdy //= lambda: ( s.state == s.HEADER ) & s.net_send.rdy
     s.write_data.rdy //= lambda: ( s.state == s.DATA   ) & s.net_send.rdy
+    s.net_send.en    //= lambda: s.read_addr.en | s.write_addr.en | s.write_data.en
 
     @s.update_ff
     def up_state():
@@ -81,15 +82,15 @@ class AXI4Slave2Net( Component ):
           s.state_next = s.HEADER
 
       elif s.state == s.ADDR:
-        if s.net_send.en & s.wr_req:
+        if s.net_send.en & s.is_wr_r:
           s.state_next = s.DATA
-        elif s.net_send.en & s.rd_req:
+        elif s.net_send.en & s.is_rd_r:
           s.state_next = s.HEADER
         else:
           s.state_next = s.ADDR
 
       else: # s.state == s.DATA
-        if ( s.data_len == b8(1) ) & s.net_send.en:
+        if ( s.len_r == b8(1) ) & s.net_send.en:
           s.state_next = s.HEADER
         else:
           s.state_next = s.DATA
@@ -99,7 +100,43 @@ class AXI4Slave2Net( Component ):
 
     @s.update
     def up_dst_pos():
-      ...
+      if ( s.state == s.HEADER ) & s.read_addr.en:
+        s.net_send.msg.dst_x = s.read_addr.msg.aruser[3:6]
+        s.net_send.msg.dst_y = s.read_addr.msg.aruser[0:3]
+
+      elif ( s.state == s.HEADER ) & s.write_addr.en:
+        s.net_send.msg.dst_x = s.write_addr.msg.aruser[3:6]
+        s.net_send.msg.dst_y = s.write_addr.msg.aruser[0:3]
+      
+      else:
+        s.net_send.msg.dst_x = s.dst_x_r
+        s.net_send.msg.dst_y = s.dst_y_r
+
+    @s.update_ff
+    def up_len_r():
+      if ( s.state == s.HEADER ) & s.read_addr.en:
+        s.len_r <<= s.read_addr.arlen
+      elif ( s.state == s.HEADER ) & s.write_addr.en:
+        s.len_r <<= s.write_addr.arlen
+      elif ( s.state == s.DATA ) & s.net_send.en:
+        s.len_r <<= s.len_r - b8(1)
+      else:
+        s.len_r <<= s.len_r
+
+    @s.update_ff
+    def up_misc_reg():
+      if ( s.state == s.HEADER ) & s.read_addr.en:
+        s.is_rd_r <<= b1(1)
+        s.is_wr_r <<= b1(0)
+        s.addr_r  <<= s.read_addr.araddr
+      elif ( s.state == s.HEADER ) & s.write_addr.en:
+        s.is_rd_r <<= b1(0)
+        s.is_wr_r <<= b1(1)
+        s.addr_r  <<= s.read_addr.awaddr
+      else:
+        s.is_rd_r <<= s.is_rd_r
+        s.is_wr_r <<= s.is_wr_r
+        s.addr_r  <<= s.addr_r
 
     @s.update
     def up_payload():
@@ -107,38 +144,38 @@ class AXI4Slave2Net( Component ):
 
         # Assembles a read request
         if s.read_addr.en:
-          s.noc_send.msg.payload[ MTYPE  ] = TYPE_RD
-          s.noc_send.msg.payload[ LEN    ] = s.read_addr.msg.arlen
-          s.noc_send.msg.payload[ SIZE   ] = s.read_addr.msg.arsize
-          s.noc_send.msg.payload[ BURST  ] = s.read_addr.msg.arburst
-          s.noc_send.msg.payload[ LOCK   ] = s.read_addr.msg.arlock
-          s.noc_send.msg.payload[ CACHE  ] = s.read_addr.msg.arcache
-          s.noc_send.msg.payload[ PROT   ] = s.read_addr.msg.arprot
-          s.noc_send.msg.payload[ QOS    ] = s.read_addr.msg.arqos
-          s.noc_send.msg.payload[ REGION ] = s.read_addr.msg.arregion
-          s.noc_send.msg.payload[ REUSER ] = s.read_addr.msg.aruser
+          s.net_send.msg.payload[ MTYPE  ] = TYPE_RD
+          s.net_send.msg.payload[ LEN    ] = s.read_addr.msg.arlen
+          s.net_send.msg.payload[ SIZE   ] = s.read_addr.msg.arsize
+          s.net_send.msg.payload[ BURST  ] = s.read_addr.msg.arburst
+          s.net_send.msg.payload[ LOCK   ] = s.read_addr.msg.arlock
+          s.net_send.msg.payload[ CACHE  ] = s.read_addr.msg.arcache
+          s.net_send.msg.payload[ PROT   ] = s.read_addr.msg.arprot
+          s.net_send.msg.payload[ QOS    ] = s.read_addr.msg.arqos
+          s.net_send.msg.payload[ REGION ] = s.read_addr.msg.arregion
+          s.net_send.msg.payload[ REUSER ] = s.read_addr.msg.aruser
 
         # Assembles a write request
         elif s.write_addr.en:
-          s.noc_send.msg.payload[ MTYPE  ] = TYPE_WR
-          s.noc_send.msg.payload[ LEN    ] = s.write_addr.msg.awlen
-          s.noc_send.msg.payload[ SIZE   ] = s.write_addr.msg.awsize
-          s.noc_send.msg.payload[ BURST  ] = s.write_addr.msg.awburst
-          s.noc_send.msg.payload[ LOCK   ] = s.write_addr.msg.awlock
-          s.noc_send.msg.payload[ CACHE  ] = s.write_addr.msg.awcache
-          s.noc_send.msg.payload[ PROT   ] = s.write_addr.msg.awprot
-          s.noc_send.msg.payload[ QOS    ] = s.write_addr.msg.awqos
-          s.noc_send.msg.payload[ REGION ] = s.write_addr.msg.awregion
-          s.noc_send.msg.payload[ REUSER ] = s.write_addr.msg.awuser
+          s.net_send.msg.payload[ MTYPE  ] = TYPE_WR
+          s.net_send.msg.payload[ LEN    ] = s.write_addr.msg.awlen
+          s.net_send.msg.payload[ SIZE   ] = s.write_addr.msg.awsize
+          s.net_send.msg.payload[ BURST  ] = s.write_addr.msg.awburst
+          s.net_send.msg.payload[ LOCK   ] = s.write_addr.msg.awlock
+          s.net_send.msg.payload[ CACHE  ] = s.write_addr.msg.awcache
+          s.net_send.msg.payload[ PROT   ] = s.write_addr.msg.awprot
+          s.net_send.msg.payload[ QOS    ] = s.write_addr.msg.awqos
+          s.net_send.msg.payload[ REGION ] = s.write_addr.msg.awregion
+          s.net_send.msg.payload[ REUSER ] = s.write_addr.msg.awuser
 
         else:
-          s.noc_send.msg.payload = b64(0)
+          s.net_send.msg.payload = b64(0)
           
       elif s.state == s.ADDR:
-        s.net_send.msg.payload = s.addr_reg
+        s.net_send.msg.payload = s.addr_r
 
       else: # s.state == s.DATA
         s.net_send.msg.payload = s.write_data.wdata
 
   def line_trace( s ):
-    return ''
+    return f'{s.read_addr}II{s.write_addr}|{s.write_data}({s.state}){s.net_send}'
