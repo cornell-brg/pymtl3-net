@@ -52,8 +52,8 @@ class AXI4Slave2NetSend( Component ):
 
     s.is_rd_r = Wire( Bits1  )
     s.is_wr_r = Wire( Bits1  )
-    s.len_r  = Wire( Bits8  )
-    s.addr_r = Wire( Bits64 )
+    s.len_r   = Wire( Bits8  )
+    s.addr_r  = Wire( Bits64 )
 
     # Wires
 
@@ -144,7 +144,7 @@ class AXI4Slave2NetSend( Component ):
 
         # Assembles a read request
         if s.read_addr.en:
-          s.net_send.msg.payload[ MTYPE  ] = TYPE_RD
+          s.net_send.msg.opaque            = TYPE_RD
           s.net_send.msg.payload[ LEN    ] = s.read_addr.msg.arlen
           s.net_send.msg.payload[ SIZE   ] = s.read_addr.msg.arsize
           s.net_send.msg.payload[ BURST  ] = s.read_addr.msg.arburst
@@ -157,7 +157,7 @@ class AXI4Slave2NetSend( Component ):
 
         # Assembles a write request
         elif s.write_addr.en:
-          s.net_send.msg.payload[ MTYPE  ] = TYPE_WR
+          s.net_send.msg.opaque            = TYPE_WR
           s.net_send.msg.payload[ LEN    ] = s.write_addr.msg.awlen
           s.net_send.msg.payload[ SIZE   ] = s.write_addr.msg.awsize
           s.net_send.msg.payload[ BURST  ] = s.write_addr.msg.awburst

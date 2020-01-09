@@ -110,6 +110,6 @@ LEN    = slice(32, 40)
 MTYPE  = slice(40, 44)
 OPQ    = slice(44, 64)
 
-TYPE_RD = b4(0)
-TYPE_WR = b4(1)
+TYPE_RD = b8(0)
+TYPE_WR = b8(1)
 
