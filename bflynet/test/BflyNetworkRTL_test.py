@@ -79,10 +79,10 @@ def test_vector_2ary_1fly( dump_vcd, test_verilog ):
   BflyPacket   = mk_bfly_pkt( k_ary, n_fly )
   model = BflyNetworkRTL( BflyPacket, BflyPosition, k_ary, n_fly, 0 )
 
-  model.set_param( "top.routers*.construct",
-                   k_ary=k_ary )
-  model.set_param( "top.routers*.route_units*.construct",
-                   n_fly=n_fly )
+  # model.set_param( "top.routers*.construct",
+  #                  k_ary=k_ary )
+  # model.set_param( "top.routers*.route_units*.construct",
+  #                  n_fly=n_fly )
   model.set_param( "top.routers*.input_units*.construct",
                    QueueType=NormalQueueRTL )
 
@@ -238,8 +238,6 @@ def test_srcsink_4ary_2fly():
   th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets,
                     0, 0, 0, 0 )
 
-  th.set_param( "top.dut.routers*.route_units*.construct", n_fly=n_fly )
-  th.set_param( "top.dut.routers*.construct", k_ary=k_ary )
   th.set_param( "top.dut.line_trace",  )
 
   run_sim( th )

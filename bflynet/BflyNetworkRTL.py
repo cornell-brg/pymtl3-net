@@ -36,7 +36,7 @@ class BflyNetworkRTL( Component ):
 
     # Components
 
-    s.routers  = [ BflyRouterRTL( PacketType, PositionType )
+    s.routers  = [ BflyRouterRTL( PacketType, PositionType, k_ary, n_fly )
                    for i in range( s.num_routers ) ]
 
     s.channels = [ ChannelRTL( PacketType, latency = chl_lat )
