@@ -144,7 +144,8 @@ class AXI4Slave2NetSend( Component ):
 
         # Assembles a read request
         if s.read_addr.en:
-          s.net_send.msg.opaque            = TYPE_RD
+          s.net_send.msg.opaque[0:4]       = TYPE_RD
+          s.net_send.msg.opaque[4:8]       = b4(0xf)
           s.net_send.msg.payload[ LEN    ] = s.read_addr.msg.arlen
           s.net_send.msg.payload[ SIZE   ] = s.read_addr.msg.arsize
           s.net_send.msg.payload[ BURST  ] = s.read_addr.msg.arburst
@@ -157,7 +158,8 @@ class AXI4Slave2NetSend( Component ):
 
         # Assembles a write request
         elif s.write_addr.en:
-          s.net_send.msg.opaque            = TYPE_WR
+          s.net_send.msg.opaque[0:4]       = TYPE_WR
+          s.net_send.msg.opaque[4:8]       = b4(0xf)
           s.net_send.msg.payload[ LEN    ] = s.write_addr.msg.awlen
           s.net_send.msg.payload[ SIZE   ] = s.write_addr.msg.awsize
           s.net_send.msg.payload[ BURST  ] = s.write_addr.msg.awburst
@@ -169,13 +171,19 @@ class AXI4Slave2NetSend( Component ):
           s.net_send.msg.payload[ USER   ] = s.write_addr.msg.awuser
 
         else:
-          s.net_send.msg.payload = b64(0)
+          s.net_send.msg.opaque[0:4] = TYPE_RD if s.is_rd_r else TYPE_WR
+          s.net_send.msg.opaque[4:8] = b4(0xf)
+          s.net_send.msg.payload     = b64(0)
           
       elif s.state == s.ADDR:
+        s.net_send.msg.opaque[0:4] = TYPE_RD if s.is_rd_r else TYPE_WR
+        s.net_send.msg.opaque[4:8] = b4(0xf)
         s.net_send.msg.payload = s.addr_r
 
       else: # s.state == s.DATA
-        s.net_send.msg.payload = s.write_data.msg.wdata
+        s.net_send.msg.opaque[0:4] = TYPE_RD if s.is_rd_r else TYPE_WR
+        s.net_send.msg.opaque[4:8] = s.write_data.msg.wlast
+        s.net_send.msg.payload     = s.write_data.msg.wdata
 
   def line_trace( s ):
     return f'{s.read_addr}II{s.write_addr}|{s.write_data}({s.state}){s.net_send}'
