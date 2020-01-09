@@ -63,7 +63,7 @@ class AXI4Slave2NetSend( Component ):
 
     s.read_addr.rdy  //= lambda: ( s.state == s.HEADER ) & s.net_send.rdy
     s.write_addr.rdy //= lambda: ( s.state == s.HEADER ) & s.net_send.rdy
-    s.write_data.rdy //= lambda: ( ( s.state == s.DATA   ) & s.net_send.rdy )
+    s.write_data.rdy //= lambda: ( s.state == s.DATA   ) & s.net_send.rdy
     s.net_send.en    //= lambda: s.read_addr.en | s.write_addr.en | s.write_data.en | ( s.state == s.ADDR ) & s.net_send.rdy
 
     @s.update_ff
