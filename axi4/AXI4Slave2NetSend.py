@@ -17,7 +17,7 @@ from ocn_pclib.ifcs.packets import mk_mesh_pkt
 
 from .axi4_msgs import *
 
-class AXI4Slave2Net( Component ):
+class AXI4Slave2NetSend( Component ):
 
   def construct( s, PktType, xpos=0, ypos=0 ):
 
