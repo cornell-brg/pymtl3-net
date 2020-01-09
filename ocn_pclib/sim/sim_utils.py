@@ -851,3 +851,8 @@ def smoke_test( topo, opts ):
     print( f' - [{_green}passed{_reset}]' )
   else:
     print( f' - [{_green}FAILED{_reset}]' )
+
+  # Extra ticks to improve waveform
+  net.tick()
+  net.tick()
+  net.tick()
