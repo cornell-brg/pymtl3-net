@@ -37,9 +37,9 @@ class AXI4Slave2NetSend( Component ):
 
     # Constants
 
-    s.HEADER = b1(0) # Assemble header packet
-    s.ADDR   = b1(1) # Assemble addr packet 
-    s.DATA   = b1(2) # Assemble body packet
+    s.HEADER = b2(0) # Assemble header packet
+    s.ADDR   = b2(1) # Assemble addr packet 
+    s.DATA   = b2(2) # Assemble body packet
 
     s.xpos   = b3( xpos )
     s.ypos   = b3( ypos )
@@ -105,8 +105,8 @@ class AXI4Slave2NetSend( Component ):
         s.net_send.msg.dst_y = s.read_addr.msg.aruser[0:3]
 
       elif ( s.state == s.HEADER ) & s.write_addr.en:
-        s.net_send.msg.dst_x = s.write_addr.msg.aruser[3:6]
-        s.net_send.msg.dst_y = s.write_addr.msg.aruser[0:3]
+        s.net_send.msg.dst_x = s.write_addr.msg.awuser[3:6]
+        s.net_send.msg.dst_y = s.write_addr.msg.awuser[0:3]
       
       else:
         s.net_send.msg.dst_x = s.dst_x_r
@@ -115,9 +115,9 @@ class AXI4Slave2NetSend( Component ):
     @s.update_ff
     def up_len_r():
       if ( s.state == s.HEADER ) & s.read_addr.en:
-        s.len_r <<= s.read_addr.arlen
+        s.len_r <<= s.read_addr.msg.arlen
       elif ( s.state == s.HEADER ) & s.write_addr.en:
-        s.len_r <<= s.write_addr.arlen
+        s.len_r <<= s.write_addr.msg.awlen
       elif ( s.state == s.DATA ) & s.net_send.en:
         s.len_r <<= s.len_r - b8(1)
       else:
@@ -128,11 +128,11 @@ class AXI4Slave2NetSend( Component ):
       if ( s.state == s.HEADER ) & s.read_addr.en:
         s.is_rd_r <<= b1(1)
         s.is_wr_r <<= b1(0)
-        s.addr_r  <<= s.read_addr.araddr
+        s.addr_r  <<= s.read_addr.msg.araddr
       elif ( s.state == s.HEADER ) & s.write_addr.en:
         s.is_rd_r <<= b1(0)
         s.is_wr_r <<= b1(1)
-        s.addr_r  <<= s.read_addr.awaddr
+        s.addr_r  <<= s.write_addr.msg.awaddr
       else:
         s.is_rd_r <<= s.is_rd_r
         s.is_wr_r <<= s.is_wr_r
@@ -175,7 +175,7 @@ class AXI4Slave2NetSend( Component ):
         s.net_send.msg.payload = s.addr_r
 
       else: # s.state == s.DATA
-        s.net_send.msg.payload = s.write_data.wdata
+        s.net_send.msg.payload = s.write_data.msg.wdata
 
   def line_trace( s ):
     return f'{s.read_addr}II{s.write_addr}|{s.write_data}({s.state}){s.net_send}'
