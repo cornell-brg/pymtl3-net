@@ -26,7 +26,7 @@ BitsAXI4PortWidth = Bits3
 BitsAXI4QoSWidth = Bits4
 BitsAXI4RegionWidth = Bits4
 BitsAXI4UserWidth = Bits11
-BitsAXI4DataWidth = Bits512
+BitsAXI4DataWidth = Bits64 # Bits512
 BitsAXI4RespWidth = Bits2
 BitsAXI4StrbWidth = Bits64
 
@@ -56,7 +56,7 @@ class AXI4DataRead:
   ruser : Bits11
 
   def __str__( self ):
-    return f'{self.rdata[480:512]}...{self.rdata[0:32]}'
+    return f'{self.rdata}'
 
 @bitstruct
 class AXI4AddrWrite:
@@ -79,12 +79,12 @@ class AXI4AddrWrite:
 class AXI4DataWrite:
   wid      : Bits6
   wdata    : BitsAXI4DataWidth # Btis512 
-  wstrb    : Bits64
+  wstrb    : Bits8
   wlast    : Bits1
   wuser    : Bits11
 
   def __str__( self ):
-    return f'{self.wstrb}:{self.wdata[480:512]}...{self.wdata[0:32]}'
+    return f'{self.wstrb}:{self.wdata}'
 
 @bitstruct
 class AXI4WriteResp:

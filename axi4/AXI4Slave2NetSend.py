@@ -63,8 +63,8 @@ class AXI4Slave2NetSend( Component ):
 
     s.read_addr.rdy  //= lambda: ( s.state == s.HEADER ) & s.net_send.rdy
     s.write_addr.rdy //= lambda: ( s.state == s.HEADER ) & s.net_send.rdy
-    s.write_data.rdy //= lambda: ( s.state == s.DATA   ) & s.net_send.rdy
-    s.net_send.en    //= lambda: s.read_addr.en | s.write_addr.en | s.write_data.en
+    s.write_data.rdy //= lambda: ( ( s.state == s.DATA   ) & s.net_send.rdy )
+    s.net_send.en    //= lambda: s.read_addr.en | s.write_addr.en | s.write_data.en | ( s.state == s.ADDR ) & s.net_send.rdy
 
     @s.update_ff
     def up_state():
@@ -101,12 +101,12 @@ class AXI4Slave2NetSend( Component ):
     @s.update
     def up_dst_pos():
       if ( s.state == s.HEADER ) & s.read_addr.en:
-        s.net_send.msg.dst_x = s.read_addr.msg.aruser[3:6]
-        s.net_send.msg.dst_y = s.read_addr.msg.aruser[0:3]
+        s.net_send.msg.dst_x = s.read_addr.msg.arid[3:6]
+        s.net_send.msg.dst_y = s.read_addr.msg.arid[0:3]
 
       elif ( s.state == s.HEADER ) & s.write_addr.en:
-        s.net_send.msg.dst_x = s.write_addr.msg.awuser[3:6]
-        s.net_send.msg.dst_y = s.write_addr.msg.awuser[0:3]
+        s.net_send.msg.dst_x = s.write_addr.msg.awid[3:6]
+        s.net_send.msg.dst_y = s.write_addr.msg.awid[0:3]
       
       else:
         s.net_send.msg.dst_x = s.dst_x_r
@@ -153,7 +153,7 @@ class AXI4Slave2NetSend( Component ):
           s.net_send.msg.payload[ PROT   ] = s.read_addr.msg.arprot
           s.net_send.msg.payload[ QOS    ] = s.read_addr.msg.arqos
           s.net_send.msg.payload[ REGION ] = s.read_addr.msg.arregion
-          s.net_send.msg.payload[ REUSER ] = s.read_addr.msg.aruser
+          s.net_send.msg.payload[ USER   ] = s.read_addr.msg.aruser
 
         # Assembles a write request
         elif s.write_addr.en:
@@ -166,7 +166,7 @@ class AXI4Slave2NetSend( Component ):
           s.net_send.msg.payload[ PROT   ] = s.write_addr.msg.awprot
           s.net_send.msg.payload[ QOS    ] = s.write_addr.msg.awqos
           s.net_send.msg.payload[ REGION ] = s.write_addr.msg.awregion
-          s.net_send.msg.payload[ REUSER ] = s.write_addr.msg.awuser
+          s.net_send.msg.payload[ USER   ] = s.write_addr.msg.awuser
 
         else:
           s.net_send.msg.payload = b64(0)
