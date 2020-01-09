@@ -194,8 +194,8 @@ def _mk_bfly_net( opts ):
   Pos = mk_bfly_pos( kary, nfly )
   Pkt = mk_bfly_pkt( kary, nfly, vc=1, payload_nbits=payload_nbits )
   net = BflyNetworkRTL( Pkt, Pos, kary, nfly, channel_lat )
-  net.set_param( "top.routers*.construct", k_ary=kary )
-  net.set_param( "top.routers*.route_units*.construct", n_fly=nfly )
+  # net.set_param( "top.routers*.construct", k_ary=kary )
+  # net.set_param( "top.routers*.route_units*.construct", n_fly=nfly )
 
   return net
 
