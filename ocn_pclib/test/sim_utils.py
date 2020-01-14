@@ -5,7 +5,7 @@ from pymtl3.passes.backends.yosys import TranslationImportPass as YSTransImport
 from pymtl3.passes.backends.yosys import ImportConfigs as YSConfig
 
 # Assumes th.dut
-def run_sim( th, max_cycles=1000, translation='' ):
+def run_sim( th, max_cycles=1000, translation='', trace=True ):
 
   th.elaborate()
 
@@ -32,12 +32,15 @@ def run_sim( th, max_cycles=1000, translation='' ):
 
   # Run simulation
   ncycles = 0
-  print()
-  print( "{:3}:{}".format( ncycles, th.line_trace() ))
+
+  if trace:
+    print()
+    print( "{:3}:{}".format( ncycles, th.line_trace() ))
+
   while not th.done() and ncycles < max_cycles:
     th.tick()
     ncycles += 1
-    print( "{:3}:{}".format( ncycles, th.line_trace() ))
+    if trace: print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
   # Check timeout
   assert ncycles < max_cycles
