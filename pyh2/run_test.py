@@ -12,7 +12,11 @@ import sys
 import os
 from pymtl3 import *
 
-from .crt_utils import run_crt
+# Hacky way to add the project root directory to path
+sys.path.insert( 0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
+print( os.path.dirname( os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) ) )
+
+from crt_utils import run_crt
 
 #-------------------------------------------------------------------------
 # add_generic_args
@@ -22,6 +26,7 @@ from .crt_utils import run_crt
 def add_generic_args( p ):
   p.add_argument( '-v', '--verbose', action='store_true' )
   p.add_argument(       '--max-nterminals', type=int, default=8, metavar='' )
+  p.add_argument(       '--translate', choices=['', 'sverilog', 'yosys'], default='' )
 
 #=========================================================================
 # multi-level command line parser

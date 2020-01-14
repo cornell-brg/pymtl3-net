@@ -10,7 +10,7 @@ Author : Yanghui Ou
 import random
 from ocn_pclib.ifcs.packets import mk_ring_pkt
 
-from .common_utils import TestReport, run_test_case
+from common_utils import TestReport, run_test_case
 
 #--------------------------------------------------------------------------
 # rand_pkt
@@ -35,7 +35,7 @@ def run_crt( opts ):
     test_seq   = [ rand_pkt( PktType, nterminals ) for _ in range(ntrans) ]
 
     try:
-      run_test_case( nterminals, test_seq, max_cycles=ntrans*50, opts.translate, False )
+      run_test_case( nterminals, test_seq, max_cycles=ntrans*50, translate=opts.translate, trace=False )
 
     except Exception as e:
       rpt = TestReport(
