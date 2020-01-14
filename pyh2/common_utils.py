@@ -12,6 +12,8 @@ import subprocess
 from dataclasses import dataclass
 from pymtl3 import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from ocn_pclib.ifcs.packets import mk_ring_pkt
+from ocn_pclib.ifcs.positions import mk_ring_pos
 from ocn_pclib.test.net_sinks import TestNetSinkRTL
 from ocn_pclib.test import run_sim
 
