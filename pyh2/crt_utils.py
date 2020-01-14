@@ -28,11 +28,15 @@ def rand_pkt( PktType, nterminals ):
 
 def run_crt( opts ):
   max_nterminals = opts.max_nterminals
+  max_ntrans      = opts.max_ntrans
 
   for i in range( opts.max_examples ):
     nterminals = random.randint(2, max_nterminals)
-    ntrans     = random.randint(1, max_trans)
+    ntrans     = random.randint(1, max_ntrans)
+    PktType    = mk_ring_pkt( nterminals )
     test_seq   = [ rand_pkt( PktType, nterminals ) for _ in range(ntrans) ]
+
+    run_test_case( nterminals, test_seq, max_cycles=ntrans*50, translate=opts.translate, trace=False )
 
     try:
       run_test_case( nterminals, test_seq, max_cycles=ntrans*50, translate=opts.translate, trace=False )

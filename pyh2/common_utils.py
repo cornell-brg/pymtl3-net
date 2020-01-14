@@ -56,13 +56,13 @@ class TestReport:
 
 class RingTestHarness( Component ):
 
-  def construct( PktType, nterminals, src_pkts, sink_pkts ):
+  def construct( s, PktType, nterminals, src_pkts, sink_pkts ):
 
     RingPos = mk_ring_pos( nterminals )
     cmp_fn  = lambda a, b: a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL( PktType, src_pkts[i] ) for i in range(nterminals) ]
-    s.dut   = RingNetworkRTL( PktType, RingPos, nterminals, 0 )
+    s.dut   = RingNetworkRTL( PktType, RingPos, nterminals )
     s.sinks = [ TestNetSinkRTL( PktType, sink_pkts[i], match_func=cmp_fn )
                 for i in range(nterminals) ]
 
@@ -70,16 +70,16 @@ class RingTestHarness( Component ):
       s.srcs[i].send //= s.dut.recv[i]
       s.dut.send[i]  //= s.sinks[i].recv
 
-    def done( s ):
-      srcs_done  = True
-      sinks_done = True
-      for src, sink in zip( s.srcs, s.sinks ):
-        srcs_done  = srcs_done and src.done()
-        sinks_done = sinks_done and sinks_done()
-      return srcs_done and sinks_done
+  def done( s ):
+    srcs_done  = True
+    sinks_done = True
+    for src, sink in zip( s.srcs, s.sinks ):
+      srcs_done  = srcs_done and src.done()
+      sinks_done = sinks_done and sink.done()
+    return srcs_done and sinks_done
 
-    def line_trace( s ):
-      return s.dut.line_trace()
+  def line_trace( s ):
+    return s.dut.line_trace()
 
 #-------------------------------------------------------------------------
 # mk_src_pkts
@@ -97,8 +97,8 @@ def mk_src_pkts( nterminals, lst ):
 
 def run_test_case( nterminals, test_seq, max_cycles=1000, translate='', trace=False ):
   PktType  = mk_ring_pkt( nterminals )
-  src_pkts = mk_src_pkts( test_seq )
+  src_pkts = mk_src_pkts( nterminals, test_seq )
   dst_pkts = ringnet_fl( src_pkts )
 
-  th = TestHarness( PktType, nterminals, src_pkts, sink_pkts )
+  th = RingTestHarness( PktType, nterminals, src_pkts, dst_pkts )
   run_sim( th, max_cycles, translate, trace )

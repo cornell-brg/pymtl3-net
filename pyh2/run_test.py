@@ -26,6 +26,7 @@ from crt_utils import run_crt
 def add_generic_args( p ):
   p.add_argument( '-v', '--verbose', action='store_true' )
   p.add_argument(       '--max-nterminals', type=int, default=8, metavar='' )
+  p.add_argument(       '--max-ntrans', type=int, default=20, metavar='' )
   p.add_argument(       '--translate', choices=['', 'sverilog', 'yosys'], default='' )
 
 #=========================================================================
