@@ -70,6 +70,8 @@ def run_idt( opts ):
 
             run_test_case( nterminals, test_seq, max_cycles=ntrans*50, translate=opts.translate, trace=False )
             test_idx += 1
+            if test_idx >= opts.max_examples:
+              return TestReport( ntests=test_idx, failed=False )
 
           except Exception as e:
             rpt = TestReport(
@@ -79,8 +81,11 @@ def run_idt( opts ):
               complexity = avg_complexity( test_seq ),
               failed     = True,
             )
+
             if opts.verbose:
               print( f'{e}' )
+
+            return rpt
 
     cur_nterm += step_nterm
     cur_ntran += step_ntran

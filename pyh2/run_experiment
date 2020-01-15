@@ -13,12 +13,12 @@ import sys
 import os
 import json
 import re
-import random
+import json
 
 # Hacky way to add the project root directory to path
 sys.path.insert( 0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 
-from common_utils import run_cmd
+from common_utils import run_cmd, TestReport
 
 #-------------------------------------------------------------------------
 # ExpResult
@@ -50,12 +50,21 @@ class ExpResult:
       'not_caught': self.not_caught,
     }
 
+  def __str__( self ):
+    return f'{self.to_dict()}'
+
 #-------------------------------------------------------------------------
 # parse_result
 #-------------------------------------------------------------------------
 
+begin_pattern = re.compile( r'^\s*(//|#)>-----+$' )
+end_pattern   = re.compile( r'^\s*(//|#)<-----+$' )
+
 def parse_result( result_str ):
-  ...
+  lst = result_str.split( '\n' )
+  for i, line in enumerate( lst ):
+    if begin_pattern.match( line ):
+      return eval( lst[i+1] )
 
 #=========================================================================
 # main
@@ -78,6 +87,10 @@ def main():
 
   opts = p.parse_args()
 
+  res_crt  = ExpResult()
+  res_idt  = ExpResult()
+  res_pyh2 = ExpResult()
+
   for bug_idx in range( opts.nbugs ):
 
     # Inject a bug here
@@ -91,19 +104,51 @@ def main():
 
       # run crt test
 
+      print( '*'*30 + ' pyh2 ' + '*'*30 )
+      result = run_cmd(
+        f'./run_test crt --max-examples {opts.max_examples}'
+        f' --max-ntrans {opts.max_ntrans}'
+        f' --max-nterminals {opts.max_nterminals}'
+        # f' --translate {opts.translate}'
+      )
+      rpt = parse_result( result )
+      res_crt.add_data( rpt )
+
       # run idt test
 
+      print( '*'*30 + ' pyh2 ' + '*'*30 )
+      result = run_cmd(
+        f'./run_test idt --max-examples {opts.max_examples}'
+        f' --tests-per-step {opts.tests_per_step}'
+        f' --max-ntrans {opts.max_ntrans}'
+        f' --max-nterminals {opts.max_nterminals}'
+        # f' --translate {opts.translate}'
+      )
+      rpt = parse_result( result )
+      res_idt.add_data( rpt )
+
       # run pyh2 test
-      # TODO: remove hypothesis cache
+
       print()
       print( '*'*30 + ' pyh2 ' + '*'*30 )
+      run_cmd( 'rm -rf .hypothesis/' )
       result = run_cmd(
         f'./run_test pyh2 --max-examples {opts.max_examples}'
         f' --max-ntrans {opts.max_ntrans}'
         f' --max-nterminals {opts.max_nterminals}'
         # f' --translate {opts.translate}'
       )
-      # print( result )
+      rpt = parse_result( result )
+      res_pyh2.add_data( rpt )
+
+  # Store the data into json files
+  raw_data = {}
+  raw_data[ 'crt'  ] = res_crt.to_dict()
+  raw_data[ 'idt'  ] = res_idt.to_dict()
+  raw_data[ 'pyh2' ] = res_pyh2.to_dict()
+
+  with open( json_name, 'w' ) as f:
+    json.dump( raw_data, f, indent=2 )
 
 if __name__ == '__main__':
   main()

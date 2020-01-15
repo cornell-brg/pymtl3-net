@@ -76,6 +76,7 @@ class Driver:
   def idt( self ):
     p = argparse.ArgumentParser( description='iterative deepened test' )
     add_generic_args( p )
+    p.add_argument( '--max-examples', type=int, default=100, metavar='' )
     p.add_argument( '--tests-per-step', type=int, default=5, metavar='' )
 
     opts = p.parse_args( sys.argv[2:] )

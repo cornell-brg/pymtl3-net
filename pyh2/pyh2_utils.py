@@ -113,7 +113,7 @@ def run_sim( th, max_cycles=1000, translation='', trace=True ):
 
   if ncycles >= max_cycles:
     failed_global = True
-    raise PyH2TestFailed( '' )
+    raise PyH2TestFailed( 'time out!' )
 
 #-------------------------------------------------------------------------
 # run_test_case
