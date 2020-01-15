@@ -104,7 +104,8 @@ def main():
 
       # run crt test
 
-      print( '*'*30 + ' pyh2 ' + '*'*30 )
+      print()
+      print( '*'*32 + ' crt ' + '*'*32 )
       result = run_cmd(
         f'./run_test crt --max-examples {opts.max_examples}'
         f' --max-ntrans {opts.max_ntrans}'
@@ -116,7 +117,8 @@ def main():
 
       # run idt test
 
-      print( '*'*30 + ' pyh2 ' + '*'*30 )
+      print()
+      print( '*'*32 + ' idt ' + '*'*32 )
       result = run_cmd(
         f'./run_test idt --max-examples {opts.max_examples}'
         f' --tests-per-step {opts.tests_per_step}'
@@ -130,7 +132,7 @@ def main():
       # run pyh2 test
 
       print()
-      print( '*'*30 + ' pyh2 ' + '*'*30 )
+      print( '*'*32 + ' pyh2 ' + '*'*32 )
       run_cmd( 'rm -rf .hypothesis/' )
       result = run_cmd(
         f'./run_test pyh2 --max-examples {opts.max_examples}'
@@ -147,6 +149,13 @@ def main():
   raw_data[ 'idt'  ] = res_idt.to_dict()
   raw_data[ 'pyh2' ] = res_pyh2.to_dict()
 
+  json_name = (
+    f'ring-{opts.ntrials}t-'
+    f'{opts.max_examples}e-'
+    f'{opts.tests_per_step}s-'
+    f'{opts.max_ntrans}x-'
+    f'{opts.max_nterminals}n.json'
+  )
   with open( json_name, 'w' ) as f:
     json.dump( raw_data, f, indent=2 )
 
