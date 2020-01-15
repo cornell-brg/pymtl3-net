@@ -21,6 +21,36 @@ sys.path.insert( 0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) 
 from common_utils import run_cmd
 
 #-------------------------------------------------------------------------
+# ExpResult
+#-------------------------------------------------------------------------
+
+class ExpResult:
+  def __init__( self ):
+    self.ntests     = []
+    self.ntrans     = []
+    self.nterminals = []
+    self.complexity = []
+    self.not_caught = 0
+
+  def add_data( self, rpt ):
+    if rpt.failed:
+      self.ntests.append( rpt.ntests )
+      self.ntrans.append( rpt.ntrans )
+      self.nterminals.append( rpt.nterminals )
+      self.complexity.append( rpt.complexity )
+    else:
+      self.not_caught += 1
+
+  def to_dict( self ):
+    return {
+      'ntests': self.ntests,
+      'ntrans': self.ntrans,
+      'nterminals': self.nterminals,
+      'complexity': self.complexity,
+      'not_caught': self.not_caught,
+    }
+
+#-------------------------------------------------------------------------
 # parse_result
 #-------------------------------------------------------------------------
 
@@ -59,7 +89,12 @@ def main():
       print( f'bug #{bug_idx+1} trial{trial_idx+1}')
       print( '-'*74 )
 
+      # run crt test
+
+      # run idt test
+
       # run pyh2 test
+      # TODO: remove hypothesis cache
       print()
       print( '*'*30 + ' pyh2 ' + '*'*30 )
       result = run_cmd(
@@ -69,7 +104,6 @@ def main():
         # f' --translate {opts.translate}'
       )
       # print( result )
-
 
 if __name__ == '__main__':
   main()

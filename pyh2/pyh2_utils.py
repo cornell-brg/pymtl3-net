@@ -24,6 +24,16 @@ failed_global = False
 rpt           = TestReport()
 
 #-------------------------------------------------------------------------
+# reset_global
+#-------------------------------------------------------------------------
+
+def reset_global():
+  global test_idx, failed_global, rpt
+  test_idx      = 0
+  failed_global = False
+  rpt           = TestReport()
+
+#-------------------------------------------------------------------------
 # PyH2TestFailed
 #-------------------------------------------------------------------------
 
@@ -117,10 +127,10 @@ def run_test_case( nterminals, test_seq, max_cycles=1000, translate='', trace=Fa
   th = RingTestHarness( PktType, nterminals, src_pkts, dst_pkts )
   run_sim( th, max_cycles, translate, trace )
 
-
 #-------------------------------------------------------------------------
 # run_pyh2
 #-------------------------------------------------------------------------
+# TODO: Reset global variables before return
 
 def run_pyh2( opts ):
   global test_idx
