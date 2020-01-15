@@ -63,4 +63,4 @@ def run_crt( opts ):
 
       return rpt
 
-  return TestReport( nterminals=opts.max_examples, failed=False )
+  return TestReport( ntests=opts.max_examples, failed=False )

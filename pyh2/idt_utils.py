@@ -84,4 +84,4 @@ def run_idt( opts ):
     cur_nterm += step_nterm
     cur_ntran += step_ntran
 
-  return TestReport( nterminals=test_idx, failed=False )
+  return TestReport( ntests=test_idx, failed=False )

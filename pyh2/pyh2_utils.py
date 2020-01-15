@@ -13,7 +13,7 @@ from pymtl3 import *
 from ocn_pclib.ifcs.packets import mk_ring_pkt
 from ringnet import RingNetworkRTL
 from ringnet.RingNetworkFL import ringnet_fl
-from common_utils import TestReport, RingTestHarness
+from common_utils import TestReport, RingTestHarness, mk_src_pkts
 
 #-------------------------------------------------------------------------
 # global variable for hypothesis
@@ -34,7 +34,7 @@ class PyH2TestFailed( Exception ):
 # ring_pkt_strat
 #-------------------------------------------------------------------------
 
-@hypothesis.composite
+@st.composite
 def ring_pkt_strat( draw, nterminals ):
   PktType = mk_ring_pkt( nterminals )
   src     = draw( st.integers(0, nterminals-1) )
@@ -97,7 +97,7 @@ def run_sim( th, max_cycles=1000, translation='', trace=True ):
     if trace: print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
   # Check timeout
-  if local_failed or ncycles >= max_cycles:
+  if failed_local:
     failed_global = True
     raise PyH2TestFailed( 'test failed!' )
 
@@ -137,7 +137,7 @@ def run_pyh2( opts ):
     nterminals = st.integers( min_nterminals, max_nterminals ),
     seq        = st.data(),
   )
-  def _run_pyh2( nterminals, test_seq ):
+  def _run_pyh2( nterminals, seq ):
     global test_idx
     global failed_global
     global rpt

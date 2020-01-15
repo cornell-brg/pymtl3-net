@@ -14,7 +14,6 @@ from pymtl3 import *
 
 # Hacky way to add the project root directory to path
 sys.path.insert( 0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
-print( os.path.dirname( os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) ) )
 
 from crt_utils  import run_crt
 from idt_utils  import run_idt
@@ -103,7 +102,7 @@ class Driver:
     p.add_argument( '--max-examples', type=int, default=100, metavar='' )
 
     opts = p.parse_args( sys.argv[2:] )
-    rpt = run_crt( opts )
+    rpt = run_pyh2( opts )
 
     print()
     print( '-'*74 )
