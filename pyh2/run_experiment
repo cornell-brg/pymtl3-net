@@ -91,6 +91,8 @@ def main():
   res_idt  = ExpResult()
   res_pyh2 = ExpResult()
 
+  translate_flag = f' --translate {opts.translate}' if opts.translate else ''
+
   for bug_idx in range( opts.nbugs ):
 
     # Inject a bug here
@@ -110,7 +112,7 @@ def main():
         f'./run_test crt --max-examples {opts.max_examples}'
         f' --max-ntrans {opts.max_ntrans}'
         f' --max-nterminals {opts.max_nterminals}'
-        f' --translate {opts.translate}' if opts.translate else ''
+        f'{translate_flag}'
       )
       rpt = parse_result( result )
       res_crt.add_data( rpt )
@@ -124,7 +126,7 @@ def main():
         f' --tests-per-step {opts.tests_per_step}'
         f' --max-ntrans {opts.max_ntrans}'
         f' --max-nterminals {opts.max_nterminals}'
-        f' --translate {opts.translate}' if opts.translate else ''
+        f'{translate_flag}'
       )
       rpt = parse_result( result )
       res_idt.add_data( rpt )
@@ -138,7 +140,7 @@ def main():
         f'./run_test pyh2 --max-examples {opts.max_examples}'
         f' --max-ntrans {opts.max_ntrans}'
         f' --max-nterminals {opts.max_nterminals}'
-        f' --translate {opts.translate}' if opts.translate else ''
+        f'{translate_flag}'
       )
       rpt = parse_result( result )
       res_pyh2.add_data( rpt )
