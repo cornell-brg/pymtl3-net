@@ -76,6 +76,7 @@ def run_idt( opts ):
               ntests     = test_idx,
               ntrans     = ntrans,
               nterminals = nterminals,
+              complexity = avg_complexity( test_seq ),
               failed     = True,
             )
             if opts.verbose:

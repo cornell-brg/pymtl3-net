@@ -166,6 +166,7 @@ def run_pyh2( opts ):
         ntests     = test_idx,
         ntrans     = ntrans,
         nterminals = nterminals,
+        complexity = avg_complexity( test_seq ),
         failed     = True,
       )
 

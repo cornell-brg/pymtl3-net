@@ -10,7 +10,7 @@ Author : Yanghui Ou
 import random
 from ocn_pclib.ifcs.packets import mk_ring_pkt
 
-from common_utils import TestReport, run_test_case
+from common_utils import TestReport, run_test_case, avg_complexity
 
 #--------------------------------------------------------------------------
 # rand_pkt
@@ -56,6 +56,7 @@ def run_crt( opts ):
         ntests     = i+1,
         ntrans     = ntrans,
         nterminals = nterminals,
+        complexity = avg_complexity( test_seq ),
         failed     = True,
       )
       if opts.verbose:
