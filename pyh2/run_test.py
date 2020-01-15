@@ -55,6 +55,8 @@ class Driver:
     opts = p.parse_args( sys.argv[2:] )
     rpt = run_crt( opts )
 
+    print( '-'*74 )
+    print( 'Report' )
     print( '#>'+'-'*72 )
     print( rpt         )
     print( '#<'+'-'*72 )

@@ -39,6 +39,16 @@ def run_crt( opts ):
     run_test_case( nterminals, test_seq, max_cycles=ntrans*50, translate=opts.translate, trace=False )
 
     try:
+      if opts.verbose:
+        print()
+        print( '-'*74 )
+        print( f'crt #{i+1}' )
+        print( '-'*74 )
+        print( f'  + nterminals: {nterminals}' )
+        print( f'  + ntransactions: {ntrans}' )
+        print( f'  + test sequence:' )
+        print( '    ' + '\n    '.join([ str(p) for p in test_seq]) )
+
       run_test_case( nterminals, test_seq, max_cycles=ntrans*50, translate=opts.translate, trace=False )
 
     except Exception as e:
