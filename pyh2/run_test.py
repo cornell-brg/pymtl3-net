@@ -16,8 +16,9 @@ from pymtl3 import *
 sys.path.insert( 0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 print( os.path.dirname( os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) ) )
 
-from crt_utils import run_crt
-from idt_utils import run_idt
+from crt_utils  import run_crt
+from idt_utils  import run_idt
+from pyh2_utils import run_pyh2
 
 #-------------------------------------------------------------------------
 # add_generic_args
@@ -63,6 +64,11 @@ class Driver:
     print( rpt         )
     print( '#<'+'-'*72 )
 
+    if rpt.failed:
+      print( f' - failed at test #{rpt.ntests}' )
+    else:
+      print( f' - passed {rpt.ntests} tests' )
+
   #-----------------------------------------------------------------------
   # idt
   #-----------------------------------------------------------------------
@@ -81,6 +87,35 @@ class Driver:
     print( '#>'+'-'*72 )
     print( rpt         )
     print( '#<'+'-'*72 )
+
+    if rpt.failed:
+      print( f' - failed at test #{rpt.ntests}' )
+    else:
+      print( f' - passed {rpt.ntests} tests' )
+
+  #-----------------------------------------------------------------------
+  # pyh2
+  #-----------------------------------------------------------------------
+
+  def pyh2( self ):
+    p = argparse.ArgumentParser( description='pyh2 test' )
+    add_generic_args( p )
+    p.add_argument( '--max-examples', type=int, default=100, metavar='' )
+
+    opts = p.parse_args( sys.argv[2:] )
+    rpt = run_crt( opts )
+
+    print()
+    print( '-'*74 )
+    print( 'Report' )
+    print( '#>'+'-'*72 )
+    print( rpt         )
+    print( '#<'+'-'*72 )
+
+    if rpt.failed:
+      print( f' - failed at test #{rpt.ntests}' )
+    else:
+      print( f' - passed {rpt.ntests} tests' )
 
 #=========================================================================
 # main
