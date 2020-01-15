@@ -17,6 +17,7 @@ sys.path.insert( 0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) 
 print( os.path.dirname( os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) ) )
 
 from crt_utils import run_crt
+from idt_utils import run_idt
 
 #-------------------------------------------------------------------------
 # add_generic_args
@@ -55,6 +56,26 @@ class Driver:
     opts = p.parse_args( sys.argv[2:] )
     rpt = run_crt( opts )
 
+    print()
+    print( '-'*74 )
+    print( 'Report' )
+    print( '#>'+'-'*72 )
+    print( rpt         )
+    print( '#<'+'-'*72 )
+
+  #-----------------------------------------------------------------------
+  # idt
+  #-----------------------------------------------------------------------
+
+  def idt( self ):
+    p = argparse.ArgumentParser( description='iterative deepened test' )
+    add_generic_args( p )
+    p.add_argument( '--tests-per-step', type=int, default=5, metavar='' )
+
+    opts = p.parse_args( sys.argv[2:] )
+    rpt = run_idt( opts )
+
+    print()
     print( '-'*74 )
     print( 'Report' )
     print( '#>'+'-'*72 )

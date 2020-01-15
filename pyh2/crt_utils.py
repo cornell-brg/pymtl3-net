@@ -28,7 +28,7 @@ def rand_pkt( PktType, nterminals ):
 
 def run_crt( opts ):
   max_nterminals = opts.max_nterminals
-  max_ntrans      = opts.max_ntrans
+  max_ntrans     = opts.max_ntrans
 
   for i in range( opts.max_examples ):
     nterminals = random.randint(2, max_nterminals)
@@ -60,5 +60,7 @@ def run_crt( opts ):
       )
       if opts.verbose:
         print( f'{e}' )
+
+      return rpt
 
   return TestReport( nterminals=opts.max_examples, failed=False )
