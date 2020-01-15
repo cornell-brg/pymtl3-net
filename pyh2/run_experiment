@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+'''
+==========================================================================
+run_experiment
+==========================================================================
+Script that runs all 3 experiments and generate plots.
+
+Author : Yanghui Ou
+  Date : Jan 14, 2020
+'''
+import argparse
+import sys
+import os
+import json
+import re
+import random
+
+# Hacky way to add the project root directory to path
+sys.path.insert( 0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
+
+from common_utils import run_cmd
+
+#-------------------------------------------------------------------------
+# parse_result
+#-------------------------------------------------------------------------
+
+def parse_result( result_str ):
+  ...
+
+#=========================================================================
+# main
+#=========================================================================
+
+def main():
+  p = argparse.ArgumentParser( description='script runs crt, idt, and pyh2' )
+  p.add_argument( '--bug-inj', action='store_true', help='use the random bug injector' )
+  p.add_argument( '--nbugs',   type=int, default=100, metavar='', help='number of random bugs to experiment with' )
+  p.add_argument( '--ntrials', type=int, default=10,  metavar='', help='number of trials per bug' )
+  p.add_argument( '--max-examples',   type=int, default=100, metavar='', help='maximum number of test cases to run for random and hypothesis' )
+  p.add_argument( '--tests-per-step', type=int, default=10,  metavar='', help='number of tests per step for iter deepen' )
+  p.add_argument( '--translate', choices=['', 'sverilog', 'yosys'], default='', help='translation backend' )
+
+  p.add_argument( '--max-nterminals', type=int, default=10,  metavar='', help='number of trials per bug' )
+  p.add_argument( '--max-ntrans', type=int, default=10,  metavar='', help='number of trials per bug' )
+
+  p.add_argument( '-s', '--trace',   action='store_true', help='show line trace' )
+  p.add_argument( '-v', '--verbose', action='store_true', help='verbose mode' )
+
+  opts = p.parse_args()
+
+  for bug_idx in range( opts.nbugs ):
+
+    # Inject a bug here
+    print()
+
+    for trial_idx in range( opts.ntrials ):
+      print()
+      print( '-'*74 )
+      print( f'bug #{bug_idx+1} trial{trial_idx+1}')
+      print( '-'*74 )
+
+      # run pyh2 test
+      print()
+      print( '*'*30 + ' pyh2 ' + '*'*30 )
+      result = run_cmd(
+        f'./run_test pyh2 --max-examples {opts.max_examples}'
+        f' --max-ntrans {opts.max_ntrans}'
+        f' --max-nterminals {opts.max_nterminals}'
+        # f' --translate {opts.translate}'
+      )
+      # print( result )
+
+
+if __name__ == '__main__':
+  main()
