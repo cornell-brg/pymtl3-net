@@ -46,7 +46,7 @@ class PyH2TestFailed( Exception ):
 
 @st.composite
 def ring_pkt_strat( draw, nterminals ):
-  PktType = mk_ring_pkt( nterminals )
+  PktType = mk_ring_pkt( nterminals, payload_nbits=16 )
   src     = draw( st.integers(0, nterminals-1) )
   dst     = draw( st.integers(0, nterminals-1) )
   payload = draw( st.integers(0, 256) )
@@ -98,9 +98,10 @@ def run_sim( th, max_cycles=1000, translation='', trace=True ):
   while not th.done() and ncycles < max_cycles:
     try:
       th.tick()
-    except:
+    except Exception as e:
       failed_global = True
       failed_local  = True
+      print( e )
       break
 
     ncycles += 1
