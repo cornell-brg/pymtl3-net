@@ -120,7 +120,7 @@ def run_sim( th, max_cycles=1000, translation='', trace=True ):
 #-------------------------------------------------------------------------
 
 def run_test_case( nterminals, test_seq, max_cycles=1000, translate='', trace=False ):
-  PktType  = mk_ring_pkt( nterminals )
+  PktType  = mk_ring_pkt( nterminals, payload_nbits=16 )
   src_pkts = mk_src_pkts( nterminals, test_seq )
   dst_pkts = ringnet_fl( src_pkts )
 

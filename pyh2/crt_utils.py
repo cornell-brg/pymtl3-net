@@ -33,7 +33,7 @@ def run_crt( opts ):
   for i in range( opts.max_examples ):
     nterminals = random.randint(2, max_nterminals)
     ntrans     = random.randint(1, max_ntrans)
-    PktType    = mk_ring_pkt( nterminals )
+    PktType    = mk_ring_pkt( nterminals, payload_nbits=16 )
     test_seq   = [ rand_pkt( PktType, nterminals ) for _ in range(ntrans) ]
 
     try:

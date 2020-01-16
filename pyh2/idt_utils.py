@@ -54,7 +54,7 @@ def run_idt( opts ):
       for ntrans in idt_range( cur_ntran, max_ntrans, step_ntran ):
         for _ in range( opts.tests_per_step ):
 
-          PktType  = mk_ring_pkt( nterminals )
+          PktType  = mk_ring_pkt( nterminals, payload_nbits=16 )
           test_seq = [ rand_pkt( PktType, nterminals ) for _ in range(ntrans) ]
 
           try:
