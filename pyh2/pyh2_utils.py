@@ -13,7 +13,7 @@ from pymtl3 import *
 from ocn_pclib.ifcs.packets import mk_ring_pkt
 from ringnet import RingNetworkRTL
 from ringnet.RingNetworkFL import ringnet_fl
-from common_utils import TestReport, RingTestHarness, mk_src_pkts
+from common_utils import TestReport, RingTestHarness, mk_src_pkts, avg_complexity
 
 #-------------------------------------------------------------------------
 # global variable for hypothesis
@@ -107,13 +107,13 @@ def run_sim( th, max_cycles=1000, translation='', trace=True ):
     if trace: print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
   # Check timeout
-  if failed_local:
+  if failed_local or ncycles >= max_cycles:
     failed_global = True
     raise PyH2TestFailed( 'test failed!' )
 
-  if ncycles >= max_cycles:
-    failed_global = True
-    raise PyH2TestFailed( 'time out!' )
+  # if ncycles >= max_cycles:
+  #   failed_global = True
+  #   raise PyH2TestFailed( 'time out!' )
 
 #-------------------------------------------------------------------------
 # run_test_case

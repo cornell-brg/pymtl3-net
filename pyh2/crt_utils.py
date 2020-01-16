@@ -36,8 +36,6 @@ def run_crt( opts ):
     PktType    = mk_ring_pkt( nterminals )
     test_seq   = [ rand_pkt( PktType, nterminals ) for _ in range(ntrans) ]
 
-    run_test_case( nterminals, test_seq, max_cycles=ntrans*50, translate=opts.translate, trace=False )
-
     try:
       if opts.verbose:
         print()

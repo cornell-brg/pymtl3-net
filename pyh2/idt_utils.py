@@ -9,7 +9,7 @@ Author : Yanghui Ou
 '''
 import random
 from ocn_pclib.ifcs.packets import mk_ring_pkt
-from common_utils import TestReport, run_test_case
+from common_utils import TestReport, run_test_case, avg_complexity
 from crt_utils import rand_pkt
 
 #-------------------------------------------------------------------------
