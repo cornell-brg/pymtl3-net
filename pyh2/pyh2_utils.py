@@ -151,7 +151,6 @@ def run_pyh2( opts ):
     global test_idx
     global failed_global
     global rpt
-    ...
     test_seq = seq.draw( st.lists( ring_pkt_strat( nterminals ),
                          min_size=min_ntrans, max_size=max_ntrans ) )
     ntrans   = len( test_seq )
