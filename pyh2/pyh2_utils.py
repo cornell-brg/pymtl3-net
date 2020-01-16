@@ -154,6 +154,7 @@ def run_pyh2( opts ):
     test_seq = seq.draw( st.lists( ring_pkt_strat( nterminals ),
                          min_size=min_ntrans, max_size=max_ntrans ) )
     ntrans   = len( test_seq )
+    hypothesis.target( len(test_seq)*1.0 )
 
     # Generate phase
     if not failed_global:

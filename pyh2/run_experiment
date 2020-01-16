@@ -109,7 +109,7 @@ def main():
       print()
       print( '*'*32 + ' crt ' + '*'*32 )
       result = run_cmd(
-        f'./run_test crt --max-examples {opts.max_examples}'
+        f'./run_test crt -v --max-examples {opts.max_examples}'
         f' --max-ntrans {opts.max_ntrans}'
         f' --max-nterminals {opts.max_nterminals}'
         f'{translate_flag}'
@@ -122,7 +122,7 @@ def main():
       print()
       print( '*'*32 + ' idt ' + '*'*32 )
       result = run_cmd(
-        f'./run_test idt --max-examples {opts.max_examples}'
+        f'./run_test idt -v --max-examples {opts.max_examples}'
         f' --tests-per-step {opts.tests_per_step}'
         f' --max-ntrans {opts.max_ntrans}'
         f' --max-nterminals {opts.max_nterminals}'
@@ -137,7 +137,7 @@ def main():
       print( '*'*32 + ' pyh2 ' + '*'*32 )
       run_cmd( 'rm -rf .hypothesis/' )
       result = run_cmd(
-        f'./run_test pyh2 --max-examples {opts.max_examples}'
+        f'./run_test pyh2 -v --max-examples {opts.max_examples}'
         f' --max-ntrans {opts.max_ntrans}'
         f' --max-nterminals {opts.max_nterminals}'
         f'{translate_flag}'
