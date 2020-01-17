@@ -9,6 +9,7 @@ Author : Yanghui Ou
 import sys
 import os
 import subprocess
+import math
 from dataclasses import dataclass
 from pymtl3 import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
@@ -63,6 +64,8 @@ class TestReport:
 #-------------------------------------------------------------------------
 # TestHarness
 #-------------------------------------------------------------------------
+# NOTE: To avoid saturating the network, assign a random delay to test 
+# source based on the number of terminals.
 
 class RingTestHarness( Component ):
 
@@ -71,7 +74,15 @@ class RingTestHarness( Component ):
     RingPos = mk_ring_pos( nterminals )
     cmp_fn  = lambda a, b: a.payload == b.payload
 
-    s.srcs  = [ TestSrcRTL( PktType, src_pkts[i] ) for i in range(nterminals) ]
+    # Calculate random injection rate
+    min_delay = 0
+    max_delay = 1
+    if nterminals >= 8:
+      inj_rate = 8.0 / nterminals
+      min_delay = int( math.ceil( 1.0 / inj_rate ) )
+      max_delay = min_delay + 1 
+
+    s.srcs  = [ TestSrcRTL( PktType, src_pkts[i], interval_delay=max_delay ) for i in range(nterminals) ]
     s.dut   = RingNetworkRTL( PktType, RingPos, nterminals )
     s.sinks = [ TestNetSinkRTL( PktType, sink_pkts[i], match_func=cmp_fn )
                 for i in range(nterminals) ]

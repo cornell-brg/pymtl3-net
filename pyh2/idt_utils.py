@@ -68,7 +68,8 @@ def run_idt( opts ):
               print( f'  + test sequence:' )
               print( '    ' + '\n    '.join([ str(p) for p in test_seq]) )
 
-            run_test_case( nterminals, test_seq, max_cycles=ntrans*50, translate=opts.translate, trace=False )
+            max_cycles = max( 1000, ntrans*100 )
+            run_test_case( nterminals, test_seq, max_cycles=max_cycles, translate=opts.translate, trace=False )
             test_idx += 1
             if test_idx >= opts.max_examples:
               return TestReport( ntests=test_idx, failed=False )
