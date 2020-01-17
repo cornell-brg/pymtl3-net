@@ -101,7 +101,7 @@ def run_sim( th, max_cycles=1000, translation='', trace=True ):
     except Exception as e:
       failed_global = True
       failed_local  = True
-      print( e )
+      # print( e )
       break
 
     ncycles += 1
