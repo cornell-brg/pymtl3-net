@@ -39,10 +39,12 @@ def run_sim( th, max_cycles=1000, translation='', trace=True, verilator_vcd=Fals
     print()
     print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
-  while not th.done() and ncycles < max_cycles:
+  while not th.done() and ncycles <= max_cycles:
     th.tick()
     ncycles += 1
     if trace: print( "{:3}:{}".format( ncycles, th.line_trace() ))
 
   # Check timeout
-  assert ncycles < max_cycles
+  # assert ncycles < max_cycles
+  if ncycles > max_cycles:
+    raise Exception( f'Timeout: simulation did not finish in {max_cycles} cycles!' )
