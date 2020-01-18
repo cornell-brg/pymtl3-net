@@ -64,7 +64,7 @@ class TestReport:
 #-------------------------------------------------------------------------
 # TestHarness
 #-------------------------------------------------------------------------
-# NOTE: To avoid saturating the network, assign a random delay to test 
+# NOTE: To avoid saturating the network, assign a random delay to test
 # source based on the number of terminals.
 
 class RingTestHarness( Component ):
@@ -80,7 +80,7 @@ class RingTestHarness( Component ):
     if nterminals >= 8:
       inj_rate = 8.0 / nterminals
       min_delay = int( math.ceil( 1.0 / inj_rate ) )
-      max_delay = min_delay + 1 
+      max_delay = min_delay + 1
 
     s.srcs  = [ TestSrcRTL( PktType, src_pkts[i], interval_delay=max_delay ) for i in range(nterminals) ]
     s.dut   = RingNetworkRTL( PktType, RingPos, nterminals )

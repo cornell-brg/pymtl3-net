@@ -185,7 +185,7 @@ def run_pyh2( opts ):
       print( f'  + ntransactions: {ntrans}' )
       print( f'  + test sequence:' )
       print( '    ' + '\n    '.join([ str(p) for p in test_seq]) )
-    
+
     max_cycles = max( 1000, ntrans*100 )
     run_test_case( nterminals, test_seq, max_cycles )
 
