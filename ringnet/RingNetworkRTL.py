@@ -7,7 +7,7 @@ Ring network implementation.
 Author : Yanghui Ou, Cheng Tan
   Date : June 22, 2019
 """
-from ocn_pclib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
+from ocnlib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
                                       RecvRTL2CreditSendRTL)
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL

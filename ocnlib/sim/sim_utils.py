@@ -24,10 +24,10 @@ sys.path.insert(0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) )
 from bflynet import BflyNetworkRTL
 from cmeshnet import CMeshNetworkRTL
 from meshnet import MeshNetworkCL, MeshNetworkRTL
-from ocn_pclib.ifcs.packets import (mk_bfly_pkt, mk_cmesh_pkt, mk_mesh_pkt,
+from ocnlib.ifcs.packets import (mk_bfly_pkt, mk_cmesh_pkt, mk_mesh_pkt,
                                     mk_ring_pkt)
-from ocn_pclib.ifcs.positions import mk_bfly_pos, mk_mesh_pos, mk_ring_pos
-from ocn_pclib.sim.CLNetWrapper import CLNetWrapper
+from ocnlib.ifcs.positions import mk_bfly_pos, mk_mesh_pos, mk_ring_pos
+from ocnlib.sim.CLNetWrapper import CLNetWrapper
 from pymtl3 import *
 from pymtl3.passes.backends.yosys import ImportPass, TranslationPass
 from pymtl3.passes import TracingConfigs

@@ -9,10 +9,10 @@
 import hypothesis
 from hypothesis import strategies as st
 
-from ocn_pclib.ifcs.packets import mk_mesh_pkt
-from ocn_pclib.ifcs.positions import mk_mesh_pos
-from ocn_pclib.test import run_sim
-from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from ocnlib.ifcs.packets import mk_mesh_pkt
+from ocnlib.ifcs.positions import mk_mesh_pos
+from ocnlib.test import run_sim
+from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from torusnet.TorusNetworkFL import torusnet_fl

@@ -16,10 +16,10 @@ from hypothesis import strategies as st
 from meshnet.DORXMeshRouteUnitCL import DORXMeshRouteUnitCL
 from meshnet.MeshRouterCL import MeshRouterCL
 from meshnet.MeshRouterFL import MeshRouterFL
-from ocn_pclib.ifcs.packets import mk_mesh_pkt
-from ocn_pclib.ifcs.positions import mk_mesh_pos
-from ocn_pclib.test import run_sim
-from ocn_pclib.test.net_sinks import TestNetSinkCL as TestSinkCL
+from ocnlib.ifcs.packets import mk_mesh_pkt
+from ocnlib.ifcs.positions import mk_mesh_pos
+from ocnlib.test import run_sim
+from ocnlib.test.net_sinks import TestNetSinkCL as TestSinkCL
 from pymtl3 import *
 from pymtl3.datatypes import strategies as pst
 from pymtl3.stdlib.test.test_srcs import TestSrcCL
