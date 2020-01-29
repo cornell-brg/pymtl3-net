@@ -60,8 +60,8 @@ def packet_format( cls ):
   setattr( cls, _FIELDS, slice_dict )
 
   # Set variables
-  for fname, slice in slice_dict.items():
-    setattr( cls, fname, slice )
+  for fname, fslice in slice_dict.items():
+    setattr( cls, fname, fslice )
 
   return cls
 
