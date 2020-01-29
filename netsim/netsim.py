@@ -69,8 +69,8 @@ from bflynet.BflyNetworkRTL import BflyNetworkRTL
 from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
 from meshnet.MeshNetworkCL import MeshNetworkCL
 from meshnet.MeshNetworkRTL import MeshNetworkRTL
-from ocn_pclib.ifcs.packets import *
-from ocn_pclib.ifcs.positions import *
+from ocnlib.ifcs.packets import *
+from ocnlib.ifcs.positions import *
 from pymtl3 import *
 from pymtl3.stdlib.test import TestVectorSimulator
 from ringnet.RingNetworkRTL import RingNetworkRTL

@@ -8,7 +8,7 @@ Author : Cheng Tan
   Date : April 6, 2019
 """
 from channel.ChannelRTL import ChannelRTL
-from ocn_pclib.ifcs.PhysicalDimension import PhysicalDimension
+from ocnlib.ifcs.PhysicalDimension import PhysicalDimension
 from pymtl3 import *
 from pymtl3.stdlib.ifcs.SendRecvIfc import *
 

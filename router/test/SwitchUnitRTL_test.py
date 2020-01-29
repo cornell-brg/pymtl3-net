@@ -7,7 +7,7 @@ Test for SwitchUnitRTL.
  Author : Yanghui Ou, Cheng Tan
    Date : June 22, 2019
 """
-from ocn_pclib.ifcs.packets import mk_generic_pkt
+from ocnlib.ifcs.packets import mk_generic_pkt
 from pymtl3 import *
 from pymtl3.stdlib.test.test_sinks import TestSinkCL
 from pymtl3.stdlib.test.test_srcs import TestSrcCL

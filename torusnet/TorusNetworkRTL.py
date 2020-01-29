@@ -7,7 +7,7 @@
 #   Date : Mar 10, 2019
 
 from channel.ChannelRTL import ChannelRTL
-from ocn_pclib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
+from ocnlib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
                                       RecvRTL2CreditSendRTL)
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL

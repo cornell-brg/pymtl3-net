@@ -8,7 +8,7 @@
 
 import pytest
 
-from ocn_pclib.test import run_sim
+from ocnlib.test import run_sim
 from pymtl3 import *
 from pymtl3.stdlib.cl.queues import NormalQueueCL
 from pymtl3.stdlib.test.test_sinks import TestSinkCL

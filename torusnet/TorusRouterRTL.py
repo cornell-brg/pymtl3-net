@@ -7,7 +7,7 @@ Torus router RTL model.
 Author : Yanghui, Ou, Cheng Tan
   Date : June 30, 2019
 """
-from ocn_pclib.ifcs.CreditIfc import CreditRecvIfcRTL, CreditSendIfcRTL
+from ocnlib.ifcs.CreditIfc import CreditRecvIfcRTL, CreditSendIfcRTL
 from pymtl3 import *
 from router.InputUnitCreditRTL import InputUnitCreditRTL
 from router.OutputUnitCreditRTL import OutputUnitCreditRTL
