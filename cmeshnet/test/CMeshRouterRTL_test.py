@@ -9,10 +9,10 @@
 """
 from cmeshnet.CMeshRouterRTL import CMeshRouterRTL
 from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
-from ocn_pclib.ifcs.packets import *
-from ocn_pclib.ifcs.positions import *
-from ocn_pclib.test import run_sim
-from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from ocnlib.ifcs.packets import *
+from ocnlib.ifcs.positions import *
+from ocnlib.test import run_sim
+from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.stdlib.test import TestVectorSimulator
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL

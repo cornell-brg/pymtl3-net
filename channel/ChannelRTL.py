@@ -7,7 +7,7 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 16, 2019
 
-from ocn_pclib.ifcs.PhysicalDimension import PhysicalDimension
+from ocnlib.ifcs.PhysicalDimension import PhysicalDimension
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3.stdlib.rtl.queues import NormalQueueRTL

@@ -18,8 +18,8 @@ import sys
 if os.path.abspath(os.path.dirname(__file__)).split('/')[-1] == "script":
   sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
-from ocn_pclib.sim import sim_utils
-from ocn_pclib.sim.sim_utils import *
+from ocnlib.sim import sim_utils
+from ocnlib.sim.sim_utils import *
 from pymtl3 import *
 
 

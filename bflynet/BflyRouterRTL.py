@@ -9,7 +9,7 @@ Author : Cheng Tan, Yanghui Ou
 """
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
-from ocn_pclib.ifcs.PhysicalDimension import PhysicalDimension
+from ocnlib.ifcs.PhysicalDimension import PhysicalDimension
 from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 from router.Router import Router

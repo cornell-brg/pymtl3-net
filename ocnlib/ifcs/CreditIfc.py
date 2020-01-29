@@ -7,7 +7,7 @@ Credit based interfaces.
 Author : Yanghui Ou
   Date : June 10, 2019
 """
-from ocn_pclib.rtl import Counter
+from ocnlib.rtl import Counter
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL, enrdy_to_str
 from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn

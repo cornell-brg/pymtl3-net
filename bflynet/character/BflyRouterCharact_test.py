@@ -12,10 +12,10 @@ import pytest
 
 from bflynet.BflyRouterRTL import BflyRouterRTL
 from bflynet.DTRBflyRouteUnitRTL import DTRBflyRouteUnitRTL
-from ocn_pclib.ifcs.packets import mk_bfly_pkt
-from ocn_pclib.ifcs.positions import mk_bfly_pos
-from ocn_pclib.test import run_sim
-from ocn_pclib.test.net_sinks import TestNetSinkRTL
+from ocnlib.ifcs.packets import mk_bfly_pkt
+from ocnlib.ifcs.positions import mk_bfly_pos
+from ocnlib.test import run_sim
+from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.passes.backends.yosys import (ImportConfigs, ImportPass,
                                           TranslationPass)
