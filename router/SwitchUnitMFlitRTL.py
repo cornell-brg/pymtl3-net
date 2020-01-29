@@ -15,7 +15,8 @@ from pymtl3.stdlib.rtl import Mux
 from pymtl3.stdlib.rtl.Encoder import Encoder
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, SendIfcRTL
 
-from ocn_pclib.rtl import Counter, GrantHoldArbiter
+from ocnlib.rtl import Counter, GrantHoldArbiter
+from ocnlib.utils.connects import connect_format
 
 
 class SwitchUnitMFlitRTL( Component ):
@@ -68,16 +69,25 @@ class SwitchUnitMFlitRTL( Component ):
       s.get[i].rdy //= s.arbiter.reqs[i]
       s.get[i].msg //= s.mux.in_[i]
 
-    for i in range( num_inports ):
-      s.get[i].en //= lambda: s.give.en & ( s.mux.sel == SelType(i) )
+    @s.update
+    def up_get_en():
+      for i in range( num_inports ):
+        s.get[i].en = s.give.en & ( s.mux.sel == SelType(i) )
+
+    # FIXME: use the lambda syntax after updating pymtl3 which fix the
+    # transalation bug
+    # for i in range( num_inports ):
+    #   s.get[i].en //= lambda: s.give.en & ( s.mux.sel == SelType(i) )
 
     s.give.rdy           //= s.granted_get_rdy
     s.plen               //= s.mux.out[ PLEN ]
     s.counter.load_value //= s.plen
     s.counter.incr       //= b1(0) # Never increments the counter
 
+    connect_format( s, HeaderFormat, s.mux.out )
+
     # State transition logic
-    @s.update
+    @s.update_ff
     def up_state():
       if s.reset:
         s.state <<= s.STATE_HEADER
