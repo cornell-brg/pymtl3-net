@@ -21,12 +21,13 @@ from ocnlib.utils.connects import connect_format
 
 class SwitchUnitMFlitRTL( Component ):
 
-  def construct( s, HeaderFormat, FlitType, num_inports=5 ):
+  def construct( s, HeaderFormat, num_inports=5 ):
 
     # Local parameters
     # NOTE: FlitType must be a BitsN type
     # TODO: check for slice object
     PLEN            = HeaderFormat.PLEN
+    FlitType        = HeaderFormat.PhitType
     s.STATE_HEADER  = b1(0)
     s.STATE_BODY    = b1(1)
     s.header_format = HeaderFormat

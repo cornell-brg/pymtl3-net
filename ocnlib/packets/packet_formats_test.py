@@ -9,7 +9,7 @@ Author : Yanghui Ou
 '''
 from .packet_formats import packet_format
 
-@packet_format
+@packet_format( 24 )
 class MyFormat:
   # Field  LO  HI
   OPAQUE : ( 16, 24 )
