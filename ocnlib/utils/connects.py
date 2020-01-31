@@ -53,7 +53,7 @@ def connect_format( host, Format, signal ):
 
 def connect_union( host, Format, wire_name, signal ):
   slice_dict  = Format.__dict__[ _FIELDS ]
-  field_dict  = { fname : mk_bits( fslice.start - fslice.stop ) for fname, fslice in slice_dict.items() }
+  field_dict  = { fname : mk_bits( fslice.stop - fslice.start ) for fname, fslice in slice_dict.items() }
 
   # FIXME: Possible name confilct if two formats in different modules
   # have the same name.
@@ -66,5 +66,5 @@ def connect_union( host, Format, wire_name, signal ):
 
   # Connect each field to the corresponding slice
   for fname, fslice in slice_dict.items():
-    connect( getattr( fname, new_wire ), signal[ fslice ] )
+    connect( getattr( new_wire, fname ), signal[ fslice ] )
 

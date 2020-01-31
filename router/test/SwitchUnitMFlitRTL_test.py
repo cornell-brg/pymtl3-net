@@ -19,7 +19,7 @@ def test_sanity_check():
 
   dut = SwitchUnitMFlitRTL( DummyFormat, num_inports=5 )
   dut.elaborate()
-  print( dut.mux_out_PLEN )
+  print( dut.mux_out.PLEN )
   dut.yosys_translate_import = True
   dut = TranslationImportPass()( dut )
   dut.elaborate()

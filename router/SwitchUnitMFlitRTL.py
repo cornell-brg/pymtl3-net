@@ -16,7 +16,7 @@ from pymtl3.stdlib.rtl.Encoder import Encoder
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, SendIfcRTL
 
 from ocnlib.rtl import Counter, GrantHoldArbiter
-from ocnlib.utils.connects import connect_format
+from ocnlib.utils.connects import connect_union
 
 
 class SwitchUnitMFlitRTL( Component ):
@@ -80,12 +80,13 @@ class SwitchUnitMFlitRTL( Component ):
     # for i in range( num_inports ):
     #   s.get[i].en //= lambda: s.give.en & ( s.mux.sel == SelType(i) )
 
+    connect_union( s, HeaderFormat, 'mux_out', s.mux.out )
+
     s.give.rdy           //= s.granted_get_rdy
-    s.plen               //= s.mux.out[ PLEN ]
+    s.plen               //= s.mux_out.PLEN
     s.counter.load_value //= s.plen
     s.counter.incr       //= b1(0) # Never increments the counter
 
-    connect_format( s, HeaderFormat, s.mux.out )
 
     # State transition logic
     @s.update_ff
