@@ -42,3 +42,29 @@ def connect_format( host, Format, signal ):
     setattr( host, new_name, new_wire )
     connect( new_wire, signal[ fslice ] )
 
+#------------------------------------------------------------------------- 
+# connect_union_wire
+#------------------------------------------------------------------------- 
+# Automatically create a bitstruct for a packet format and adds a wire to
+# the component.
+# NOTE: The argument [signal] must has type of Bits.
+# NOTE: We can also create a new level of Component that has this function
+# as a method.
+
+def connect_union( host, Format, wire_name, signal ):
+  slice_dict  = Format.__dict__[ _FIELDS ]
+  field_dict  = { fname : mk_bits( fslice.start - fslice.stop ) for fname, fslice in slice_dict.items() }
+
+  # FIXME: Possible name confilct if two formats in different modules
+  # have the same name.
+  struct_name = f'{Format.__name__}Struct'
+  StructType  = mk_bitstruct( f'', field_dict )
+  new_wire    = Wire( StructType )
+
+  # Add the new wire to host
+  setattr( host, wire_name, new_wire )
+
+  # Connect each field to the corresponding slice
+  for fname, fslice in slice_dict.items():
+    connect( getattr( fname, new_wire ), signal[ fslice ] )
+
