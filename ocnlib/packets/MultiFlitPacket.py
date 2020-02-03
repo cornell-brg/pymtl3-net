@@ -51,7 +51,7 @@ class MultiFlitPacket:
 
   def pop( self ):
     assert not add_lock, "Packet locked by add, cannot pop any more!"
-    assert self.flit_idx < self.nflits "Already reached the last flit of the packet!" 
+    assert self.flit_idx < self.nflits, "Already reached the last flit of the packet!" 
     # Copy the current flit
     cur_flit = self.PhitType( self.flits[ self.flit_idx ] )
 
