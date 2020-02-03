@@ -11,7 +11,6 @@ from pymtl3 import *
 
 from .packet_formats import packet_format
 from .MultiFlitPacket import MultiFlitPacket
-from .OpenPitonFormat import OpenPitonFormat
 
 @packet_format( 32 )
 class SimpleFormat:
