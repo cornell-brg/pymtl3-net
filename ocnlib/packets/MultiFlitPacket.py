@@ -37,7 +37,7 @@ class MultiFlitPacket:
     # Check
     if self.flits:
       self._get_nflits()
-      assert nflits == len( self.flits ) - 1
+      assert self.nflits == len( self.flits )
 
   def add( self, flit ):
     assert not self.pop_lock, "Packet locked by pop, cannot add any more!"
@@ -63,10 +63,10 @@ class MultiFlitPacket:
     return cur_flit
 
   def full( self ):
-    return self.nflits > 0 and self.nflits == len( self.flits )
+    return self.nflits > 0 and self.nflits == len( self.flits ) and self.flit_idx == 0
 
   def empty( self ):
-    return len( self.flits ) == 0
+    return len( self.flits ) == 0 or self.flit_idx == self.nflits
 
   def _get_nflits( self ):
     nflits = _get_payload_length( self.Format, self.flits[0], self.plen_fname ) + 1
