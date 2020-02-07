@@ -8,6 +8,7 @@ Author : Yanghui Ou
   Date : Jan 29, 2020
 '''
 from pymtl3 import *
+from pymtl3.datatypes.bitstructs import is_bitstruct_class, _FIELDS as bitstruct_fields
 from ..packets.packet_formats import _FIELDS
 
 #------------------------------------------------------------------------- 
@@ -67,4 +68,59 @@ def connect_union( host, Format, wire_name, signal ):
   # Connect each field to the corresponding slice
   for fname, fslice in slice_dict.items():
     connect( getattr( new_wire, fname ), signal[ fslice ] )
+
+
+#------------------------------------------------------------------------- 
+# _get_bitstruct_nbits
+#------------------------------------------------------------------------- 
+
+def _get_bitstruct_nbits_h( cls, acc ): 
+  if issubclass( cls, Bits ):
+    return cls.nbits
+
+  else:
+    assert is_bitstruct_class( cls )
+    fields = getattr( cls, bitstruct_fields )
+
+#------------------------------------------------------------------------- 
+# bitstruct_to_slice_h
+#------------------------------------------------------------------------- 
+# Recursive helper function
+
+def _bitstruct_to_slices_h( cls, slices ): 
+  if issubclass( cls, Bits ):
+    start = 0 if not slices else slices[-1].stop
+    stop  = start + cls.nbits
+    slices.append( slice( start, stop ) )
+
+  else:
+    assert is_bitstruct_class( cls )
+    fields = getattr( cls, bitstruct_fields )
+    for _, ftype in fields.items():
+      _bitstruct_to_slices_h( ftype, slices )
+
+#------------------------------------------------------------------------- 
+# bitstruct_to_slice_h
+#------------------------------------------------------------------------- 
+# Converts a bitstruct to a list of slices
+
+def _bitstruct_to_slices( cls ):
+  slices = []
+  _bitstruct_to_slices( cls, slices )
+      
+#------------------------------------------------------------------------- 
+# connect_union_wire
+#------------------------------------------------------------------------- 
+
+def connect_bitstruct( signal1, signal2 ):
+  type1 = signal1._dsl.Type
+  type2 = signal2._dsl.Type
+  if is_bitstruct_class( type1 ):
+    assert issubclass( type2, Bits )
+    bits_signal, bitstruct_signal = signal2, signal1
+  elif is_bitstruct_class( type2 ):
+    assert issubclass( type1, Bits )
+    bits_signal, bitstruct_signal = signal1, signal2
+  else:
+    assert False, "Can only connect a bitstruct wire to bits wire"
 
