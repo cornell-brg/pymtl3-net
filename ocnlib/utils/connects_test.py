@@ -21,9 +21,9 @@ class Point:
 
 @bitstruct
 class Nested:
-  z  : Bits6
-  pt : Point
-  x  : Bits1
+  z    : Bits6
+  pt   : Point
+  flag : Bits1
 
 #-------------------------------------------------------------------------
 # Components for unit tests
@@ -39,6 +39,18 @@ class Bitstruct2Bits( Component ):
   def construct( s ):
     s.pt_bitstruct = InPort ( Point  )
     s.pt_bits      = OutPort( Bits12 )
+    connect_bitstruct( s.pt_bitstruct, s.pt_bits )
+
+class Bits2BitstructNested( Component ):
+  def construct( s ):
+    s.pt_bits      = InPort ( Bits19 )
+    s.pt_bitstruct = OutPort( Nested )
+    connect_bitstruct( s.pt_bits, s.pt_bitstruct )
+
+class Bitstruct2BitsNested( Component ):
+  def construct( s ):
+    s.pt_bitstruct = InPort ( Nested )
+    s.pt_bits      = OutPort( Bits19 )
     connect_bitstruct( s.pt_bitstruct, s.pt_bits )
 
 #-------------------------------------------------------------------------
@@ -64,7 +76,7 @@ def test_connet_bitstruct_simple():
   a = Bits2Bitstruct()
   a.elaborate()
   a.apply( SimulationPass() )
-  a.pt_bits = Bits12( 0xeda )
+  a.pt_bits = b12( 0xeda )
   a.eval_combinational()
   assert a.pt_bitstruct.x == 0xed
   assert a.pt_bitstruct.y == 0xa
@@ -72,7 +84,29 @@ def test_connet_bitstruct_simple():
   b = Bitstruct2Bits()
   b.elaborate()
   b.apply( SimulationPass() )
-  b.pt_bitstruct.x = Bits8( 0xed )
-  b.pt_bitstruct.y = Bits4( 0xa  )
+  b.pt_bitstruct.x = b8( 0xed )
+  b.pt_bitstruct.y = b4( 0xa  )
   b.eval_combinational()
   assert b.pt_bits == 0xeda
+
+def test_connect_bitstruct_nested():
+  a = Bits2BitstructNested()
+  a.elaborate()
+  a.apply( SimulationPass() )
+  a.pt_bits = concat( b6(0x3f), b12(0xeda), b1(1) )
+  a.eval_combinational()
+  assert a.pt_bitstruct.z    == 0x3f
+  assert a.pt_bitstruct.pt.x == 0xed
+  assert a.pt_bitstruct.pt.y == 0xa
+  assert a.pt_bitstruct.flag == 1
+
+  b = Bitstruct2BitsNested()
+  b.elaborate()
+  b.apply( SimulationPass() )
+  b.pt_bitstruct.z    = b6( 0x3f )
+  b.pt_bitstruct.pt.x = b8( 0xed )
+  b.pt_bitstruct.pt.y = b4( 0xa  )
+  b.pt_bitstruct.flag = b1( 0x1  )
+  b.eval_combinational()
+  assert b.pt_bits == concat( b6(0x3f), b12(0xeda), b1(1) )
+
