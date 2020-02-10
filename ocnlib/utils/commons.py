@@ -30,4 +30,18 @@ def get_nbits( cls ):
     return total_nbits
 
 
+#-------------------------------------------------------------------------
+# get_plen_type
+#-------------------------------------------------------------------------
+# Returns the type of feild payload length from the header format.
+
+def get_plen_type( cls, plen_field_name='plen' ):
+  assert is_bitstruct_class( cls )
+  fields_dict = getattr( cls, bitstruct_fields )
+
+  if not plen_field_name in fields_dict:
+    raise AssertionError( f'{cls.__qualname__} does not have field {plen_field_name}!' )
+
+  return fields_dict[ plen_field_name ]
+
 
