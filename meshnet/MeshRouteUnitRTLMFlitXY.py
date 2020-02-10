@@ -115,6 +115,11 @@ class MeshRouteUnitRTLMFlitXY( Component ):
     def up_out_dir_r():
       s.out_dir_r <<= s.out_dir
 
+    @s.update
+    def up_give_rdy():
+      for i in range( s.num_outports ):
+        s.give[i].rdy = ( b3(i) == s.out_dir ) & s.get.rdy
+
   #-----------------------------------------------------------------------
   # line_trace
   #-----------------------------------------------------------------------
