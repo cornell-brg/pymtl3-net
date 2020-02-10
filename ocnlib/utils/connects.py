@@ -8,8 +8,11 @@ Author : Yanghui Ou
   Date : Jan 29, 2020
 '''
 from pymtl3 import *
-from pymtl3.datatypes.bitstructs import is_bitstruct_class, _FIELDS as bitstruct_fields
 from ..packets.packet_formats import _FIELDS
+from pymtl3.datatypes.bitstructs import (
+  is_bitstruct_class, 
+  _FIELDS as bitstruct_fields,
+)
 
 #------------------------------------------------------------------------- 
 # _name_mangle
@@ -95,26 +98,52 @@ def _bitstruct_to_slices_h( cls, slices ):
 
   else:
     assert is_bitstruct_class( cls )
-    fields = getattr( cls, bitstruct_fields )
-    for _, ftype in fields.items():
+    fields_dict = getattr( cls, bitstruct_fields )
+    fields_lst  = list( fields_dict.items() )
+    # Use reverse instead of [::-1] because it is faster
+    fields_lst.reverse()
+    for _, ftype in fields_lst:
       _bitstruct_to_slices_h( ftype, slices )
 
 #------------------------------------------------------------------------- 
-# bitstruct_to_slice_h
+# bitstruct_to_slice
 #------------------------------------------------------------------------- 
 # Converts a bitstruct to a list of slices
 
-def _bitstruct_to_slices( cls ):
+def bitstruct_to_slices( cls ):
   slices = []
-  _bitstruct_to_slices( cls, slices )
-      
+  _bitstruct_to_slices_h( cls, slices )
+  return slices
+
 #------------------------------------------------------------------------- 
-# connect_union_wire
+# _connect_bitstruct_h
+#------------------------------------------------------------------------- 
+
+def _connect_bitstruct_h( field, bits_signal, slices_stack ):
+  field_type = field._dsl.Type
+
+  # Base case: current field is a BitsN
+  if not is_bitstruct_class( field_type ):
+    assert issubclass( field_type, Bits )
+    connect( field, bits_signal[ slices_stack.pop() ] )
+    return
+
+  # Recursive case: current field is a bitstruct
+  else:
+    fields_dict = getattr( field_type, bitstruct_fields )
+    for fname, ftype in fields_dict.items():
+      cur_field = getattr( field, fname )
+      _connect_bitstruct_h( cur_field, bits_signal, slices_stack )
+    return
+
+#------------------------------------------------------------------------- 
+# connect_bitstruct
 #------------------------------------------------------------------------- 
 
 def connect_bitstruct( signal1, signal2 ):
   type1 = signal1._dsl.Type
   type2 = signal2._dsl.Type
+
   if is_bitstruct_class( type1 ):
     assert issubclass( type2, Bits )
     bits_signal, bitstruct_signal = signal2, signal1
@@ -123,4 +152,10 @@ def connect_bitstruct( signal1, signal2 ):
     bits_signal, bitstruct_signal = signal1, signal2
   else:
     assert False, "Can only connect a bitstruct wire to bits wire"
+
+  slices = bitstruct_to_slices( bitstruct_signal._dsl.Type )
+
+  # Connect field to corresponding slice
+  _connect_bitstruct_h( bitstruct_signal, bits_signal, slices )
+
 
