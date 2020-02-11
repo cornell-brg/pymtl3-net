@@ -47,6 +47,10 @@ def test_to_bits():
   assert to_bits( pt ) == 0xedc
   assert to_bits( nested ) == 0xedcba
 
+#-------------------------------------------------------------------------
+# test_to_bitstruct
+#-------------------------------------------------------------------------
+
 def test_to_bitstruct():
   bits = b12( 0xcba )
   pt1 = to_bitstruct( bits, Point    )
