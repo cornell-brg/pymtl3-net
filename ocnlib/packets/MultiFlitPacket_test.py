@@ -12,11 +12,12 @@ from pymtl3 import *
 from .packet_formats import packet_format
 from .MultiFlitPacket import MultiFlitPacket
 
-@packet_format( 32 )
+@bitstruct
 class SimpleFormat:
-  plen   : (0,  8 )
-  opaque : (8,  16)
-  id     : (16, 24)
+  opaque : Bits8
+  src    : Bits8
+  dst    : Bits8
+  plen   : Bits8
 
 def test_add():
   # An empty packet

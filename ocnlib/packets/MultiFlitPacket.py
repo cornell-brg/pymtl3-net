@@ -8,14 +8,20 @@ multi-flit (single-phit flit) packets.
 Author : Yanghui Ou
   Date : Jan 31, 2019
 '''
+from pymtl3 import mk_bits
+from ..utils import get_nbits, to_bitstruct
+from pymtl3.datatypes.bitstructs import (
+  is_bitstruct_class, 
+  _FIELDS as bitstruct_fields,
+)
 
 #-------------------------------------------------------------------------
 # _get_payload_length
 #-------------------------------------------------------------------------
 
 def _get_payload_length( Format, header_flit, field_name='plen' ):
-  plen_slice = getattr( Format, field_name )
-  return header_flit[ plen_slice ].uint()
+  header = to_bitstruct( header_flit, Format )
+  return getattr( header, field_name ).uint()
 
 #-------------------------------------------------------------------------
 # MultiFlitPacket
@@ -27,7 +33,7 @@ class MultiFlitPacket:
 
     self.Format     = Format
     self.plen_fname = plen_field_name 
-    self.PhitType   = Format.PhitType
+    self.PhitType   = mk_bits( get_nbits( Format ) )
     self.add_lock   = False
     self.pop_lock   = False
     self.nflits     = 0
