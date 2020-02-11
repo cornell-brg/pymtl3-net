@@ -72,19 +72,6 @@ def connect_union( host, Format, wire_name, signal ):
   for fname, fslice in slice_dict.items():
     connect( getattr( new_wire, fname ), signal[ fslice ] )
 
-
-#------------------------------------------------------------------------- 
-# _get_bitstruct_nbits
-#------------------------------------------------------------------------- 
-
-def _get_bitstruct_nbits_h( cls, acc ): 
-  if issubclass( cls, Bits ):
-    return cls.nbits
-
-  else:
-    assert is_bitstruct_class( cls )
-    fields = getattr( cls, bitstruct_fields )
-
 #------------------------------------------------------------------------- 
 # bitstruct_to_slice_h
 #------------------------------------------------------------------------- 
@@ -109,6 +96,7 @@ def _bitstruct_to_slices_h( cls, slices ):
 # bitstruct_to_slice
 #------------------------------------------------------------------------- 
 # Converts a bitstruct to a list of slices
+# TODO: import this from commons.py
 
 def bitstruct_to_slices( cls ):
   slices = []
@@ -118,6 +106,8 @@ def bitstruct_to_slices( cls ):
 #------------------------------------------------------------------------- 
 # _connect_bitstruct_h
 #------------------------------------------------------------------------- 
+# TODO: it might be more efficent to just traverse the tree once.
+# TODO: use get_type() API once it is added in pymtl3.
 
 def _connect_bitstruct_h( field, bits_signal, slices_stack ):
   field_type = field._dsl.Type
