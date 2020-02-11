@@ -8,6 +8,7 @@ Author : Yanghui Ou
   Date : Feb 3, 2020
 '''
 from pymtl3 import *
+from ..utils import get_nbits
 from ..packets import MultiFlitPacket as Packet
 
 #-------------------------------------------------------------------------
@@ -19,7 +20,8 @@ class MultiFlitPacketSinkCL( Component ):
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0, 
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
 
-    s.recv.Type = Format.PhitType
+    PhitType = mk_bits( get_nbits( Format ) )
+    s.recv.Type = PhitType
     s.Format    = Format
 
     s.cur_pkt  = Packet( Format )

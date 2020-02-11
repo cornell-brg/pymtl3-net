@@ -12,11 +12,12 @@ from ..packets   import packet_format, MultiFlitPacket
 from .test_srcs  import MultiFlitPacketSourceCL
 from .test_sinks import MultiFlitPacketSinkCL
 
-@packet_format(24)
+@bitstruct
 class SimpleFormat:
-  plen : (0,  8 )
-  src  : (8,  16)
-  dst  : (16, 24)
+  opq  : Bits8
+  src  : Bits8
+  dst  : Bits8
+  plen : Bits8
 
 def mk_simple_pkt( src, dst, payload ):
   plen          = len(payload)

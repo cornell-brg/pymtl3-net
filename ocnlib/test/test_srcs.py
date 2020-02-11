@@ -10,6 +10,7 @@ Author : Yanghui Ou
 from collections import deque
 
 from pymtl3 import *
+from ..utils import get_nbits
 
 #-------------------------------------------------------------------------
 # MultiFlitPacketSourceCL
@@ -25,7 +26,8 @@ class MultiFlitPacketSourceCL( Component ):
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0, pkt_interval_delay=0 ):
 
     # Interface
-    s.send = NonBlockingCallerIfc( Type=Format.PhitType )
+    PhitType = mk_bits( get_nbits( Format ) )
+    s.send = NonBlockingCallerIfc( Type=PhitType )
 
     # Metadata
     s.pkts    = deque( pkts )
