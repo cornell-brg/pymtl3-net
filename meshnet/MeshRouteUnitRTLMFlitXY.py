@@ -25,7 +25,7 @@ class MeshRouteUnitRTLMFlitXY( Component ):
   # construct
   #-----------------------------------------------------------------------
 
-  def construct( s, HeaderFormat, plen_field_name='plen' ):
+  def construct( s, HeaderFormat, PositionType, plen_field_name='plen' ):
     # Meta data
     s.num_outports = 5
     s.HeaderFormat = HeaderFormat
@@ -37,14 +37,14 @@ class MeshRouteUnitRTLMFlitXY( Component ):
 
     # Interface
     s.get  = GetIfcRTL( s.PhitType )
-    s.pos  = InPort( Bits8 ) # TODO: figure out a way to encode position
+    s.pos  = InPort( PositionType ) # TODO: figure out a way to encode position
 
     s.give = [ GiveIfcRTL( s.PhitType ) for _ in range( s.num_outports ) ]
     s.hold = [ OutPort( Bits1 ) for _ in range( s.num_outports ) ]
 
     # Components
     s.header      = Wire( HeaderFormat )
-    s.state_r     = Wire( Bits1 )
+    s.state       = Wire( Bits1 )
     s.state_next  = Wire( Bits1 )
     s.out_dir_r   = Wire( Bits3 )
     s.out_dir     = Wire( Bits3 )
@@ -56,6 +56,10 @@ class MeshRouteUnitRTLMFlitXY( Component ):
     )
 
     connect_bitstruct( s.get.msg, s.header )
+    
+    for i in range( 5 ):
+      s.get.msg //= s.give[i].msg
+    s.get.en //= s.any_give_en
 
     @s.update
     def up_any_give_en():
@@ -84,6 +88,7 @@ class MeshRouteUnitRTLMFlitXY( Component ):
 
       else: # STATE_BODY
         if ( s.counter.count == PLenType(1) ) & s.any_give_en:
+          s.state_next = s.STATE_HEADER
 
     # State output logic
     @s.update
@@ -92,6 +97,14 @@ class MeshRouteUnitRTLMFlitXY( Component ):
         s.counter.decr = b1(0)
       else:
         s.counter.decr = s.any_give_en
+
+    @s.update
+    def up_counter_load():
+      if s.state == s.STATE_HEADER:
+        s.counter.load = ( s.state_next == s.STATE_BODY )
+      else:
+        s.counter.load = b1(0)
+
 
     # Routing logic
     # TODO: Figure out how to encode dest id
@@ -104,9 +117,9 @@ class MeshRouteUnitRTLMFlitXY( Component ):
         elif s.header.dst_x > s.pos.pos_x:
           s.out_dir = EAST
         elif s.header.dst_y < s.pos.pos_y:
-          s.out_dir = NORTH
-        else:
           s.out_dir = SOUTH
+        else:
+          s.out_dir = NORTH
        
       else:
         s.out_dir = s.out_dir_r
@@ -116,13 +129,27 @@ class MeshRouteUnitRTLMFlitXY( Component ):
       s.out_dir_r <<= s.out_dir
 
     @s.update
-    def up_give_rdy():
+    def up_give_rdy_hold():
       for i in range( s.num_outports ):
         s.give[i].rdy = ( b3(i) == s.out_dir ) & s.get.rdy
+        s.hold[i]     = ( b3(i) == s.out_dir ) & ( s.state == s.STATE_BODY )
 
   #-----------------------------------------------------------------------
   # line_trace
   #-----------------------------------------------------------------------
 
   def line_trace( s ):
-    return f''
+    give_trace = '|'.join([ f'{ifc}' for ifc in s.give ])
+    hold  = ''.join([ '^' if h else '.' for h in s.hold ])
+    pos   = f'<{s.pos.pos_x},{s.pos.pos_y}>'
+    count = f'{s.counter.count}'
+    state = 'H' if s.state == s.STATE_HEADER else \
+            'B' if s.state == s.STATE_BODY else   \
+            '!'
+    dir   = 'n' if s.out_dir == NORTH else \
+            's' if s.out_dir == SOUTH else \
+            'w' if s.out_dir == WEST  else \
+            'e' if s.out_dir == EAST  else \
+            'S' if s.out_dir == SELF  else \
+            '?'
+    return f'{s.get}({pos}[{state}{count}]{dir}{hold}){give_trace}'
