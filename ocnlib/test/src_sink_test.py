@@ -27,7 +27,7 @@ def mk_simple_pkt( src, dst, payload ):
   header[16:24] = b8(dst)
   flits = [ header ]
   flits.extend( [ b24(x) for x in payload ] )
-  return MultiFlitPacket( SimpleFormat, flits ) 
+  return MultiFlitPacket( SimpleFormat, flits )
 
 class TestHarness( Component ):
 
@@ -41,6 +41,10 @@ class TestHarness( Component ):
 
   def line_trace( s ):
     return f'{s.src.line_trace()} >>> {s.sink.line_trace()}'
+
+#-------------------------------------------------------------------------
+# test_simple
+#-------------------------------------------------------------------------
 
 def test_simple():
 
@@ -59,3 +63,22 @@ def test_simple():
 
   assert th.done()
 
+#-------------------------------------------------------------------------
+# test_delay
+#-------------------------------------------------------------------------
+
+def test_delay():
+  pkts = [
+    mk_simple_pkt( 0, 1, [ 0xbeef, 0xface, 0xf00d ] ),
+    mk_simple_pkt( 0, 1, [ 0xbaad, 0xc0de         ] ),
+  ]
+
+  th = TestHarness( SimpleFormat, pkts )
+  th.set_param( 'top.src.construct', flit_interval_delay=2 )
+  th.elaborate()
+  th.apply( SimulationPass() )
+  print()
+  for i in range( 20 ):
+    th.tick()
+    print( f'{i:3}:{th.line_trace()}' )
+  assert th.done()

@@ -44,7 +44,7 @@ class MultiFlitPacketSourceCL( Component ):
       elif not s.reset:
         # pop a packet to send
         if not s.cur_pkt and s.pkts:
-          s.cur_pkt = s.pkts.pop()
+          s.cur_pkt = s.pkts.popleft()
           assert not s.cur_pkt.empty()
 
         if s.send.rdy() and s.cur_pkt:
