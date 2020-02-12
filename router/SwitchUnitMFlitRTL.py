@@ -26,23 +26,23 @@ class SwitchUnitMFlitRTL( Component ):
     # Local parameters
     s.num_inports = num_inports
     s.Header      = Header
-    s.PhitType    = mk_bits( get_nbits( HeaderFormat ) )
+    s.PhitType    = mk_bits( get_nbits( Header ) )
     s.sel_width   = clog2( num_inports )
 
     GrantType     = mk_bits( num_inports )
     SelType       = mk_bits( s.sel_width )
 
     # Interface
-    s.get  = [ GetIfcRTL( FlitType ) for _ in range( num_inports )  ]
+    s.get  = [ GetIfcRTL( s.PhitType ) for _ in range( num_inports )  ]
     s.hold = [ InPort( Bits1 ) for _ in range( num_inports ) ]
-    s.give = GiveIfcRTL( FlitType )
+    s.give = GiveIfcRTL( s.PhitType )
 
     # Components
     s.granted_get_rdy = Wire( Bits1 )
     s.any_hold        = Wire( Bits1 )
 
     s.arbiter = GrantHoldArbiter( nreqs=num_inports )( hold = s.any_hold )
-    s.mux     = Mux( FlitType, num_inports )( out = s.give.msg )
+    s.mux     = Mux( s.PhitType, num_inports )( out = s.give.msg )
     s.encoder = Encoder( num_inports, s.sel_width )(
       in_ = s.arbiter.grants,
       out = s.mux.sel,
