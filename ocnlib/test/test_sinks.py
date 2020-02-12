@@ -8,11 +8,13 @@ Author : Yanghui Ou
   Date : Feb 3, 2020
 '''
 from pymtl3 import *
+from pymtl3.ifcs import RecvRTL2SendCL, RecvIfcRTL
+
 from ..utils import get_nbits
 from ..packets import MultiFlitPacket as Packet
 
 #-------------------------------------------------------------------------
-# MultiFlitPacketSink
+# MultiFlitPacketSinkCL
 #-------------------------------------------------------------------------
 
 class MultiFlitPacketSinkCL( Component ):
@@ -112,3 +114,27 @@ class MultiFlitPacketSinkCL( Component ):
   def line_trace( s ):
     return f'{s.recv}({s.count})'
 
+#-------------------------------------------------------------------------
+# MultiFlitPacketSinkRTL
+#-------------------------------------------------------------------------
+
+class MultiFlitPacketSinkRTL( Component ):
+
+  def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
+                 packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
+
+    PhitType = mk_bits( get_nbits( Format ) )
+
+    s.recv     = RecvIfcRTL( PhitType )
+    s.sink_cl  = MultiFlitPacketSinkRTL( Format, pkts, initial_delay, flit_interval_delay, 
+                                         packet_interval_delay , cmp_fn )
+    s.adapter = RecvRTL2SendCL( PhitType )
+    
+    connect( s.recv,         s.adapter.recv )
+    connect( s.adapter.send, s.sink_cl.recv )
+
+  def done( s ):
+    return s.sink_cl.done()
+
+  def line_trace( s ):
+    return f'{s.recv}'

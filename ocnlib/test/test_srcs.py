@@ -8,8 +8,9 @@ Author : Yanghui Ou
   Date : Feb 2, 2020
 '''
 from collections import deque
-
 from pymtl3 import *
+from pymtl3.ifcs import RecvCL2SendRTL, SendIfcRTL
+
 from ..utils import get_nbits
 
 #-------------------------------------------------------------------------
@@ -61,3 +62,28 @@ class MultiFlitPacketSourceCL( Component ):
 
   def line_trace( s ):
     return f'({s.count}){s.send}'
+
+#-------------------------------------------------------------------------
+# MultiFlitPacketSourceRTL
+#-------------------------------------------------------------------------
+
+class MultiFlitPacketSourceRTL( Component ):
+
+  def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
+                 packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
+
+    PhitType = mk_bits( get_nbits( Format ) )
+
+    s.send    = SendIfcRTL( PhitType )
+    s.src_cl  = MultiFlitPacketSourceRTL( Format, pkts, initial_delay, flit_interval_delay, 
+                                          packet_interval_delay , cmp_fn )
+    s.adapter = RecvCL2SendRTL( PhitType )
+    
+    connect( s.src_cl.send,  s.adapter.recv )
+    connect( s.adapter.send, s.send         )
+
+  def done( s ):
+    return s.src_cl.done()
+
+  def line_trace( s ):
+    return f'{s.send}'
