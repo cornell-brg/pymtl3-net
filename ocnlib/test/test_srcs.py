@@ -18,12 +18,12 @@ from ..utils import get_nbits
 # pkts                : a list of MultiFlitPacket objects.
 # initial_delay       : number of cycles before sending the very first flit.
 # flit_interval_delay : number of cycles between each flit in a packet.
-# pkt_interval_delay  : number of cycles between each packet.
+# packet_interval_delay  : number of cycles between each packet.
 # TODO: check if inputs packtes are valid
 
 class MultiFlitPacketSourceCL( Component ):
 
-  def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0, pkt_interval_delay=0 ):
+  def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0, packet_interval_delay=0 ):
 
     # Interface
     PhitType = mk_bits( get_nbits( Format ) )
@@ -34,7 +34,7 @@ class MultiFlitPacketSourceCL( Component ):
     s.cur_pkt = None
     s.count   = initial_delay
     s.f_delay = flit_interval_delay
-    s.p_delay = pkt_interval_delay
+    s.p_delay = packet_interval_delay
 
     # Update block
     @s.update
@@ -61,4 +61,3 @@ class MultiFlitPacketSourceCL( Component ):
 
   def line_trace( s ):
     return f'({s.count}){s.send}'
-

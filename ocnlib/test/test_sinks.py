@@ -17,7 +17,7 @@ from ..packets import MultiFlitPacket as Packet
 
 class MultiFlitPacketSinkCL( Component ):
 
-  def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0, 
+  def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
 
     PhitType = mk_bits( get_nbits( Format ) )
