@@ -21,44 +21,41 @@ from ocnlib.utils.connects import connect_union
 
 class SwitchUnitMFlitRTL( Component ):
 
-  def construct( s, HeaderFormat, num_inports=5 ):
+  def construct( s, Header, num_inports=5 ):
 
     # Local parameters
-    # NOTE: FlitType must be a BitsN type
-    # TODO: check for slice object
-    PLEN            = HeaderFormat.PLEN
-    FlitType        = HeaderFormat.PhitType
-    s.STATE_HEADER  = b1(0)
-    s.STATE_BODY    = b1(1)
-    s.header_format = HeaderFormat
-    s.num_inports   = num_inports
-    s.sel_width     = clog2( num_inports )
-    plen_width      = PLEN.stop - PLEN.start
+    s.num_inports = num_inports
+    s.Header      = Header
+    s.PhitType    = mk_bits( get_nbits( HeaderFormat ) )
+    s.sel_width   = clog2( num_inports )
 
-    PLenType        = mk_bits( plen_width  )
-    GrantType       = mk_bits( num_inports )
-    CountType       = mk_bits( plen_width  )
-    SelType         = mk_bits( s.sel_width )
+    GrantType     = mk_bits( num_inports )
+    SelType       = mk_bits( s.sel_width )
 
     # Interface
     s.get  = [ GetIfcRTL( FlitType ) for _ in range( num_inports )  ]
+    s.hold = [ InPort( Bits1 ) for _ in range( num_inports ) ]
     s.give = GiveIfcRTL( FlitType )
 
     # Components
-    s.plen            = Wire( PLenType )
-    s.granted_get_rdy = Wire( Bits1    )
-    s.state           = Wire( Bits1    )
-    s.state_next      = Wire( Bits1    )
+    s.granted_get_rdy = Wire( Bits1 )
+    s.any_hold        = Wire( Bits1 )
 
-    s.arbiter = GrantHoldArbiter( nreqs=num_inports )
+    s.arbiter = GrantHoldArbiter( nreqs=num_inports )( hold = s.any_hold )
     s.mux     = Mux( FlitType, num_inports )( out = s.give.msg )
     s.encoder = Encoder( num_inports, s.sel_width )(
       in_ = s.arbiter.grants,
       out = s.mux.sel,
     )
-    s.counter = Counter( CountType )
 
     # Combinational Logic
+    @s.update
+    def up_any_hold():
+      s.any_hold = b1(0)
+      for i in range( num_inports ):
+        if s.hold[i]:
+          s.any_hold = b1(1)
+
     @s.update
     def up_granted_get_rdy():
       s.granted_get_rdy = b1(0)
@@ -80,44 +77,7 @@ class SwitchUnitMFlitRTL( Component ):
     # for i in range( num_inports ):
     #   s.get[i].en //= lambda: s.give.en & ( s.mux.sel == SelType(i) )
 
-    connect_union( s, HeaderFormat, 'mux_out', s.mux.out )
-
-    s.give.rdy           //= s.granted_get_rdy
-    s.plen               //= s.mux_out.PLEN
-    s.counter.load_value //= s.plen
-    s.counter.incr       //= b1(0) # Never increments the counter
-
-
-    # State transition logic
-    @s.update_ff
-    def up_state():
-      if s.reset:
-        s.state <<= s.STATE_HEADER
-      else:
-        s.state <<= s.state_next
-
-    @s.update
-    def up_state_next():
-      if s.state == s.STATE_HEADER:
-        if s.give.en & ( s.plen > PLenType(0) ):
-          s.state_next = s.STATE_BODY
-        elif s.give.en & ( s.plen == PLenType(0) ):
-          s.state_next = s.STATE_HEADER
-        else:
-          s.state_next = s.STATE_HEADER
-
-      else: # STATE_BODY
-        if ( s.counter.count == CountType(1) ) & s.give.en:
-          s.state_next = s.STATE_HEADER
-
-    # State output logic
-    # TODO: counter decr
-    @s.update
-    def up_counter_decr():
-      if s.state == s.STATE_HEADER:
-        s.counter.decr = b1(0)
-      else: # STATE_BODY
-        s.counter.decr = s.give.en & ( s.state_next != s.STATE_HEADER )
+    s.give.rdy //= s.granted_get_rdy
 
   def line_trace( s ):
     in_trace  = '|'.join( [ str(p) for p in s.get ] )
