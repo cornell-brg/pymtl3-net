@@ -32,6 +32,7 @@ def run_sim( th, max_cycles=200 ):
   while not th.done() and ncycles < max_cycles:
     print( f'{ncycles:3}:{th.line_trace()}' )
     th.tick()
+    ncycles += 1
 
   assert th.done()
   th.tick()
@@ -148,4 +149,19 @@ def test_1pkt():
     mk_pkt( 0, 1, [ 0xfaceb00c, 0x8badf00d ] ), 
   ]
   th = TestHarness( TestHeader, TestPosition, pkts, 0, 0 )
+  run_sim( th, max_cycles=20 )
+
+#-------------------------------------------------------------------------
+# test_4pkt
+#-------------------------------------------------------------------------
+
+def test_4pkt():
+  pkts= [
+    mk_pkt( 1, 0, [                                    ] ), 
+    mk_pkt( 1, 2, [ 0xfaceb00c, 0x8badf00d             ] ), 
+    mk_pkt( 0, 1, [ 0xdeadbeef                         ] ), 
+    mk_pkt( 2, 1, [ 0xcafef00d, 0x111edcba, 0xbaaaaaad ] ), 
+  ]
+  th = TestHarness( TestHeader, TestPosition, pkts, 1, 1 )
+  th.set_param( 'top.src.construct', packet_interval_delay = 1 )
   run_sim( th, max_cycles=20 )

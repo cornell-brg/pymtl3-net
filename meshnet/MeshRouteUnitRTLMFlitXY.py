@@ -108,18 +108,19 @@ class MeshRouteUnitRTLMFlitXY( Component ):
 
     # Routing logic
     # TODO: Figure out how to encode dest id
+    @s.update
     def up_out_dir():
       if ( s.state == s.STATE_HEADER ) & s.get.rdy:
         if ( s.header.dst_x == s.pos.pos_x ) & ( s.header.dst_y == s.pos.pos_y ):
-          s.out_dir = SELF
+          s.out_dir = b3( SELF )
         elif s.header.dst_x < s.pos.pos_x:
-          s.out_dir = WEST
+          s.out_dir = b3( WEST )
         elif s.header.dst_x > s.pos.pos_x:
-          s.out_dir = EAST
+          s.out_dir = b3( EAST )
         elif s.header.dst_y < s.pos.pos_y:
-          s.out_dir = SOUTH
+          s.out_dir = b3( SOUTH )
         else:
-          s.out_dir = NORTH
+          s.out_dir = b3( NORTH )
        
       else:
         s.out_dir = s.out_dir_r
