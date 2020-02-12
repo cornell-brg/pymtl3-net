@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Feb 3, 2020
 '''
 from pymtl3 import *
-from pymtl3.ifcs import RecvRTL2SendCL, RecvIfcRTL
+from pymtl3.stdlib.ifcs import RecvRTL2SendCL, RecvIfcRTL
 
 from ..utils import get_nbits
 from ..packets import MultiFlitPacket as Packet
@@ -126,7 +126,7 @@ class MultiFlitPacketSinkRTL( Component ):
     PhitType = mk_bits( get_nbits( Format ) )
 
     s.recv     = RecvIfcRTL( PhitType )
-    s.sink_cl  = MultiFlitPacketSinkRTL( Format, pkts, initial_delay, flit_interval_delay, 
+    s.sink_cl  = MultiFlitPacketSinkCL( Format, pkts, initial_delay, flit_interval_delay, 
                                          packet_interval_delay , cmp_fn )
     s.adapter = RecvRTL2SendCL( PhitType )
     

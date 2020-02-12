@@ -9,8 +9,8 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from ..packets   import packet_format, MultiFlitPacket
-from .test_srcs  import MultiFlitPacketSourceCL
-from .test_sinks import MultiFlitPacketSinkCL
+from .test_srcs  import MultiFlitPacketSourceCL, MultiFlitPacketSourceRTL
+from .test_sinks import MultiFlitPacketSinkCL, MultiFlitPacketSinkRTL
 
 @bitstruct
 class SimpleFormat:
@@ -34,6 +34,19 @@ class TestHarness( Component ):
   def construct( s, Format, pkts ):
     s.src  = MultiFlitPacketSourceCL( SimpleFormat, pkts )
     s.sink = MultiFlitPacketSinkCL  ( SimpleFormat, pkts )
+    connect( s.src.send, s.sink.recv )
+
+  def done( s ):
+    return s.src.done() and s.sink.done()
+
+  def line_trace( s ):
+    return f'{s.src.line_trace()} >>> {s.sink.line_trace()}'
+
+class TestHarnessRTL( Component ):
+
+  def construct( s, Format, pkts ):
+    s.src  = MultiFlitPacketSourceRTL( SimpleFormat, pkts )
+    s.sink = MultiFlitPacketSinkRTL  ( SimpleFormat, pkts )
     connect( s.src.send, s.sink.recv )
 
   def done( s ):
@@ -124,4 +137,25 @@ def test_mix_delay():
   for i in range( 50 ):
     th.tick()
     print( f'{i:3}:{th.line_trace()}' )
+  assert th.done()
+
+#-------------------------------------------------------------------------
+# test_simple_rtl
+#-------------------------------------------------------------------------
+
+def test_simple_rtl():
+
+  pkts = [
+    mk_simple_pkt( 0, 1, [ 0xbeef, 0xb00c ] ),
+    mk_simple_pkt( 1, 0, [ 0xf00d, 0xbabe ] ),
+  ]
+  th = TestHarnessRTL( SimpleFormat, pkts )
+  th.elaborate()
+  th.apply( SimulationPass() )
+
+  print()
+  for i in range(10):
+    th.tick()
+    print( f'{i:3}:{th.line_trace()}' )
+
   assert th.done()
