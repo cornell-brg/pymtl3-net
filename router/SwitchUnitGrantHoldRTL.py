@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-SwitchUnitMFlitRTL.py
+SwitchUnitGrantHoldRTL.py
 ==========================================================================
 Switch unit that supports multi-flit (single-phit flit) packet.
 
@@ -14,12 +14,11 @@ from pymtl3.stdlib.rtl import Mux
 # FIXME: pymtl3.stdlib.rtl.Encoder
 from pymtl3.stdlib.rtl.Encoder import Encoder
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, SendIfcRTL
-
 from ocnlib.rtl import Counter, GrantHoldArbiter
 from ocnlib.utils.connects import connect_union
 
 
-class SwitchUnitMFlitRTL( Component ):
+class SwitchUnitGrantHoldRTL( Component ):
 
   def construct( s, Header, num_inports=5 ):
 
