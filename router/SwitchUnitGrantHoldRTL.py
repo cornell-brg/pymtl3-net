@@ -20,28 +20,27 @@ from ocnlib.utils.connects import connect_union
 
 class SwitchUnitGrantHoldRTL( Component ):
 
-  def construct( s, Header, num_inports=5 ):
+  def construct( s, Type, num_inports=5 ):
 
     # Local parameters
     s.num_inports = num_inports
-    s.Header      = Header
-    s.PhitType    = mk_bits( get_nbits( Header ) )
+    s.Type        = Type
     s.sel_width   = clog2( num_inports )
 
     GrantType     = mk_bits( num_inports )
     SelType       = mk_bits( s.sel_width )
 
     # Interface
-    s.get  = [ GetIfcRTL( s.PhitType ) for _ in range( num_inports )  ]
+    s.get  = [ GetIfcRTL( s.Type ) for _ in range( num_inports )  ]
     s.hold = [ InPort( Bits1 ) for _ in range( num_inports ) ]
-    s.give = GiveIfcRTL( s.PhitType )
+    s.give = GiveIfcRTL( s.Type )
 
     # Components
     s.granted_get_rdy = Wire( Bits1 )
     s.any_hold        = Wire( Bits1 )
 
     s.arbiter = GrantHoldArbiter( nreqs=num_inports )( hold = s.any_hold )
-    s.mux     = Mux( s.PhitType, num_inports )( out = s.give.msg )
+    s.mux     = Mux( s.Type, num_inports )( out = s.give.msg )
     s.encoder = Encoder( num_inports, s.sel_width )(
       in_ = s.arbiter.grants,
       out = s.mux.sel,
@@ -80,6 +79,7 @@ class SwitchUnitGrantHoldRTL( Component ):
 
   def line_trace( s ):
     in_trace  = '|'.join( [ str(p) for p in s.get ] )
+    hold      = ''.join([ '^' if h else '.' for h in s.hold ])
     out_trace = f'{s.give}'
-    return f'{in_trace}({s.state}){out_trace}'
+    return f'{in_trace}({hold}){out_trace}'
 
