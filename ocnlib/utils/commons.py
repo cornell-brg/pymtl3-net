@@ -10,8 +10,8 @@ Author : Yanghui Ou
 from functools import reduce
 from pymtl3 import *
 from pymtl3.datatypes.bitstructs import(
-  is_bitstruct_class, 
-  is_bitstruct_inst, 
+  is_bitstruct_class,
+  is_bitstruct_inst,
   _FIELDS as bitstruct_fields,
 )
 
@@ -25,7 +25,7 @@ def get_nbits( cls ):
     return cls.nbits
 
   else:
-    assert is_bitstruct_class( cls ) 
+    assert is_bitstruct_class( cls )
     fields_dict = getattr( cls, bitstruct_fields )
     total_nbits = 0
     for _, ftype in fields_dict.items():
@@ -47,12 +47,12 @@ def get_plen_type( cls, plen_field_name='plen' ):
 
   return fields_dict[ plen_field_name ]
 
-#------------------------------------------------------------------------- 
+#-------------------------------------------------------------------------
 # bitstruct_to_slice_h
-#------------------------------------------------------------------------- 
+#-------------------------------------------------------------------------
 # Recursive helper function
 
-def _bitstruct_to_slices_h( cls, slices ): 
+def _bitstruct_to_slices_h( cls, slices ):
   if issubclass( cls, Bits ):
     start = 0 if not slices else slices[-1].stop
     stop  = start + cls.nbits
@@ -67,9 +67,9 @@ def _bitstruct_to_slices_h( cls, slices ):
     for _, ftype in fields_lst:
       _bitstruct_to_slices_h( ftype, slices )
 
-#------------------------------------------------------------------------- 
+#-------------------------------------------------------------------------
 # bitstruct_to_slice
-#------------------------------------------------------------------------- 
+#-------------------------------------------------------------------------
 # Converts a bitstruct to a list of slices
 
 def bitstruct_to_slices( cls ):
