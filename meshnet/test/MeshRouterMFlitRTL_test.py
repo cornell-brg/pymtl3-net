@@ -95,7 +95,7 @@ def run_sim( th, max_cycles=200 ):
 
 def mk_pkt( src_x, src_y, dst_x, dst_y, payload=[], opaque=0 ):
   plen        = len( payload )
-  header      = TestHeader( opaque, plen, src_x, src_y, dst_x, dst_y )
+  header      = TestHeader( opaque, src_x, src_y, dst_x, dst_y, plen )
   header_bits = to_bits( header )
   flits       = [ header_bits ] + payload
   return Packet( TestHeader, flits )
@@ -117,8 +117,9 @@ def test_sanity_check():
 
 def basic_pkts( pos_x, pos_y ):
   return [
-    #      src_x  y  dst_x  y      payload
-    mk_pkt(    0, 0, pos_x, pos_y, [ 0x8badf00d ] ),
+    #       src_x  y      dst_x  y      payload
+    mk_pkt(     0, 0,     pos_x, pos_y, [ 0x8badf00d             ] ),
+    mk_pkt( pos_x, pos_y, 0,     0,     [ 0x8badf00d, 0xdeadbeef ] ),
   ]
 
 #-------------------------------------------------------------------------

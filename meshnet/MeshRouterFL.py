@@ -158,7 +158,7 @@ class MeshRouterMFlitFL:
         for pkt in pkts:
           header = to_bitstruct( pkt.flits[0], s.Header )
           dst = (
-            SELF  if header.dst_x == s.pos_x and pkt.dst_y == s.pos_y else
+            SELF  if header.dst_x == s.pos_x and header.dst_y == s.pos_y else
             EAST  if header.dst_x > s.pos_x else
             WEST  if header.dst_x < s.pos_x else
             NORTH if header.dst_y > s.pos_y else
