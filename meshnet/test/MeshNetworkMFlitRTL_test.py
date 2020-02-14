@@ -48,7 +48,7 @@ class TestHarness( Component ):
     nterminals = ncols * nrows
 
     s.src  = [ TestSource( Header, src_pkts[i] ) for i in range( nterminals ) ]
-    s.dut  = MeshNetworkMFlitRTL( Header, Position )
+    s.dut  = MeshNetworkMFlitRTL( Header, Position, ncols, nrows )
     s.sink = [ TestSink( Header, sink_pkts[i] ) for i in range( nterminals ) ]
 
     for i in range( nterminals ): 
@@ -145,8 +145,9 @@ def basic_pkts( ncols, nrows ):
 #-------------------------------------------------------------------------
 
 test_case_table = mk_test_case_table([
-  (          'msg_func        ncols  nrows' ),
-  [ 'basic',  basic_pkts,     2,     2  ],
+  (             'msg_func        ncols  nrows' ),
+  [ 'basic',     basic_pkts,     2,     2  ],
+  [ 'basic4x4',  basic_pkts,     4,     4  ],
 ])
 
 #-------------------------------------------------------------------------
