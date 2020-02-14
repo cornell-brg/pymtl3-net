@@ -154,7 +154,7 @@ test_case_table = mk_test_case_table([
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_mflit_mesh_router( test_params ):
+def test_mflit_mesh( test_params ):
   ncols = test_params.ncols
   nrows = test_params.nrows
   pkts  = test_params.msg_func( ncols, nrows )
