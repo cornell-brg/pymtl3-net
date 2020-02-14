@@ -146,8 +146,8 @@ def basic_pkts( ncols, nrows ):
 
 test_case_table = mk_test_case_table([
   (             'msg_func        ncols  nrows' ),
-  [ 'basic',     basic_pkts,     2,     2  ],
-  [ 'basic4x4',  basic_pkts,     4,     4  ],
+  [ 'basic',     basic_pkts,     2,     2      ],
+  [ 'basic4x4',  basic_pkts,     4,     4      ],
 ])
 
 #-------------------------------------------------------------------------
