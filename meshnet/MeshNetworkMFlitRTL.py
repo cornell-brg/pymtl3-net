@@ -93,4 +93,6 @@ class MeshNetworkMFlitRTL( Component ):
   #-----------------------------------------------------------------------
 
   def line_trace( s ):
-    return f''
+    in_trace  = '|'.join([ f'{ifc}' for ifc in s.recv ])
+    out_trace = '|'.join([ f'{ifc}' for ifc in s.send ])
+    return f'{in_trace}(){out_trace}'
