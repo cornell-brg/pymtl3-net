@@ -104,30 +104,30 @@ class MeshRouterMFlitFL:
     src_pkts = [ [] for _ in range(5) ]
     if s.first_dimension == 'y':
       for pkt in lst:
-        pkt = to_bitstruct( pkt, s.Header )
-        if pkt.src_x == s.pos_x and pkt.src_y == s.pos_y:
+        header = to_bitstruct( pkt.flits[0], s.Header )
+        if header.src_x == s.pos_x and header.src_y == s.pos_y:
           src_pkts[ SELF ].append( pkt )
-        elif pkt.src_x == s.pos_x:
-          if pkt.src_y < s.pos_y:
+        elif header.src_x == s.pos_x:
+          if header.src_y < s.pos_y:
             src_pkts[ SOUTH ].append( pkt )
           else:
             src_pkts[ NORTH ].append( pkt )
-        elif pkt.src_x < s.pos_x:
+        elif header.src_x < s.pos_x:
           src_pkts[ WEST ].append( pkt )
         else:
           src_pkts[ EAST ].append( pkt )
 
     elif s.first_dimension == 'x':
       for pkt in lst:
-        pkt = to_bitstruct( pkt, s.Header )
-        if pkt.src_x == s.pos_x and pkt.src_y == s.pos_y:
+        header = to_bitstruct( pkt.flits[0], s.Header )
+        if header.src_x == s.pos_x and header.src_y == s.pos_y:
           src_pkts[ SELF ].append( pkt )
-        elif pkt.src_y == s.pos_y:
-          if pkt.src_x < s.pos_x:
+        elif header.src_y == s.pos_y:
+          if header.src_x < s.pos_x:
             src_pkts[ WEST ].append( pkt )
           else:
             src_pkts[ NORTH ].append( pkt )
-        elif pkt.src_y < s.pos_y:
+        elif header.src_y < s.pos_y:
           src_pkts[ SOUTH ].append( pkt )
         else:
           src_pkts[ NORTH ].append( pkt )
@@ -143,25 +143,25 @@ class MeshRouterMFlitFL:
     if s.first_dimension == 'y':
       for pkts in src_pkts:
         for pkt in pkts:
-          pkt = to_bitstruct( pkt, s.Header )
+          header = to_bitstruct( pkt.flits[0], s.Header )
           dst = (
-            SELF  if pkt.dst_x == s.pos_x and pkt.dst_y == s.pos_y else
-            NORTH if pkt.dst_y > s.pos_y else
-            SOUTH if pkt.dst_y < s.pos_y else
-            EAST  if pkt.dst_x > s.pos_x else
+            SELF  if header.dst_x == s.pos_x and pkt.dst_y == s.pos_y else
+            NORTH if header.dst_y > s.pos_y else
+            SOUTH if header.dst_y < s.pos_y else
+            EAST  if header.dst_x > s.pos_x else
             WEST
           )
           dst_pkts[ dst ].append( pkt )
 
-    elif s._firstdimension == 'x':
+    elif s.first_dimension == 'x':
       for pkts in src_pkts:
         for pkt in pkts:
-          pkt = to_bitstruct( pkt, s.Header )
+          header = to_bitstruct( pkt.flits[0], s.Header )
           dst = (
-            SELF  if pkt.dst_x == s.pos_x and pkt.dst_y == s.pos_y else
-            EAST  if pkt.dst_x > s.pos_x else
-            WEST  if pkt.dst_x < s.pos_x else
-            NORTH if pkt.dst_y > s.pos_y else
+            SELF  if header.dst_x == s.pos_x and pkt.dst_y == s.pos_y else
+            EAST  if header.dst_x > s.pos_x else
+            WEST  if header.dst_x < s.pos_x else
+            NORTH if header.dst_y > s.pos_y else
             SOUTH
           )
           dst_pkts[ dst ].append( pkt )
