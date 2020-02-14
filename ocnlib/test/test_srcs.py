@@ -75,10 +75,10 @@ class MultiFlitPacketSourceRTL( Component ):
     PhitType = mk_bits( get_nbits( Format ) )
 
     s.send    = SendIfcRTL( PhitType )
-    s.src_cl  = MultiFlitPacketSourceCL( Format, pkts, initial_delay, flit_interval_delay, 
+    s.src_cl  = MultiFlitPacketSourceCL( Format, pkts, initial_delay, flit_interval_delay,
                                          packet_interval_delay )
     s.adapter = RecvCL2SendRTL( PhitType )
-    
+
     connect( s.src_cl.send,  s.adapter.recv )
     connect( s.adapter.send, s.send         )
 
