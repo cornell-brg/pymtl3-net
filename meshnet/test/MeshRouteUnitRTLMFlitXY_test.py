@@ -92,9 +92,9 @@ class TestHarness( Component ):
     s.src.send  //= s.src_q.enq
     s.src_q.deq //= s.dut.get
     s.dut.pos   //= PositionType( x, y )
-    
+
     for i in range(5):
-      s.sink[i].recv.msg //= s.dut.give[i].msg 
+      s.sink[i].recv.msg //= s.dut.give[i].msg
       s.sink[i].recv.en  //= lambda: s.dut.give[i].rdy & s.sink[i].recv.rdy
       s.dut.give[i].en   //= lambda: s.dut.give[i].rdy & s.sink[i].recv.rdy
 
@@ -103,7 +103,7 @@ class TestHarness( Component ):
     for sink in s.sink:
       sinks_done &= sink.done()
     return s.src.done() and sinks_done
-  
+
   def line_trace( s ):
     return s.dut.line_trace()
 
@@ -146,7 +146,7 @@ def mk_pkt( dst_x, dst_y, payload=[], src_x=0, src_y=0, opaque=0 ):
 
 def test_1pkt():
   pkts= [
-    mk_pkt( 0, 1, [ 0xfaceb00c, 0x8badf00d ] ), 
+    mk_pkt( 0, 1, [ 0xfaceb00c, 0x8badf00d ] ),
   ]
   th = TestHarness( TestHeader, TestPosition, pkts, 0, 0 )
   run_sim( th, max_cycles=20 )
@@ -157,10 +157,10 @@ def test_1pkt():
 
 def test_4pkt():
   pkts= [
-    mk_pkt( 1, 0, [                                    ] ), 
-    mk_pkt( 1, 2, [ 0xfaceb00c, 0x8badf00d             ] ), 
-    mk_pkt( 0, 1, [ 0xdeadbeef                         ] ), 
-    mk_pkt( 2, 1, [ 0xcafef00d, 0x111edcba, 0xbaaaaaad ] ), 
+    mk_pkt( 1, 0, [                                    ] ),
+    mk_pkt( 1, 2, [ 0xfaceb00c, 0x8badf00d             ] ),
+    mk_pkt( 0, 1, [ 0xdeadbeef                         ] ),
+    mk_pkt( 2, 1, [ 0xcafef00d, 0x111edcba, 0xbaaaaaad ] ),
   ]
   th = TestHarness( TestHeader, TestPosition, pkts, 1, 1 )
   th.set_param( 'top.src.construct', packet_interval_delay = 1 )
