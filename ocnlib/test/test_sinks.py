@@ -22,8 +22,8 @@ class MultiFlitPacketSinkCL( Component ):
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
 
-    PhitType = mk_bits( get_nbits( Format ) )
-    s.recv.Type = PhitType
+    s.PhitType  = mk_bits( get_nbits( Format ) )
+    s.recv.Type = s.PhitType
     s.Format    = Format
 
     s.cur_pkt  = Packet( Format )
@@ -86,7 +86,8 @@ class MultiFlitPacketSinkCL( Component ):
       )
 
     # Assemble packet
-    s.cur_pkt.add( flit )
+    # FIXME: use clone() to avoid mutable issue once pymtl3 is updated
+    s.cur_pkt.add( s.PhitType(flit) )
 
     # If a packet is assembled, check if it exists in the reference
     if s.cur_pkt.full():
@@ -102,7 +103,8 @@ class MultiFlitPacketSinkCL( Component ):
       if not flag:
         s.error_msg = (
           f'Test sink {s} received unexpected packet!\n'
-          f'Received : {s.cur_pkt.flits}'
+          f'Received : {s.cur_pkt.flits}\n'
+          f'Expecting: {[ p.flits for p in s.ref_pkts]}'
         )
 
       # Reset current packet to empty
@@ -123,13 +125,13 @@ class MultiFlitPacketSinkRTL( Component ):
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
 
-    PhitType = mk_bits( get_nbits( Format ) )
+    s.PhitType = mk_bits( get_nbits( Format ) )
 
-    s.recv     = RecvIfcRTL( PhitType )
-    s.sink_cl  = MultiFlitPacketSinkCL( Format, pkts, initial_delay, flit_interval_delay, 
+    s.recv     = RecvIfcRTL( s.PhitType )
+    s.sink_cl  = MultiFlitPacketSinkCL( Format, pkts, initial_delay, flit_interval_delay,
                                          packet_interval_delay , cmp_fn )
-    s.adapter = RecvRTL2SendCL( PhitType )
-    
+    s.adapter = RecvRTL2SendCL( s.PhitType )
+
     connect( s.recv,         s.adapter.recv )
     connect( s.adapter.send, s.sink_cl.recv )
 
