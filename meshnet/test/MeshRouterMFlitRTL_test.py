@@ -123,13 +123,56 @@ def basic_pkts( pos_x, pos_y ):
   ]
 
 #-------------------------------------------------------------------------
+# test case: hotspot
+#-------------------------------------------------------------------------
+
+def hotspot_pkts( pos_x, pos_y ):
+  return [
+    #       src_x  y      dst_x  y      payload
+    mk_pkt(     0, 0,     pos_x, pos_y, [ 0x8badf00d                         ] ),
+    mk_pkt(     0, 1,     pos_x, pos_y, [ 0x8badf00d, 0xdeadbeef             ] ),
+    mk_pkt( pos_x, 0,     pos_x, pos_y, [                                    ] ),
+    mk_pkt(     2, pos_y, pos_x, pos_y, [ 0xdeadbeef, 0xfaceb00c, 0xdeadfa11 ] ),
+    mk_pkt(     2, pos_y, pos_x, pos_y, [                                    ] ),
+    mk_pkt(     2, pos_y, pos_x, pos_y, [ 0xdeadc0de ] * 10                   ),
+  ]
+
+#-------------------------------------------------------------------------
+# test case: long
+#-------------------------------------------------------------------------
+
+def long_pkts( pos_x, pos_y ):
+  return [
+    #       src_x  y      dst_x  y      payload
+    mk_pkt(     0, 0,     pos_x, pos_y, [ 0x8badf00d                         ] * 13 ),
+    mk_pkt(     0, 1,     pos_x, pos_y, [ 0x8badf00d, 0xdeadbeef             ] * 6  ),
+    mk_pkt( pos_x, 0,     pos_x, pos_y, [                                    ]      ),
+    mk_pkt(     2, 1,     pos_x, pos_y, [ 0xdeadbeef, 0xfaceb00c, 0xdeadfa11 ] * 3  ),
+    mk_pkt(     7, pos_y, pos_x, pos_y, [                                    ]      ),
+    mk_pkt(     0, 8,     pos_x, pos_y, [ 0xdeadc0de                         ] * 10 ),
+  ]
+
+#-------------------------------------------------------------------------
 # test case table
 #-------------------------------------------------------------------------
 
-test_case_table = mk_test_case_table([
-  (          'msg_func    pos_x  pos_y' ),
-  [ 'basic',  basic_pkts,     1,     1  ],
-])
+table = [
+  (               'msg_func      pos_x  pos_y' ),
+  [ 'basic',       basic_pkts,       1,     1  ],
+  [ 'hotspot2_3',  hotspot_pkts,     2,     3  ],
+  [ 'hotspot4_4',  hotspot_pkts,     4,     4  ],
+  [ 'long_4_4',    long_pkts,        4,     4  ],
+]
+
+for x in range(4):
+  for y in range(4):
+    table.append([ f'hotspot_{x},{y}', hotspot_pkts, x, y ])
+
+for x in range(4):
+  for y in range(4):
+    table.append([ f'long_{x},{y}', long_pkts, x, y ])
+
+test_case_table = mk_test_case_table( table )
 
 #-------------------------------------------------------------------------
 # test driver
