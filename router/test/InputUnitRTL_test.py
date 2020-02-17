@@ -35,7 +35,7 @@ def run_tv_test( dut, test_vectors ):
   def tv_out( dut, tv ):
     if tv[1] != '?': assert dut.recv.rdy == tv[1]
     if tv[4] != '?': assert dut.give.rdy == tv[4]
-    if tv[5] != '?': assert dut.give.msg == tv[5]
+    if tv[5] != '?': assert dut.give.ret == tv[5]
 
   # Run the test
 
@@ -45,7 +45,7 @@ def run_tv_test( dut, test_vectors ):
 def test_pipe_Bits():
 
   run_tv_test( InputUnitRTL( Bits32 ), [
-    #  enq.en  enq.rdy enq.msg   deq.en  deq.rdy deq.msg
+    #  enq.en  enq.rdy enq.msg   deq.en  deq.rdy deq.ret
     [  b1(1),  b1(1),  b32(123), b1(0),  b1(0),    '?'    ],
     [  b1(1),  b1(1),  b32(345), b1(0),  b1(1),  b32(123) ],
     [  b1(0),  b1(0),  b32(567), b1(0),  b1(1),  b32(123) ],
@@ -72,7 +72,7 @@ class TestHarness( Component ):
 
     # Connections
     s.src.send     //= s.dut.recv
-    s.dut.give.msg //= s.sink.recv.msg
+    s.dut.give.ret //= s.sink.recv.msg
 
     @s.update
     def up_give_en():

@@ -42,11 +42,11 @@ class ChannelRTL( Component ):
         s.queues[0].enq.msg = s.recv.msg
         s.queues[0].enq.en  = s.recv.en and s.queues[0].enq.rdy
         for i in range(s.latency - 1):
-          s.queues[i+1].enq.msg = s.queues[i].deq.msg
+          s.queues[i+1].enq.msg = s.queues[i].deq.ret
           s.queues[i+1].enq.en  = s.queues[i].deq.rdy and s.queues[i+1].enq.rdy
           s.queues[i].deq.en    = s.queues[i+1].enq.en
 
-        s.send.msg  = s.queues[s.latency-1].deq.msg
+        s.send.msg  = s.queues[s.latency-1].deq.ret
         s.send.en   = s.send.rdy and s.queues[s.latency-1].deq.rdy
         s.queues[s.latency-1].deq.en   = s.send.en
 

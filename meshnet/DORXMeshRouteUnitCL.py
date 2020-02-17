@@ -23,8 +23,8 @@ class DORXMeshRouteUnitCL( Component ):
 
     # Interface
 
-    s.get  = NonBlockingCallerIfc( PacketType )
-    s.give = [ NonBlockingCalleeIfc( PacketType ) for _ in range( s.num_outports ) ]
+    s.get  = CallerIfcCL( Type=PacketType )
+    s.give = [ CalleeIfcCL( Type=PacketType ) for _ in range( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Components

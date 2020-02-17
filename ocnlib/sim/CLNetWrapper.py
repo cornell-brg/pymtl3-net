@@ -18,8 +18,8 @@ class CLNetWrapper( Component ):
 
     # Interface
 
-    s.recv = [ NonBlockingCalleeIfc( PktType ) for _ in range( nports ) ]
-    s.give = [ NonBlockingCalleeIfc( PktType ) for _ in range( nports ) ]
+    s.recv = [ CalleeIfcCL( PktType ) for _ in range( nports ) ]
+    s.give = [ CalleeIfcCL( PktType ) for _ in range( nports ) ]
 
     # Component
 

@@ -52,23 +52,23 @@ class RingRouteUnitRTL( Component ):
     # Routing logic
     @s.update
     def up_left_right_dist():
-      if s.get.msg.dst < s.pos:
-        s.left_dist  = dist_type(s.pos) - dist_type(s.get.msg.dst)
-        s.right_dist = s.last_idx - dist_type(s.pos) + dist_type(s.get.msg.dst) + dist_type(1)
+      if s.get.ret.dst < s.pos:
+        s.left_dist  = dist_type(s.pos) - dist_type(s.get.ret.dst)
+        s.right_dist = s.last_idx - dist_type(s.pos) + dist_type(s.get.ret.dst) + dist_type(1)
       else:
-        s.left_dist  = dist_type(1) + s.last_idx + dist_type(s.pos) - dist_type(s.get.msg.dst)
-        s.right_dist = dist_type(s.get.msg.dst) - dist_type(s.pos)
+        s.left_dist  = dist_type(1) + s.last_idx + dist_type(s.pos) - dist_type(s.get.ret.dst)
+        s.right_dist = dist_type(s.get.ret.dst) - dist_type(s.pos)
 
     @s.update
     def up_ru_routing():
 
       s.out_dir = dir_type(0)
-      s.give_msg_wire = deepcopy( s.get.msg )
+      s.give_msg_wire = deepcopy( s.get.ret )
       for i in range( s.num_outports ):
         s.give[i].rdy = b1(0)
 
       if s.get.rdy:
-        if s.pos == s.get.msg.dst:
+        if s.pos == s.get.ret.dst:
           s.out_dir = dir_type(SELF)
         elif s.left_dist < s.right_dist:
           s.out_dir = dir_type(LEFT)
@@ -81,7 +81,7 @@ class RingRouteUnitRTL( Component ):
           s.give_msg_wire.vc_id = b1(1)
 
         s.give[ s.out_dir ].rdy = b1(1)
-        s.give[ s.out_dir ].msg = s.give_msg_wire
+        s.give[ s.out_dir ].ret = s.give_msg_wire
 
     @s.update
     def up_ru_get_en():

@@ -15,8 +15,8 @@ class OutputUnitCL( Component ):
   def construct( s, PacketType, QueueType = None ):
 
     # Interface
-    s.get  = NonBlockingCallerIfc( PacketType )
-    s.send = NonBlockingCallerIfc( PacketType )
+    s.get  = CallerIfcCL( Type=PacketType )
+    s.send = CallerIfcCL( Type=PacketType )
     s.QueueType = QueueType
 
     # If queue type is assigned

@@ -36,7 +36,7 @@ class DORXCMeshRouteUnitRTL( Component ):
     # Connections
 
     for i in range( s.num_outports ):
-      s.get.msg     //= s.give[i].msg
+      s.get.ret     //= s.give[i].ret
       s.give_ens[i] //= s.give[i].en
       s.give_rdy[i] //= s.give[i].rdy
 
@@ -50,13 +50,13 @@ class DORXCMeshRouteUnitRTL( Component ):
         s.give_rdy[i] = Bits1(0)
 
       if s.get.rdy:
-        if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
-          s.give_rdy[ Bits3( 4 ) + s.get.msg.dst_ter ] = Bits1(1)
-        elif s.get.msg.dst_x < s.pos.pos_x:
+        if s.pos.pos_x == s.get.ret.dst_x and s.pos.pos_y == s.get.ret.dst_y:
+          s.give_rdy[ Bits3( 4 ) + s.get.ret.dst_ter ] = Bits1(1)
+        elif s.get.ret.dst_x < s.pos.pos_x:
           s.give_rdy[2] = Bits1(1)
-        elif s.get.msg.dst_x > s.pos.pos_x:
+        elif s.get.ret.dst_x > s.pos.pos_x:
           s.give_rdy[3] = Bits1(1)
-        elif s.get.msg.dst_y < s.pos.pos_y:
+        elif s.get.ret.dst_y < s.pos.pos_y:
           s.give_rdy[1] = Bits1(1)
         else:
           s.give_rdy[0] = Bits1(1)

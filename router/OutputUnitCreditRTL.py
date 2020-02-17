@@ -31,16 +31,16 @@ class OutputUnitCreditRTL( Component ):
 
     s.credit = [ Counter( credit_type, credit_line ) for _ in range( vc ) ]
 
-    s.get.msg //= s.send.msg
+    s.get.ret //= s.send.msg
 
     @s.update
     def up_credit_send():
       s.send.en = b1(0)
       s.get.en = b1(0)
       if s.get.rdy:
-        # print( str(s) + " : " + str(s.get.msg) )
+        # print( str(s) + " : " + str(s.get.ret) )
         for i in range( vc ):
-          if vcid_type(i) == s.get.msg.vc_id and s.credit[i].count > credit_type(0):
+          if vcid_type(i) == s.get.ret.vc_id and s.credit[i].count > credit_type(0):
             s.send.en = b1(1)
             s.get.en = b1(1)
 

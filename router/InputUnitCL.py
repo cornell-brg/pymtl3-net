@@ -17,8 +17,8 @@ class InputUnitCL( Component ):
 
     # Interface
 
-    s.recv = NonBlockingCalleeIfc( PacketType )
-    s.give = NonBlockingCalleeIfc( PacketType )
+    s.recv = CalleeIfcCL( Type=PacketType )
+    s.give = CalleeIfcCL( Type=PacketType )
 
     # Component
 

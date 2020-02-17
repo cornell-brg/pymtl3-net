@@ -37,7 +37,7 @@ class TestHarness( Component ):
     s.src.send             //= s.src_q.enq
     s.src_q.deq            //= s.output_unit.get
     s.output_unit.send     //= s.input_unit.recv
-    s.switch_unit.give.msg //= s.sink.recv.msg
+    s.switch_unit.give.ret //= s.sink.recv.msg
     for i in range( vc ):
       s.input_unit.give[i] //= s.switch_unit.get[i]
 
