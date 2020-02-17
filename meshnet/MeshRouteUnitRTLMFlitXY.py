@@ -55,10 +55,10 @@ class MeshRouteUnitRTLMFlitXY( Component ):
       load_value=s.header.plen,
     )
 
-    connect_bitstruct( s.get.msg, s.header )
+    connect_bitstruct( s.get.ret, s.header )
     
     for i in range( 5 ):
-      s.get.msg //= s.give[i].msg
+      s.get.ret //= s.give[i].ret
     s.get.en //= s.any_give_en
 
     @s.update
