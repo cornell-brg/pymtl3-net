@@ -20,7 +20,7 @@ class SwitchUnitCL( Component ):
 
     # Interface
 
-    s.get  = [ CallerIfcCL( PacketType ) for _ in range( s.num_inports ) ]
+    s.get  = [ CallerIfcCL( Type=PacketType ) for _ in range( s.num_inports ) ]
     s.give.Type = PacketType
 
     # Components

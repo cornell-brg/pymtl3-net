@@ -27,8 +27,8 @@ class MeshNetworkCL( Component ):
 
     # Interface
 
-    s.recv = [ CalleeIfcCL( PacketType ) for _ in range( s.num_terminals ) ]
-    s.send = [ CallerIfcCL( PacketType ) for _ in range( s.num_terminals ) ]
+    s.recv = [ CalleeIfcCL( Type=PacketType ) for _ in range( s.num_terminals ) ]
+    s.send = [ CallerIfcCL( Type=PacketType ) for _ in range( s.num_terminals ) ]
 
     # Components
 
@@ -68,29 +68,40 @@ class MeshNetworkCL( Component ):
       s.send[i] //= s.routers[i].send[SELF]
 
       # Connect the unused ports
-      def dummy_rdy():
-        return lambda : False
+      # def dummy_rdy():
+      #   return lambda : False
+
+      # def dummy_method():
+      #   ...
 
       # FIXME: this doesn't work!
       if i // ncols == 0:
-        s.routers[i].send[SOUTH].rdy.method = dummy_rdy()
+        s.routers[i].send[SOUTH].method     = lambda s: None
+        s.routers[i].send[SOUTH].rdy.method = lambda s: False
 
       if i // ncols == nrows - 1:
-        s.routers[i].send[NORTH].rdy.method = dummy_rdy()
+        s.routers[i].send[NORTH].method     = lambda s: None
+        s.routers[i].send[NORTH].rdy.method = lambda s: False
 
       if i % ncols == 0:
-        s.routers[i].send[WEST].rdy.method = dummy_rdy()
+        s.routers[i].send[WEST].method     = lambda s: None
+        s.routers[i].send[WEST].rdy.method = lambda s: False
 
       if i % ncols == ncols - 1:
-        s.routers[i].send[EAST].rdy.method = dummy_rdy()
+        s.routers[i].send[EAST].method     = lambda s: None
+        s.routers[i].send[EAST].rdy.method = lambda s: False
 
-    # FIXME: unable to connect a struct to a port.
-    @s.update
-    def up_pos():
-      for y in range( nrows ):
-        for x in range( ncols ):
-          idx = y * ncols + x
-          s.routers[idx].pos = PositionType( x, y )
+    # @s.update
+    # def up_pos():
+    #   for y in range( nrows ):
+    #     for x in range( ncols ):
+    #       idx = y * ncols + x
+    #       s.routers[idx].pos = PositionType( x, y )
+
+    for y in range( nrows ):
+      for x in range( ncols ):
+        idx = y * ncols + x
+        s.routers[idx].pos //= PositionType( x, y )
 
   def line_trace( s ):
     return "|".join( [ s.routers[i].line_trace() for i in range(s.num_routers) ] )
