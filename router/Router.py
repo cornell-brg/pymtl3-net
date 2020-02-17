@@ -60,9 +60,9 @@ class Router( Component ):
 
   def line_trace( s ):
     return "{}({}){}".format(
-      "|".join( [ f"{x.line_trace()}" for x in s.recv ] ),
+      "|".join( [ f"{x}" for x in s.recv ] ),
       s.pos,
-      "|".join( [ f"{x.line_trace()}" for x in s.send ] )
+      "|".join( [ f"{x}" for x in s.send ] )
     )
 
   def elaborate_physical( s ):

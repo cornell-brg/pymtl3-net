@@ -9,6 +9,7 @@
 from channel.ChannelCL import ChannelCL
 from pymtl3 import *
 from pymtl3.stdlib.cl.queues import BypassQueueCL
+from ocnlib.cl import BoundaryUnit
 
 from .directions import *
 from .MeshRouterCL import MeshRouterCL
@@ -27,8 +28,8 @@ class MeshNetworkCL( Component ):
 
     # Interface
 
-    s.recv = [ NonBlockingCalleeIfc( PacketType ) for _ in range( s.num_terminals ) ]
-    s.send = [ NonBlockingCallerIfc( PacketType ) for _ in range( s.num_terminals ) ]
+    s.recv = [ CalleeIfcCL( Type=PacketType ) for _ in range( s.num_terminals ) ]
+    s.send = [ CallerIfcCL( Type=PacketType ) for _ in range( s.num_terminals ) ]
 
     # Components
 
@@ -67,30 +68,53 @@ class MeshNetworkCL( Component ):
       s.recv[i] //= s.routers[i].recv[SELF]
       s.send[i] //= s.routers[i].send[SELF]
 
-      # Connect the unused ports
-      def dummy_rdy():
-        return lambda : False
+      # Connect the unused ports to dummy methods
+      # def dummy_rdy():
+      #   return lambda : False
+
+      # def dummy_method():
+      #   ...
 
       # FIXME: this doesn't work!
+      # if i // ncols == 0:
+      #   s.routers[i].send[SOUTH].method.method = lambda s: None
+      #   s.routers[i].send[SOUTH].rdy.method    = lambda s: False
+
+      # if i // ncols == nrows - 1:
+      #   s.routers[i].send[NORTH].method.method = lambda s: None
+      #   s.routers[i].send[NORTH].rdy.method    = lambda s: False
+
+      # if i % ncols == 0:
+      #   s.routers[i].send[WEST].method.method = lambda s: None
+      #   s.routers[i].send[WEST].rdy.method    = lambda s: False
+
+      # if i % ncols == ncols - 1:
+      #   s.routers[i].send[EAST].method.method = lambda s: None
+      #   s.routers[i].send[EAST].rdy.method    = lambda s: False
+      
+      # Connet unused port to dummy queues
+      s.dangling_q_n = [ BoundaryUnit( default_rdy=False ) for _ in range( ncols ) ]
+      s.dangling_q_s = [ BoundaryUnit( default_rdy=False ) for _ in range( ncols ) ]
+      s.dangling_q_w = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
+      s.dangling_q_e = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
+
       if i // ncols == 0:
-        s.routers[i].send[SOUTH].rdy.method = dummy_rdy()
+        s.routers[i].send[ SOUTH ] //= s.dangling_q_s[ i % ncols ].recv
 
       if i // ncols == nrows - 1:
-        s.routers[i].send[NORTH].rdy.method = dummy_rdy()
+        s.routers[i].send[ NORTH ] //= s.dangling_q_n[ i % ncols ].recv
 
       if i % ncols == 0:
-        s.routers[i].send[WEST].rdy.method = dummy_rdy()
+        s.routers[i].send[ WEST ] //= s.dangling_q_w[ i // ncols ].recv
 
       if i % ncols == ncols - 1:
-        s.routers[i].send[EAST].rdy.method = dummy_rdy()
+        s.routers[i].send[ EAST ] //= s.dangling_q_e[ i // ncols ].recv
 
-    # FIXME: unable to connect a struct to a port.
-    @s.update
-    def up_pos():
-      for y in range( nrows ):
-        for x in range( ncols ):
-          idx = y * ncols + x
-          s.routers[idx].pos = PositionType( x, y )
+    # Set the position of each router
+    for y in range( nrows ):
+      for x in range( ncols ):
+        idx = y * ncols + x
+        s.routers[idx].pos //= PositionType( x, y )
 
   def line_trace( s ):
     return "|".join( [ s.routers[i].line_trace() for i in range(s.num_routers) ] )
@@ -110,8 +134,8 @@ class WrappedMeshNetCL( Component ):
     chl_lat = 0
   ):
     s.nterminals = nrows * ncols
-    s.recv = [ NonBlockingCalleeIfc( PacketType )  for _ in range( s.nterminals ) ]
-    s.give = [ NonBlockingCalleeIfc( PacketType )  for _ in range( s.nterminals ) ]
+    s.recv = [ CalleeIfcCL( PacketType )  for _ in range( s.nterminals ) ]
+    s.give = [ CalleeIfcCL( PacketType )  for _ in range( s.nterminals ) ]
     s.net = MeshNetworkCL( PacketType, PositionType, ncols, nrows, chl_lat )
     s.out_q = [ BypassQueueCL( num_entries=1 ) for _ in range( s.nterminals ) ]
     for i in range( s.nterminals ):

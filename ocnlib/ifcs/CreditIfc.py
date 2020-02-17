@@ -123,7 +123,7 @@ class RecvRTL2CreditSendRTL( Component ):
     s.credit = [ Counter( CreditType, credit_line ) for _ in range( vc ) ]
 
     s.recv           //=  s.buffer.enq
-    s.buffer.deq.msg //=  s.send.msg
+    s.buffer.deq.ret //=  s.send.msg
 
     @s.update
     def up_credit_send():
@@ -131,7 +131,7 @@ class RecvRTL2CreditSendRTL( Component ):
       s.buffer.deq.en = b1(0)
       if s.buffer.deq.rdy:
         for i in range( vc ):
-          if VcIDType(i) == s.buffer.deq.msg.vc_id and s.credit[i].count > CreditType(0):
+          if VcIDType(i) == s.buffer.deq.ret.vc_id and s.credit[i].count > CreditType(0):
             s.send.en = b1(1)
             s.buffer.deq.en = b1(1)
 
@@ -197,7 +197,7 @@ class CreditRecvRTL2SendRTL( Component ):
       for i in range( vc ):
         s.buffers[i].deq.en = b1(0)
 
-      s.send.msg = s.buffers[ s.encoder.out ].deq.msg
+      s.send.msg = s.buffers[ s.encoder.out ].deq.ret
       if s.send.rdy & ( s.arbiter.grants > ArbReqType(0) ):
         s.send.en = b1(1)
         s.buffers[ s.encoder.out ].deq.en = b1(1)

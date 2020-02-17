@@ -23,8 +23,8 @@ class RingRouteUnitCL( Component ):
 
     # Interface
 
-    s.get  = NonBlockingCallerIfc()
-    s.give = [ NonBlockingCalleeIfc() for _ in range ( s.num_outports ) ]
+    s.get  = CallerIfcCL()
+    s.give = [ CalleeIfcCL() for _ in range ( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Components

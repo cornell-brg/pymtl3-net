@@ -17,8 +17,8 @@ class ChannelCL( Component ):
 
     # Interface
 
-    s.recv = NonBlockingCalleeIfc()
-    s.send = NonBlockingCallerIfc()
+    s.recv = CalleeIfcCL()
+    s.send = CallerIfcCL()
     s.QueueType = QueueType
 
     # Constants
