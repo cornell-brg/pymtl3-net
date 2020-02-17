@@ -28,7 +28,7 @@ class MultiFlitPacketSourceCL( Component ):
 
     # Interface
     PhitType = mk_bits( get_nbits( Format ) )
-    s.send = NonBlockingCallerIfc( Type=PhitType )
+    s.send = CallerIfcCL( Type=PhitType )
 
     # Metadata
     s.pkts    = deque( pkts )
