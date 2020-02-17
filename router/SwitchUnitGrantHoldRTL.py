@@ -40,7 +40,7 @@ class SwitchUnitGrantHoldRTL( Component ):
     s.any_hold        = Wire( Bits1 )
 
     s.arbiter = GrantHoldArbiter( nreqs=num_inports )( hold = s.any_hold )
-    s.mux     = Mux( s.Type, num_inports )( out = s.give.msg )
+    s.mux     = Mux( s.Type, num_inports )( out = s.give.ret )
     s.encoder = Encoder( num_inports, s.sel_width )(
       in_ = s.arbiter.grants,
       out = s.mux.sel,
@@ -63,7 +63,7 @@ class SwitchUnitGrantHoldRTL( Component ):
 
     for i in range( num_inports ):
       s.get[i].rdy //= s.arbiter.reqs[i]
-      s.get[i].msg //= s.mux.in_[i]
+      s.get[i].ret //= s.mux.in_[i]
 
     @s.update
     def up_get_en():
