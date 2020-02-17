@@ -9,6 +9,7 @@
 from channel.ChannelCL import ChannelCL
 from pymtl3 import *
 from pymtl3.stdlib.cl.queues import BypassQueueCL
+from ocnlib.cl import BoundaryUnit
 
 from .directions import *
 from .MeshRouterCL import MeshRouterCL
@@ -75,39 +76,36 @@ class MeshNetworkCL( Component ):
       #   ...
 
       # FIXME: this doesn't work!
-      if i // ncols == 0:
-        s.routers[i].send[SOUTH].method.method = lambda s: None
-        s.routers[i].send[SOUTH].rdy.method    = lambda s: False
-
-      if i // ncols == nrows - 1:
-        s.routers[i].send[NORTH].method.method = lambda s: None
-        s.routers[i].send[NORTH].rdy.method    = lambda s: False
-
-      if i % ncols == 0:
-        s.routers[i].send[WEST].method.method = lambda s: None
-        s.routers[i].send[WEST].rdy.method    = lambda s: False
-
-      if i % ncols == ncols - 1:
-        s.routers[i].send[EAST].method.method = lambda s: None
-        s.routers[i].send[EAST].rdy.method    = lambda s: False
-      
-      # Connet unused port to dummy queues
-      # s.dummy_q_n = [ BypassQueueCL() for _ in range( ncols ) ]
-      # s.dummy_q_s = [ BypassQueueCL() for _ in range( ncols ) ]
-      # s.dummy_q_w = [ BypassQueueCL() for _ in range( nrows ) ]
-      # s.dummy_q_e = [ BypassQueueCL() for _ in range( nrows ) ]
-
       # if i // ncols == 0:
-      #   s.routers[i].send[SOUTH] //= s.dummy_q_s[ i % ncols ].enq
+      #   s.routers[i].send[SOUTH].method.method = lambda s: None
+      #   s.routers[i].send[SOUTH].rdy.method    = lambda s: False
 
       # if i // ncols == nrows - 1:
-      #   s.routers[i].send[NORTH] //= s.dummy_q_n[ i % ncols ].enq
+      #   s.routers[i].send[NORTH].method.method = lambda s: None
+      #   s.routers[i].send[NORTH].rdy.method    = lambda s: False
 
       # if i % ncols == 0:
-      #   s.routers[i].send[WEST] //= s.dummy_q_w[ i // ncols ].enq
+      #   s.routers[i].send[WEST].method.method = lambda s: None
+      #   s.routers[i].send[WEST].rdy.method    = lambda s: False
 
       # if i % ncols == ncols - 1:
-      #   s.routers[i].send[EAST] //= s.dummy_q_e[ i // ncols ].enq
+      #   s.routers[i].send[EAST].method.method = lambda s: None
+      #   s.routers[i].send[EAST].rdy.method    = lambda s: False
+      
+      # Connet unused port to dummy queues
+      s.dangling_q = BoundaryUnit( default_rdy=False )
+
+      if i // ncols == 0:
+        s.routers[i].send[SOUTH] //= s.dangling_q.recv
+
+      if i // ncols == nrows - 1:
+        s.routers[i].send[NORTH] //= s.dangling_q.recv
+
+      if i % ncols == 0:
+        s.routers[i].send[WEST] //= s.dangling_q.recv
+
+      if i % ncols == ncols - 1:
+        s.routers[i].send[EAST] //= s.dangling_q.recv
 
     # Set the position of each router
     for y in range( nrows ):
