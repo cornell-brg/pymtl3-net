@@ -16,4 +16,4 @@ class BoundaryUnit( Component ):
 
   @non_blocking( lambda s: s.default_rdy )
   def recv( s, *args, **kwargs ):
-    assert False, "The boundary unit is not supposed to receive any message!"
+    assert False, f'Boundary unit {s} is not supposed to receive any message!'
