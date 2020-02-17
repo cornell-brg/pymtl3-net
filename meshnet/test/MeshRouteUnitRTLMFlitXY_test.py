@@ -94,7 +94,7 @@ class TestHarness( Component ):
     s.dut.pos   //= PositionType( x, y )
 
     for i in range(5):
-      s.sink[i].recv.msg //= s.dut.give[i].msg
+      s.sink[i].recv.msg //= s.dut.give[i].ret
       s.sink[i].recv.en  //= lambda: s.dut.give[i].rdy & s.sink[i].recv.rdy
       s.dut.give[i].en   //= lambda: s.dut.give[i].rdy & s.sink[i].recv.rdy
 
