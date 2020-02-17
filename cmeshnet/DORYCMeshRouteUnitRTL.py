@@ -36,7 +36,7 @@ class DORYCMeshRouteUnitRTL( Component ):
     # Connections
 
     for i in range( s.num_outports ):
-      s.get.ret     //= s.give[i].msg
+      s.get.ret     //= s.give[i].ret
       s.give_ens[i] //= s.give[i].en
       s.give_rdy[i] //= s.give[i].rdy
 

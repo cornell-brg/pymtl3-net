@@ -31,7 +31,7 @@ class CrossbarRouteUnitRTL( Component ):
     # Connections
 
     for i in range( s.num_outports ):
-      s.connect( s.get.ret,     s.give[i].msg )
+      s.connect( s.get.ret,     s.give[i].ret )
       s.connect( s.give_ens[i], s.give[i].en  )
 
     # Routing logic

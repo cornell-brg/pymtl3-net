@@ -56,7 +56,7 @@ class DORYTorusRouteUnitRTL( Component ):
 
     for i in range( s.num_outports ):
       s.give_ens[i]   //= s.give[i].en
-      s.give_msg_wire //= s.give[i].msg
+      s.give_msg_wire //= s.give[i].ret
 
     # Calculate distance
 

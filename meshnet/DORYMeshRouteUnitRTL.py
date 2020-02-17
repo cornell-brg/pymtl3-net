@@ -30,7 +30,7 @@ class DORYMeshRouteUnitRTL( Component ):
     # Connections
 
     for i in range( num_outports ):
-      s.get.ret     //= s.give[i].msg
+      s.get.ret     //= s.give[i].ret
       s.give_ens[i] //= s.give[i].en
 
     # Routing logic

@@ -63,7 +63,7 @@ class DTRBflyRouteUnitRTL( Component ):
     def up_ru_get_en():
       s.get.en = s.give_ens > EnType(0)
       for i in range( s.num_outports ):
-        s.give[i].msg = deepcopy( s.get.ret )
+        s.give[i].ret = deepcopy( s.get.ret )
       if s.get.rdy:
         s.give[ s.out_dir ].msg.dst = DstType(s.get.ret.dst << RowWidth)
 

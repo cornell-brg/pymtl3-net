@@ -50,7 +50,7 @@ class SwitchUnitRTL( Component ):
 
     for i in range( num_inports ):
       s.get[i].rdy //= s.arbiter.reqs[i]
-      s.get[i].msg //= s.mux.in_[i]
+      s.get[i].ret //= s.mux.in_[i]
       s.get[i].en  //= s.get_en[i]
       s.get[i].rdy //= s.get_rdy[i]
 
