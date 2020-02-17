@@ -30,7 +30,7 @@ class DORYMeshRouteUnitRTL( Component ):
     # Connections
 
     for i in range( num_outports ):
-      s.get.msg     //= s.give[i].msg
+      s.get.ret     //= s.give[i].msg
       s.give_ens[i] //= s.give[i].en
 
     # Routing logic
@@ -43,13 +43,13 @@ class DORYMeshRouteUnitRTL( Component ):
       s.give[4].rdy = b1(0)
 
       if s.get.rdy:
-        if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
+        if s.pos.pos_x == s.get.ret.dst_x and s.pos.pos_y == s.get.ret.dst_y:
           s.give[4].rdy = b1(1)
-        elif s.get.msg.dst_y < s.pos.pos_y:
+        elif s.get.ret.dst_y < s.pos.pos_y:
           s.give[1].rdy = b1(1)
-        elif s.get.msg.dst_y > s.pos.pos_y:
+        elif s.get.ret.dst_y > s.pos.pos_y:
           s.give[0].rdy = b1(1)
-        elif s.get.msg.dst_x < s.pos.pos_x:
+        elif s.get.ret.dst_x < s.pos.pos_x:
           s.give[2].rdy = b1(1)
         else:
           s.give[3].rdy = b1(1)

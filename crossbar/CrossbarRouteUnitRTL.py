@@ -31,7 +31,7 @@ class CrossbarRouteUnitRTL( Component ):
     # Connections
 
     for i in range( s.num_outports ):
-      s.connect( s.get.msg,     s.give[i].msg )
+      s.connect( s.get.ret,     s.give[i].msg )
       s.connect( s.give_ens[i], s.give[i].en  )
 
     # Routing logic
@@ -42,7 +42,7 @@ class CrossbarRouteUnitRTL( Component ):
         s.give[i].rdy = 0
 
       if s.get.rdy:
-        s.give[ s.get.msg.dst ].rdy = 1
+        s.give[ s.get.ret.dst ].rdy = 1
 
     @s.update
     def up_ru_get_en():
@@ -52,4 +52,4 @@ class CrossbarRouteUnitRTL( Component ):
 
   def line_trace( s ):
     out_str = "|".join([ f"{s.give[i]}" for i in range( s.num_outports ) ])
-    return f"{s.get}({s.get.msg.dst}){out_str}"
+    return f"{s.get}({s.get.ret.dst}){out_str}"

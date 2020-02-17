@@ -28,7 +28,7 @@ class OutputUnitRTL( Component ):
       s.queue = QueueType( PacketType )
 
       # Connections
-      s.get.msg       //= s.queue.enq.msg
+      s.get.ret       //= s.queue.enq.msg
       s.queue.deq.msg //= s.send.msg
 
       @s.update
@@ -44,7 +44,7 @@ class OutputUnitRTL( Component ):
     # No ouput queue
     else:
 
-      s.get.msg //= s.send.msg
+      s.get.ret //= s.send.msg
 
       @s.update
       def up_get_send():

@@ -85,7 +85,7 @@ class RingNetworkRTL( Component ):
           out_trace[i] += "|".join([ "{}r{}".format( s.routers[i].switch_units[j].get[x].msg, s.routers[i].switch_units[j].get[x].rdy ) ])
           out_trace[i] += "}}"
           out_trace[i] += "OU{}{{".format( j )
-          out_trace[i] += "({}r{})".format( s.routers[i].output_units[j].get.msg, s.routers[i].output_units[j].get.rdy )
+          out_trace[i] += "({}r{})".format( s.routers[i].output_units[j].get.ret, s.routers[i].output_units[j].get.rdy )
           out_trace[i] += "<{},{}>".format( s.routers[i].output_units[j].credit[0].count, s.routers[i].output_units[j].credit[1].count )
         out_trace[i] += str(s.send[i])
       # Assemble line trace

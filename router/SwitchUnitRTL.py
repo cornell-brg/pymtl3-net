@@ -39,7 +39,7 @@ class SwitchUnitRTL( Component ):
     s.get_rdy = [ Wire( Bits1 ) for _ in range( s.num_inports ) ]
 
     s.arbiter = RoundRobinArbiterEn( num_inports )( en = 1 )
-    s.mux = Mux( PacketType, num_inports )( out = s.give.msg )
+    s.mux = Mux( PacketType, num_inports )( out = s.give.ret )
 
     s.encoder = Encoder( num_inports, s.sel_width )(
       in_ = s.arbiter.grants,

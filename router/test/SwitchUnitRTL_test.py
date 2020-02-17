@@ -37,7 +37,7 @@ def test_switch_unit_simpe():
 
   for i in range( 3 ):
     assert dut.give.rdy
-    assert dut.give.msg in { b32(0xfaceb00c), b32(0xdeadface), b32(0xbaadbeef)  }
+    assert dut.give.ret in { b32(0xfaceb00c), b32(0xdeadface), b32(0xbaadbeef)  }
     dut.give.en = b1(1)
     dut.eval_combinational()
     dut.tick()

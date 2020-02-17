@@ -35,7 +35,7 @@ def run_tv_test( dut, test_vectors ):
   def tv_out( dut, tv ):
     if tv[1] != '?': assert dut.recv.rdy == tv[1]
     if tv[4] != '?': assert dut.give.rdy == tv[4]
-    if tv[5] != '?': assert dut.give.msg == tv[5]
+    if tv[5] != '?': assert dut.give.ret == tv[5]
 
   # Run the test
 
@@ -72,7 +72,7 @@ class TestHarness( Component ):
 
     # Connections
     s.src.send     //= s.dut.recv
-    s.dut.give.msg //= s.sink.recv.msg
+    s.dut.give.ret //= s.sink.recv.msg
 
     @s.update
     def up_give_en():

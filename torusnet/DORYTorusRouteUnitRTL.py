@@ -62,28 +62,28 @@ class DORYTorusRouteUnitRTL( Component ):
 
     @s.update
     def up_ns_dist():
-      if s.get.msg.dst_y < s.pos.pos_y:
-        s.south_dist = ns_dist_type(s.pos.pos_y) - ns_dist_type(s.get.msg.dst_y)
-        s.north_dist = s.last_row_id - ns_dist_type(s.pos.pos_y) + ns_dist_type(1) + ns_dist_type(s.get.msg.dst_y)
+      if s.get.ret.dst_y < s.pos.pos_y:
+        s.south_dist = ns_dist_type(s.pos.pos_y) - ns_dist_type(s.get.ret.dst_y)
+        s.north_dist = s.last_row_id - ns_dist_type(s.pos.pos_y) + ns_dist_type(1) + ns_dist_type(s.get.ret.dst_y)
       else:
-        s.south_dist = ns_dist_type(s.pos.pos_y) + ns_dist_type(1) + s.last_row_id - ns_dist_type(s.get.msg.dst_y)
-        s.north_dist = ns_dist_type(s.get.msg.dst_y) - ns_dist_type(s.pos.pos_y)
+        s.south_dist = ns_dist_type(s.pos.pos_y) + ns_dist_type(1) + s.last_row_id - ns_dist_type(s.get.ret.dst_y)
+        s.north_dist = ns_dist_type(s.get.ret.dst_y) - ns_dist_type(s.pos.pos_y)
 
     @s.update
     def up_we_dist():
-      if s.get.msg.dst_x < s.pos.pos_x:
-        s.west_dist = we_dist_type(s.pos.pos_x) - we_dist_type(s.get.msg.dst_x)
-        s.east_dist = s.last_col_id - we_dist_type(s.pos.pos_x) + we_dist_type(1) + we_dist_type(s.get.msg.dst_x)
+      if s.get.ret.dst_x < s.pos.pos_x:
+        s.west_dist = we_dist_type(s.pos.pos_x) - we_dist_type(s.get.ret.dst_x)
+        s.east_dist = s.last_col_id - we_dist_type(s.pos.pos_x) + we_dist_type(1) + we_dist_type(s.get.ret.dst_x)
       else:
-        s.west_dist = we_dist_type(s.pos.pos_x) + we_dist_type(1) + s.last_col_id - we_dist_type(s.get.msg.dst_x)
-        s.east_dist = we_dist_type(s.get.msg.dst_x) - we_dist_type(s.pos.pos_x)
+        s.west_dist = we_dist_type(s.pos.pos_x) + we_dist_type(1) + s.last_col_id - we_dist_type(s.get.ret.dst_x)
+        s.east_dist = we_dist_type(s.get.ret.dst_x) - we_dist_type(s.pos.pos_x)
 
     # Routing logic
 
     @s.update
     def up_ru_routing():
 
-      s.give_msg_wire = deepcopy( s.get.msg )
+      s.give_msg_wire = deepcopy( s.get.ret )
       s.out_dir = b3(0)
       s.turning = b1(0)
 
@@ -91,17 +91,17 @@ class DORYTorusRouteUnitRTL( Component ):
         s.give[i].rdy = b1(0)
 
       if s.get.rdy:
-        if s.pos.pos_x == s.get.msg.dst_x and s.pos.pos_y == s.get.msg.dst_y:
+        if s.pos.pos_x == s.get.ret.dst_x and s.pos.pos_y == s.get.ret.dst_y:
           s.out_dir = SELF
-        elif s.get.msg.dst_y != s.pos.pos_y:
+        elif s.get.ret.dst_y != s.pos.pos_y:
           s.out_dir = NORTH if s.north_dist < s.south_dist else SOUTH
         else:
           s.out_dir = WEST if s.west_dist < s.east_dist else EAST
 
         # Turning logic
 
-        s.turning = ( s.get.msg.src_x == s.pos.pos_x ) & \
-                    ( s.get.msg.src_y != s.pos.pos_y ) & \
+        s.turning = ( s.get.ret.src_x == s.pos.pos_x ) & \
+                    ( s.get.ret.src_y != s.pos.pos_y ) & \
                     ( s.out_dir == WEST ) | ( s.out_dir == EAST )
 
         # Dateline logic

@@ -37,7 +37,7 @@ class TestHarness( Component ):
                 for i in range ( s.dut.num_outports ) ]
 
     # Connections
-    s.src.send.msg //= s.dut.get.msg
+    s.src.send.msg //= s.dut.get.ret
 
     for i in range ( s.dut.num_outports ):
       s.dut.give[i].msg //= s.sinks[i].recv.msg

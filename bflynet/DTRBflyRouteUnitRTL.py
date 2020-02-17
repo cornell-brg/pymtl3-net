@@ -56,16 +56,16 @@ class DTRBflyRouteUnitRTL( Component ):
         s.give_rdy[i] = b1(0)
 
       if s.get.rdy:
-        s.out_dir = s.get.msg.dst[ BEGIN : END]
+        s.out_dir = s.get.ret.dst[ BEGIN : END]
         s.give_rdy[ s.out_dir ] = b1(1)
 
     @s.update
     def up_ru_get_en():
       s.get.en = s.give_ens > EnType(0)
       for i in range( s.num_outports ):
-        s.give[i].msg = deepcopy( s.get.msg )
+        s.give[i].msg = deepcopy( s.get.ret )
       if s.get.rdy:
-        s.give[ s.out_dir ].msg.dst = DstType(s.get.msg.dst << RowWidth)
+        s.give[ s.out_dir ].msg.dst = DstType(s.get.ret.dst << RowWidth)
 
   # Line trace
 
