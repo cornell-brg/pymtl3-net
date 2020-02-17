@@ -93,19 +93,22 @@ class MeshNetworkCL( Component ):
       #   s.routers[i].send[EAST].rdy.method    = lambda s: False
       
       # Connet unused port to dummy queues
-      s.dangling_q = BoundaryUnit( default_rdy=False )
+      s.dangling_q_n = [ BoundaryUnit( default_rdy=False ) for _ in range( ncols ) ]
+      s.dangling_q_s = [ BoundaryUnit( default_rdy=False ) for _ in range( ncols ) ]
+      s.dangling_q_w = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
+      s.dangling_q_e = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
 
       if i // ncols == 0:
-        s.routers[i].send[SOUTH] //= s.dangling_q.recv
+        s.routers[i].send[ SOUTH ] //= s.dangling_q_s[ i % ncols ].recv
 
       if i // ncols == nrows - 1:
-        s.routers[i].send[NORTH] //= s.dangling_q.recv
+        s.routers[i].send[ NORTH ] //= s.dangling_q_n[ i % ncols ].recv
 
       if i % ncols == 0:
-        s.routers[i].send[WEST] //= s.dangling_q.recv
+        s.routers[i].send[ WEST ] //= s.dangling_q_w[ i // ncols ].recv
 
       if i % ncols == ncols - 1:
-        s.routers[i].send[EAST] //= s.dangling_q.recv
+        s.routers[i].send[ EAST ] //= s.dangling_q_e[ i // ncols ].recv
 
     # Set the position of each router
     for y in range( nrows ):
