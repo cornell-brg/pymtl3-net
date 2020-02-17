@@ -67,7 +67,7 @@ class MeshNetworkCL( Component ):
       s.recv[i] //= s.routers[i].recv[SELF]
       s.send[i] //= s.routers[i].send[SELF]
 
-      # Connect the unused ports
+      # Connect the unused ports to dummy methods
       # def dummy_rdy():
       #   return lambda : False
 
