@@ -65,7 +65,7 @@ class DTRBflyRouteUnitRTL( Component ):
       for i in range( s.num_outports ):
         s.give[i].ret = deepcopy( s.get.ret )
       if s.get.rdy:
-        s.give[ s.out_dir ].msg.dst = DstType(s.get.ret.dst << RowWidth)
+        s.give[ s.out_dir ].ret.dst = DstType(s.get.ret.dst << RowWidth)
 
   # Line trace
 

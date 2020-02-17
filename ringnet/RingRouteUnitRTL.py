@@ -81,7 +81,7 @@ class RingRouteUnitRTL( Component ):
           s.give_msg_wire.vc_id = b1(1)
 
         s.give[ s.out_dir ].rdy = b1(1)
-        s.give[ s.out_dir ].msg = s.give_msg_wire
+        s.give[ s.out_dir ].ret = s.give_msg_wire
 
     @s.update
     def up_ru_get_en():
