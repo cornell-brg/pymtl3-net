@@ -27,8 +27,8 @@ class MeshNetworkCL( Component ):
 
     # Interface
 
-    s.recv = [ NonBlockingCalleeIfc( PacketType ) for _ in range( s.num_terminals ) ]
-    s.send = [ NonBlockingCallerIfc( PacketType ) for _ in range( s.num_terminals ) ]
+    s.recv = [ CalleeIfcCL( PacketType ) for _ in range( s.num_terminals ) ]
+    s.send = [ CallerIfcCL( PacketType ) for _ in range( s.num_terminals ) ]
 
     # Components
 
@@ -110,8 +110,8 @@ class WrappedMeshNetCL( Component ):
     chl_lat = 0
   ):
     s.nterminals = nrows * ncols
-    s.recv = [ NonBlockingCalleeIfc( PacketType )  for _ in range( s.nterminals ) ]
-    s.give = [ NonBlockingCalleeIfc( PacketType )  for _ in range( s.nterminals ) ]
+    s.recv = [ CalleeIfcCL( PacketType )  for _ in range( s.nterminals ) ]
+    s.give = [ CalleeIfcCL( PacketType )  for _ in range( s.nterminals ) ]
     s.net = MeshNetworkCL( PacketType, PositionType, ncols, nrows, chl_lat )
     s.out_q = [ BypassQueueCL( num_entries=1 ) for _ in range( s.nterminals ) ]
     for i in range( s.nterminals ):

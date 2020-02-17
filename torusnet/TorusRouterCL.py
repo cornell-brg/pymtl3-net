@@ -32,8 +32,8 @@ class TorusRouterCL( Router ):
 
     # Interface
     s.pos  = InPort( PositionType )
-    s.recv = [ NonBlockingCalleeIfc() for _ in range( s.num_inports  ) ]
-    s.send = [ NonBlockingCallerIfc() for _ in range( s.num_outports ) ]
+    s.recv = [ CalleeIfcCL() for _ in range( s.num_inports  ) ]
+    s.send = [ CallerIfcCL() for _ in range( s.num_outports ) ]
 
     # Components
 

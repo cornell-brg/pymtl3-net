@@ -24,8 +24,8 @@ class RingNetworkCL( Component ):
 
     # Interface
 
-    s.recv = [ NonBlockingCalleeIfc() for _ in range(s.num_terminals) ]
-    s.send = [ NonBlockingCallerIfc() for _ in range(s.num_terminals) ]
+    s.recv = [ CalleeIfcCL() for _ in range(s.num_terminals) ]
+    s.send = [ CallerIfcCL() for _ in range(s.num_terminals) ]
 
     # Components
 
