@@ -45,7 +45,7 @@ def run_tv_test( dut, test_vectors ):
 def test_pipe_Bits():
 
   run_tv_test( InputUnitRTL( Bits32 ), [
-    #  enq.en  enq.rdy enq.msg   deq.en  deq.rdy deq.msg
+    #  enq.en  enq.rdy enq.msg   deq.en  deq.rdy deq.ret
     [  b1(1),  b1(1),  b32(123), b1(0),  b1(0),    '?'    ],
     [  b1(1),  b1(1),  b32(345), b1(0),  b1(1),  b32(123) ],
     [  b1(0),  b1(0),  b32(567), b1(0),  b1(1),  b32(123) ],

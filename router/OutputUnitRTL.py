@@ -29,7 +29,7 @@ class OutputUnitRTL( Component ):
 
       # Connections
       s.get.ret       //= s.queue.enq.msg
-      s.queue.deq.msg //= s.send.msg
+      s.queue.deq.ret //= s.send.msg
 
       @s.update
       def up_get_deq():
