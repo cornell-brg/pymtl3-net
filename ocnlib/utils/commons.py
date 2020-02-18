@@ -9,6 +9,10 @@ Author : Yanghui Ou
 '''
 from functools import reduce
 from pymtl3 import *
+from pymtl3.passes.backends.sverilog import TranslationImportPass as SVTransImport
+from pymtl3.passes.backends.sverilog import ImportConfigs as SVConfig 
+from pymtl3.passes.backends.yosys import TranslationImportPass as YSTransImport
+from pymtl3.passes.backends.yosys import ImportConfigs as YSConfig
 from pymtl3.datatypes.bitstructs import(
   is_bitstruct_class,
   is_bitstruct_inst,
@@ -134,3 +138,44 @@ def to_bitstruct( obj, BitstructType ):
   assert not slices_stack # Make sure every field is assigned
   return ret
 
+#-------------------------------------------------------------------------
+# run_sim
+#-------------------------------------------------------------------------
+# A generic run_sim function
+
+def run_sim( th, max_cycles=1000, translation='', dut_name = 'dut' ):
+
+  th.elaborate()
+
+  if translation == 'sverilog':
+    TransImport = SVTransImport
+    getattr( th, dut_name ).sverilog_translate_import = True
+    getattr( th, dut_name ).config_sverilog_import = SVConfig(
+      vl_trace = True,
+    )
+
+  elif translation == 'yosys':
+    TransImport = YSTransImport
+    getattr( th, dut_name ).yosys_translate_import = True
+    getattr( th, dut_name ).config_yosys_import = SVConfig(
+      vl_trace = True,
+    )
+
+  if translation:
+    th = TransImport()( th )
+    th.elaborate()
+
+  th.apply( SimulationPass() )
+  th.sim_reset()
+
+  # Run simulation
+  ncycles = 0
+  print()
+  print( "{:3}:{}".format( ncycles, th.line_trace() ))
+  while not th.done() and ncycles < max_cycles:
+    th.tick()
+    ncycles += 1
+    print( "{:3}:{}".format( ncycles, th.line_trace() ))
+
+  # Check timeout
+  assert ncycles < max_cycles
