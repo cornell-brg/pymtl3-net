@@ -8,9 +8,11 @@ Author : Yanghui Ou
   Date : Feb 14, 2020
 '''
 import pytest
+import hypothesis
+from hypothesis import strategies as st
 from pymtl3 import *
 from pymtl3.stdlib.test import mk_test_case_table
-from ocnlib.utils import to_bitstruct
+from ocnlib.utils import to_bitstruct, run_sim
 from ocnlib.packets import MultiFlitPacket as Packet
 from ocnlib.test.test_srcs import MultiFlitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MultiFlitPacketSinkRTL as TestSink
@@ -72,22 +74,22 @@ class TestHarness( Component ):
 #-------------------------------------------------------------------------
 # TODO: use stdlib run_sim omce pymtl3 is updated
 
-def run_sim( th, max_cycles=200 ):
-  th.elaborate()
-  th.apply( SimulationPass() )
-  print()
-  th.sim_reset()
-
-  ncycles = 0
-  while not th.done() and ncycles < max_cycles:
-    print( f'{ncycles:3}:{th.line_trace()}' )
-    th.tick()
-    ncycles += 1
-
-  assert th.done()
-  th.tick()
-  th.tick()
-  th.tick()
+# def run_sim( th, max_cycles=200 ):
+#   th.elaborate()
+#   th.apply( SimulationPass() )
+#   print()
+#   th.sim_reset()
+# 
+#   ncycles = 0
+#   while not th.done() and ncycles < max_cycles:
+#     print( f'{ncycles:3}:{th.line_trace()}' )
+#     th.tick()
+#     ncycles += 1
+# 
+#   assert th.done()
+#   th.tick()
+#   th.tick()
+#   th.tick()
 
 #-------------------------------------------------------------------------
 # mk_pkt
@@ -155,13 +157,19 @@ test_case_table = mk_test_case_table([
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_mflit_mesh( test_params ):
+def test_mflit_mesh( test_params, test_verilog ):
   ncols = test_params.ncols
   nrows = test_params.nrows
   pkts  = test_params.msg_func( ncols, nrows )
+  trans_backend = 'yosys' if test_verilog else ''
 
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
 
   th = TestHarness( TestHeader, TestPosition, ncols, nrows, 
                     src_pkts, dst_pkts )
-  run_sim( th )
+  run_sim( th, translation=trans_backend )
+
+#--------------------------------------------------------------------------
+# pyh2 tests
+#--------------------------------------------------------------------------
+
