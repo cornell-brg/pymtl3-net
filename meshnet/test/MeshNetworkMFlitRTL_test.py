@@ -191,6 +191,33 @@ def test_mflit_mesh( test_params, test_verilog ):
   run_sim( th, translation=trans_backend )
 
 #--------------------------------------------------------------------------
-# pyh2 tests
+# packet strategy
 #--------------------------------------------------------------------------
 
+@st.composite
+def pkt_strat( draw, ncols, nrows, max_plen=15 ):
+  hex_words = [ 0x8badf00d, 0xdeadbeef, 0xfaceb00c, 0xdeadc0de ]
+  payload = draw( st.lists( st.sampled_from( hex_words ), min_size=0, max_size=max_plen ) )
+  src_x   = draw( st.integers(0, ncols-1) )
+  src_y   = draw( st.integers(0, nrows-1) )
+  dst_x   = draw( st.integers(0, ncols-1) )
+  dst_y   = draw( st.integers(0, nrows-1) )
+  return mk_pkt( src_x, src_y, dst_x, dst_y, payload )
+
+#--------------------------------------------------------------------------
+# pyh2 test
+#--------------------------------------------------------------------------
+
+@hypothesis.settings( deadline=None, max_examples=50 )
+@hypothesis.given(
+  ncols = st.integers(2, 4),
+  nrows = st.integers(2, 4),
+  pkts  = st.data(),
+)
+def test_pyh2( ncols, nrows, pkts, test_verilog ):
+  pkts = pkts.draw( st.lists( pkt_strat( ncols, nrows ), min_size=1, max_size=100 ) )
+  src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
+  trans_backend = 'yosys' if test_verilog else ''
+  th = TestHarness( TestHeader, TestPosition, ncols, nrows, 
+                    src_pkts, dst_pkts )
+  run_sim( th, translation=trans_backend )
