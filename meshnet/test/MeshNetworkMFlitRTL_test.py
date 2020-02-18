@@ -153,15 +153,11 @@ def neighbor_pkts( ncols, nrows ):
     src_x = i %  ncols
     src_y = i // ncols
     dst_x = ( i+1 ) %  ncols
-    dst_y = ( i+1 ) // ncols
+    dst_y = ( ( i+1 ) % nterminals ) // ncols
     payload = [ x for x in range( i % 10 ) ]
     pkts.append( mk_pkt( src_x, src_y, dst_x, dst_y, payload ) )
 
-  return [
-    #       src_x    y        dst_x    y        payload
-    mk_pkt(     0,   0,       ncols-1, nrows-1, [ 0x8badf00d             ] ),
-    mk_pkt( ncols-1, nrows-1, 0,       0,       [ 0x8badbabe, 0xdeadbeef ] ),
-  ]
+  return pkts
 
 #-------------------------------------------------------------------------
 # test case table
@@ -171,9 +167,10 @@ test_case_table = mk_test_case_table([
   (                'msg_func        ncols  nrows' ),
   [ 'basic',        basic_pkts,     2,     2      ],
   [ 'basic4x4',     basic_pkts,     4,     4      ],
-  [ 'neighbor2x2',  basic_pkts,     2,     2      ],
-  [ 'neighbor2x3',  basic_pkts,     2,     3      ],
-  [ 'neighbor4x4',  basic_pkts,     4,     4      ],
+  [ 'neighbor2x2',  neighbor_pkts,  2,     2      ],
+  [ 'neighbor2x3',  neighbor_pkts,  2,     3      ],
+  [ 'neighbor3x3',  neighbor_pkts,  3,     3      ],
+  [ 'neighbor4x4',  neighbor_pkts,  4,     4      ],
 ])
 
 #-------------------------------------------------------------------------
