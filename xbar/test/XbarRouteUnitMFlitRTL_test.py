@@ -91,13 +91,34 @@ def one_pkt( num_outports ):
   return [ mk_pkt( 0, num_outports-1, [ 0x8badf00d, 0xfaceb00c ] ) ]
 
 #--------------------------------------------------------------------------
+# test case: 1 pkt to each 
+#--------------------------------------------------------------------------
+
+def two_pkt_each( num_outports ):
+  pkts = []
+
+  for i in range( num_outports ):
+    pkts.append( mk_pkt( 0, i, [ x for x in range( i ) ] ) )
+
+  for i in range( num_outports ):
+    pkts.append( mk_pkt( 0, i, [ x for x in range( (i+1) % 5 ) ] ) )
+
+  return pkts
+
+#--------------------------------------------------------------------------
 # test case table
 #--------------------------------------------------------------------------
 
 test_cases = [
-  (               'msg_func n_outs init flit_intv pkt_intv' ),
-  [ '1pkt',        one_pkt, 4,     0,   0,        0         ],
-  [ '1pkt_delay',  one_pkt, 4,     9,   3,        0         ],
+  (                      'msg_func      n_outs init flit_intv pkt_intv' ),
+  [ '1pkt',               one_pkt,      4,     0,   0,        0         ],
+  [ '1pkt_delay',         one_pkt,      4,     9,   3,        0         ],
+  [ '2pkt_each_4',        two_pkt_each, 4,     0,   0,        9         ],
+  [ '2pkt_each_4_delay',  two_pkt_each, 4,     4,   4,        0         ],
+  [ '2pkt_each_6',        two_pkt_each, 6,     0,   0,        0         ],
+  [ '2pkt_each_6_delay',  two_pkt_each, 6,     3,   6,        9         ],
+  [ '2pkt_each_8',        two_pkt_each, 4,     0,   0,        0         ],
+  [ '2pkt_each_8_delay',  two_pkt_each, 4,     8,   4,        9         ],
 ]
 
 test_case_table = mk_test_case_table( test_cases )
@@ -110,6 +131,11 @@ test_case_table = mk_test_case_table( test_cases )
 def test_xbar_route( test_params, test_verilog ):
   pkts = test_params.msg_func( test_params.n_outs )
   th   = TestHarness( TestHeader, test_params.n_outs, pkts )
+  th.set_param( 'top.sink*.construct', 
+    initial_delay         = test_params.init,
+    flit_interval_delay   = test_params.flit_intv,
+    packet_interval_delay = test_params.pkt_intv,
+  )
 
   trans_backend = 'yosys' if test_verilog else ''
   run_sim( th, translation=trans_backend )

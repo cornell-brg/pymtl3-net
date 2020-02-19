@@ -137,5 +137,5 @@ class XbarRouteUnitMFlitRTL( Component ):
     state = 'H' if s.state == s.STATE_HEADER else \
             'B' if s.state == s.STATE_BODY else   \
             '!'
-    dir   = f's.out_dir'
+    dir   = f'{s.out_dir}'
     return f'{s.get}([{state}{count}]{dir}{hold}){give_trace}'
