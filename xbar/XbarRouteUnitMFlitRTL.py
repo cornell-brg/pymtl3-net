@@ -17,7 +17,6 @@ from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 from ocnlib.rtl import Counter, GrantHoldArbiter
 from ocnlib.utils import get_nbits, get_plen_type
 from ocnlib.utils.connects import connect_bitstruct
-from .directions import *
 
 class XbarRouteUnitMFlitRTL( Component ):
 
@@ -30,6 +29,8 @@ class XbarRouteUnitMFlitRTL( Component ):
     s.num_outports = num_outports
     s.HeaderFormat = HeaderFormat
     s.PhitType     = mk_bits( get_nbits( HeaderFormat ) )
+    s.dir_nbits    = clog2( num_outports )
+    s.DirType      = mk_bits( s.dir_nbits )
     s.STATE_HEADER = b1(0)
     s.STATE_BODY   = b1(1)
 
@@ -45,8 +46,8 @@ class XbarRouteUnitMFlitRTL( Component ):
     s.header      = Wire( HeaderFormat )
     s.state       = Wire( Bits1 )
     s.state_next  = Wire( Bits1 )
-    s.out_dir_r   = Wire( Bits3 )
-    s.out_dir     = Wire( Bits3 )
+    s.out_dir_r   = Wire( s.DirType )
+    s.out_dir     = Wire( s.DirType )
     s.any_give_en = Wire( Bits1 )
 
     s.counter = Counter( PLenType )(
@@ -56,7 +57,7 @@ class XbarRouteUnitMFlitRTL( Component ):
 
     connect_bitstruct( s.get.ret, s.header )
     
-    for i in range( 5 ):
+    for i in range( s.num_outports ):
       s.get.ret //= s.give[i].ret
     s.get.en //= s.any_give_en
 
@@ -110,7 +111,7 @@ class XbarRouteUnitMFlitRTL( Component ):
     @s.update
     def up_out_dir():
       if ( s.state == s.STATE_HEADER ) & s.get.rdy:
-        s.out_dir = s.get.ret.dst
+        s.out_dir = s.header.dst[0:s.dir_nbits]
        
       else:
         s.out_dir = s.out_dir_r
