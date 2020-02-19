@@ -29,7 +29,7 @@ class XbarRouteUnitMFlitRTL( Component ):
     s.num_outports = num_outports
     s.HeaderFormat = HeaderFormat
     s.PhitType     = mk_bits( get_nbits( HeaderFormat ) )
-    s.dir_nbits    = clog2( num_outports )
+    s.dir_nbits    = clog2( num_outports ) if num_outports > 1 else 1
     s.DirType      = mk_bits( s.dir_nbits )
     s.STATE_HEADER = b1(0)
     s.STATE_BODY   = b1(1)

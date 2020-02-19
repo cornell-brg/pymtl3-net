@@ -26,7 +26,7 @@ class XbarMFlitRTL( Component ):
   # Construct
   #-----------------------------------------------------------------------
 
-  def construct(
+  def construct( s,
     Header,
     num_inports    = 2,
     num_outports   = 2,
@@ -83,4 +83,4 @@ class XbarMFlitRTL( Component ):
   def line_trace( s ):
     in_trace  = '|'.join([ f'{ifc}' for ifc in s.recv ])
     out_trace = '|'.join([ f'{ifc}' for ifc in s.send ])
-    return f'{in_trace}({}){out_trace}'
+    return f'{in_trace}(){out_trace}'
