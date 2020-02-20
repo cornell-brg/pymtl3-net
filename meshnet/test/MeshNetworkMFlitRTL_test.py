@@ -53,7 +53,7 @@ class TestHarness( Component ):
     s.dut  = MeshNetworkMFlitRTL( Header, Position, ncols, nrows )
     s.sink = [ TestSink( Header, sink_pkts[i] ) for i in range( nterminals ) ]
 
-    for i in range( nterminals ): 
+    for i in range( nterminals ):
       s.src[i].send //= s.dut.recv[i]
       s.dut.send[i] //= s.sink[i].recv
 
@@ -79,13 +79,13 @@ class TestHarness( Component ):
 #   th.apply( SimulationPass() )
 #   print()
 #   th.sim_reset()
-# 
+#
 #   ncycles = 0
 #   while not th.done() and ncycles < max_cycles:
 #     print( f'{ncycles:3}:{th.line_trace()}' )
 #     th.tick()
 #     ncycles += 1
-# 
+#
 #   assert th.done()
 #   th.tick()
 #   th.tick()
@@ -186,7 +186,7 @@ def test_mflit_mesh( test_params, test_verilog ):
 
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
 
-  th = TestHarness( TestHeader, TestPosition, ncols, nrows, 
+  th = TestHarness( TestHeader, TestPosition, ncols, nrows,
                     src_pkts, dst_pkts )
   run_sim( th, translation=trans_backend )
 
@@ -218,6 +218,6 @@ def test_pyh2( ncols, nrows, pkts, test_verilog ):
   pkts = pkts.draw( st.lists( pkt_strat( ncols, nrows ), min_size=1, max_size=100 ) )
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
   trans_backend = 'yosys' if test_verilog else ''
-  th = TestHarness( TestHeader, TestPosition, ncols, nrows, 
+  th = TestHarness( TestHeader, TestPosition, ncols, nrows,
                     src_pkts, dst_pkts )
   run_sim( th, translation=trans_backend )
