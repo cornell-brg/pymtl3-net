@@ -190,13 +190,14 @@ def test_mflit_mesh( test_params, test_verilog ):
                     src_pkts, dst_pkts )
   run_sim( th, translation=trans_backend )
 
-#--------------------------------------------------------------------------
+#-------------------------------------------------------------------------
 # packet strategy
-#--------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+
+hex_words = [ 0x8badf00d, 0xdeadbeef, 0xfaceb00c, 0xdeadc0de ]
 
 @st.composite
 def pkt_strat( draw, ncols, nrows, max_plen=15 ):
-  hex_words = [ 0x8badf00d, 0xdeadbeef, 0xfaceb00c, 0xdeadc0de ]
   payload = draw( st.lists( st.sampled_from( hex_words ), min_size=0, max_size=max_plen ) )
   src_x   = draw( st.integers(0, ncols-1) )
   src_y   = draw( st.integers(0, nrows-1) )
@@ -204,9 +205,9 @@ def pkt_strat( draw, ncols, nrows, max_plen=15 ):
   dst_y   = draw( st.integers(0, nrows-1) )
   return mk_pkt( src_x, src_y, dst_x, dst_y, payload )
 
-#--------------------------------------------------------------------------
+#-------------------------------------------------------------------------
 # pyh2 test
-#--------------------------------------------------------------------------
+#-------------------------------------------------------------------------
 
 @hypothesis.settings( deadline=None, max_examples=50 )
 @hypothesis.given(
