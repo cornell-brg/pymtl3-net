@@ -70,28 +70,6 @@ class TestHarness( Component ):
     return s.dut.line_trace()
 
 #-------------------------------------------------------------------------
-# run_sim
-#-------------------------------------------------------------------------
-# TODO: use stdlib run_sim omce pymtl3 is updated
-
-# def run_sim( th, max_cycles=200 ):
-#   th.elaborate()
-#   th.apply( SimulationPass() )
-#   print()
-#   th.sim_reset()
-#
-#   ncycles = 0
-#   while not th.done() and ncycles < max_cycles:
-#     print( f'{ncycles:3}:{th.line_trace()}' )
-#     th.tick()
-#     ncycles += 1
-#
-#   assert th.done()
-#   th.tick()
-#   th.tick()
-#   th.tick()
-
-#-------------------------------------------------------------------------
 # mk_pkt
 #-------------------------------------------------------------------------
 

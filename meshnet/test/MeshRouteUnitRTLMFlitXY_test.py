@@ -82,7 +82,6 @@ class TestHarness( Component ):
   def construct( s, HeaderFormat, PositionType, pkts, x, y ):
     PhitType = mk_bits( get_nbits( HeaderFormat ) )
     sink_pkts = route_unit_fl( HeaderFormat, pkts, x, y )
-    print( sink_pkts )
 
     s.src   = TestSource( HeaderFormat, pkts )
     s.src_q = BypassQueueRTL( PhitType, num_entries=1 )
