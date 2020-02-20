@@ -97,6 +97,7 @@ def arrange_src_sink_pkts( Header, num_inports, num_outports, pkt_lst ):
 def basic_pkts( num_inports, num_outports ):
   return [
     #       src            dst             payload
+    mk_pkt( 0,             0,              [                ] ),
     mk_pkt( 0,             num_outports-1, [                ] ),
     mk_pkt( num_inports-1, 0,              [ 0xface, 0xf00d ] ),
   ]
@@ -144,6 +145,7 @@ test_cases = [
   (                      'msg_func         n_in n_out init f_intv p_intv' ),
   [ 'basic2x2',           basic_pkts,      2,   2,    0,   0,     0       ],
   [ 'basic2x1',           basic_pkts,      2,   1,    0,   0,     0       ],
+  [ 'basic2x9',           basic_pkts,      2,   9,    0,   0,     0       ],
   # [ 'basic1x2',         basic_pkts,      1,   2,    0,   0,     0       ], FIXME: support 1 to n xbar
   [ 'neighbor4x4',        neighbor_pkts,   4,   4,    0,   0,     0       ],
   [ 'neighbor5x2',        neighbor_pkts,   5,   2,    0,   0,     0       ],
@@ -169,4 +171,34 @@ def test_mflit_xbar( test_params, test_verilog ):
     flit_interval_delay   = test_params.f_intv,
     packet_interval_delay = test_params.p_intv,
   )
+  run_sim( th, translation=trans_backend )
+
+#-------------------------------------------------------------------------
+# packet strategy
+#-------------------------------------------------------------------------
+
+hex_words = [ 0xf00d, 0xfade, 0xface, 0xbeef, 0x8bad, 0xdeaf, 0xbabe ]
+
+@st.composite
+def pkt_strat( draw, num_inports, num_outports, max_plen=15 ):
+  payload = draw( st.lists( st.sampled_from( hex_words ),
+                            min_size=0, max_size=max_plen ) )
+  src     = draw( st.integers(0, num_inports-1 ) )
+  dst     = draw( st.integers(0, num_outports-1) )
+  return mk_pkt( src, dst, payload )
+
+#-------------------------------------------------------------------------
+# pyh2 test
+#-------------------------------------------------------------------------
+
+@hypothesis.settings( deadline=None, max_examples=50 )
+@hypothesis.given(
+  num_inports  = st.integers(2, 16),
+  num_outports = st.integers(1, 16),
+  pkts         = st.data(),
+)
+def test_pyh2( num_inports, num_outports, pkts, test_verilog ):
+  pkts = pkts.draw( st.lists( pkt_strat( num_inports, num_outports ), min_size=1, max_size=100 ) )
+  trans_backend = 'yosys' if test_verilog else ''
+  th = TestHarness( TestHeader, num_inports, num_outports, pkts )
   run_sim( th, translation=trans_backend )

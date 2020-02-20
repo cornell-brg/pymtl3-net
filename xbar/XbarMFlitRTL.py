@@ -49,7 +49,7 @@ class XbarMFlitRTL( Component ):
 
     # Components
 
-    s.input_units = [ InputUnitType( s.PhitType ) 
+    s.input_units = [ InputUnitType( s.PhitType )
                       for _ in range( s.num_inports )  ]
 
     s.route_units  = [ RouteUnitType( Header, s.num_outports )

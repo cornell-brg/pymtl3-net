@@ -10,7 +10,7 @@ It requires no tail flit and that the header flit should have a field that
 indicates the length of the payload in terms of number of flits.
 
 Authour : Yanghui Ou
-   Date : Feb 18, 2020  
+   Date : Feb 18, 2020
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
@@ -56,7 +56,7 @@ class XbarRouteUnitMFlitRTL( Component ):
     )
 
     connect_bitstruct( s.get.ret, s.header )
-    
+
     for i in range( s.num_outports ):
       s.get.ret //= s.give[i].ret
     s.get.en //= s.any_give_en
@@ -112,7 +112,7 @@ class XbarRouteUnitMFlitRTL( Component ):
     def up_out_dir():
       if ( s.state == s.STATE_HEADER ) & s.get.rdy:
         s.out_dir = s.header.dst[0:s.dir_nbits]
-       
+
       else:
         s.out_dir = s.out_dir_r
 
@@ -123,8 +123,8 @@ class XbarRouteUnitMFlitRTL( Component ):
     @s.update
     def up_give_rdy_hold():
       for i in range( s.num_outports ):
-        s.give[i].rdy = ( b3(i) == s.out_dir ) & s.get.rdy
-        s.hold[i]     = ( b3(i) == s.out_dir ) & ( s.state == s.STATE_BODY )
+        s.give[i].rdy = ( s.DirType(i) == s.out_dir ) & s.get.rdy
+        s.hold[i]     = ( s.DirType(i) == s.out_dir ) & ( s.state == s.STATE_BODY )
 
   #-----------------------------------------------------------------------
   # line_trace
