@@ -9,7 +9,6 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 
-from .packet_formats import packet_format
 from .MultiFlitPacket import MultiFlitPacket
 
 @bitstruct
