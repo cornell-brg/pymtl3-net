@@ -194,7 +194,7 @@ def pkt_strat( draw, num_inports, num_outports, max_plen=15 ):
 
 @hypothesis.settings( deadline=None, max_examples=50 )
 @hypothesis.given(
-  num_inports  = st.integers(2, 16),
+  num_inports  = st.integers(1, 16),
   num_outports = st.integers(1, 16),
   pkts         = st.data(),
 )
