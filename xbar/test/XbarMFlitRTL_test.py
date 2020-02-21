@@ -146,7 +146,7 @@ test_cases = [
   [ 'basic2x2',           basic_pkts,      2,   2,    0,   0,     0       ],
   [ 'basic2x1',           basic_pkts,      2,   1,    0,   0,     0       ],
   [ 'basic2x9',           basic_pkts,      2,   9,    0,   0,     0       ],
-  # [ 'basic1x2',         basic_pkts,      1,   2,    0,   0,     0       ], FIXME: support 1 to n xbar
+  [ 'basic1x2',           basic_pkts,      1,   2,    0,   0,     0       ],
   [ 'neighbor4x4',        neighbor_pkts,   4,   4,    0,   0,     0       ],
   [ 'neighbor5x2',        neighbor_pkts,   5,   2,    0,   0,     0       ],
   [ 'neighbor3x3_delay',  neighbor_pkts,   4,   4,    5,   2,     9       ],

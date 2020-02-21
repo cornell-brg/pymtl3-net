@@ -13,6 +13,7 @@ from ocnlib.utils import get_nbits
 from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 from router.SwitchUnitGrantHoldRTL import SwitchUnitGrantHoldRTL
+from router.SwitchUnitNullRTL import SwitchUnitNullRTL
 
 from .XbarRouteUnitMFlitRTL import XbarRouteUnitMFlitRTL
 
@@ -41,6 +42,9 @@ class XbarMFlitRTL( Component ):
     s.num_inports  = num_inports
     s.num_outports = num_outports
     s.PhitType     = mk_bits( get_nbits( Header ) )
+
+    # Special case for num_inports = 1
+    if num_inports == 1: SwitchUnitType = SwitchUnitNullRTL
 
     # Interface
 
