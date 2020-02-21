@@ -153,6 +153,7 @@ test_cases = [
   [ 'product4x4',         product_pkts,    4,   4,    0,   0,     4       ],
   [ 'product8x8',         product_pkts,    8,   8,    0,   0,     2       ],
   [ 'product3x4',         product_pkts,    3,   4,    0,   0,     1       ],
+  [ 'product7x3',         product_pkts,    7,   3,    0,   0,     1       ],
 ]
 
 test_case_table = mk_test_case_table( test_cases )
