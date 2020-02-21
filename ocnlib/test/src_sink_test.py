@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Feb 3, 2019
 '''
 from pymtl3 import *
-from ..packets   import packet_format, MultiFlitPacket
+from ..packets   import MultiFlitPacket
 from .test_srcs  import MultiFlitPacketSourceCL, MultiFlitPacketSourceRTL
 from .test_sinks import MultiFlitPacketSinkCL, MultiFlitPacketSinkRTL
 
