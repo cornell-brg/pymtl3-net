@@ -15,8 +15,6 @@ from pymtl3.stdlib.rtl import Mux
 from pymtl3.stdlib.rtl.Encoder import Encoder
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, SendIfcRTL
 from ocnlib.rtl import Counter, GrantHoldArbiter
-from ocnlib.utils.connects import connect_union
-
 
 class SwitchUnitGrantHoldRTL( Component ):
 
@@ -65,15 +63,15 @@ class SwitchUnitGrantHoldRTL( Component ):
       s.get[i].rdy //= s.arbiter.reqs[i]
       s.get[i].ret //= s.mux.in_[i]
 
-    @s.update
-    def up_get_en():
-      for i in range( num_inports ):
-        s.get[i].en = s.give.en & ( s.mux.sel == SelType(i) )
+    # @s.update
+    # def up_get_en():
+    #   for i in range( num_inports ):
+    #     s.get[i].en = s.give.en & ( s.mux.sel == SelType(i) )
 
     # FIXME: use the lambda syntax after updating pymtl3 which fix the
     # transalation bug
-    # for i in range( num_inports ):
-    #   s.get[i].en //= lambda: s.give.en & ( s.mux.sel == SelType(i) )
+    for i in range( num_inports ):
+      s.get[i].en //= lambda: s.give.en & ( s.mux.sel == SelType(i) )
 
     s.give.rdy //= s.granted_get_rdy
 
