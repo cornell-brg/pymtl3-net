@@ -22,10 +22,6 @@ class SwitchUnitNullRTL( Component ):
     s.hold = [ InPort( Bits1 ) for _ in range( num_inports ) ]
     s.give = GiveIfcRTL( Type )
 
-    # connect( s.give.en,  s.get[0].en  )
-    # connect( s.give.ret, s.get[0].ret )
-    # connect( s.give.rdy, s.get[0].rdy )
-
     connect( s.give, s.get[0] )
 
   def line_trace( s ):
