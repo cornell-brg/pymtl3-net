@@ -12,9 +12,9 @@ from pymtl3 import *
 from pymtl3.stdlib.rtl.queues import BypassQueueRTL
 from pymtl3.stdlib.test import mk_test_case_table
 from ocnlib.utils import to_bits, to_bitstruct, run_sim
-from ocnlib.test.test_srcs import MultiFlitPacketSourceRTL as TestSource
-from ocnlib.test.test_sinks import MultiFlitPacketSinkRTL as TestSink
-from ocnlib.packets import MultiFlitPacket as Packet
+from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
+from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
+from ocnlib.packets import MflitPacket as Packet
 
 from ..XbarRouteUnitMflitRTL import XbarRouteUnitMflitRTL
 

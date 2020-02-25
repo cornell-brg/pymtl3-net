@@ -1,15 +1,15 @@
 '''
 ==========================================================================
-MultiFlitPacket_test.py
+MflitPacket_test.py
 ==========================================================================
-Unit tests for MultiFlitPacket.
+Unit tests for MflitPacket.
 
 Author : Yanghui Ou
   Date : Jan 31, 2019
 '''
 from pymtl3 import *
 
-from .MultiFlitPacket import MultiFlitPacket
+from .MflitPacket import MflitPacket
 
 @bitstruct
 class SimpleFormat:
@@ -20,7 +20,7 @@ class SimpleFormat:
 
 def test_add():
   # An empty packet
-  pkt = MultiFlitPacket( SimpleFormat )
+  pkt = MflitPacket( SimpleFormat )
   assert pkt.empty()
 
   header      = b32(0) 
@@ -41,7 +41,7 @@ def test_add():
 def test_pop():
   # A single-flit packet
   header = b32(0)
-  pkt    = MultiFlitPacket( SimpleFormat, [ header ] )
+  pkt    = MflitPacket( SimpleFormat, [ header ] )
   assert not pkt.empty()
   assert pkt.full()
   assert pkt.pop() == b32(0)
@@ -52,7 +52,7 @@ def test_pop():
   header      = b32(0)
   header[0:8] = b8(2)
   flits       = [ header, b32(0xfaceb00c), b32(0x8badf00d) ]
-  pkt         = MultiFlitPacket( SimpleFormat, flits )
+  pkt         = MflitPacket( SimpleFormat, flits )
 
   assert not pkt.empty()
   assert pkt.full()

@@ -8,9 +8,9 @@ Author : Yanghui Ou
   Date : Feb 3, 2019
 '''
 from pymtl3 import *
-from ..packets   import MultiFlitPacket
-from .test_srcs  import MultiFlitPacketSourceCL, MultiFlitPacketSourceRTL
-from .test_sinks import MultiFlitPacketSinkCL, MultiFlitPacketSinkRTL
+from ..packets   import MflitPacket
+from .test_srcs  import MflitPacketSourceCL, MflitPacketSourceRTL
+from .test_sinks import MflitPacketSinkCL, MflitPacketSinkRTL
 
 @bitstruct
 class SimpleFormat:
@@ -27,13 +27,13 @@ def mk_simple_pkt( src, dst, payload ):
   header[16:24] = b8(dst)
   flits = [ header ]
   flits.extend( [ b32(x) for x in payload ] )
-  return MultiFlitPacket( SimpleFormat, flits )
+  return MflitPacket( SimpleFormat, flits )
 
 class TestHarness( Component ):
 
   def construct( s, Format, pkts ):
-    s.src  = MultiFlitPacketSourceCL( SimpleFormat, pkts )
-    s.sink = MultiFlitPacketSinkCL  ( SimpleFormat, pkts )
+    s.src  = MflitPacketSourceCL( SimpleFormat, pkts )
+    s.sink = MflitPacketSinkCL  ( SimpleFormat, pkts )
     connect( s.src.send, s.sink.recv )
 
   def done( s ):
@@ -45,8 +45,8 @@ class TestHarness( Component ):
 class TestHarnessRTL( Component ):
 
   def construct( s, Format, pkts ):
-    s.src  = MultiFlitPacketSourceRTL( SimpleFormat, pkts )
-    s.sink = MultiFlitPacketSinkRTL  ( SimpleFormat, pkts )
+    s.src  = MflitPacketSourceRTL( SimpleFormat, pkts )
+    s.sink = MflitPacketSinkRTL  ( SimpleFormat, pkts )
     connect( s.src.send, s.sink.recv )
 
   def done( s ):

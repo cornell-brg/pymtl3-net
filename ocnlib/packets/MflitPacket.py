@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-MultiFlitPacket.py
+MflitPacket.py
 ==========================================================================
 A **non translatable** data type that helps testing components that use
 multi-flit (single-phit flit) packets.
@@ -24,10 +24,10 @@ def _get_payload_length( Format, header_flit, field_name='plen' ):
   return getattr( header, field_name ).uint()
 
 #-------------------------------------------------------------------------
-# MultiFlitPacket
+# MflitPacket
 #-------------------------------------------------------------------------
 
-class MultiFlitPacket:
+class MflitPacket:
 
   def __init__( self, Format, flits=[], plen_field_name='plen' ):
 

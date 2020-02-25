@@ -14,15 +14,15 @@ from pymtl3.stdlib.ifcs import RecvCL2SendRTL, SendIfcRTL
 from ..utils import get_nbits
 
 #-------------------------------------------------------------------------
-# MultiFlitPacketSourceCL
+# MflitPacketSourceCL
 #-------------------------------------------------------------------------
-# pkts                : a list of MultiFlitPacket objects.
+# pkts                : a list of MflitPacket objects.
 # initial_delay       : number of cycles before sending the very first flit.
 # flit_interval_delay : number of cycles between each flit in a packet.
 # packet_interval_delay  : number of cycles between each packet.
 # TODO: check if inputs packtes are valid
 
-class MultiFlitPacketSourceCL( Component ):
+class MflitPacketSourceCL( Component ):
 
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0, packet_interval_delay=0 ):
 
@@ -64,10 +64,10 @@ class MultiFlitPacketSourceCL( Component ):
     return f'({s.count}){s.send}'
 
 #-------------------------------------------------------------------------
-# MultiFlitPacketSourceRTL
+# MflitPacketSourceRTL
 #-------------------------------------------------------------------------
 
-class MultiFlitPacketSourceRTL( Component ):
+class MflitPacketSourceRTL( Component ):
 
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
@@ -75,7 +75,7 @@ class MultiFlitPacketSourceRTL( Component ):
     PhitType = mk_bits( get_nbits( Format ) )
 
     s.send    = SendIfcRTL( PhitType )
-    s.src_cl  = MultiFlitPacketSourceCL( Format, pkts, initial_delay, flit_interval_delay,
+    s.src_cl  = MflitPacketSourceCL( Format, pkts, initial_delay, flit_interval_delay,
                                          packet_interval_delay )
     s.adapter = RecvCL2SendRTL( PhitType )
 

@@ -11,13 +11,13 @@ from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvRTL2SendCL, RecvIfcRTL
 
 from ..utils import get_nbits
-from ..packets import MultiFlitPacket as Packet
+from ..packets import MflitPacket as Packet
 
 #-------------------------------------------------------------------------
-# MultiFlitPacketSinkCL
+# MflitPacketSinkCL
 #-------------------------------------------------------------------------
 
-class MultiFlitPacketSinkCL( Component ):
+class MflitPacketSinkCL( Component ):
 
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
@@ -117,10 +117,10 @@ class MultiFlitPacketSinkCL( Component ):
     return f'{s.recv}({s.count})'
 
 #-------------------------------------------------------------------------
-# MultiFlitPacketSinkRTL
+# MflitPacketSinkRTL
 #-------------------------------------------------------------------------
 
-class MultiFlitPacketSinkRTL( Component ):
+class MflitPacketSinkRTL( Component ):
 
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
@@ -128,7 +128,7 @@ class MultiFlitPacketSinkRTL( Component ):
     s.PhitType = mk_bits( get_nbits( Format ) )
 
     s.recv     = RecvIfcRTL( s.PhitType )
-    s.sink_cl  = MultiFlitPacketSinkCL( Format, pkts, initial_delay, flit_interval_delay,
+    s.sink_cl  = MflitPacketSinkCL( Format, pkts, initial_delay, flit_interval_delay,
                                          packet_interval_delay , cmp_fn )
     s.adapter = RecvRTL2SendCL( s.PhitType )
 
