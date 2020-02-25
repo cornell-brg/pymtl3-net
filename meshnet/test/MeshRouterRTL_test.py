@@ -22,7 +22,6 @@ from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 from router.SwitchUnitRTL import SwitchUnitRTL
-from test_helpers import dor_routing
 
 #-------------------------------------------------------------------------
 # TestHarness

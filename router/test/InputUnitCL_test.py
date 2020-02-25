@@ -68,6 +68,7 @@ class InputUnitCL_Tests:
     run_sim( th )
 
   def test_hypothesis( s ):
+    @hypothesis.settings( deadline=None )
     @hypothesis.given(
       qsize     = st.integers(1, 16),
       dwid      = st.integers(1, 32),
