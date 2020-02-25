@@ -11,10 +11,10 @@ import pytest
 from pymtl3 import *
 from pymtl3.stdlib.test import mk_test_case_table
 from ocnlib.utils import to_bitstruct
-from ocnlib.packets import MultiFlitPacket as Packet
+from ocnlib.packets import MflitPacket as Packet
 from ocnlib.test import run_sim
-from ocnlib.test.test_srcs import MultiFlitPacketSourceRTL as TestSource
-from ocnlib.test.test_sinks import MultiFlitPacketSinkRTL as TestSink
+from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
+from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
 
 from ..MeshRouterFL import MeshRouterMflitFL
 from ..MeshRouterMflitRTL import MeshRouterMflitRTL
