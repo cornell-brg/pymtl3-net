@@ -88,7 +88,7 @@ class MeshRouterFL:
     return dst_pkts
 
 #-------------------------------------------------------------------------
-# MeshRouterFL
+# MeshRouterMflitFL
 #-------------------------------------------------------------------------
 # Mesh router that supports single flit packet.
 
