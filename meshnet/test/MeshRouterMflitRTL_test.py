@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-MeshRouterMFlitRTL_test.py
+MeshRouterMflitRTL_test.py
 ==========================================================================
 Test cases for mesh router that supports multi-flit packet.
 
@@ -15,8 +15,8 @@ from ocnlib.packets import MultiFlitPacket as Packet
 from ocnlib.test.test_srcs import MultiFlitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MultiFlitPacketSinkRTL as TestSink
 
-from ..MeshRouterFL import MeshRouterMFlitFL
-from ..MeshRouterMFlitRTL import MeshRouterMFlitRTL
+from ..MeshRouterFL import MeshRouterMflitFL
+from ..MeshRouterMflitRTL import MeshRouterMflitRTL
 
 #-------------------------------------------------------------------------
 # bitstructs for testing
@@ -46,7 +46,7 @@ class TestHarness( Component ):
     nports = 5
 
     s.src  = [ TestSource( Header, src_pkts[i] ) for i in range( nports ) ]
-    s.dut  = MeshRouterMFlitRTL( Header, Position )
+    s.dut  = MeshRouterMflitRTL( Header, Position )
     s.sink = [ TestSink( Header, sink_pkts[i] ) for i in range( nports ) ]
 
     for i in range( nports ):
@@ -105,7 +105,7 @@ def mk_pkt( src_x, src_y, dst_x, dst_y, payload=[], opaque=0 ):
 #-------------------------------------------------------------------------
 
 def test_sanity_check():
-  dut = MeshRouterMFlitRTL( TestHeader, TestPosition )
+  dut = MeshRouterMflitRTL( TestHeader, TestPosition )
   dut.elaborate()
   dut.apply( SimulationPass() )
   dut.sim_reset()
@@ -180,7 +180,7 @@ test_case_table = mk_test_case_table( table )
 
 @pytest.mark.parametrize( **test_case_table )
 def test_mflit_mesh_router( test_params ):
-  ref  = MeshRouterMFlitFL( TestHeader, test_params.pos_x, test_params.pos_y )
+  ref  = MeshRouterMflitFL( TestHeader, test_params.pos_x, test_params.pos_y )
   pkts = test_params.msg_func( test_params.pos_x, test_params.pos_y )
 
   src_pkts = ref.arrange_src_pkts( pkts )

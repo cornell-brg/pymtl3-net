@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-MeshRouteUnitRTLMFlitXY_test.py
+MeshRouteUnitRTLMflitXY_test.py
 ==========================================================================
 Unit tests for the multi-flit mesh route unit.
 
@@ -16,7 +16,7 @@ from ocnlib.test.test_sinks import MultiFlitPacketSinkRTL as TestSink
 from ocnlib.packets import MultiFlitPacket as Packet
 
 from ..directions import *
-from ..MeshRouteUnitRTLMFlitXY import MeshRouteUnitRTLMFlitXY
+from ..MeshRouteUnitRTLMflitXY import MeshRouteUnitRTLMflitXY
 
 #-------------------------------------------------------------------------
 # Helper stuff
@@ -85,7 +85,7 @@ class TestHarness( Component ):
 
     s.src   = TestSource( HeaderFormat, pkts )
     s.src_q = BypassQueueRTL( PhitType, num_entries=1 )
-    s.dut   = MeshRouteUnitRTLMFlitXY( HeaderFormat, PositionType )
+    s.dut   = MeshRouteUnitRTLMflitXY( HeaderFormat, PositionType )
     s.sink  = [ TestSink( HeaderFormat, sink_pkts[i] ) for i in range(5) ]
 
     s.src.send  //= s.src_q.enq

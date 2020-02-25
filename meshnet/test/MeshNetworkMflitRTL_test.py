@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-MeshNetworkMFlitRTL_test.py
+MeshNetworkMflitRTL_test.py
 ==========================================================================
 Test cases for multi-flit mesh.
 
@@ -16,7 +16,7 @@ from ocnlib.utils import to_bitstruct, run_sim
 from ocnlib.packets import MultiFlitPacket as Packet
 from ocnlib.test.test_srcs import MultiFlitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MultiFlitPacketSinkRTL as TestSink
-from ..MeshNetworkMFlitRTL import MeshNetworkMFlitRTL
+from ..MeshNetworkMflitRTL import MeshNetworkMflitRTL
 
 #-------------------------------------------------------------------------
 # TestHeader
@@ -50,7 +50,7 @@ class TestHarness( Component ):
     nterminals = ncols * nrows
 
     s.src  = [ TestSource( Header, src_pkts[i] ) for i in range( nterminals ) ]
-    s.dut  = MeshNetworkMFlitRTL( Header, Position, ncols, nrows )
+    s.dut  = MeshNetworkMflitRTL( Header, Position, ncols, nrows )
     s.sink = [ TestSink( Header, sink_pkts[i] ) for i in range( nterminals ) ]
 
     for i in range( nterminals ):
@@ -103,7 +103,7 @@ def arrange_src_sink_pkts( Header, ncols, nrows, pkt_lst ):
 #-------------------------------------------------------------------------
 
 def test_sanity_check():
-  net = MeshNetworkMFlitRTL( TestHeader, TestPosition, ncols=2, nrows=2 )
+  net = MeshNetworkMflitRTL( TestHeader, TestPosition, ncols=2, nrows=2 )
   net.elaborate()
   net.apply( SimulationPass() )
   net.sim_reset()

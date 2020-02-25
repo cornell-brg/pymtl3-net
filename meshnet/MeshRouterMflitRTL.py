@@ -1,11 +1,11 @@
 '''
 ==========================================================================
-XbarMFlitRTL.py
+MeshRouterMflitRTL
 ==========================================================================
-A crossbar that supports multi-flit packet.
+Mesh router that supports multi-flit packet.
 
 Author : Yanghui Ou
-  Date : Feb 18, 2020
+  Date : Feb 13, 2020
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
@@ -13,15 +13,14 @@ from ocnlib.utils import get_nbits
 from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 from router.SwitchUnitGrantHoldRTL import SwitchUnitGrantHoldRTL
-from router.SwitchUnitNullRTL import SwitchUnitNullRTL
 
-from .XbarRouteUnitMFlitRTL import XbarRouteUnitMFlitRTL
+from .MeshRouteUnitRTLMflitXY import MeshRouteUnitRTLMflitXY
 
 #-------------------------------------------------------------------------
-# XbarMFlitRTL
+# MeshRouterMflitRTL
 #-------------------------------------------------------------------------
 
-class XbarMFlitRTL( Component ):
+class MeshRouterMflitRTL( Component ):
 
   #-----------------------------------------------------------------------
   # Construct
@@ -29,34 +28,31 @@ class XbarMFlitRTL( Component ):
 
   def construct( s,
     Header,
-    num_inports    = 2,
-    num_outports   = 2,
+    PositionType,
     InputUnitType  = InputUnitRTL,
-    RouteUnitType  = XbarRouteUnitMFlitRTL,
+    RouteUnitType  = MeshRouteUnitRTLMflitXY,
     SwitchUnitType = SwitchUnitGrantHoldRTL,
     OutputUnitType = OutputUnitRTL,
   ):
 
     # Local parameter
 
-    s.num_inports  = num_inports
-    s.num_outports = num_outports
+    s.num_inports  = 5
+    s.num_outports = 5
     s.PhitType     = mk_bits( get_nbits( Header ) )
-
-    # Special case for num_inports = 1
-    if num_inports == 1: SwitchUnitType = SwitchUnitNullRTL
 
     # Interface
 
     s.recv = [ RecvIfcRTL( s.PhitType ) for _ in range( s.num_inports  ) ]
     s.send = [ SendIfcRTL( s.PhitType ) for _ in range( s.num_outports ) ]
+    s.pos  = InPort( PositionType )
 
     # Components
 
-    s.input_units = [ InputUnitType( s.PhitType )
-                      for _ in range( s.num_inports )  ]
+    s.input_units  = [ InputUnitType( s.PhitType )
+                       for _ in range( s.num_inports ) ]
 
-    s.route_units  = [ RouteUnitType( Header, s.num_outports )
+    s.route_units  = [ RouteUnitType( Header, PositionType )
                        for i in range( s.num_inports ) ]
 
     s.switch_units = [ SwitchUnitType( s.PhitType, s.num_inports )
@@ -70,6 +66,7 @@ class XbarMFlitRTL( Component ):
     for i in range( s.num_inports ):
       s.recv[i]             //= s.input_units[i].recv
       s.input_units[i].give //= s.route_units[i].get
+      s.pos                 //= s.route_units[i].pos
 
     for i in range( s.num_inports ):
       for j in range( s.num_outports ):
@@ -87,4 +84,4 @@ class XbarMFlitRTL( Component ):
   def line_trace( s ):
     in_trace  = '|'.join([ f'{ifc}' for ifc in s.recv ])
     out_trace = '|'.join([ f'{ifc}' for ifc in s.send ])
-    return f'{in_trace}(){out_trace}'
+    return f'{in_trace}({s.pos}){out_trace}'

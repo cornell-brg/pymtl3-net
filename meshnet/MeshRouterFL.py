@@ -92,7 +92,7 @@ class MeshRouterFL:
 #-------------------------------------------------------------------------
 # Mesh router that supports single flit packet.
 
-class MeshRouterMFlitFL:
+class MeshRouterMflitFL:
 
   def __init__( s, Header, pos_x, pos_y, first_dimension='x' ):
     s.Header          = Header

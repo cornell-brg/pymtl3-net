@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-XbarRouteUnitMFlitRTL_test.py
+XbarRouteUnitMflitRTL_test.py
 ==========================================================================
 Unit tests for the multi-flit xbar route unit.
 
@@ -16,7 +16,7 @@ from ocnlib.test.test_srcs import MultiFlitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MultiFlitPacketSinkRTL as TestSink
 from ocnlib.packets import MultiFlitPacket as Packet
 
-from ..XbarRouteUnitMFlitRTL import XbarRouteUnitMFlitRTL
+from ..XbarRouteUnitMflitRTL import XbarRouteUnitMflitRTL
 
 #-------------------------------------------------------------------------
 # route_fl
@@ -42,7 +42,7 @@ class TestHarness( Component ):
 
     s.src   = TestSource( Header, pkts )
     s.src_q = BypassQueueRTL( PhitType, num_entries=1 )
-    s.dut   = XbarRouteUnitMFlitRTL( Header, num_outports )
+    s.dut   = XbarRouteUnitMflitRTL( Header, num_outports )
     s.sink  = [ TestSink( Header, sink_pkts[i] ) for i in range( num_outports ) ]
 
     s.src.send  //= s.src_q.enq

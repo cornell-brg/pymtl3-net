@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-MeshNetworkMFlitRTL.py
+MeshNetworkMflitRTL.py
 ==========================================================================
 Mesh network that supports multi-flit packet.
 
@@ -11,10 +11,10 @@ from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
 
 from .directions import *
-from .MeshRouterMFlitRTL import MeshRouterMFlitRTL
+from .MeshRouterMflitRTL import MeshRouterMflitRTL
 
 
-class MeshNetworkMFlitRTL( Component ):
+class MeshNetworkMflitRTL( Component ):
 
   #-----------------------------------------------------------------------
   # construct
@@ -35,7 +35,7 @@ class MeshNetworkMFlitRTL( Component ):
 
     # Components
 
-    s.routers = [ MeshRouterMFlitRTL( Header, PositionType )
+    s.routers = [ MeshRouterMflitRTL( Header, PositionType )
                   for _ in range( s.nterminals ) ]
 
     # Set position of each router

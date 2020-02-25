@@ -1,6 +1,6 @@
 '''
 ==========================================================================
-XbarMFlitRTL_test.py
+XbarMflitRTL_test.py
 ==========================================================================
 Test cases for the multi-flit xbar.
 
@@ -16,7 +16,7 @@ from ocnlib.utils import to_bitstruct, run_sim
 from ocnlib.packets import MultiFlitPacket as Packet
 from ocnlib.test.test_srcs import MultiFlitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MultiFlitPacketSinkRTL as TestSink
-from ..XbarMFlitRTL import XbarMFlitRTL
+from ..XbarMflitRTL import XbarMflitRTL
 
 #-------------------------------------------------------------------------
 # TestHeader
@@ -41,7 +41,7 @@ class TestHarness( Component ):
       arrange_src_sink_pkts( Header, num_inports, num_outports, pkts )
 
     s.src  = [ TestSource( Header, src_pkts[i] ) for i in range( num_inports ) ]
-    s.dut  = XbarMFlitRTL( Header, num_inports, num_outports )
+    s.dut  = XbarMflitRTL( Header, num_inports, num_outports )
     s.sink = [ TestSink( Header, sink_pkts[i] ) for i in range( num_outports ) ]
 
     for i in range( num_inports ):
