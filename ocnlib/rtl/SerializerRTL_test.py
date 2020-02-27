@@ -11,6 +11,7 @@ from pymtl3 import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL as TestSource
 from pymtl3.stdlib.test.test_sinks import TestSinkRTL as TestSink
 from ocnlib.utils import run_sim
+# from pymtl3.stdlib.test import run_sim
 
 from .SerializerRTL import SerializerRTL
 
@@ -106,5 +107,5 @@ def test_backpressure():
   ]
   th = TestHarness( 16, 4, msgs )
   th.set_param( 'top.sink.construct', initial_delay=10, interval_delay=2 )
-  run_sim( th, max_cycles=20 )
+  run_sim( th, max_cycles=40 )
 

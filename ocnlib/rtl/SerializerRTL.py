@@ -112,11 +112,12 @@ class SerializerRTL( Component ):
     def up_state_next():
       if s.state == s.STATE_IDLE:
         # If length is 1, bypass to IDLE
-        if ( s.len == s.CountType(1) ) & s.send.rdy:
+        if ( s.len == s.CountType(1) ) & s.send.en:
           s.state_next = s.STATE_IDLE
 
-        elif ( s.len > s.CountType(1) ) & s.send.rdy:
+        elif s.recv.en:
           s.state_next = s.STATE_SEND
+          print( s.state_next )
 
         else:
           s.state_next = s.STATE_IDLE
@@ -134,5 +135,8 @@ class SerializerRTL( Component ):
   def line_trace( s ):
     state = 'I' if s.state == s.STATE_IDLE else \
             'S' if s.state == s.STATE_SEND else \
+            '?'
+    state_next = 'I' if s.state_next == s.STATE_IDLE else \
+            'S' if s.state_next == s.STATE_SEND else \
             '?'
     return f'{s.recv}({state}{s.counter.count}<{s.len_r}){s.send}'
