@@ -88,7 +88,23 @@ def test_basic():
     0xfaceb00c,         2,
     0xdeadbeef,         1,
     0xcafebabefa11deaf, 4,
+    0xace3ace2ace1ace0, 3,
   ]
   th = TestHarness( 16, 4, msgs )
+  run_sim( th, max_cycles=20 )
+
+#-------------------------------------------------------------------------
+# test case: backpressure
+#-------------------------------------------------------------------------
+
+def test_backpressure():
+  msgs = [
+    0xfaceb00c,         2,
+    0xdeadbeef,         1,
+    0xcafebabefa11deaf, 4,
+    0xace3ace2ace1ace0, 3,
+  ]
+  th = TestHarness( 16, 4, msgs )
+  th.set_param( 'top.sink.construct', initial_delay=10, interval_delay=2 )
   run_sim( th, max_cycles=20 )
 
