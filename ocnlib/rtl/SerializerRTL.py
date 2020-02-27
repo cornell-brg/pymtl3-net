@@ -36,7 +36,7 @@ class SerializerRTL( Component ):
 
     s.recv = RecvIfcRTL( s.InType    )
     s.send = SendIfcRTL( s.OutType   )
-    s.len  = InPort ( s.CountType )
+    s.len  = InPort    ( s.CountType )
 
     # Components
 
@@ -52,13 +52,13 @@ class SerializerRTL( Component ):
 
     @s.update_ff
     def up_in_r():
-      if s.recv.en:
+      if s.recv.en & ( s.state_next != s.STATE_IDLE ):
         s.in_r  <<= s.recv.msg
         # Force len to 1 if it is set to be 0 to avoid undefined behavior
         s.len_r <<= s.len if s.len > s.CountType(0) else s.CountType(1)
       else:
         s.in_r  <<= s.in_r
-        s.len_r <<= s.len_r
+        s.len_r <<= s.CountType(0) if s.state_next == s.STATE_IDLE else s.len_r
 
     # Mux logic
 
@@ -68,12 +68,12 @@ class SerializerRTL( Component ):
 
     # Counter load
 
-    s.counter.load //= s.recv.en 
-    s.counter.incr //= s.send.en
+    s.counter.load //= lambda: s.recv.en | ( s.state_next == s.STATE_IDLE )
+    s.counter.incr //= lambda: s.send.en & ( s.state_next != s.STATE_IDLE )
 
     @s.update
     def up_counter_load_value():
-      if ( s.state == s.STATE_IDLE ) & s.send.rdy:
+      if ( s.state == s.STATE_IDLE ) & s.send.rdy & ( s.state_next != s.STATE_IDLE ):
         s.counter.load_value = s.CountType(1)
       else:
         s.counter.load_value = s.CountType(0)
@@ -115,8 +115,11 @@ class SerializerRTL( Component ):
         if ( s.len == s.CountType(1) ) & s.send.rdy:
           s.state_next = s.STATE_IDLE
 
-        else:
+        elif ( s.len > s.CountType(1) ) & s.send.rdy:
           s.state_next = s.STATE_SEND
+
+        else:
+          s.state_next = s.STATE_IDLE
 
       else: # STATE_SEND
         if ( s.counter.count == s.len_r - s.CountType(1) ) & s.send.rdy:
@@ -132,4 +135,4 @@ class SerializerRTL( Component ):
     state = 'I' if s.state == s.STATE_IDLE else \
             'S' if s.state == s.STATE_SEND else \
             '?'
-    return f'{s.recv}({state}{s.counter.count}){s.send}'
+    return f'{s.recv}({state}{s.counter.count}<{s.len_r}){s.send}'
