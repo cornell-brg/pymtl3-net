@@ -117,7 +117,6 @@ class SerializerRTL( Component ):
 
         elif s.recv.en:
           s.state_next = s.STATE_SEND
-          print( s.state_next )
 
         else:
           s.state_next = s.STATE_IDLE
