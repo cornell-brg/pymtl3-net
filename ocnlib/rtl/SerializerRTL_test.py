@@ -7,6 +7,9 @@ Unit tests for SerializerRTL.
 Author : Yanghui Ou
   Date : Feb 26, 2020
 '''
+import hypothesis
+from hypothesis import strategies as st
+from pymtl3.datatypes.strategies import bits 
 from pymtl3 import *
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL as TestSource
 from pymtl3.stdlib.test.test_sinks import TestSinkRTL as TestSink
@@ -122,4 +125,43 @@ def test_src_delay():
   th = TestHarness( 32, 9, msgs )
   th.set_param( 'top.src*.construct', initial_delay=10, interval_delay=2 )
   run_sim( th, max_cycles=40 )
+
+#-------------------------------------------------------------------------
+# test case: stream 
+#-------------------------------------------------------------------------
+
+def test_stream():
+  msgs = [
+    0xdeadbeef, 1,
+    0xbad0bad0, 1,
+    0xcafebabe, 1,
+    0xace5ace4, 1,
+    0xfaceb00c_ace5ace4, 2,
+    0x8badf00d_ace5ace4, 2,
+    0x8badc0de_ace5ace4, 2,
+    0xfeedbabe_ace5ace4, 2,
+  ]
+  th = TestHarness( 32, 4, msgs )
+  run_sim( th, max_cycles=40 )
+
+#-------------------------------------------------------------------------
+# test case: pyh2
+#-------------------------------------------------------------------------
+
+@hypothesis.given(
+  out_nbits   = st.integers(1, 64),
+  max_nblocks = st.integers(2, 15),
+  data        = st.data(),
+)
+def test_pyh2( out_nbits, max_nblocks, data ):
+  len_msgs = data.draw( st.lists( st.integers(1, max_nblocks), min_size=1, max_size=100 ) )
+  src_msgs = [ data.draw( bits(x*out_nbits) ) for x in len_msgs ]
+
+  msgs = []
+  for x, l in zip( src_msgs, len_msgs ):
+    msgs.append( x )
+    msgs.append( l )
+
+  th = TestHarness( out_nbits, max_nblocks, msgs )
+  run_sim( th )
 

@@ -7,7 +7,10 @@ Unit tests for DeserializerRTL.
 Author : Yanghui Ou
   Date : Feb 26, 2020
 '''
+import hypothesis
+from hypothesis import strategies as st
 from pymtl3 import *
+from pymtl3.datatypes.strategies import bits 
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL as TestSource
 from pymtl3.stdlib.test.test_sinks import TestSinkRTL as TestSink
 from ocnlib.utils import run_sim
@@ -131,7 +134,7 @@ def test_src_delay():
   run_sim( th, max_cycles=40 )
 
 #-------------------------------------------------------------------------
-# test case: bypass
+# test case: stream
 #-------------------------------------------------------------------------
 
 def test_stream():
@@ -147,3 +150,26 @@ def test_stream():
   ]
   th = TestHarness( 32, 4, msgs )
   run_sim( th, max_cycles=40 )
+
+#-------------------------------------------------------------------------
+# test case: pyh2
+#-------------------------------------------------------------------------
+
+@hypothesis.settings( deadline=None, max_examples=100 )
+@hypothesis.given(
+  in_nbits    = st.integers(1, 64),
+  max_nblocks = st.integers(2, 15),
+  data        = st.data(),
+)
+def test_pyh2( in_nbits, max_nblocks, data ):
+  len_msgs = data.draw( st.lists( st.integers(1, max_nblocks), min_size=1, max_size=100 ) )
+  src_msgs = [ data.draw( bits(x*in_nbits) ) for x in len_msgs ]
+
+  msgs = []
+  for x, l in zip( src_msgs, len_msgs ):
+    msgs.append( x )
+    msgs.append( l )
+
+  th = TestHarness( in_nbits, max_nblocks, msgs )
+  run_sim( th )
+
