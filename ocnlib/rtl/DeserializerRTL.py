@@ -51,7 +51,7 @@ class DeserializerRTL( Component ):
     @s.update_ff
     def up_len_r():
       if s.recv.en & ( s.state == s.STATE_IDLE ) | \
-         s.recv.en & ( s.state == s.STATE_RECV ) & ( s.idx == s.len_r - s.CountType(1) ):
+         s.recv.en & ( s.state == s.STATE_RECV ):
         s.len_r <<= s.len if s.len > s.CountType(0) else s.CountType(1)
       else:
         s.len_r <<= s.CountType(0) if s.state_next == s.STATE_IDLE else s.len_r
@@ -60,8 +60,16 @@ class DeserializerRTL( Component ):
 
     @s.update_ff
     def up_out_r():
-      if s.reset | ( s.state == s.STATE_RECV ) & ( s.state_next == s.STATE_IDLE ): 
+      if s.reset:
         for i in range( max_nblocks ):
+          s.out_r[i] <<= s.InType(0)
+
+      elif ( s.state == s.STATE_RECV ) & ( s.idx == s.len_r ) & s.send.en: 
+        if s.recv.en:
+          s.out_r[0] <<= s.recv.msg
+        else:
+          s.out_r[0] <<= s.InType(0)
+        for i in range(1, max_nblocks):
           s.out_r[i] <<= s.InType(0)
 
       elif s.recv.en:
@@ -76,9 +84,25 @@ class DeserializerRTL( Component ):
 
     # Recv/Send logic
 
-    s.recv.rdy //= lambda: ( s.state == s.STATE_IDLE ) | ( s.idx < s.len_r )
     # s.send.en  //= lambda: ( s.state == s.STATE_IDLE ) & ( s.len == s.CountType(1) ) & s.recv.en & s.send.rdy | ( s.state == s.STATE_RECV ) & ( s.idx ==  s.len_r ) & s.send.rdy
     s.send.en  //= lambda: ( s.state == s.STATE_RECV ) & ( s.idx ==  s.len_r ) & s.send.rdy
+
+    # s.recv.rdy //= lambda: ( s.state == s.STATE_IDLE ) | ( s.idx < s.len_r )
+
+    @s.update
+    def up_recv_rdy():
+      if s.state == s.STATE_IDLE:
+        s.recv.rdy = b1(1)
+
+      else: # STATE_RECV
+        if s.idx < s.len_r:
+          s.recv.rdy = b1(1)
+        elif s.send.en:
+          s.recv.rdy = b1(1)
+
+        else:
+          s.recv.rdy = b1(0)
+
 
     # State transition logic
 
@@ -107,14 +131,19 @@ class DeserializerRTL( Component ):
           s.counter.load = b1(0)
 
       else: # STATE_RECV
-        if ( s.idx >= s.len_r - s.CountType(1) ) & s.send.en: 
-          s.state_next   = s.STATE_IDLE
-          s.counter.load = b1(1)
-          s.counter.load_value = s.CountType(0)
+        if ( s.idx == s.len_r ) & s.send.en: 
+          if s.recv.en:
+            s.state_next         = s.STATE_RECV
+            s.counter.load       = b1(1)
+            s.counter.load_value = s.CountType(1)
+          else:
+            s.state_next         = s.STATE_IDLE
+            s.counter.load       = b1(1)
+            s.counter.load_value = s.CountType(0)
 
         else:
-          s.state_next   = s.STATE_RECV
-          s.counter.load = b1(0)
+          s.state_next         = s.STATE_RECV
+          s.counter.load       = b1(0)
           s.counter.load_value = s.CountType(0)
 
   #-----------------------------------------------------------------------
