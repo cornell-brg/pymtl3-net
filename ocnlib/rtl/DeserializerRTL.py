@@ -10,6 +10,8 @@ Author : Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
 
+from .Counter import Counter
+
 class DeserializerRTL( Component ):
 
   #-----------------------------------------------------------------------
@@ -85,7 +87,7 @@ class DeserializerRTL( Component ):
     @s.update
     def up_state_next():
       if s.state == s.STATE_IDLE:
-        if ( s.len >  s.CountType(1) ) & s.recv.en | |:
+        if ( s.len >  s.CountType(1) ) & s.recv.en | \
            ( s.len == s.CountType(1) ) & s.recv.en & ~s.send.rdy:
           s.state_next   = s.STATE_RECV
           s.counter.load = b1(1)
@@ -94,7 +96,7 @@ class DeserializerRTL( Component ):
           s.counter.load = b1(0)
 
       else: # STATE_RECV
-        if ( s.idx >= s.len_r - s.CountType(1) ) & s.send.en | \
+        if ( s.idx >= s.len_r - s.CountType(1) ) & s.send.en: 
           s.state_next   = s.STATE_IDLE
           s.counter.load = b1(1)
         else:
