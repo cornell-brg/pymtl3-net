@@ -84,10 +84,7 @@ class DeserializerRTL( Component ):
 
     # Recv/Send logic
 
-    # s.send.en  //= lambda: ( s.state == s.STATE_IDLE ) & ( s.len == s.CountType(1) ) & s.recv.en & s.send.rdy | ( s.state == s.STATE_RECV ) & ( s.idx ==  s.len_r ) & s.send.rdy
     s.send.en  //= lambda: ( s.state == s.STATE_RECV ) & ( s.idx ==  s.len_r ) & s.send.rdy
-
-    # s.recv.rdy //= lambda: ( s.state == s.STATE_IDLE ) | ( s.idx < s.len_r )
 
     @s.update
     def up_recv_rdy():
@@ -102,7 +99,6 @@ class DeserializerRTL( Component ):
 
         else:
           s.recv.rdy = b1(0)
-
 
     # State transition logic
 
@@ -120,11 +116,6 @@ class DeserializerRTL( Component ):
           s.state_next         = s.STATE_RECV
           s.counter.load       = b1(1)
           s.counter.load_value = s.CountType(1)
-
-        # elif ( s.len == s.CountType(1) ) & s.recv.en & ~s.send.rdy:
-        #   s.state_next         = s.STATE_RECV
-        #   s.counter.load       = b1(1)
-        #   s.counter.load_value = s.CountType(0)
 
         else:
           s.state_next   = s.STATE_IDLE
@@ -154,5 +145,4 @@ class DeserializerRTL( Component ):
     state = 'I' if s.state == s.STATE_IDLE else \
             'R' if s.state == s.STATE_RECV else \
             '?'
-
     return f'{s.recv}({state}:{s.idx}<{s.len_r}){s.send}'
