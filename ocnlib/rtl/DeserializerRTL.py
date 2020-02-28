@@ -155,4 +155,4 @@ class DeserializerRTL( Component ):
             'R' if s.state == s.STATE_RECV else \
             '?'
 
-    return f'{s.recv}({state}[{s.len}]:{s.idx}<{s.len_r}){s.send}'
+    return f'{s.recv}({state}:{s.idx}<{s.len_r}){s.send}'
