@@ -44,7 +44,6 @@ class TestHarness( Component ):
     OutType = mk_bits( out_nbits )
     LenType =  mk_bits( clog2( max_nblocks+1 ) )
     src_msgs, len_msgs, sink_msgs = mk_msgs( out_nbits, max_nblocks, msgs )
-    print( sink_msgs )
 
     s.src     = TestSource( InType, src_msgs )
     s.src_len = TestSource( LenType, len_msgs )
