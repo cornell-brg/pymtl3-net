@@ -60,7 +60,7 @@ class DeserializerRTL( Component ):
 
     @s.update_ff
     def up_out_r():
-      if ( s.state == s.STATE_RECV ) & ( s.state_next == s.STATE_IDLE ): 
+      if s.reset | ( s.state == s.STATE_RECV ) & ( s.state_next == s.STATE_IDLE ): 
         for i in range( max_nblocks ):
           s.out_r[i] <<= s.InType(0)
 
