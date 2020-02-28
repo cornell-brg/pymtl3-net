@@ -99,3 +99,34 @@ def test_basic():
   ]
   th = TestHarness( 16, 4, msgs )
   run_sim( th, max_cycles=20 )
+
+#-------------------------------------------------------------------------
+# test case: backpressure
+#-------------------------------------------------------------------------
+
+def test_backpressure():
+  msgs = [
+    0xfaceb00c,         2,
+    0xdeadbeef,         1,
+    0xcafebabefa11deaf, 4,
+    0xace3ace2ace1ace0, 3,
+  ]
+  th = TestHarness( 16, 4, msgs )
+  th.set_param( 'top.sink.construct', initial_delay=10, interval_delay=2 )
+  run_sim( th, max_cycles=40 )
+
+#-------------------------------------------------------------------------
+# test case: src delay
+#-------------------------------------------------------------------------
+
+def test_src_delay():
+  msgs = [
+    0xdeadbeef_faceb00c,                   2,
+    0xbad0bad0_deadbeef,                   1,
+    0xcafebabe_fa11deaf_deadc0de_faceb00c, 4,
+    0xace5ace4_ace3ace2_ace1ace0,          3,
+  ]
+  th = TestHarness( 32, 9, msgs )
+  th.set_param( 'top.src*.construct', initial_delay=10, interval_delay=2 )
+  run_sim( th, max_cycles=40 )
+
