@@ -25,13 +25,15 @@ def mk_msgs( in_nbits, max_nblocks, msgs ):
   sink_msgs = [ OutType(x) for x in msgs[::2] ]
   len_lst   = [ LenType(x) for x in msgs[1::2] ]
 
+  sink_msgs = [ data[0:in_nbits*length.uint()] for data, length in zip( sink_msgs, len_lst ) ]
+
   src_msgs = []
   for data, length in zip( sink_msgs, len_lst ):
     assert length.uint() > 0
     for i in range( length.uint() ):
       src_msgs.append( data[i*in_nbits:(i+1)*in_nbits] )
 
-  # 0-padding len_msgs
+  # pad len_msgs
   len_msgs = []
   for x in len_lst:
     for _ in range( x ):
