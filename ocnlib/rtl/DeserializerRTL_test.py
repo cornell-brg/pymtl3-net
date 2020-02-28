@@ -22,14 +22,14 @@ def mk_msgs( in_nbits, max_nblocks, msgs ):
   InType    = mk_bits( in_nbits )
   OutType   = mk_bits( in_nbits * max_nblocks )
   LenType   = mk_bits( clog2( max_nblocks+1 ) )
-  sink_msgs = [ InType(x) for x in msgs[::2] ]
+  sink_msgs = [ OutType(x) for x in msgs[::2] ]
   len_lst   = [ LenType(x) for x in msgs[1::2] ]
 
   src_msgs = []
   for data, length in zip( sink_msgs, len_lst ):
     assert length.uint() > 0
     for i in range( length.uint() ):
-      src_msgs.append( data[i:out_nbits:(i+1)*out_nbits] )
+      src_msgs.append( data[i*in_nbits:(i+1)*in_nbits] )
 
   # 0-padding len_msgs
   len_msgs = []
@@ -83,3 +83,17 @@ def test_sanity_check():
   th.apply( SimulationPass() )
   th.tick()
   th.tick()
+
+#-------------------------------------------------------------------------
+# test case: basic
+#-------------------------------------------------------------------------
+
+def test_basic():
+  msgs = [
+    0xfaceb00c,         2,
+    0xdeadbeef,         1,
+    0xcafebabefa11deaf, 4,
+    0xace3ace2ace1ace0, 3,
+  ]
+  th = TestHarness( 16, 4, msgs )
+  run_sim( th, max_cycles=20 )
