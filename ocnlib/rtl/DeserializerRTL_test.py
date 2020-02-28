@@ -130,3 +130,20 @@ def test_src_delay():
   th.set_param( 'top.src*.construct', initial_delay=10, interval_delay=2 )
   run_sim( th, max_cycles=40 )
 
+#-------------------------------------------------------------------------
+# test case: bypass
+#-------------------------------------------------------------------------
+
+def test_stream():
+  msgs = [
+    0xdeadbeef, 1,
+    0xbad0bad0, 1,
+    0xcafebabe, 1,
+    0xace5ace4, 1,
+    0xfaceb00c_ace5ace4, 2,
+    0x8badf00d_ace5ace4, 2,
+    0x8badc0de_ace5ace4, 2,
+    0xfeedbabe_ace5ace4, 2,
+  ]
+  th = TestHarness( 32, 4, msgs )
+  run_sim( th, max_cycles=40 )
