@@ -22,27 +22,27 @@ class DeserializerRTL( Component ):
 
     # Local parameter
 
-    s.InType    = mk_bits( in_nbits )
-    s.OutType   = mk_bits( in_nbits * max_nblocks )
-    s.CountType = mk_bits( clog2( max_nblocks +1 ) )
+    InType    = mk_bits( in_nbits )
+    OutType   = mk_bits( in_nbits * max_nblocks )
+    CountType = mk_bits( clog2( max_nblocks +1 ) )
 
     s.STATE_IDLE = b1(0)
     s.STATE_RECV = b1(1)
 
     # Interface
 
-    s.recv = RecvIfcRTL( s.InType    )
-    s.len  = InPort    ( s.CountType )
-    s.send = SendIfcRTL( s.OutType   )
+    s.recv = RecvIfcRTL( InType    )
+    s.len  = InPort    ( CountType )
+    s.send = SendIfcRTL( OutType   )
 
     # Component
 
     s.state      = Wire( Bits1 )
     s.state_next = Wire( Bits1 )
-    s.idx        = Wire( s.CountType )
-    s.len_r      = Wire( s.CountType )
-    s.out_r      = [ Wire( s.InType ) for _ in range( max_nblocks ) ]
-    s.counter    = Counter( s.CountType )( decr=b1(0) )
+    s.idx        = Wire( CountType )
+    s.len_r      = Wire( CountType )
+    s.out_r      = [ Wire( InType ) for _ in range( max_nblocks ) ]
+    s.counter    = Counter( CountType )( decr=b1(0) )
 
     s.idx //= s.counter.count
 
@@ -52,9 +52,9 @@ class DeserializerRTL( Component ):
     def up_len_r():
       if s.recv.en & ( s.state == s.STATE_IDLE ) | \
          s.recv.en & ( s.state == s.STATE_RECV ):
-        s.len_r <<= s.len if s.len > s.CountType(0) else s.CountType(1)
+        s.len_r <<= s.len if s.len > CountType(0) else CountType(1)
       else:
-        s.len_r <<= s.CountType(0) if s.state_next == s.STATE_IDLE else s.len_r
+        s.len_r <<= CountType(0) if s.state_next == s.STATE_IDLE else s.len_r
 
     # Reg write logic
 
@@ -62,15 +62,15 @@ class DeserializerRTL( Component ):
     def up_out_r():
       if s.reset:
         for i in range( max_nblocks ):
-          s.out_r[i] <<= s.InType(0)
+          s.out_r[i] <<= InType(0)
 
       elif ( s.state == s.STATE_RECV ) & ( s.idx == s.len_r ) & s.send.en: 
         if s.recv.en:
           s.out_r[0] <<= s.recv.msg
         else:
-          s.out_r[0] <<= s.InType(0)
+          s.out_r[0] <<= InType(0)
         for i in range(1, max_nblocks):
-          s.out_r[i] <<= s.InType(0)
+          s.out_r[i] <<= InType(0)
 
       elif s.recv.en:
         s.out_r[ s.idx ] <<= s.recv.msg
@@ -112,10 +112,10 @@ class DeserializerRTL( Component ):
     @s.update
     def up_state_next():
       if s.state == s.STATE_IDLE:
-        if ( s.len > s.CountType(0) ) & s.recv.en:
+        if ( s.len > CountType(0) ) & s.recv.en:
           s.state_next         = s.STATE_RECV
           s.counter.load       = b1(1)
-          s.counter.load_value = s.CountType(1)
+          s.counter.load_value = CountType(1)
 
         else:
           s.state_next   = s.STATE_IDLE
@@ -126,16 +126,16 @@ class DeserializerRTL( Component ):
           if s.recv.en:
             s.state_next         = s.STATE_RECV
             s.counter.load       = b1(1)
-            s.counter.load_value = s.CountType(1)
+            s.counter.load_value = CountType(1)
           else:
             s.state_next         = s.STATE_IDLE
             s.counter.load       = b1(1)
-            s.counter.load_value = s.CountType(0)
+            s.counter.load_value = CountType(0)
 
         else:
           s.state_next         = s.STATE_RECV
           s.counter.load       = b1(0)
-          s.counter.load_value = s.CountType(0)
+          s.counter.load_value = CountType(0)
 
   #-----------------------------------------------------------------------
   # line_trace

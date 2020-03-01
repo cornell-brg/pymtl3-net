@@ -148,6 +148,7 @@ def test_stream():
 # test case: pyh2
 #-------------------------------------------------------------------------
 
+@hypothesis.settings( deadline=None, max_examples=100 )
 @hypothesis.given(
   out_nbits   = st.integers(1, 64),
   max_nblocks = st.integers(2, 15),

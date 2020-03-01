@@ -93,7 +93,7 @@ def test_sanity_check():
 # test case: basic
 #-------------------------------------------------------------------------
 
-def test_basic():
+def test_basic( test_verilog ):
   msgs = [
     0xfaceb00c,         2,
     0xdeadbeef,         1,
@@ -101,7 +101,8 @@ def test_basic():
     0xace3ace2ace1ace0, 3,
   ]
   th = TestHarness( 16, 4, msgs )
-  run_sim( th, max_cycles=20 )
+  translation = 'yosys' if test_verilog else ''
+  run_sim( th, max_cycles=20, translation=translation )
 
 #-------------------------------------------------------------------------
 # test case: backpressure
