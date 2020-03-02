@@ -86,7 +86,7 @@ def test_sanity_check():
 # test case: basic
 #-------------------------------------------------------------------------
 
-def test_basic():
+def test_basic( test_verilog ):
   msgs = [
     0xfaceb00c,         2,
     0xdeadbeef,         1,
@@ -94,13 +94,14 @@ def test_basic():
     0xace3ace2ace1ace0, 3,
   ]
   th = TestHarness( 16, 4, msgs )
-  run_sim( th, max_cycles=20 )
+  translation = 'sverilog' if test_verilog else ''
+  run_sim( th, max_cycles=40, translation=translation )
 
 #-------------------------------------------------------------------------
 # test case: backpressure
 #-------------------------------------------------------------------------
 
-def test_backpressure():
+def test_backpressure( test_verilog ):
   msgs = [
     0xfaceb00c,         2,
     0xdeadbeef,         1,
@@ -109,13 +110,14 @@ def test_backpressure():
   ]
   th = TestHarness( 16, 4, msgs )
   th.set_param( 'top.sink.construct', initial_delay=10, interval_delay=2 )
-  run_sim( th, max_cycles=40 )
+  translation = 'sverilog' if test_verilog else ''
+  run_sim( th, max_cycles=40, translation=translation )
 
 #-------------------------------------------------------------------------
 # test case: src delay
 #-------------------------------------------------------------------------
 
-def test_src_delay():
+def test_src_delay( test_verilog ):
   msgs = [
     0xdeadbeef_faceb00c,                   2,
     0xbad0bad0_deadbeef,                   1,
@@ -124,13 +126,14 @@ def test_src_delay():
   ]
   th = TestHarness( 32, 9, msgs )
   th.set_param( 'top.src*.construct', initial_delay=10, interval_delay=2 )
-  run_sim( th, max_cycles=40 )
+  translation = 'sverilog' if test_verilog else ''
+  run_sim( th, max_cycles=40, translation=translation )
 
 #-------------------------------------------------------------------------
 # test case: stream 
 #-------------------------------------------------------------------------
 
-def test_stream():
+def test_stream( test_verilog ):
   msgs = [
     0xdeadbeef, 1,
     0xbad0bad0, 1,
@@ -142,7 +145,8 @@ def test_stream():
     0xfeedbabe_ace5ace4, 2,
   ]
   th = TestHarness( 32, 4, msgs )
-  run_sim( th, max_cycles=40 )
+  translation = 'sverilog' if test_verilog else ''
+  run_sim( th, max_cycles=40, translation=translation )
 
 #-------------------------------------------------------------------------
 # test case: pyh2
@@ -154,7 +158,7 @@ def test_stream():
   max_nblocks = st.integers(2, 15),
   data        = st.data(),
 )
-def test_pyh2( out_nbits, max_nblocks, data ):
+def test_pyh2( out_nbits, max_nblocks, data, test_verilog ):
   len_msgs = data.draw( st.lists( st.integers(1, max_nblocks), min_size=1, max_size=100 ) )
   src_msgs = [ data.draw( bits(x*out_nbits) ) for x in len_msgs ]
 
@@ -164,5 +168,6 @@ def test_pyh2( out_nbits, max_nblocks, data ):
     msgs.append( l )
 
   th = TestHarness( out_nbits, max_nblocks, msgs )
-  run_sim( th )
+  translation = 'sverilog' if test_verilog else ''
+  run_sim( th, translation=translation )
 

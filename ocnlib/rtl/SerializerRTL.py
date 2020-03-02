@@ -23,9 +23,9 @@ class SerializerRTL( Component ):
 
     # Local parameter
 
-    s.InType    = mk_bits( out_nbits*( max_nblocks ) )
-    s.OutType   = mk_bits( out_nbits )
-    s.CountType = mk_bits( clog2( max_nblocks+1 ) )
+    InType    = mk_bits( out_nbits*( max_nblocks ) )
+    OutType   = mk_bits( out_nbits )
+    CountType = mk_bits( clog2( max_nblocks+1 ) )
 
     s.STATE_IDLE = b1(0)
     s.STATE_SEND = b1(1)
@@ -34,19 +34,19 @@ class SerializerRTL( Component ):
 
     # Interface
 
-    s.recv = RecvIfcRTL( s.InType    )
-    s.send = SendIfcRTL( s.OutType   )
-    s.len  = InPort    ( s.CountType )
+    s.recv = RecvIfcRTL( InType    )
+    s.send = SendIfcRTL( OutType   )
+    s.len  = InPort    ( CountType )
 
     # Components
 
-    s.state      = Wire( Bits1       )
-    s.state_next = Wire( Bits1       )
-    s.in_r       = Wire( s.InType    )
-    s.len_r      = Wire( s.CountType )
+    s.state      = Wire( Bits1     )
+    s.state_next = Wire( Bits1     )
+    s.in_r       = Wire( InType    )
+    s.len_r      = Wire( CountType )
 
-    s.counter    = Counter( s.CountType )( decr=b1(0) )
-    s.mux        = Mux( s.OutType, max_nblocks )
+    s.counter    = Counter( CountType )( decr=b1(0) )
+    s.mux        = Mux( OutType, max_nblocks )
 
     # Input register
 
@@ -55,10 +55,10 @@ class SerializerRTL( Component ):
       if s.recv.en & ( s.state_next != s.STATE_IDLE ):
         s.in_r  <<= s.recv.msg
         # Force len to 1 if it is set to be 0 to avoid undefined behavior
-        s.len_r <<= s.len if s.len > s.CountType(0) else s.CountType(1)
+        s.len_r <<= s.len if s.len > CountType(0) else CountType(1)
       else:
         s.in_r  <<= s.in_r
-        s.len_r <<= s.CountType(0) if s.state_next == s.STATE_IDLE else s.len_r
+        s.len_r <<= CountType(0) if s.state_next == s.STATE_IDLE else s.len_r
 
     # Mux logic
 
@@ -74,9 +74,9 @@ class SerializerRTL( Component ):
     @s.update
     def up_counter_load_value():
       if ( s.state == s.STATE_IDLE ) & s.send.rdy & ( s.state_next != s.STATE_IDLE ):
-        s.counter.load_value = s.CountType(1)
+        s.counter.load_value = CountType(1)
       else:
-        s.counter.load_value = s.CountType(0)
+        s.counter.load_value = CountType(0)
 
     # Recv logic
 
@@ -112,7 +112,7 @@ class SerializerRTL( Component ):
     def up_state_next():
       if s.state == s.STATE_IDLE:
         # If length is 1, bypass to IDLE
-        if ( s.len == s.CountType(1) ) & s.send.en:
+        if ( s.len == CountType(1) ) & s.send.en:
           s.state_next = s.STATE_IDLE
 
         elif s.recv.en:
@@ -122,7 +122,7 @@ class SerializerRTL( Component ):
           s.state_next = s.STATE_IDLE
 
       else: # STATE_SEND
-        if ( s.counter.count == s.len_r - s.CountType(1) ) & s.send.rdy:
+        if ( s.counter.count == s.len_r - CountType(1) ) & s.send.rdy:
           s.state_next = s.STATE_IDLE
         else:
           s.state_next = s.STATE_SEND
