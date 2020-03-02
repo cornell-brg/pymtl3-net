@@ -25,6 +25,7 @@ class DeserializerRTL( Component ):
     InType    = mk_bits( in_nbits )
     OutType   = mk_bits( in_nbits * max_nblocks )
     CountType = mk_bits( clog2( max_nblocks +1 ) )
+    SelType   = mk_bits( clog2( max_nblocks ) )
 
     s.STATE_IDLE = b1(0)
     s.STATE_RECV = b1(1)
@@ -73,7 +74,7 @@ class DeserializerRTL( Component ):
           s.out_r[i] <<= InType(0)
 
       elif s.recv.en:
-        s.out_r[ s.idx ] <<= s.recv.msg
+        s.out_r[ SelType( s.idx ) ] <<= s.recv.msg
 
     for i in range( max_nblocks ):
       s.send.msg[i*in_nbits:(i+1)*in_nbits] //= s.out_r[i]
