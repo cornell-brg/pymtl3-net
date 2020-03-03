@@ -51,8 +51,8 @@ class DeserializerRTL( Component ):
 
     @s.update_ff
     def up_len_r():
-      if s.recv.en & ( s.state == s.STATE_IDLE ) | \
-         s.recv.en & ( s.state == s.STATE_RECV ):
+      if ( s.state == s.STATE_IDLE ) & s.recv.en | \
+         ( s.state == s.STATE_RECV ) & ( s.idx == s.len_r ) & s.send.en:
         s.len_r <<= s.len if s.len > CountType(0) else CountType(1)
       else:
         s.len_r <<= CountType(0) if s.state_next == s.STATE_IDLE else s.len_r
@@ -65,7 +65,7 @@ class DeserializerRTL( Component ):
         for i in range( max_nblocks ):
           s.out_r[i] <<= InType(0)
 
-      elif ( s.state == s.STATE_RECV ) & ( s.idx == s.len_r ) & s.send.en: 
+      elif ( s.state == s.STATE_RECV ) & ( s.idx == s.len_r ) & s.send.en:
         if s.recv.en:
           s.out_r[0] <<= s.recv.msg
         else:
@@ -123,7 +123,7 @@ class DeserializerRTL( Component ):
           s.counter.load = b1(0)
 
       else: # STATE_RECV
-        if ( s.idx == s.len_r ) & s.send.en: 
+        if ( s.idx == s.len_r ) & s.send.en:
           if s.recv.en:
             s.state_next         = s.STATE_RECV
             s.counter.load       = b1(1)
