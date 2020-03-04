@@ -14,7 +14,7 @@ from ocnlib.utils import get_nbits, get_plen_type
 from ocnlib.utils.connects import connect_bitstruct
 
 from .directions import *
-from .PitonNocHeader import PitonNocHeader
+from .PitonNoCHeader import PitonNoCHeader
 
 class PitonRouteUnit( Component ):
 
@@ -26,7 +26,7 @@ class PitonRouteUnit( Component ):
 
     # Local parameter
 
-    assert get_nbits( PitonNocHeader ) == 64
+    assert get_nbits( PitonNoCHeader ) == 64
     s.num_outports = 5
     s.PhitType     = Bits64
     s.STATE_HEADER = b1(0)
@@ -44,7 +44,7 @@ class PitonRouteUnit( Component ):
 
     # Components
 
-    s.header      = Wire( HeaderFormat )
+    s.header      = Wire( PitonNoCHeader )
     s.state       = Wire( Bits1 )
     s.state_next  = Wire( Bits1 )
     s.out_dir_r   = Wire( Bits3 )

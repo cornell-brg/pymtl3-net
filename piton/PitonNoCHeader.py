@@ -9,7 +9,7 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 
-@bistruct
+@bitstruct
 class PitonNoCHeader:
   chipid : Bits14
   xpos   : Bits8
