@@ -192,3 +192,6 @@ def run_sim( th, max_cycles=1000, translation='', dut_name = 'dut' ):
 
   # Check timeout
   assert ncycles < max_cycles
+  th.tick()
+  th.tick()
+  th.tick()
