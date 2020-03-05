@@ -109,7 +109,7 @@ class PitonPosition:
 #-------------------------------------------------------------------------
 
 def mk_pkt( offchip, dst_x, dst_y, payload=[], fbits=0, mtype=0, mshr=0, opt1=0 ):
-  chipid      = b14(1) << 13 if offchip else b14(0)  
+  chipid      = b14(1) << 13 if offchip else b14(0)
   plen        = len( payload )
   header      = PitonNoCHeader( chipid, dst_x, dst_y, fbits, plen, mtype, mshr, opt1 )
   header_bits = to_bits( header )

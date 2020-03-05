@@ -5,7 +5,7 @@ PitonRouteUnit.py
 Route unit for mesh that uses XY-routing and supports multi-flit packet.
 
 Authour : Yanghui Ou
-   Date : Mar 4, 2020  
+   Date : Mar 4, 2020
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
@@ -61,7 +61,7 @@ class PitonRouteUnit( Component ):
     )
 
     connect_bitstruct( s.get.ret, s.header )
-    
+
     for i in range( 5 ):
       s.get.ret //= s.give[i].ret
     s.get.en //= s.any_give_en
@@ -138,11 +138,11 @@ class PitonRouteUnit( Component ):
           s.out_dir = b3( WEST )
         elif s.dst_x > s.pos.pos_x:
           s.out_dir = b3( EAST )
-        elif s.dst_x < s.pos.pos_y:
+        elif s.dst_y < s.pos.pos_y:
           s.out_dir = b3( SOUTH )
         else:
           s.out_dir = b3( NORTH )
-       
+
       else:
         s.out_dir = s.out_dir_r
 
