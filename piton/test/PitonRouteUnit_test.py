@@ -27,9 +27,6 @@ from ..PitonNoCHeader import PitonNoCHeader
 
 def route_unit_fl( pkt_lst, pos_x, pos_y, first_dimension='x' ):
   sink_pkts = [ [] for _ in range(5) ]
-  if header.chipid[13]:
-    pos_x = 0
-    pos_y = 0
 
   if first_dimension == 'x':
     for pkt in pkt_lst:
@@ -53,6 +50,9 @@ def route_unit_fl( pkt_lst, pos_x, pos_y, first_dimension='x' ):
       header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
       if header.chipid[13] and pos_x == 0 and pos_y == 0:
         sink_pkts[ WEST ].append( pkt ) # North west port is the offchip port
+      if header.chipid[13]:
+        pos_x = 0
+        pos_y = 0
 
       elif header.xpos == pos_x and header.ypos == pos_y:
         sink_pkts[ SELF ].append( pkt )
