@@ -151,11 +151,26 @@ def test_4pkt():
 
 def offchip_pkts():
   return [
-           # offchip xpos  ypos  payload
+         # offchip   xpos  ypos  payload
    mk_pkt( True,     0,    6,    [ 0x8badf00d_faceb00c                      ] ),
    mk_pkt( True,     0,    6,    [                                          ] ),
    mk_pkt( True,     0,    6,    [ 0x8badf00d_faceb00c, 0xbaaaaaad_f000000d ] ),
   ]
+
+#-------------------------------------------------------------------------
+# test case: mix
+#-------------------------------------------------------------------------
+# Packets goes to the north west (0,6) terminal
+
+def mix_pkts():
+  return [
+         # offchip xpos  ypos  payload
+   mk_pkt( True,   0,    6,    [ 0x8badf00d_faceb00c                      ] ),
+   mk_pkt( False,  0,    6,    [                                          ] ),
+   mk_pkt( True,   0,    6,    [ 0x8badf00d_faceb00c, 0xbaaaaaad_f000000d ] ),
+   mk_pkt( False,  0,    6,    [ 0x11111111_aaaaaaaa, 0x000edcba_badaceee ] ),
+  ]
+
 
 #-------------------------------------------------------------------------
 # test case table
@@ -164,8 +179,10 @@ def offchip_pkts():
 test_case_table = mk_test_case_table([
   (                'msg_func      pos_x pos_y' ),
   [ 'offchip_0_6',  offchip_pkts, 0,    6      ],
-  [ 'offchip_0_6',  offchip_pkts, 1,    6      ],
-  [ 'offchip_0_6',  offchip_pkts, 0,    5      ],
+  [ 'offchip_1_6',  offchip_pkts, 1,    6      ],
+  [ 'offchip_0_5',  offchip_pkts, 0,    5      ],
+  [ 'mix_0_6',      mix_pkts,     0,    6      ],
+
 ])
 
 #-------------------------------------------------------------------------
