@@ -7,7 +7,10 @@ Unit tests for the multi-flit mesh route unit.
 Author : Yanghui Ou
   Date : 11 Feb, 2020
 '''
+import pytest
 from pymtl3 import *
+from pymtl3.stdlib.test import mk_test_case_table
+
 from pymtl3.stdlib.rtl.queues import BypassQueueRTL
 from ocnlib.utils import to_bits, to_bitstruct, run_sim
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
@@ -141,3 +144,38 @@ def test_4pkt():
   th = TestHarness( PitonPosition, pkts, 1, 1, 4, 4 )
   th.set_param( 'top.src.construct', packet_interval_delay = 1 )
   run_sim( th, max_cycles=20 )
+
+#-------------------------------------------------------------------------
+# test case: offchip
+#-------------------------------------------------------------------------
+
+def offchip_pkts():
+  return [
+           # offchip xpos  ypos  payload
+   mk_pkt( True,     0,    6,    [ 0x8badf00d_faceb00c                      ] ),
+   mk_pkt( True,     0,    6,    [                                          ] ),
+   mk_pkt( True,     0,    6,    [ 0x8badf00d_faceb00c, 0xbaaaaaad_f000000d ] ),
+  ]
+
+#-------------------------------------------------------------------------
+# test case table
+#-------------------------------------------------------------------------
+
+test_case_table = mk_test_case_table([
+  (                'msg_func      pos_x pos_y' ),
+  [ 'offchip_0_6',  offchip_pkts, 0,    6      ],
+  [ 'offchip_0_6',  offchip_pkts, 1,    6      ],
+  [ 'offchip_0_6',  offchip_pkts, 0,    5      ],
+])
+
+#-------------------------------------------------------------------------
+# test driver
+#-------------------------------------------------------------------------
+
+@pytest.mark.parametrize( **test_case_table )
+def test_piton_router_2x7( test_params ):
+  pkts  = test_params.msg_func()
+  pos_x = test_params.pos_x
+  pos_y = test_params.pos_y
+  th = TestHarness( PitonPosition, pkts, pos_x, pos_y, 2, 7 )
+  run_sim( th )
