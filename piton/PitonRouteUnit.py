@@ -4,13 +4,24 @@ PitonRouteUnit.py
 ==========================================================================
 Route unit for mesh that uses XY-routing and supports multi-flit packet.
 
+NOTE - OpenPiton's coordinate system looks like this:
+
+0 ------------------> x
+ | (0, 0)  (1, 0)
+ | (0, 1)  (1, 1)
+ | ...
+ |
+ | (0, 6)  (1, 6)
+ v
+y
+
 Authour : Yanghui Ou
    Date : Mar 4, 2020
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 from ocnlib.rtl import Counter, GrantHoldArbiter
-from ocnlib.utils import get_nbits, get_plen_type
+from ocnlib.utils import get_nbits, get_field_type
 from ocnlib.utils.connects import connect_bitstruct
 
 from .directions import *
@@ -22,7 +33,7 @@ class PitonRouteUnit( Component ):
   # construct
   #-----------------------------------------------------------------------
 
-  def construct( s, PositionType, ncols, nrows, plen_field_name='plen' ):
+  def construct( s, PositionType, plen_field_name='plen' ):
 
     # Local parameter
 
@@ -33,6 +44,8 @@ class PitonRouteUnit( Component ):
     s.STATE_BODY   = b1(1)
 
     PLenType = Bits8
+    XType    = get_field_type( PositionType, 'pos_x' )
+    YType    = get_field_type( PositionType, 'pos_y' )
 
     # Interface
 
@@ -119,8 +132,8 @@ class PitonRouteUnit( Component ):
     @s.update
     def up_dst():
       if s.offchip:
-        s.dst_x = b8(0)
-        s.dst_y = b8(nrows-1)
+        s.dst_x = XType(0)
+        s.dst_y = YType(0)
       else:
         s.dst_x = s.header.xpos
         s.dst_y = s.header.ypos
@@ -129,7 +142,7 @@ class PitonRouteUnit( Component ):
     def up_out_dir():
       if ( s.state == s.STATE_HEADER ) & s.get.rdy:
         # Offchip port
-        if ( s.pos.pos_x == b8(0) ) & ( s.pos.pos_y == b8(nrows-1) ) & s.offchip:
+        if ( s.pos.pos_x == XType(0) ) & ( s.pos.pos_y == YType(0) ) & s.offchip:
           s.out_dir = b3( WEST )
 
         elif ( s.dst_x == s.pos.pos_x ) & ( s.dst_y == s.pos.pos_y ):
@@ -139,9 +152,9 @@ class PitonRouteUnit( Component ):
         elif s.dst_x > s.pos.pos_x:
           s.out_dir = b3( EAST )
         elif s.dst_y < s.pos.pos_y:
-          s.out_dir = b3( SOUTH )
-        else:
           s.out_dir = b3( NORTH )
+        else:
+          s.out_dir = b3( SOUTH )
 
       else:
         s.out_dir = s.out_dir_r

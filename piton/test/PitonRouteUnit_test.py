@@ -25,12 +25,16 @@ from ..PitonNoCHeader import PitonNoCHeader
 # Helper stuff
 #-------------------------------------------------------------------------
 
-def route_unit_fl( pkt_lst, pos_x, pos_y, ncols, nrows, first_dimension='x' ):
+def route_unit_fl( pkt_lst, pos_x, pos_y, first_dimension='x' ):
   sink_pkts = [ [] for _ in range(5) ]
+  if header.chipid[13]:
+    pos_x = 0
+    pos_y = 0
+
   if first_dimension == 'x':
     for pkt in pkt_lst:
       header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
-      if header.chipid[13] and pos_x == 0 and pos_y == nrows-1:
+      if header.chipid[13] and pos_x == 0 and pos_y == 0:
         sink_pkts[ WEST ].append( pkt ) # North west port is the offchip port
 
       elif header.xpos == pos_x and header.ypos == pos_y:
@@ -40,22 +44,22 @@ def route_unit_fl( pkt_lst, pos_x, pos_y, ncols, nrows, first_dimension='x' ):
       elif header.xpos > pos_x:
         sink_pkts[ EAST ].append( pkt )
       elif header.ypos < pos_y:
-        sink_pkts[ SOUTH ].append( pkt )
-      else:
         sink_pkts[ NORTH ].append( pkt )
+      else:
+        sink_pkts[ SOUTH ].append( pkt )
 
   elif first_dimension == 'y':
     for pkt in pkt_lst:
       header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
-      if header.chipid[13] and pos_x == 0 and pos_y == nrows-1:
+      if header.chipid[13] and pos_x == 0 and pos_y == 0:
         sink_pkts[ WEST ].append( pkt ) # North west port is the offchip port
 
       elif header.xpos == pos_x and header.ypos == pos_y:
         sink_pkts[ SELF ].append( pkt )
       elif s.header.ypos < pos_y:
-        sink_pkts[ NORTH ].append( pkt )
-      elif s.header.ypos > pos_y:
         sink_pkts[ SOUTH ].append( pkt )
+      elif s.header.ypos > pos_y:
+        sink_pkts[ NORTH ].append( pkt )
       elif s.header.xpos < pos_x:
         sink_pkts[ WEST ].append( pkt )
       else:
@@ -71,13 +75,13 @@ def route_unit_fl( pkt_lst, pos_x, pos_y, ncols, nrows, first_dimension='x' ):
 #-------------------------------------------------------------------------
 
 class TestHarness( Component ):
-  def construct( s, PositionType, pkts, x, y, ncols, nrows ):
+  def construct( s, PositionType, pkts, x, y ):
     PhitType  = Bits64
-    sink_pkts = route_unit_fl( pkts, x, y, ncols, nrows )
+    sink_pkts = route_unit_fl( pkts, x, y, )
 
     s.src   = TestSource( PitonNoCHeader, pkts )
     s.src_q = BypassQueueRTL( PhitType, num_entries=1 )
-    s.dut   = PitonRouteUnit( PositionType, ncols, nrows )
+    s.dut   = PitonRouteUnit( PositionType )
     s.sink  = [ TestSink( PitonNoCHeader, sink_pkts[i] ) for i in range(5) ]
 
     s.src.send  //= s.src_q.enq
@@ -127,7 +131,7 @@ def test_1pkt():
   pkts= [
     mk_pkt( False, 0, 1, [ 0xfaceb00c, 0x8badf00d ] ),
   ]
-  th = TestHarness( PitonPosition, pkts, 0, 0, 2, 7 )
+  th = TestHarness( PitonPosition, pkts, 0, 0 )
   run_sim( th, max_cycles=20 )
 
 #-------------------------------------------------------------------------
@@ -141,7 +145,7 @@ def test_4pkt():
     mk_pkt( False, 0, 1, [ 0xdeadbeef                         ] ),
     mk_pkt( False, 2, 1, [ 0xcafef00d, 0x111edcba, 0xbaaaaaad ] ),
   ]
-  th = TestHarness( PitonPosition, pkts, 1, 1, 4, 4 )
+  th = TestHarness( PitonPosition, pkts, 1, 1 )
   th.set_param( 'top.src.construct', packet_interval_delay = 1 )
   run_sim( th, max_cycles=20 )
 
@@ -152,9 +156,9 @@ def test_4pkt():
 def offchip_pkts():
   return [
          # offchip   xpos  ypos  payload
-   mk_pkt( True,     0,    6,    [ 0x8badf00d_faceb00c                      ] ),
-   mk_pkt( True,     0,    6,    [                                          ] ),
-   mk_pkt( True,     0,    6,    [ 0x8badf00d_faceb00c, 0xbaaaaaad_f000000d ] ),
+   mk_pkt( True,     0,    0,    [ 0x8badf00d_faceb00c                      ] ),
+   mk_pkt( True,     0,    0,    [                                          ] ),
+   mk_pkt( True,     0,    0,    [ 0x8badf00d_faceb00c, 0xbaaaaaad_f000000d ] ),
   ]
 
 #-------------------------------------------------------------------------
@@ -165,10 +169,10 @@ def offchip_pkts():
 def mix_pkts():
   return [
          # offchip xpos  ypos  payload
-   mk_pkt( True,   0,    6,    [ 0x8badf00d_faceb00c                      ] ),
-   mk_pkt( False,  0,    6,    [                                          ] ),
-   mk_pkt( True,   0,    6,    [ 0x8badf00d_faceb00c, 0xbaaaaaad_f000000d ] ),
-   mk_pkt( False,  0,    6,    [ 0x11111111_aaaaaaaa, 0x000edcba_badaceee ] ),
+   mk_pkt( True,   0,    0,    [ 0x8badf00d_faceb00c                      ] ),
+   mk_pkt( False,  0,    0,    [                                          ] ),
+   mk_pkt( True,   0,    0,    [ 0x8badf00d_faceb00c, 0xbaaaaaad_f000000d ] ),
+   mk_pkt( False,  0,    0,    [ 0x11111111_aaaaaaaa, 0x000edcba_badaceee ] ),
   ]
 
 
@@ -194,5 +198,5 @@ def test_piton_router_2x7( test_params ):
   pkts  = test_params.msg_func()
   pos_x = test_params.pos_x
   pos_y = test_params.pos_y
-  th = TestHarness( PitonPosition, pkts, pos_x, pos_y, 2, 7 )
+  th = TestHarness( PitonPosition, pkts, pos_x, pos_y )
   run_sim( th )
