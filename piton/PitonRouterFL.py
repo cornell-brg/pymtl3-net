@@ -18,7 +18,7 @@ from .PitonNoCHeader import PitonNoCHeader
 #-------------------------------------------------------------------------
 # Mesh router that supports single flit packet.
 
-class MeshRouterMflitFL:
+class PitonRouterFL:
 
   def __init__( s, pos_x, pos_y, first_dimension='x' ):
     s.pos_x           = pos_x
@@ -75,10 +75,10 @@ class MeshRouterMflitFL:
       for pkts in src_pkts:
         for pkt in pkts:
           header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
-          dst_x = 0 if pkt.dst_offchip else header.dst_x
-          dst_y = 0 if pkt.dst_offchip else header.dst_y
+          dst_x = 0 if header.chipid[13] else header.xpos
+          dst_y = 0 if header.chipid[13] else header.ypos
           dst = (
-            WEST  if header.offchip and s.pos_x == 0 and s.pos_y == 0 else
+            WEST  if header.chipid[13] and s.pos_x == 0 and s.pos_y == 0 else
             SELF  if dst_x == s.pos_x and dst_y == s.pos_y else
             SOUTH if dst_y > s.pos_y else
             NORTH if dst_y < s.pos_y else
@@ -91,10 +91,10 @@ class MeshRouterMflitFL:
       for pkts in src_pkts:
         for pkt in pkts:
           header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
-          dst_x = 0 if pkt.dst_offchip else header.dst_x
-          dst_y = 0 if pkt.dst_offchip else header.dst_y
+          dst_x = 0 if header.chipid[13] else header.xpos
+          dst_y = 0 if header.chipid[13] else header.ypos
           dst = (
-            WEST  if header.offchip and s.pos_x == 0 and s.pos_y == 0 else
+            WEST  if header.chipid[13] and s.pos_x == 0 and s.pos_y == 0 else
             SELF  if dst_x == s.pos_x and dst_y == s.pos_y else
             EAST  if dst_x > s.pos_x else
             WEST  if dst_x < s.pos_x else
