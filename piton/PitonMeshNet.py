@@ -36,7 +36,7 @@ class PitonMeshNet( Component ):
     s.send = [ SendIfcRTL( s.PhitType ) for _ in range( s.nterminals ) ]
 
     s.offchip_recv = RecvIfcRTL( s.PhitType )
-    s.offchip_send = RecvIfcRTL( s.PhitType )
+    s.offchip_send = SendIfcRTL( s.PhitType )
 
     # Components
 
@@ -79,14 +79,14 @@ class PitonMeshNet( Component ):
       # won't complain about net need driver.
 
       if i // ncols == 0:
-        s.routers[i].send[SOUTH].rdy //= 0
-        s.routers[i].recv[SOUTH].en  //= 0
-        s.routers[i].recv[SOUTH].msg //= 0
-
-      if i // ncols == nrows - 1:
         s.routers[i].send[NORTH].rdy //= 0
         s.routers[i].recv[NORTH].en  //= 0
         s.routers[i].recv[NORTH].msg //= 0
+
+      if i // ncols == nrows - 1:
+        s.routers[i].send[SOUTH].rdy //= 0
+        s.routers[i].recv[SOUTH].en  //= 0
+        s.routers[i].recv[SOUTH].msg //= 0
 
       if i % ncols == 0 and i != 0:
         s.routers[i].send[WEST].rdy //= 0
