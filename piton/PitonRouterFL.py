@@ -51,7 +51,7 @@ class PitonRouterFL:
         src_y = 0 if pkt.src_offchip else pkt.src_y
         if pkt.src_offchip and s.pos_x == 0 and s.pos_y == 0:
           src_pkts[ WEST ].append( pkt )
-        if src_x == s.pos_x and src_y == s.pos_y:
+        elif src_x == s.pos_x and src_y == s.pos_y:
           src_pkts[ SELF ].append( pkt )
         elif src_y == s.pos_y:
           if src_x < s.pos_x:

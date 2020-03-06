@@ -150,6 +150,24 @@ def long_pkts( pos_x, pos_y ):
   ]
 
 #-------------------------------------------------------------------------
+# test case: offchip
+#-------------------------------------------------------------------------
+
+def offchip_pkts( pos_x, pos_y ):
+  return [
+    #      src                dst
+    #      off     x  y     | off x     y      payload
+    mk_pkt( y,     0, 0,      n, pos_x, pos_y, [ 0x8badcafe                         ] * 13 ),
+    mk_pkt( n,     0, 0,      n, pos_x, pos_y, [ 0x8badf00d, 0xdeadbeef             ] * 6  ),
+    mk_pkt( n,     1, 1,      y,     0, 0,     [ 0x01badbed,                        ] * 1  ),
+    mk_pkt( y,     0, 0,      n,     1, 6,     [                                    ]      ),
+    mk_pkt( n, pos_x, pos_y,  y,     0, 0,     [ 0xbad0 + i for i in range(10)      ]      ),
+    mk_pkt( n,     0, 6,      y,     0, 0,     [ 0xdeadbeef                         ]      ),
+    mk_pkt( y,     0, 0,      n, pos_x, 0,     [                                    ]      ),
+  ]# 
+
+
+#-------------------------------------------------------------------------
 # test case table
 #-------------------------------------------------------------------------
 
@@ -168,6 +186,10 @@ for x in range(2):
 for x in range(2):
   for y in range(7):
     table.append([ f'long_{x},{y}', long_pkts, x, y ])
+
+for x in range(2):
+  for y in range(7):
+    table.append([ f'offchip_{x},{y}', offchip_pkts, x, y ])
 
 test_case_table = mk_test_case_table( table )
 
