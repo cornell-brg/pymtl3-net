@@ -138,4 +138,4 @@ def test_xbar_route( test_params, test_verilog ):
   )
 
   trans_backend = 'verilog' if test_verilog else ''
-  run_sim( th, translation=trans_backend, vl_trace=True )
+  run_sim( th, translation=trans_backend )
