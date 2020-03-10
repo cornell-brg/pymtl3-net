@@ -159,7 +159,7 @@ def run_sim( th, max_cycles=1000, translation='',
 
   th.elaborate()
 
-  if translation == 'sverilog':
+  if translation == 'verilog':
     from pymtl3.passes.backends.verilog import TranslationImportPass
     from pymtl3.passes.backends.verilog import VerilatorImportConfigs
     getattr( th, dut_name ).verilog_translate_import = True

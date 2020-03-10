@@ -29,12 +29,13 @@ class XbarRouteUnitMflitRTL( Component ):
     s.num_outports = num_outports
     s.HeaderFormat = HeaderFormat
     s.PhitType     = mk_bits( get_nbits( HeaderFormat ) )
-    s.dir_nbits    = clog2( num_outports ) if num_outports > 1 else 1
-    s.DirType      = mk_bits( s.dir_nbits )
+    dir_nbits      = clog2( num_outports ) if num_outports > 1 else 1
+    DirType        = mk_bits( dir_nbits )
     s.STATE_HEADER = b1(0)
     s.STATE_BODY   = b1(1)
 
     PLenType = get_plen_type( HeaderFormat )
+    print( PLenType )
 
     # Interface
     s.get  = GetIfcRTL( s.PhitType )
@@ -46,8 +47,8 @@ class XbarRouteUnitMflitRTL( Component ):
     s.header      = Wire( HeaderFormat )
     s.state       = Wire( Bits1 )
     s.state_next  = Wire( Bits1 )
-    s.out_dir_r   = Wire( s.DirType )
-    s.out_dir     = Wire( s.DirType )
+    s.out_dir_r   = Wire( DirType )
+    s.out_dir     = Wire( DirType )
     s.any_give_en = Wire( Bits1 )
 
     s.counter = Counter( PLenType )(
@@ -105,13 +106,12 @@ class XbarRouteUnitMflitRTL( Component ):
       else:
         s.counter.load = b1(0)
 
-
     # Routing logic
     # TODO: Figure out how to encode dest id
     @s.update
     def up_out_dir():
       if ( s.state == s.STATE_HEADER ) & s.get.rdy:
-        s.out_dir = s.header.dst[0:s.dir_nbits]
+        s.out_dir = s.header.dst[0:dir_nbits]
 
       else:
         s.out_dir = s.out_dir_r
@@ -123,8 +123,8 @@ class XbarRouteUnitMflitRTL( Component ):
     @s.update
     def up_give_rdy_hold():
       for i in range( s.num_outports ):
-        s.give[i].rdy = ( s.DirType(i) == s.out_dir ) & s.get.rdy
-        s.hold[i]     = ( s.DirType(i) == s.out_dir ) & ( s.state == s.STATE_BODY )
+        s.give[i].rdy = ( DirType(i) == s.out_dir ) & s.get.rdy
+        s.hold[i]     = ( DirType(i) == s.out_dir ) & ( s.state == s.STATE_BODY )
 
   #-----------------------------------------------------------------------
   # line_trace
