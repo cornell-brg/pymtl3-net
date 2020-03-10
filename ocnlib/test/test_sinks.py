@@ -126,6 +126,7 @@ class MflitPacketSinkRTL( Component ):
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
 
     s.PhitType = mk_bits( get_nbits( Format ) )
+    print( s.PhitType )
 
     s.recv     = RecvIfcRTL( s.PhitType )
     s.sink_cl  = MflitPacketSinkCL( Format, pkts, initial_delay, flit_interval_delay,
