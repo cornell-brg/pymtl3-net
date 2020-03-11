@@ -11,7 +11,7 @@ import hypothesis
 import pytest
 from hypothesis import strategies as st
 
-from ocnlib.test import run_sim
+from ocnlib.utils import run_sim
 from pymtl3 import *
 from pymtl3.datatypes import strategies as pst
 from pymtl3.stdlib.cl.queues import BypassQueueCL, NormalQueueCL, PipeQueueCL

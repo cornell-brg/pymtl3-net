@@ -14,7 +14,7 @@ from bflynet.BflyRouterRTL import BflyRouterRTL
 from bflynet.DTRBflyRouteUnitRTL import DTRBflyRouteUnitRTL
 from ocnlib.ifcs.packets import mk_bfly_pkt
 from ocnlib.ifcs.positions import mk_bfly_pos
-from ocnlib.test import run_sim
+from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.passes.backends.yosys import (ImportConfigs, ImportPass,

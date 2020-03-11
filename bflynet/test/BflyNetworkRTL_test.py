@@ -9,7 +9,7 @@
 from bflynet.BflyNetworkRTL import BflyNetworkRTL
 from ocnlib.ifcs.packets import *
 from ocnlib.ifcs.positions import *
-from ocnlib.test import run_sim
+from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.passes.backends.sverilog import ImportPass, TranslationPass
