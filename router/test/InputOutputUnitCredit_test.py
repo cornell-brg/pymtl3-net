@@ -10,7 +10,7 @@ Author : Yanghui Ou
 from ocnlib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
                                       RecvRTL2CreditSendRTL)
 from ocnlib.ifcs.packets import mk_generic_pkt
-from ocnlib.test import run_sim
+from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.stdlib.rtl.queues import BypassQueueRTL

@@ -14,10 +14,9 @@ from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from meshnet.MeshRouterRTL import MeshRouterRTL
 from ocnlib.ifcs.packets import mk_mesh_pkt
 from ocnlib.ifcs.positions import mk_mesh_pos
-from ocnlib.test import run_sim
+from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.passes.backends.sverilog import ImportPass, TranslationPass
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
