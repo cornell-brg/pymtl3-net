@@ -173,7 +173,7 @@ def run_sim( th, max_cycles=1000, translation='',
       vl_trace = vl_trace,
     )
 
-  else:
+  elif translation:
     assert False, f'Invalid translation backend {translation}!'
 
   if translation:
