@@ -7,7 +7,6 @@
 #   Date : June 16, 2019
 
 import random
-
 import pytest
 
 from bflynet.BflyRouterRTL import BflyRouterRTL
@@ -17,8 +16,6 @@ from ocnlib.ifcs.positions import mk_bfly_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.passes.backends.yosys import (ImportConfigs, ImportPass,
-                                          TranslationPass)
 from pymtl3.stdlib.test import TestVectorSimulator
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from router.InputUnitRTL import InputUnitRTL
