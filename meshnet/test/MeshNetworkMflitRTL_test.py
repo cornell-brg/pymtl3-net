@@ -160,7 +160,7 @@ def test_mflit_mesh( test_params, test_verilog ):
   ncols = test_params.ncols
   nrows = test_params.nrows
   pkts  = test_params.msg_func( ncols, nrows )
-  trans_backend = 'yosys' if test_verilog else ''
+  trans_backend = 'verilog' if test_verilog else ''
 
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
 
@@ -196,7 +196,7 @@ def pkt_strat( draw, ncols, nrows, max_plen=15 ):
 def test_pyh2( ncols, nrows, pkts, test_verilog ):
   pkts = pkts.draw( st.lists( pkt_strat( ncols, nrows ), min_size=1, max_size=100 ) )
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
-  trans_backend = 'yosys' if test_verilog else ''
+  trans_backend = 'verilog' if test_verilog else ''
   th = TestHarness( TestHeader, TestPosition, ncols, nrows,
                     src_pkts, dst_pkts )
   run_sim( th, translation=trans_backend )
