@@ -52,6 +52,7 @@ script:
  - mkdir -p build
  - cd build
  - py.test ../ $CONFIG
+ - py.test ../ $CONFIG --test-verilog
 
 #-------------------------------------------------------------------------
 # after success

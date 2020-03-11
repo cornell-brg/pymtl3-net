@@ -137,5 +137,5 @@ def test_xbar_route( test_params, test_verilog ):
     packet_interval_delay = test_params.pkt_intv,
   )
 
-  trans_backend = 'yosys' if test_verilog else ''
+  trans_backend = 'verilog' if test_verilog else ''
   run_sim( th, translation=trans_backend )

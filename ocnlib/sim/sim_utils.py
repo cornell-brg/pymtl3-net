@@ -1,6 +1,6 @@
 """
 ==========================================================================
-utils.py
+sim_utils.py
 ==========================================================================
 Utility functions for pyocn script.
 
@@ -29,7 +29,7 @@ from ocnlib.ifcs.packets import (mk_bfly_pkt, mk_cmesh_pkt, mk_mesh_pkt,
 from ocnlib.ifcs.positions import mk_bfly_pos, mk_mesh_pos, mk_ring_pos
 from ocnlib.sim.CLNetWrapper import CLNetWrapper
 from pymtl3 import *
-from pymtl3.passes.backends.yosys import ImportPass, TranslationPass
+from pymtl3.passes.backends.verilog import TranslationPass, TranslationConfigs
 from pymtl3.passes import TracingConfigs
 from ringnet import RingNetworkRTL
 from torusnet import TorusNetworkRTL
@@ -780,10 +780,10 @@ def gen_verilog( topo, opts ):
   net.elaborate()
 
   vprint( f' - applying translation pass' )
-  net.yosys_translate = True
+  net.config_verilog_translate = TranslationConfigs( explicit_module_name = f'{topo}' )
   net.apply( TranslationPass() )
 
-  os.system(f'mv {net.translated_top_module_name}.sv {topo}.sv')
+  os.system(f'mv {net.translated_top_module_name}.v {topo}.v')
 
 #-------------------------------------------------------------------------
 # smoke_test
@@ -850,7 +850,7 @@ def smoke_test( topo, opts ):
   if net.send[ nports-1 ].msg.payload == p_type(1024):
     print( f' - [{_green}passed{_reset}]' )
   else:
-    print( f' - [{_green}FAILED{_reset}]' )
+    erint( f' - [{_red}FAILED{_reset}]' )
 
   # Extra ticks to improve waveform
   net.tick()

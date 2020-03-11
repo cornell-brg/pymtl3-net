@@ -8,7 +8,7 @@ Author: Yanghui Ou
 """
 import pytest
 
-from ocnlib.test import run_sim
+from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkCL as TestSinkCL
 from pymtl3 import *
 from pymtl3.stdlib.cl.queues import BypassQueueCL
