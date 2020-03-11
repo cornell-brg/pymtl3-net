@@ -172,7 +172,7 @@ def test_mflit_xbar( test_params, test_verilog ):
     flit_interval_delay   = test_params.f_intv,
     packet_interval_delay = test_params.p_intv,
   )
-  run_sim( th, translation=trans_backend, vl_trace=True )
+  run_sim( th, translation=trans_backend )
 
 #-------------------------------------------------------------------------
 # packet strategy
