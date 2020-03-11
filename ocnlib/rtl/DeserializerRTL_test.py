@@ -134,7 +134,7 @@ def test_src_delay( test_verilog ):
   th = TestHarness( 32, 9, msgs )
   th.set_param( 'top.src*.construct', initial_delay=10, interval_delay=2 )
   translation = 'sverilog' if test_verilog else ''
-  run_sim( th, max_cycles=40, translation=translation )
+  run_sim( th, max_cycles=200, translation=translation )
 
 #-------------------------------------------------------------------------
 # test case: stream
