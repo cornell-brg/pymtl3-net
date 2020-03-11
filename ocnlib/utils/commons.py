@@ -9,8 +9,6 @@ Author : Yanghui Ou
 '''
 from functools import reduce
 from pymtl3 import *
-# from pymtl3.passes.backends.verilog import ImportConfigs as SVConfig 
-# from pymtl3.passes.backends.yosys import ImportConfigs as YSConfig
 from pymtl3.datatypes.bitstructs import(
   is_bitstruct_class,
   is_bitstruct_inst,
@@ -174,6 +172,9 @@ def run_sim( th, max_cycles=1000, translation='',
     getattr( th, dut_name ).config_yosys_import = VerilatorImportConfigs(
       vl_trace = vl_trace,
     )
+
+  else:
+    assert False, f'Invalid translation backend {translation}!'
 
   if translation:
     th = TranslationImportPass()( th )
