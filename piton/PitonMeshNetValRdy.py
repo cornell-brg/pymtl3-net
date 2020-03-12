@@ -25,6 +25,7 @@ class PitonMeshNetValRdy( Component ):
     # Local prameter
 
     nterminals = ncols * nrows
+    s.config_verilog_translate = TranslationConfigs( explicit_module_name = f'pyocn_mesh_{ncols}x{nrows}' )
 
     # Interface
 
@@ -36,13 +37,13 @@ class PitonMeshNetValRdy( Component ):
 
     # Component
 
-    s.net = PitonMeshNet( PitonPositioin, ncols=ncols, nrows=nrows )
+    s.net = PitonMeshNet( PitonPosition, ncols=ncols, nrows=nrows )
 
-    s.in2send  = [ ValRdy2EnRdy( Bits64 ) for _ in range( nterminals ) ]
-    s.recv2out = [ EnRdy2ValRdy( Bits64 ) for _ in range( nterminals ) ]
+    s.in2send  = [ InValRdy2Send( Bits64 ) for _ in range( nterminals ) ]
+    s.recv2out = [ Recv2OutValRdy( Bits64 ) for _ in range( nterminals ) ]
 
-    s.offchip_in2send  = ValRdy2EnRdy( Bits64 )
-    s.offchip_recv2out = EnRdy2ValRdy( Bits64 )
+    s.offchip_in2send  = InValRdy2Send( Bits64 )
+    s.offchip_recv2out = Recv2OutValRdy( Bits64 )
 
     # Connections
 
@@ -50,8 +51,8 @@ class PitonMeshNetValRdy( Component ):
       s.in_[i]          //= s.in2send[i].in_
       s.in2send[i].send //= s.net.recv[i]
 
-      s.net.send[i]  //= s.recv2out[i].recv
-      s.recv2out.out //= s.out[i]
+      s.net.send[i]     //= s.recv2out[i].recv
+      s.recv2out[i].out //= s.out[i]
 
     s.offchip_in           //= s.offchip_in2send.in_
     s.offchip_in2send.send //= s.net.offchip_recv

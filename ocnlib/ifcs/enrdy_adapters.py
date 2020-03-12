@@ -6,7 +6,7 @@
 # Author : Yanghui Ou
 #   Date : Feb 20, 2019
 
-from pymtl import *
+from pymtl3 import *
 from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
 from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
 
