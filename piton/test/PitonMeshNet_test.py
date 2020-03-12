@@ -18,7 +18,7 @@ from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
 
 from ..PitonNoCHeader import PitonNoCHeader
-from ..PitonMeshNet import PitonMeshNet 
+from ..PitonMeshNet import PitonMeshNet
 
 #-------------------------------------------------------------------------
 # TestPosition
