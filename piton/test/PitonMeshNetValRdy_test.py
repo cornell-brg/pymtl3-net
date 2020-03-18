@@ -110,7 +110,7 @@ def basic_pkts( ncols, nrows ):
   ]
 
 #-------------------------------------------------------------------------
-# test case: basic
+# test case: basic offchip
 #-------------------------------------------------------------------------
 
 def basic_offchip_pkts( ncols, nrows ):
@@ -118,6 +118,19 @@ def basic_offchip_pkts( ncols, nrows ):
     #      src                    dst
     #      off       x  y       | off      x  y        payload
     mk_pkt( y,       0, 0,        n,       0, 0,       [                        ] ),
+    mk_pkt( n,       0, 0,        n,       0, 0,       [                        ] ),
+  ]
+
+#-------------------------------------------------------------------------
+# test case: basic offchip
+#-------------------------------------------------------------------------
+
+def offchip_long_pkts( ncols, nrows ):
+  return [
+    #      src                    dst
+    #      off       x  y       | off      x  y        payload
+    mk_pkt( y,       0, 0,        n,       0, 0,       [ 0x0100_0000_0100_0000 ] * 8 ),
+    mk_pkt( y,       0, 0,        n,       0, 0,       [                       ]     ),
   ]
 
 #-------------------------------------------------------------------------
@@ -147,6 +160,7 @@ test_case_table = mk_test_case_table([
   [ 'basic4x4',     basic_pkts,             4,     4      ],
   [ 'basic2x7',     basic_pkts,             2,     7      ],
   [ 'offchip2x7',   basic_offchip_pkts,     2,     7      ],
+  [ 'offchip_long', offchip_long_pkts,      2,     7      ],
   [ 'neighbor2x2',  neighbor_pkts,          2,     2      ],
   [ 'neighbor2x3',  neighbor_pkts,          2,     3      ],
   [ 'neighbor3x3',  neighbor_pkts,          3,     3      ],
