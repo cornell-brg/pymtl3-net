@@ -108,6 +108,8 @@ class PitonRouteUnit( Component ):
       else: # STATE_BODY
         if ( s.counter.count == PLenType(1) ) & s.any_give_en:
           s.state_next = s.STATE_HEADER
+        else:
+          s.state_next = s.STATE_BODY
 
     # State output logic
 
