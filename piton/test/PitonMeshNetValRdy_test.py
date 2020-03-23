@@ -182,4 +182,5 @@ def test_piton_mesh( test_params, test_verilog ):
   src_pkts, dst_pkts = arrange_src_sink_pkts( ncols, nrows, pkts )
 
   th = TestHarness( ncols, nrows, src_pkts, dst_pkts )
-  run_sim( th, translation=trans_backend )
+  run_sim( th, translation=trans_backend, xinit=test_verilog )
+
