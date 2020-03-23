@@ -153,7 +153,7 @@ def to_bitstruct( obj, BitstructType ):
 # A generic run_sim function
 
 def run_sim( th, max_cycles=1000, translation='', 
-             dut_name='dut', vl_trace=False ):
+             dut_name='dut', vl_trace=False, xinit='zeros' ):
 
   th.elaborate()
 
@@ -163,6 +163,7 @@ def run_sim( th, max_cycles=1000, translation='',
     getattr( th, dut_name ).verilog_translate_import = True
     getattr( th, dut_name ).config_verilog_import = VerilatorImportConfigs(
       vl_trace = vl_trace,
+      vl_xinit = xinit,
     )
 
   elif translation == 'yosys':
@@ -171,6 +172,7 @@ def run_sim( th, max_cycles=1000, translation='',
     getattr( th, dut_name ).yosys_translate_import = True
     getattr( th, dut_name ).config_yosys_import = VerilatorImportConfigs(
       vl_trace = vl_trace,
+      vl_xinit = xinit,
     )
 
   elif translation:
