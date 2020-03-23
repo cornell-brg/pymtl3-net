@@ -97,35 +97,29 @@ class PitonRouteUnit( Component ):
 
     @s.update
     def up_state_next():
+      s.state_next = s.state
       if s.state == s.STATE_HEADER:
         # If the packet has body flits
         if s.any_give_en & ( s.header.plen > PLenType(0) ):
           s.state_next = s.STATE_BODY
 
-        else:
-          s.state_next = s.STATE_HEADER
-
       else: # STATE_BODY
         if ( s.counter.count == PLenType(1) ) & s.any_give_en:
           s.state_next = s.STATE_HEADER
-        else:
-          s.state_next = s.STATE_BODY
 
     # State output logic
 
     @s.update
     def up_counter_decr():
-      if s.state == s.STATE_HEADER:
-        s.counter.decr = b1(0)
-      else:
+      s.counter.decr = b1(0)
+      if s.state != s.STATE_HEADER:
         s.counter.decr = s.any_give_en
 
     @s.update
     def up_counter_load():
+      s.counter.load = b1(0)
       if s.state == s.STATE_HEADER:
         s.counter.load = ( s.state_next == s.STATE_BODY )
-      else:
-        s.counter.load = b1(0)
 
     # Routing logic
 
@@ -133,16 +127,18 @@ class PitonRouteUnit( Component ):
 
     @s.update
     def up_dst():
-      if s.offchip:
-        s.dst_x = XType(0)
-        s.dst_y = YType(0)
-      else:
+      s.dst_x = XType(0)
+      s.dst_y = YType(0)
+      if ~s.offchip:
         s.dst_x = s.header.xpos
         s.dst_y = s.header.ypos
 
     @s.update
     def up_out_dir():
+      s.out_dir = s.out_dir_r
+
       if ( s.state == s.STATE_HEADER ) & s.get.rdy:
+        s.out_dir = b3(0)
         # Offchip port
         if ( s.pos.pos_x == XType(0) ) & ( s.pos.pos_y == YType(0) ) & s.offchip:
           s.out_dir = b3( WEST )
@@ -155,11 +151,8 @@ class PitonRouteUnit( Component ):
           s.out_dir = b3( EAST )
         elif s.dst_y < s.pos.pos_y:
           s.out_dir = b3( NORTH )
-        else:
+        elif s.dst_y > s.pos.pos_y:
           s.out_dir = b3( SOUTH )
-
-      else:
-        s.out_dir = s.out_dir_r
 
     @s.update_ff
     def up_out_dir_r():
