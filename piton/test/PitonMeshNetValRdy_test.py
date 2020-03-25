@@ -155,17 +155,18 @@ def neighbor_pkts( ncols, nrows ):
 #-------------------------------------------------------------------------
 
 test_case_table = mk_test_case_table([
-  (                'msg_func                ncols  nrows' ),
-  [ 'basic',        basic_pkts,             2,     2      ],
-  [ 'basic4x4',     basic_pkts,             4,     4      ],
-  [ 'basic2x7',     basic_pkts,             2,     7      ],
-  [ 'offchip2x7',   basic_offchip_pkts,     2,     7      ],
-  [ 'offchip_long', offchip_long_pkts,      2,     7      ],
-  [ 'neighbor2x2',  neighbor_pkts,          2,     2      ],
-  [ 'neighbor2x3',  neighbor_pkts,          2,     3      ],
-  [ 'neighbor3x3',  neighbor_pkts,          3,     3      ],
-  [ 'neighbor4x4',  neighbor_pkts,          4,     4      ],
-  [ 'neighbor2x7',  neighbor_pkts,          2,     7      ],
+  (                  'msg_func                ncols  nrows src_init src_pintv  src_fintv sink_init sink_pintv sink_fintv' ),
+  [ 'basic',          basic_pkts,             2,     2,    0,       0,         0,       0,        0,          0,          ],
+  [ 'basic4x4',       basic_pkts,             4,     4,    0,       0,         0,       0,        0,          0,          ],
+  [ 'basic2x7',       basic_pkts,             2,     7,    0,       0,         0,       0,        0,          0,          ],
+  [ 'basic2x7_delay', basic_pkts,             2,     7,    0,       0,         0,       20,       0,          0,          ],
+  [ 'offchip2x7',     basic_offchip_pkts,     2,     7,    0,       0,         0,       0,        0,          0,          ],
+  [ 'long2x7',        offchip_long_pkts,      2,     7,    0,       0,         0,       0,        0,          0,          ],
+  [ 'neighbor2x2',    neighbor_pkts,          2,     2,    0,       0,         0,       0,        0,          0,          ],
+  [ 'neighbor2x3',    neighbor_pkts,          2,     3,    0,       0,         0,       0,        0,          0,          ],
+  [ 'neighbor3x3',    neighbor_pkts,          3,     3,    0,       0,         0,       0,        0,          0,          ],
+  [ 'neighbor4x4',    neighbor_pkts,          4,     4,    0,       0,         0,       0,        0,          0,          ],
+  [ 'neighbor2x7',    neighbor_pkts,          2,     7,    0,       0,         0,       0,        0,          0,          ],
 ])
 
 #-------------------------------------------------------------------------
@@ -182,5 +183,15 @@ def test_piton_mesh( test_params, test_verilog ):
   src_pkts, dst_pkts = arrange_src_sink_pkts( ncols, nrows, pkts )
 
   th = TestHarness( ncols, nrows, src_pkts, dst_pkts )
+  th.set_param( 'top.src*.construct', 
+    initial_delay         = test_params.src_init,
+    packet_interval_delay = test_params.src_pintv,
+    flit_interval_delay   = test_params.src_fintv,
+  )
+  th.set_param( 'top.sink*.construct', 
+    initial_delay         = test_params.sink_init,
+    packet_interval_delay = test_params.sink_pintv,
+    flit_interval_delay   = test_params.sink_fintv,
+  )
   run_sim( th, translation=trans_backend, xinit=test_verilog )
 
