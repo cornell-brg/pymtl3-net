@@ -170,6 +170,22 @@ test_case_table = mk_test_case_table([
 ])
 
 #-------------------------------------------------------------------------
+# test case table
+#-------------------------------------------------------------------------
+
+test_case_table2x7 = mk_test_case_table([
+  (                  'msg_func              src_init src_pintv  src_fintv sink_init sink_pintv sink_fintv' ),
+  [ 'basic2x7',       basic_pkts,           0,       0,         0,       0,        0,          0,          ],
+  [ 'basic2x7_bp',    basic_pkts,           0,       0,         0,       20,       0,          0,          ],
+  [ 'offchip2x7',     basic_offchip_pkts,   0,       0,         0,       0,        0,          0,          ],
+  [ 'offchip2x7_bp',  basic_offchip_pkts,   0,       0,         0,       20,       10,         3,          ],
+  [ 'long2x7',        offchip_long_pkts,    0,       0,         0,       0,        0,          0,          ],
+  [ 'long2x7_bp',     offchip_long_pkts,    0,       0,         0,       10,       15,         5,          ],
+  [ 'neighbor2x7',    neighbor_pkts,        0,       0,         0,       0,        0,          0,          ],
+  [ 'neighbor2x7_bp', neighbor_pkts,        0,       0,         0,       10,       10,         5,          ],
+])
+
+#-------------------------------------------------------------------------
 # test driver
 #-------------------------------------------------------------------------
 
@@ -177,6 +193,28 @@ test_case_table = mk_test_case_table([
 def test_piton_mesh( test_params, test_verilog ):
   ncols = test_params.ncols
   nrows = test_params.nrows
+  pkts  = test_params.msg_func( ncols, nrows )
+  trans_backend = 'verilog' if test_verilog else ''
+
+  src_pkts, dst_pkts = arrange_src_sink_pkts( ncols, nrows, pkts )
+
+  th = TestHarness( ncols, nrows, src_pkts, dst_pkts )
+  th.set_param( 'top.src*.construct', 
+    initial_delay         = test_params.src_init,
+    packet_interval_delay = test_params.src_pintv,
+    flit_interval_delay   = test_params.src_fintv,
+  )
+  th.set_param( 'top.sink*.construct', 
+    initial_delay         = test_params.sink_init,
+    packet_interval_delay = test_params.sink_pintv,
+    flit_interval_delay   = test_params.sink_fintv,
+  )
+  run_sim( th, translation=trans_backend, xinit=test_verilog )
+
+@pytest.mark.parametrize( **test_case_table2x7 )
+def test_piton_mesh2x7( test_params, test_verilog ):
+  ncols = 2
+  nrows = 7
   pkts  = test_params.msg_func( ncols, nrows )
   trans_backend = 'verilog' if test_verilog else ''
 
