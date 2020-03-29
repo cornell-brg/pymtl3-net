@@ -50,7 +50,7 @@ class TestHarness( Component ):
 #-------------------------------------------------------------------------
 
 def test_simple():
-  Pkt = mk_generic_pkt( vc=2 )
+  Pkt = mk_generic_pkt( vc=2, payload_nbits=32 )
   msgs = [
     Pkt( 0, 1, 0x04, 0, 0xdeadbabe ),
     Pkt( 0, 2, 0x02, 1, 0xfaceb00c ),
@@ -60,7 +60,7 @@ def test_simple():
   run_sim( th )
 
 def test_backpresure():
-  Pkt = mk_generic_pkt( vc=2 )
+  Pkt = mk_generic_pkt( vc=2, payload_nbits=32 )
   msgs = [
      # src dst opq vc_id  payload
     Pkt( 0, 1, 0x04, 0, 0xdeadbabe ),

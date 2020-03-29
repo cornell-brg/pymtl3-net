@@ -53,7 +53,7 @@ class TestNetSinkCL( Component ):
     s.trace_len   = len( str( s.msgs[0] ) ) if len(s.msgs) != 0 else 0
 #    s.trace_len   = len( str( s.msgs[0] ) )
 
-    @s.update
+    @update
     def up_sink_count():
       if s.error_msg:
         raise Exception( s.error_msg )

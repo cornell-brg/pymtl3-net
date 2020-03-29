@@ -26,14 +26,14 @@ class GrantHoldArbiter( Component ):
     s.last_r = Wire( BitsN )
 
     # Logic
-    s.arb.reqs //= lambda: BitsN(0) if s.hold else s.reqs
+    s.arb.reqs //= lambda: 0 if s.hold else s.reqs
     s.arb.en   //= lambda: ~s.hold
     s.grants   //= lambda: s.arb.grants if ~s.hold else s.last_r
 
-    @s.update_ff
+    @update_ff
     def up_last_r():
       s.last_r <<= s.grants
-    
+
   def line_trace( s ):
     hold = 'h' if s.hold else ' '
     return f'{str(s.reqs.bin())[2:]}({hold}){str(s.grants.bin())[2:]}'

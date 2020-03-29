@@ -14,7 +14,8 @@ def test_false():
   m = BoundaryUnit( default_rdy=False )
   m.elaborate()
   m.apply( SimulationPass() )
-  m.tick()
+  m.sim_reset()
+
   assert not m.recv.rdy()
 
   try:
@@ -22,14 +23,15 @@ def test_false():
     flag = False
   except AssertionError:
     flag = True
-  
+
   assert flag
 
 def test_true():
   m = BoundaryUnit( default_rdy=True )
   m.elaborate()
   m.apply( SimulationPass() )
-  m.tick()
+  m.sim_reset()
+
   assert m.recv.rdy()
 
   try:
@@ -37,5 +39,5 @@ def test_true():
     flag = False
   except AssertionError:
     flag = True
-  
+
   assert flag

@@ -9,9 +9,8 @@ Author : Yanghui Ou
   Date : Jan 31, 2019
 '''
 from pymtl3 import mk_bits
-from ..utils import get_nbits, to_bitstruct
 from pymtl3.datatypes.bitstructs import (
-  is_bitstruct_class, 
+  is_bitstruct_class,
   _FIELDS as bitstruct_fields,
 )
 
@@ -20,7 +19,7 @@ from pymtl3.datatypes.bitstructs import (
 #-------------------------------------------------------------------------
 
 def _get_payload_length( Format, header_flit, field_name='plen' ):
-  header = to_bitstruct( header_flit, Format )
+  header = Format.from_bits( header_flit )
   return getattr( header, field_name ).uint()
 
 #-------------------------------------------------------------------------
@@ -32,8 +31,8 @@ class MflitPacket:
   def __init__( self, Format, flits=[], plen_field_name='plen' ):
 
     self.Format     = Format
-    self.plen_fname = plen_field_name 
-    self.PhitType   = mk_bits( get_nbits( Format ) )
+    self.plen_fname = plen_field_name
+    self.PhitType   = mk_bits( Format.nbits )
     self.add_lock   = False
     self.pop_lock   = False
     self.nflits     = 0
@@ -53,14 +52,14 @@ class MflitPacket:
       self.flits.append( flit )
       self._get_nflits()
     else:
-      assert not self.full(), "Packet is already full" 
+      assert not self.full(), "Packet is already full"
       self.flits.append( flit )
 
     self.add_lock = True
 
   def pop( self ):
     assert not self.add_lock, "Packet locked by add, cannot pop any more!"
-    assert self.flit_idx < self.nflits, "Already reached the last flit of the packet!" 
+    assert self.flit_idx < self.nflits, "Already reached the last flit of the packet!"
     # Copy the current flit
     cur_flit = self.PhitType( self.flits[ self.flit_idx ] )
 

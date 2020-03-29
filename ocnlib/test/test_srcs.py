@@ -11,8 +11,6 @@ from collections import deque
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvCL2SendRTL, SendIfcRTL
 
-from ..utils import get_nbits
-
 #-------------------------------------------------------------------------
 # MflitPacketSourceCL
 #-------------------------------------------------------------------------
@@ -27,7 +25,7 @@ class MflitPacketSourceCL( Component ):
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0, packet_interval_delay=0 ):
 
     # Interface
-    PhitType = mk_bits( get_nbits( Format ) )
+    PhitType = mk_bits( Format.nbits )
     s.send = CallerIfcCL( Type=PhitType )
 
     # Metadata
@@ -38,7 +36,7 @@ class MflitPacketSourceCL( Component ):
     s.p_delay = packet_interval_delay
 
     # Update block
-    @s.update
+    @update
     def up_src_send():
       if s.count > 0:
         s.count -= 1
@@ -72,7 +70,7 @@ class MflitPacketSourceRTL( Component ):
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
 
-    PhitType = mk_bits( get_nbits( Format ) )
+    PhitType = mk_bits( Format.nbits )
 
     s.send    = SendIfcRTL( PhitType )
     s.src_cl  = MflitPacketSourceCL( Format, pkts, initial_delay, flit_interval_delay,

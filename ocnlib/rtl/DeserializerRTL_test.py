@@ -10,7 +10,7 @@ Author : Yanghui Ou
 import hypothesis
 from hypothesis import strategies as st
 from pymtl3 import *
-from pymtl3.datatypes.strategies import bits 
+from pymtl3.datatypes.strategies import bits
 from pymtl3.stdlib.test.test_srcs import TestSrcRTL as TestSource
 from pymtl3.stdlib.test.test_sinks import TestSinkRTL as TestSink
 from ocnlib.utils import run_sim
@@ -80,14 +80,14 @@ def test_sanity_check():
   dut.elaborate()
   dut.apply( SimulationPass() )
   dut.sim_reset()
-  dut.tick()
-  dut.tick()
+  dut.sim_tick()
+  dut.sim_tick()
 
   th = TestHarness( 16, 8, [] )
   th.elaborate()
   th.apply( SimulationPass() )
-  th.tick()
-  th.tick()
+  th.sim_tick()
+  th.sim_tick()
 
 #-------------------------------------------------------------------------
 # test case: basic
@@ -167,7 +167,7 @@ def test_stream( test_verilog ):
 )
 def test_pyh2( in_nbits, max_nblocks, data, test_verilog ):
   len_msgs = data.draw( st.lists( st.integers(1, max_nblocks), min_size=1, max_size=100 ) )
-  src_msgs = [ data.draw( bits(x*in_nbits) ) for x in len_msgs ]
+  src_msgs = [ data.draw( st.integers(0, 2**(x*in_nbits)-1) ) for x in len_msgs ]
 
   msgs = []
   for x, l in zip( src_msgs, len_msgs ):
@@ -177,4 +177,3 @@ def test_pyh2( in_nbits, max_nblocks, data, test_verilog ):
   th = TestHarness( in_nbits, max_nblocks, msgs )
   translation = 'verilog' if test_verilog else ''
   run_sim( th, translation=translation )
-

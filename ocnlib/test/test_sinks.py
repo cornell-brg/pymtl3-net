@@ -10,7 +10,6 @@ Author : Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvRTL2SendCL, RecvIfcRTL
 
-from ..utils import get_nbits
 from ..packets import MflitPacket as Packet
 
 #-------------------------------------------------------------------------
@@ -22,7 +21,7 @@ class MflitPacketSinkCL( Component ):
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
 
-    s.PhitType  = mk_bits( get_nbits( Format ) )
+    s.PhitType  = mk_bits( Format.nbits )
     s.recv.Type = s.PhitType
     s.Format    = Format
 
@@ -37,7 +36,7 @@ class MflitPacketSinkCL( Component ):
     s.done_flag    = False
     s.recv_called  = False
 
-    @s.update
+    @update
     def up_sink_count():
       # Raise exception at the start of next cycle so that the errored
       # line trace gets printed out
@@ -125,7 +124,7 @@ class MflitPacketSinkRTL( Component ):
   def construct( s, Format, pkts, initial_delay=0, flit_interval_delay=0,
                  packet_interval_delay=0, cmp_fn=lambda a, b : a.flits == b.flits ):
 
-    s.PhitType = mk_bits( get_nbits( Format ) )
+    s.PhitType = mk_bits( Format.nbits )
 
     s.recv     = RecvIfcRTL( s.PhitType )
     s.sink_cl  = MflitPacketSinkCL( Format, pkts, initial_delay, flit_interval_delay,

@@ -12,7 +12,7 @@ from pymtl3 import *
 def mk_mesh_pos( ncols, nrows ):
   assert ncols > 0 and nrows > 0
 
-  XType = mk_bits(clog2( ncols  )) if ncols  != 1 else Bits1
+  XType = mk_bits(clog2( ncols )) if ncols != 1 else Bits1
   YType = mk_bits(clog2( nrows )) if nrows != 1 else Bits1
 
   return mk_bitstruct( f"MeshPosition_{ncols}x{nrows}", {

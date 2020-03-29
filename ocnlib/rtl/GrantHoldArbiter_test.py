@@ -15,23 +15,16 @@ def test_simple():
   arb.elaborate()
   arb.apply( SimulationPass() )
   arb.sim_reset()
-  arb.tick()
 
-  print()
-  arb.reqs = b4(0b0011)
-  arb.hold = b1(0)
-  arb.eval_combinational()
-  print( arb.line_trace() )
-  arb.tick()
-  
-  arb.eval_combinational()
-  print( arb.line_trace() )
-  g0 = b4(arb.grants)
-  arb.tick()
+  arb.reqs @= 0b0011
+  arb.hold @= 0
+  arb.sim_tick()
 
-  arb.hold = b1(1)
-  arb.eval_combinational()
-  print( arb.line_trace() )
+  g0 = arb.grants.clone()
+  arb.sim_tick()
+
+  arb.hold @= 1
+  arb.sim_eval_combinational()
   assert arb.grants == g0
-  arb.tick()
+  arb.sim_tick()
 
