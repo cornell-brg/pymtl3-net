@@ -71,9 +71,9 @@ class TestHarness( Component ):
       s.dut.send[i]  //= s.sinks[i].recv
 
     #TODO: provide pos for router...
-    @s.update
+    @update
     def up_pos():
-      s.dut.pos = BflyPos( pos_r, pos_f )
+      s.dut.pos @= BflyPos( pos_r, pos_f )
 
   def done( s ):
     srcs_done = 1

@@ -52,12 +52,12 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
 
       # Enable the network interface on specific router
       for i in range (num_terminals):
-        model.recv[i].en  = 0
-      model.recv[terminal_id].msg = pkt
-      model.recv[terminal_id].en  = 1
+        model.recv[i].en  @= 0
+      model.recv[terminal_id].msg @= pkt
+      model.recv[terminal_id].en  @= 1
 
     for i in range (num_terminals):
-      model.send[i].rdy = 1
+      model.send[i].rdy @= 1
 
   def tv_out( model, test_vector ):
     if test_vector[2] != 'x':
@@ -66,7 +66,6 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
   model.elaborate()
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
-  model.sim_reset()
 
 def test_vector_2ary_1fly( dump_vcd, test_verilog ):
 
@@ -236,8 +235,6 @@ def test_srcsink_4ary_2fly():
 
   th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets,
                     0, 0, 0, 0 )
-
-  th.set_param( "top.dut.line_trace",  )
 
   run_sim( th )
   th.dut.elaborate_physical()

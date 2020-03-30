@@ -78,28 +78,26 @@ def bitstruct_to_slices( cls ):
 #-------------------------------------------------------------------------
 # A generic run_sim function
 
-def run_sim( th, max_cycles=1000, translation='', 
+def run_sim( th, max_cycles=1000, translation='',
              dut_name='dut', vl_trace=False, xinit='zeros' ):
 
   th.elaborate()
 
   if translation == 'verilog':
     from pymtl3.passes.backends.verilog import TranslationImportPass
-    from pymtl3.passes.backends.verilog import VerilatorImportConfigs
-    getattr( th, dut_name ).verilog_translate_import = True
-    getattr( th, dut_name ).config_verilog_import = VerilatorImportConfigs(
-      vl_trace = vl_trace,
-      vl_xinit = xinit,
-    )
+
+    dut = getattr( th, dut_name )
+    dut.set_metadata( TranslationImportPass.enable, True )
+    dut.set_metadata( VerilatorImportPass.vl_xinit, xinit )
+    dut.set_metadata( VerilatorImportPass.vl_trace, vl_trace )
 
   elif translation == 'yosys':
     from pymtl3.passes.backends.yosys import TranslationImportPass
-    from pymtl3.passes.backends.yosys import VerilatorImportConfigs
-    getattr( th, dut_name ).yosys_translate_import = True
-    getattr( th, dut_name ).config_yosys_import = VerilatorImportConfigs(
-      vl_trace = vl_trace,
-      vl_xinit = xinit,
-    )
+
+    dut = getattr( th, dut_name )
+    dut.set_metadata( TranslationImportPass.enable, True )
+    dut.set_metadata( VerilatorImportPass.vl_xinit, xinit )
+    dut.set_metadata( VerilatorImportPass.vl_trace, vl_trace )
 
   elif translation:
     assert False, f'Invalid translation backend {translation}!'
