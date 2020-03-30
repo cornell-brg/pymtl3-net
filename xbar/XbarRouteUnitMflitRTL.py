@@ -15,7 +15,7 @@ Authour : Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 from ocnlib.rtl import Counter, GrantHoldArbiter
-from ocnlib.utils import get_nbits, get_plen_type
+from ocnlib.utils import get_plen_type
 from ocnlib.utils.connects import connect_bitstruct
 
 class XbarRouteUnitMflitRTL( Component ):
@@ -28,13 +28,12 @@ class XbarRouteUnitMflitRTL( Component ):
     # Meta data
     s.num_outports = num_outports
     s.HeaderFormat = HeaderFormat
-    s.PhitType     = mk_bits( get_nbits( HeaderFormat ) )
+    s.PhitType     = mk_bits( HeaderFormat.nbits )
     dir_nbits      = clog2( num_outports ) if num_outports > 1 else 1
     DirType        = mk_bits( dir_nbits )
+    PLenType       = get_plen_type( HeaderFormat )
     s.STATE_HEADER = b1(0)
     s.STATE_BODY   = b1(1)
-
-    PLenType = get_plen_type( HeaderFormat )
 
     # Interface
     s.get  = GetIfcRTL( s.PhitType )
@@ -44,88 +43,84 @@ class XbarRouteUnitMflitRTL( Component ):
 
     # Components
     s.header      = Wire( HeaderFormat )
-    s.state       = Wire( Bits1 )
-    s.state_next  = Wire( Bits1 )
-    s.out_dir_r   = Wire( DirType )
-    s.out_dir     = Wire( DirType )
-    s.any_give_en = Wire( Bits1 )
+    s.state       = Wire()
+    s.state_next  = Wire()
+    s.out_dir_r   = Wire( dir_nbits )
+    s.out_dir     = Wire( dir_nbits )
+    s.any_give_en = Wire()
 
-    s.counter = Counter( PLenType )(
-      incr=b1(0),
-      load_value=s.header.plen,
-    )
+    s.counter = Counter( PLenType )
+    s.counter.incr //= 0
+    s.counter.load_value //= s.header.plen
 
-    connect_bitstruct( s.get.ret, s.header )
+    @update
+    def up_header():
+      s.header @= s.get.ret
 
     for i in range( s.num_outports ):
       s.get.ret //= s.give[i].ret
     s.get.en //= s.any_give_en
 
-    @s.update
+    @update
     def up_any_give_en():
-      s.any_give_en = b1(0)
+      s.any_give_en @= 0
       for i in range( s.num_outports ):
         if s.give[i].en:
-          s.any_give_en = b1(1)
+          s.any_give_en @= 1
 
     # State transition logic
-    @s.update_ff
+    @update_ff
     def up_state_r():
       if s.reset:
         s.state <<= s.STATE_HEADER
       else:
         s.state <<= s.state_next
 
-    @s.update
+    @update
     def up_state_next():
+      s.state_next @= s.state
       if s.state == s.STATE_HEADER:
         # If the packet has body flits
-        if s.any_give_en & ( s.header.plen > PLenType(0) ):
-          s.state_next = s.STATE_BODY
-
-        else:
-          s.state_next = s.STATE_HEADER
+        if s.any_give_en & ( s.header.plen > 0 ):
+          s.state_next @= s.STATE_BODY
 
       else: # STATE_BODY
-        if ( s.counter.count == PLenType(1) ) & s.any_give_en:
-          s.state_next = s.STATE_HEADER
-        else:
-          s.state_next = s.STATE_BODY
+        if ( s.counter.count == 1 ) & s.any_give_en:
+          s.state_next @= s.STATE_HEADER
 
     # State output logic
-    @s.update
+    @update
     def up_counter_decr():
       if s.state == s.STATE_HEADER:
-        s.counter.decr = b1(0)
+        s.counter.decr @= 0
       else:
-        s.counter.decr = s.any_give_en
+        s.counter.decr @= s.any_give_en
 
-    @s.update
+    @update
     def up_counter_load():
       if s.state == s.STATE_HEADER:
-        s.counter.load = ( s.state_next == s.STATE_BODY )
+        s.counter.load @= ( s.state_next == s.STATE_BODY )
       else:
-        s.counter.load = b1(0)
+        s.counter.load @= 0
 
     # Routing logic
     # TODO: Figure out how to encode dest id
-    @s.update
+    @update
     def up_out_dir():
       if ( s.state == s.STATE_HEADER ) & s.get.rdy:
-        s.out_dir = s.header.dst[0:dir_nbits]
-
+        s.out_dir @= s.header.dst[0:dir_nbits]
       else:
-        s.out_dir = s.out_dir_r
+        s.out_dir @= s.out_dir_r
 
-    @s.update_ff
+    @update_ff
     def up_out_dir_r():
       s.out_dir_r <<= s.out_dir
 
-    @s.update
+    @update
     def up_give_rdy_hold():
       for i in range( s.num_outports ):
-        s.give[i].rdy = ( DirType(i) == s.out_dir ) & s.get.rdy
-        s.hold[i]     = ( DirType(i) == s.out_dir ) & ( s.state == s.STATE_BODY )
+        s.give[i].rdy @= ( i == s.out_dir ) & s.get.rdy
+        s.hold[i]     @= ( i == s.out_dir ) & ( s.state == s.STATE_BODY )
 
   #-----------------------------------------------------------------------
   # line_trace

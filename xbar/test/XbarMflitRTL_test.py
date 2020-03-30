@@ -12,7 +12,7 @@ import hypothesis
 from hypothesis import strategies as st
 from pymtl3 import *
 from pymtl3.stdlib.test import mk_test_case_table
-from ocnlib.utils import to_bitstruct, run_sim
+from ocnlib.utils import run_sim
 from ocnlib.packets import MflitPacket as Packet
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
@@ -69,7 +69,7 @@ class TestHarness( Component ):
 def mk_pkt( src, dst, payload=[], opaque=0 ):
   plen        = len( payload )
   header      = TestHeader( src, dst, opaque, plen )
-  header_bits = to_bits( header )
+  header_bits = header.to_bits()
   flits       = [ header_bits ] + payload
   return Packet( TestHeader, flits )
 
@@ -82,7 +82,7 @@ def arrange_src_sink_pkts( Header, num_inports, num_outports, pkt_lst ):
   sink_pkts = [ [] for _ in range( num_outports ) ]
 
   for pkt in pkt_lst:
-    header = to_bitstruct( pkt.flits[0], Header )
+    header = Header.from_bits( pkt.flits[0] )
     src    = header.src.uint()
     dst    = header.dst.uint()
     src_pkts [ src ].append( pkt )

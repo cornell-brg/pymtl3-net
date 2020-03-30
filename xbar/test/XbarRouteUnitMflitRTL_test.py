@@ -11,7 +11,7 @@ import pytest
 from pymtl3 import *
 from pymtl3.stdlib.rtl.queues import BypassQueueRTL
 from pymtl3.stdlib.test import mk_test_case_table
-from ocnlib.utils import to_bits, to_bitstruct, run_sim
+from ocnlib.utils import run_sim
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
 from ocnlib.packets import MflitPacket as Packet
@@ -25,7 +25,7 @@ from ..XbarRouteUnitMflitRTL import XbarRouteUnitMflitRTL
 def route_fl( Header, num_outports, pkt_lst ):
   sink_pkts = [ [] for _ in range( num_outports ) ]
   for pkt in pkt_lst:
-    header = to_bitstruct( pkt.flits[0], Header )
+    header = Header.from_bits( pkt.flits[0] )
     dst    = header.dst.uint()
     sink_pkts[ dst ].append( pkt )
   return sink_pkts
@@ -37,7 +37,7 @@ def route_fl( Header, num_outports, pkt_lst ):
 class TestHarness( Component ):
 
   def construct( s, Header, num_outports, pkts ):
-    PhitType  = mk_bits( get_nbits( Header ) )
+    PhitType  = mk_bits( Header.nbits )
     sink_pkts = route_fl( Header, num_outports, pkts )
 
     s.src   = TestSource( Header, pkts )
@@ -80,7 +80,7 @@ class TestHeader:
 def mk_pkt( src, dst, payload=[], opaque=0 ):
   plen   = len( payload )
   header = TestHeader( src, dst, opaque, plen )
-  flits  = [ to_bits( header) ] + payload
+  flits  = [ header.to_bits() ] + payload
   return Packet( TestHeader, flits )
 
 #--------------------------------------------------------------------------
