@@ -38,7 +38,7 @@ class ChannelCL( Component ):
 
       s.recv //= s.queues[0].enq
 
-      @s.update
+      @update
       def chnl_up_send():
 
         for i in range( s.latency-1 ):

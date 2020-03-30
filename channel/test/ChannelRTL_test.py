@@ -45,6 +45,12 @@ class TestHarness( Component ):
 
 test_msgs = [ b16(4), b16(1), b16(2), b16(3) ]
 
-def test_normal2_simple():
+def test_passthrough():
   th = TestHarness( Bits16, test_msgs, test_msgs)
   run_sim( th )
+
+def test_normal2_simple():
+  th = TestHarness( Bits16, test_msgs, test_msgs)
+  th.set_param("top.dut.construct", latency=2)
+  run_sim( th )
+

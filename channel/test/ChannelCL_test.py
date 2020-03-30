@@ -26,7 +26,7 @@ class TestHarness( Component ):
 
     s.src  = TestSrcCL ( MsgType, src_msgs  )
     s.sink = TestSinkCL( MsgType, sink_msgs )
-    s.dut  = ChannelCL ( MsgType, latency=1 )
+    s.dut  = ChannelCL ( MsgType )
 
     # Connections
     s.src.send //= s.dut.recv
@@ -47,4 +47,9 @@ test_msgs = [ b16(4), b16(1), b16(2), b16(3) ]
 
 def test_chnl_simple():
   th = TestHarness( Bits16, test_msgs, test_msgs )
+  run_sim( th )
+
+def test_chnl_2():
+  th = TestHarness( Bits16, test_msgs, test_msgs )
+  th.set_param("top.dut.construct", latency=2)
   run_sim( th )
