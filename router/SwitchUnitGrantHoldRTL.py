@@ -24,46 +24,43 @@ class SwitchUnitGrantHoldRTL( Component ):
     s.Type        = Type
     s.sel_width   = clog2( num_inports )
 
-    GrantType     = mk_bits( num_inports )
-    SelType       = mk_bits( s.sel_width )
-
     # Interface
     s.get  = [ GetIfcRTL( s.Type ) for _ in range( num_inports )  ]
-    s.hold = [ InPort( Bits1 ) for _ in range( num_inports ) ]
+    s.hold = InPort(num_inports)
     s.give = GiveIfcRTL( s.Type )
 
     # Components
-    s.granted_get_rdy = Wire( Bits1 )
-    s.any_hold        = Wire( Bits1 )
+    s.granted_get_rdy = Wire()
+    s.any_hold        = Wire()
 
-    s.arbiter = GrantHoldArbiter( nreqs=num_inports )( hold = s.any_hold )
-    s.mux     = Mux( s.Type, num_inports )( out = s.give.ret )
-    s.encoder = Encoder( num_inports, s.sel_width )(
-      in_ = s.arbiter.grants,
-      out = s.mux.sel,
-    )
+    s.arbiter = GrantHoldArbiter( nreqs=num_inports )
+    s.arbiter.hold //= s.any_hold
+
+    s.mux = Mux( s.Type, num_inports )
+    s.mux.out //= s.give.ret
+
+    s.encoder = m = Encoder( num_inports, s.sel_width )
+    m.in_ //= s.arbiter.grants
+    m.out //= s.mux.sel
 
     # Combinational Logic
-    @s.update
+    @update
     def up_any_hold():
-      s.any_hold = b1(0)
-      for i in range( num_inports ):
-        if s.hold[i]:
-          s.any_hold = b1(1)
+      s.any_hold @= s.hold > 0
 
-    @s.update
+    @update
     def up_granted_get_rdy():
-      s.granted_get_rdy = b1(0)
+      s.granted_get_rdy @= 0
       for i in range( num_inports ):
         if s.arbiter.grants[i]:
-          s.granted_get_rdy = s.get[i].rdy
+          s.granted_get_rdy @= s.get[i].rdy
 
     for i in range( num_inports ):
       s.get[i].rdy //= s.arbiter.reqs[i]
       s.get[i].ret //= s.mux.in_[i]
 
     for i in range( num_inports ):
-      s.get[i].en //= lambda: s.give.en & ( s.mux.sel == SelType(i) )
+      s.get[i].en //= lambda: s.give.en & ( s.mux.sel == i )
 
     s.give.rdy //= s.granted_get_rdy
 

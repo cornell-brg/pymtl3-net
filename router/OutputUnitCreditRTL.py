@@ -27,32 +27,31 @@ class OutputUnitCreditRTL( Component ):
 
     # Loval types
     credit_type = mk_bits( clog2(credit_line+1) )
-    vcid_type   = mk_bits( clog2( vc ) if vc > 1 else 1 )
 
     s.credit = [ Counter( credit_type, credit_line ) for _ in range( vc ) ]
 
     s.get.ret //= s.send.msg
 
-    @s.update
+    @update
     def up_credit_send():
-      s.send.en = b1(0)
-      s.get.en = b1(0)
+      s.send.en @= 0
+      s.get.en  @= 0
       if s.get.rdy:
         # print( str(s) + " : " + str(s.get.ret) )
         for i in range( vc ):
-          if vcid_type(i) == s.get.ret.vc_id and s.credit[i].count > credit_type(0):
-            s.send.en = b1(1)
-            s.get.en = b1(1)
+          if i == s.get.ret.vc_id and s.credit[i].count > 0:
+            s.send.en @= 1
+            s.get.en  @= 1
 
-    @s.update
+    @update
     def up_counter_decr():
       for i in range( vc ):
-        s.credit[i].decr = s.send.en & ( vcid_type(i) == s.send.msg.vc_id )
+        s.credit[i].decr @= s.send.en & ( i == s.send.msg.vc_id )
 
     for i in range( vc ):
       s.credit[i].incr       //= s.send.yum[i]
-      s.credit[i].load       //= b1(0)
-      s.credit[i].load_value //= credit_type(0)
+      s.credit[i].load       //= 0
+      s.credit[i].load_value //= 0
 
   def line_trace( s ):
     return "{}({}){}".format(
