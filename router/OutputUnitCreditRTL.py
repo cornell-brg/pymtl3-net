@@ -39,7 +39,7 @@ class OutputUnitCreditRTL( Component ):
       if s.get.rdy:
         # print( str(s) + " : " + str(s.get.ret) )
         for i in range( vc ):
-          if i == s.get.ret.vc_id and s.credit[i].count > 0:
+          if (i == s.get.ret.vc_id) & (s.credit[i].count > 0):
             s.send.en @= 1
             s.get.en  @= 1
 

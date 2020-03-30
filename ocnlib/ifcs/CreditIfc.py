@@ -130,7 +130,7 @@ class RecvRTL2CreditSendRTL( Component ):
       s.buffer.deq.en @= 0
       if s.buffer.deq.rdy:
         for i in range( vc ):
-          if i == s.buffer.deq.ret.vc_id and s.credit[i].count > 0:
+          if ( i == s.buffer.deq.ret.vc_id ) & ( s.credit[i].count > 0 ):
             s.send.en @= 1
             s.buffer.deq.en @= 1
 

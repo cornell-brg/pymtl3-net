@@ -78,7 +78,8 @@ class RingNetwork_Tests:
   def setup_class( cls ):
     cls.DutType = RingNetworkRTL
 
-  def test_simple( s ):
+  # Refactor common test functinos
+  def _test_simple( s, translation='' ):
     nterminals = 4
     Pkt = mk_ring_pkt( nterminals )
     src_pkts = mk_src_pkts( nterminals, [
@@ -87,9 +88,9 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    run_sim( th )
+    run_sim( th, translation=translation )
 
-  def test_cycle( s ):
+  def _test_cycle( s, translation='' ):
     nterminals = 4
     Pkt = mk_ring_pkt( nterminals )
     src_pkts = mk_src_pkts( nterminals, [
@@ -101,9 +102,9 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    run_sim( th )
+    run_sim( th, translation=translation )
 
-  def test_anti_cycle( s ):
+  def _test_anti_cycle( s, translation='' ):
     nterminals = 4
     Pkt = mk_ring_pkt( nterminals )
     src_pkts = mk_src_pkts( nterminals, [
@@ -115,4 +116,32 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    run_sim( th )
+    run_sim( th, translation=translation )
+
+  # Run each test with two additional backends
+  def test_simple( self ):
+    self._test_simple()
+
+  def test_cycle( self ):
+    self._test_cycle()
+
+  def test_anti_cycle( self ):
+    self._test_anti_cycle()
+
+  def test_simple_verilog( self ):
+    self._test_simple('verilog')
+
+  def test_cycle_verilog( self ):
+    self._test_cycle('verilog')
+
+  def test_anti_cycle_verilog( self ):
+    self._test_anti_cycle('verilog')
+
+  # def test_simple_yosys( self ):
+    # self._test_simple('yosys')
+
+  # def test_cycle_yosys( self ):
+    # self._test_cycle('yosys')
+
+  # def test_anti_cycle_yosys( self ):
+    # self._test_anti_cycle('yosys')
