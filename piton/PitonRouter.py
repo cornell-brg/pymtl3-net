@@ -10,6 +10,7 @@ Author : Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
 from ocnlib.utils import get_nbits
+from ocnlib.rtl.queues import NormalQueueRTL
 from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 from router.SwitchUnitGrantHoldRTL import SwitchUnitGrantHoldRTL
@@ -50,7 +51,7 @@ class PitonRouter( Component ):
 
     # Components
 
-    s.input_units  = [ InputUnitType( s.PhitType )
+    s.input_units  = [ InputUnitType( s.PhitType, QueueType=NormalQueueRTL )
                        for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PositionType )
