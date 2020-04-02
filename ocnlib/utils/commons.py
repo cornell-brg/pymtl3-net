@@ -9,6 +9,10 @@ Author : Yanghui Ou
 '''
 from functools import reduce
 from pymtl3 import *
+from pymtl3.passes.backends.verilog import (
+  VerilogPlaceholderPass,
+  VerilogTBGenPass,
+)
 from pymtl3.datatypes.bitstructs import(
   is_bitstruct_class,
   is_bitstruct_inst,
@@ -153,7 +157,7 @@ def to_bitstruct( obj, BitstructType ):
 # A generic run_sim function
 
 def run_sim( th, max_cycles=1000, translation='', 
-             dut_name='dut', vl_trace=False, xinit='zeros' ):
+             dut_name='dut', vl_trace=False, xinit='zeros', tb_gen=True ):
 
   th.elaborate()
 
@@ -178,9 +182,16 @@ def run_sim( th, max_cycles=1000, translation='',
   elif translation:
     assert False, f'Invalid translation backend {translation}!'
 
+  if translation and tb_gen:
+    th.apply( VerilogPlaceholderPass() )
+
   if translation:
     th = TranslationImportPass()( th )
     th.elaborate()
+
+  if translation and tb_gen:
+    getattr( th, dut_name ).verilog_tbgen = True
+    th.apply( VerilogTBGenPass() )
 
   th.apply( SimulationPass() )
   th.sim_reset()
