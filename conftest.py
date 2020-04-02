@@ -30,5 +30,5 @@ def pytest_cmdline_preparse(config, args):
 
 def pytest_runtest_setup(item):
   test_verilog = item.config.option.test_verilog
-  if test_verilog and 'test_verilog' not in item.funcargnames:
+  if test_verilog and 'test_verilog' not in item.fixturenames:
     pytest.skip("ignoring non-Verilog tests")

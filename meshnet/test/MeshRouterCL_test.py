@@ -58,9 +58,7 @@ class TestHarness( Component ):
       s.srcs[i].send //= s.dut.recv[i]
       s.dut.send[i]  //= s.sinks[i].recv
 
-    @s.update
-    def up_pos():
-      s.dut.pos = MeshPos( pos_x, pos_y )
+    s.dut.pos //= MeshPos( pos_x, pos_y )
 
   def done( s ):
     srcs_done = 1

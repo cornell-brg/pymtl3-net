@@ -10,7 +10,7 @@ Author : Yanghui Ou
 import pytest
 from pymtl3 import *
 from pymtl3.stdlib.test import mk_test_case_table
-from ocnlib.utils import to_bitstruct, run_sim
+from ocnlib.utils import run_sim
 from ocnlib.packets import MflitPacket as Packet
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
@@ -74,7 +74,7 @@ class TestHarness( Component ):
 def mk_pkt( src_x, src_y, dst_x, dst_y, payload=[], opaque=0 ):
   plen        = len( payload )
   header      = TestHeader( opaque, src_x, src_y, dst_x, dst_y, plen )
-  header_bits = to_bits( header )
+  header_bits = header.to_bits()
   flits       = [ header_bits ] + payload
   return Packet( TestHeader, flits )
 
@@ -87,7 +87,7 @@ def test_sanity_check():
   dut.elaborate()
   dut.apply( SimulationPass() )
   dut.sim_reset()
-  dut.tick()
+  dut.sim_tick()
 
 #-------------------------------------------------------------------------
 # test case: basic
@@ -157,7 +157,7 @@ test_case_table = mk_test_case_table( table )
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_mflit_mesh_router( test_params ):
+def test_mflit_mesh_router( test_params, test_verilog ):
   ref  = MeshRouterMflitFL( TestHeader, test_params.pos_x, test_params.pos_y )
   pkts = test_params.msg_func( test_params.pos_x, test_params.pos_y )
 
@@ -167,4 +167,4 @@ def test_mflit_mesh_router( test_params ):
   th = TestHarness( TestHeader, TestPosition,
                     test_params.pos_x, test_params.pos_y,
                     src_pkts, dst_pkts )
-  run_sim( th )
+  run_sim( th, translation='verilog' if test_verilog else '' )

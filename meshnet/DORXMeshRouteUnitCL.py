@@ -32,7 +32,7 @@ class DORXMeshRouteUnitCL( Component ):
     s.rdy_lst = [ False for _ in range( s.num_outports ) ]
     s.pkt     = None
 
-    @s.update
+    @update
     def ru_up_route():
       if s.pkt is None and s.get.rdy():
         s.pkt = s.get()

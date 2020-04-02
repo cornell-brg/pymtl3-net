@@ -8,7 +8,6 @@ Author : Yanghui Ou
   Date : July 3, 2019
 """
 from pymtl3 import *
-from ocnlib.utils import to_bitstruct
 
 from .directions import *
 
@@ -104,7 +103,7 @@ class MeshRouterMflitFL:
     src_pkts = [ [] for _ in range(5) ]
     if s.first_dimension == 'y':
       for pkt in lst:
-        header = to_bitstruct( pkt.flits[0], s.Header )
+        header = s.Header.from_bits( pkt.flits[0] )
         if header.src_x == s.pos_x and header.src_y == s.pos_y:
           src_pkts[ SELF ].append( pkt )
         elif header.src_x == s.pos_x:
@@ -119,7 +118,7 @@ class MeshRouterMflitFL:
 
     elif s.first_dimension == 'x':
       for pkt in lst:
-        header = to_bitstruct( pkt.flits[0], s.Header )
+        header = s.Header.from_bits( pkt.flits[0] )
         if header.src_x == s.pos_x and header.src_y == s.pos_y:
           src_pkts[ SELF ].append( pkt )
         elif header.src_y == s.pos_y:
@@ -156,7 +155,7 @@ class MeshRouterMflitFL:
     elif s.first_dimension == 'x':
       for pkts in src_pkts:
         for pkt in pkts:
-          header = to_bitstruct( pkt.flits[0], s.Header )
+          header = s.Header.from_bits( pkt.flits[0] )
           dst = (
             SELF  if header.dst_x == s.pos_x and header.dst_y == s.pos_y else
             EAST  if header.dst_x > s.pos_x else

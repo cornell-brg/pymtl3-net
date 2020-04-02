@@ -42,15 +42,12 @@ class TestHarness( Component ):
     for i in range ( s.dut.num_outports ):
       s.dut.give[i].ret //= s.sinks[i].recv.msg
 
-    @s.update
+    @update
     def up_give_en():
       for i in range (s.dut.num_outports):
-        if s.dut.give[i].rdy and s.sinks[i].recv.rdy:
-          s.dut.give[i].en   = 1
-          s.sinks[i].recv.en = 1
-        else:
-          s.dut.give[i].en   = 0
-          s.sinks[i].recv.en = 0
+        both_rdy = s.dut.give[i].rdy & s.sinks[i].recv.rdy
+        s.dut.give[i].en @= both_rdy
+        s.sinks[i].recv.en @= both_rdy
 
     # FIXME: connect send to get
     # s.connect( s.src.send.rdy, Bits1( 1 )    )
