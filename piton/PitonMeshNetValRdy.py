@@ -8,6 +8,7 @@ Author : Yanghui Ou
   Date : Mar 10, 2020
 '''
 from pymtl3 import *
+from pymtl3.passes.backends.verilog import TranslationPass
 from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
 from ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
 
@@ -25,7 +26,7 @@ class PitonMeshNetValRdy( Component ):
     # Local prameter
 
     nterminals = ncols * nrows
-    s.config_verilog_translate = TranslationConfigs( explicit_module_name = f'pyocn_mesh_{ncols}x{nrows}' )
+    s.set_metadata( TranslationPass.explicit_module_name, f'pyocn_mesh_{ncols}x{nrows}' )
 
     # Interface
 
