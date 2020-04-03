@@ -6,6 +6,8 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : July 1, 2019
 
+import os
+import pytest
 import hypothesis
 from hypothesis import strategies as st
 
@@ -118,6 +120,7 @@ class TorusNetwork_Tests:
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
     run_sim( th, cmdline_opts )
 
+  @pytest.mark.skipif('CI' in os.environ)
   def test_simple_5x5( s, cmdline_opts ):
     ncols = 5
     nrows = 5
@@ -133,6 +136,7 @@ class TorusNetwork_Tests:
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
     run_sim( th, cmdline_opts )
 
+  @pytest.mark.skipif('CI' in os.environ)
   def test_simple_8x8( s, cmdline_opts ):
     ncols = 8
     nrows = 8
@@ -148,6 +152,7 @@ class TorusNetwork_Tests:
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
     run_sim( th, cmdline_opts )
 
+  @pytest.mark.skipif('CI' in os.environ)
   @hypothesis.settings( deadline=None, max_examples=5 )
   # @hypothesis.reproduce_failure('4.24.4', 'AAMDAQEAAAQAAA==') #(1:0)>(0:4)
   @hypothesis.given(
