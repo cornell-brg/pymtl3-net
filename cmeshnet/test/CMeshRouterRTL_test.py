@@ -29,27 +29,28 @@ def run_vector_test( model, PacketType, test_vectors,
   def tv_in( model, test_vector ):
 
     MeshPos    = mk_mesh_pos( ncols, nrows )
-    model.pos  = MeshPos( pos_x, pos_y )
+    model.pos @= MeshPos( pos_x, pos_y )
 
     for i in range( model.num_outports ):
       if model.recv[i].rdy and test_vector[3][i]:
         pkt = PacketType( 0, 0, test_vector[0][i]%4, test_vector[0][i]//4,
                       test_vector[1], 1, test_vector[2][i] )
 
-        model.recv[i].msg = pkt
-        model.recv[i].en = 1
+        model.recv[i].msg @= pkt
+        model.recv[i].en  @= 1
       elif model.recv[i].rdy == 0:
-        model.recv[i].en = 0
+        model.recv[i].en  @= 0
 
     for i in range( model.num_outports ):
-      model.send[i].rdy = 1
+      model.send[i].rdy @= 1
 
   def tv_out( model, test_vector ):
 
     for i in range( model.num_outports ):
       if model.send[i].en == 1:
         pkt = model.send[i].msg
-        assert pkt.payload == test_vector[4][i]
+        print('??', test_vector[4][i])
+        assert test_vector[4][i] == 'x' or pkt.payload == test_vector[4][i]
 
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
@@ -105,7 +106,7 @@ class TestHarness( Component ):
 
     @update
     def up_pos():
-      s.dut.pos = MeshPos(1,1)
+      s.dut.pos @= MeshPos(1,1)
 
   def done( s ):
     srcs_done = 1

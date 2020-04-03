@@ -20,7 +20,7 @@ class DORXCMeshRouteUnitRTL( Component ):
     # Constants
 
     s.num_outports = num_outports
-    TType = mk_bits( num_outports )
+    TType = mk_bits( clog2(num_outports) )
 
     # Interface
 

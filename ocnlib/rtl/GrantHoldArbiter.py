@@ -14,16 +14,15 @@ from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
 class GrantHoldArbiter( Component ):
 
   def construct( s, nreqs ):
-    BitsN = mk_bits( nreqs )
 
     # Interface
-    s.reqs   = InPort ( BitsN )
-    s.hold   = InPort ( Bits1 )
-    s.grants = OutPort( BitsN )
+    s.reqs   = InPort ( nreqs )
+    s.grants = OutPort( nreqs )
+    s.hold   = InPort ()
 
     # Components
     s.arb    = RoundRobinArbiterEn( nreqs )
-    s.last_r = Wire( BitsN )
+    s.last_r = Wire( nreqs )
 
     # Logic
     s.arb.reqs //= lambda: 0 if s.hold else s.reqs

@@ -40,12 +40,12 @@ def run_vector_test( model, PacketType, test_vectors, ncols, nrows ):
 
       # Enable the network interface on specific router
       for i in range (num_routers):
-        model.recv[i].en  = 0
-      model.recv[router_id].msg = pkt
-      model.recv[router_id].en  = 1
+        model.recv[i].en @= 0
+      model.recv[router_id].msg @= pkt
+      model.recv[router_id].en  @= 1
 
     for i in range (num_routers*4):
-      model.send[i].rdy = 1
+      model.send[i].rdy @= 1
 
   def tv_out( model, test_vector ):
     if test_vector[3] != 'x':

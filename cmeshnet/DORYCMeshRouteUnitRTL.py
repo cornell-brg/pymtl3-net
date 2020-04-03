@@ -20,7 +20,7 @@ class DORYCMeshRouteUnitRTL( Component ):
     # Constants
 
     s.num_outports = num_outports
-    TType = mk_bits( num_outports )
+    TType = mk_bits( clog2(num_outports) )
 
     # Interface
 
@@ -50,7 +50,7 @@ class DORYCMeshRouteUnitRTL( Component ):
 
       if s.get.rdy:
         if (s.pos.pos_x == s.get.ret.dst_x) & (s.pos.pos_y == s.get.ret.dst_y):
-          s.give_rdy[TType(4)+TType(s.get.ret.dst_ter)] @= 1
+          s.give_rdy[4+zext(s.get.ret.dst_ter,TType)] @= 1
         elif s.get.ret.dst_y < s.pos.pos_y:
           s.give_rdy[1] @= 1
         elif s.get.ret.dst_y > s.pos.pos_y:
