@@ -76,7 +76,7 @@ class DeserializerRTL( Component ):
           s.out_r[i] <<= 0
 
       elif s.recv.en:
-        s.out_r[ s.idx ] <<= s.recv.msg
+        s.out_r[ SelType(s.idx) ] <<= s.recv.msg
 
     for i in range( max_nblocks ):
       s.send.msg[i*in_nbits:(i+1)*in_nbits] //= s.out_r[i]
