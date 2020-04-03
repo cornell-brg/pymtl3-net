@@ -21,7 +21,7 @@ Authour : Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 from ocnlib.rtl import Counter, GrantHoldArbiter
-from ocnlib.utils import get_nbits, get_field_type
+from ocnlib.utils import get_field_type
 from ocnlib.utils.connects import connect_bitstruct
 
 from .directions import *
@@ -37,7 +37,7 @@ class PitonRouteUnit( Component ):
 
     # Local parameter
 
-    assert get_nbits( PitonNoCHeader ) == 64
+    assert PitonNoCHeader.nbits == 64
     s.num_outports = 5
     s.PhitType     = Bits64
     s.STATE_HEADER = b1(0)

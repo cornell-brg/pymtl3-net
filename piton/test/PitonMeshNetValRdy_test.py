@@ -11,7 +11,7 @@ import pytest
 from pymtl3 import *
 from pymtl3.stdlib.test import mk_test_case_table
 from ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
-from ocnlib.utils import to_bitstruct, run_sim
+from ocnlib.utils import run_sim
 from ocnlib.packets import MflitPacket as Packet
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
@@ -71,7 +71,7 @@ def mk_pkt( src_offchip, src_x, src_y, dst_offchip, dst_x, dst_y,
   chipid      = b14(1) << 13 if dst_offchip else b14(0)
   plen        = len( payload )
   header      = PitonNoCHeader( chipid, dst_x, dst_y, fbits, plen, mtype, mshr, opt1 )
-  header_bits = to_bits( header )
+  header_bits = header.nbits
   flits       = [ header_bits ] + payload
   pkt         = Packet( PitonNoCHeader, flits )
   pkt.src_offchip = src_offchip
@@ -89,7 +89,7 @@ def arrange_src_sink_pkts( ncols, nrows, pkt_lst ):
   sink_pkts = [ [] for _ in range( nterminals+1 ) ]
 
   for pkt in pkt_lst:
-    header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
+    header = PitonNoCHeader.from_bits( pkt.flits[0] )
     src_id = nterminals if pkt.src_offchip else pkt.src_x + pkt.src_y * ncols
     dst_id = nterminals if header.chipid[13] else header.xpos.uint() + header.ypos.uint() * ncols
     src_pkts [ src_id ].append( pkt )

@@ -12,7 +12,7 @@ from pymtl3 import *
 from pymtl3.stdlib.test import mk_test_case_table
 
 from pymtl3.stdlib.rtl.queues import BypassQueueRTL
-from ocnlib.utils import to_bitstruct, run_sim
+from ocnlib.utils import run_sim
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
 from ocnlib.packets import MflitPacket as Packet
@@ -30,7 +30,7 @@ def route_unit_fl( pkt_lst, pos_x, pos_y, first_dimension='x' ):
 
   if first_dimension == 'x':
     for pkt in pkt_lst:
-      header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
+      header = PitonNoCHeader.from_bits( pkt.flits[0] )
       if header.chipid[13] and pos_x == 0 and pos_y == 0:
         sink_pkts[ WEST ].append( pkt ) # North west port is the offchip port
 
@@ -47,7 +47,7 @@ def route_unit_fl( pkt_lst, pos_x, pos_y, first_dimension='x' ):
 
   elif first_dimension == 'y':
     for pkt in pkt_lst:
-      header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
+      header = PitonNoCHeader.from_bits( pkt.flits[0] )
       if header.chipid[13] and pos_x == 0 and pos_y == 0:
         sink_pkts[ WEST ].append( pkt ) # North west port is the offchip port
       if header.chipid[13]:
