@@ -1,1 +1,1 @@
-pymtl3
+git+https://github.com/cornell-brg/pymtl3.git@dev-3.0-release
