@@ -67,7 +67,7 @@ def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
 
-def test_vector_2ary_1fly( dump_vcd, test_verilog ):
+def test_vector_2ary_1fly( cmdline_opts ):
 
   k_ary = 2
   n_fly = 1
@@ -105,7 +105,7 @@ def test_vector_2ary_1fly( dump_vcd, test_verilog ):
 
   run_vector_test( model, BflyPacket, simple_2_test, k_ary, n_fly)
 
-def test_vector_2ary_2fly( dump_vcd, test_verilog ):
+def test_vector_2ary_2fly( cmdline_opts ):
 
   k_ary = 2
   n_fly = 2

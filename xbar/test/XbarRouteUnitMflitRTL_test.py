@@ -128,7 +128,7 @@ test_case_table = mk_test_case_table( test_cases )
 #--------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_xbar_route( test_params, test_verilog ):
+def test_xbar_route( test_params, cmdline_opts ):
   pkts = test_params.msg_func( test_params.n_outs )
   th   = TestHarness( TestHeader, test_params.n_outs, pkts )
   th.set_param( 'top.sink*.construct',
@@ -137,5 +137,5 @@ def test_xbar_route( test_params, test_verilog ):
     packet_interval_delay = test_params.pkt_intv,
   )
 
-  trans_backend = 'verilog' if test_verilog else ''
+  trans_backend = 'verilog' if cmdline_opts['test_verilog'] else ''
   run_sim( th, translation=trans_backend )

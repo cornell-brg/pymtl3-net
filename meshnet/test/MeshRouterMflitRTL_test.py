@@ -157,7 +157,7 @@ test_case_table = mk_test_case_table( table )
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_mflit_mesh_router( test_params, test_verilog ):
+def test_mflit_mesh_router( test_params, cmdline_opts ):
   ref  = MeshRouterMflitFL( TestHeader, test_params.pos_x, test_params.pos_y )
   pkts = test_params.msg_func( test_params.pos_x, test_params.pos_y )
 
@@ -167,4 +167,4 @@ def test_mflit_mesh_router( test_params, test_verilog ):
   th = TestHarness( TestHeader, TestPosition,
                     test_params.pos_x, test_params.pos_y,
                     src_pkts, dst_pkts )
-  run_sim( th, translation='verilog' if test_verilog else '' )
+  run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )

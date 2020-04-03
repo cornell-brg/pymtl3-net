@@ -156,11 +156,11 @@ test_case_table = mk_test_case_table([
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_mflit_mesh( test_params, test_verilog ):
+def test_mflit_mesh( test_params, cmdline_opts ):
   ncols = test_params.ncols
   nrows = test_params.nrows
   pkts  = test_params.msg_func( ncols, nrows )
-  trans_backend = 'verilog' if test_verilog else ''
+  trans_backend = 'verilog' if cmdline_opts['test_verilog'] else ''
 
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
 
@@ -193,10 +193,10 @@ def pkt_strat( draw, ncols, nrows, max_plen=15 ):
   nrows = st.integers(2, 4),
   pkts  = st.data(),
 )
-def test_pyh2( ncols, nrows, pkts, test_verilog ):
+def test_pyh2( ncols, nrows, pkts, cmdline_opts ):
   pkts = pkts.draw( st.lists( pkt_strat( ncols, nrows ), min_size=1, max_size=100 ) )
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
-  trans_backend = 'verilog' if test_verilog else ''
+  trans_backend = 'verilog' if cmdline_opts['test_verilog'] else ''
   th = TestHarness( TestHeader, TestPosition, ncols, nrows,
                     src_pkts, dst_pkts )
   run_sim( th, translation=trans_backend )

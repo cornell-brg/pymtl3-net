@@ -163,9 +163,9 @@ test_case_table = mk_test_case_table( test_cases )
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_mflit_xbar( test_params, test_verilog ):
+def test_mflit_xbar( test_params, cmdline_opts ):
   pkts = test_params.msg_func( test_params.n_in, test_params.n_out )
-  trans_backend = 'verilog' if test_verilog else ''
+  trans_backend = 'verilog' if cmdline_opts['test_verilog'] else ''
   th = TestHarness( TestHeader, test_params.n_in, test_params.n_out, pkts )
   th.set_param( 'top.sink*.construct',
     initial_delay         = test_params.init,
@@ -198,8 +198,8 @@ def pkt_strat( draw, num_inports, num_outports, max_plen=15 ):
   num_outports = st.integers(1, 16),
   pkts         = st.data(),
 )
-def test_pyh2( num_inports, num_outports, pkts, test_verilog ):
+def test_pyh2( num_inports, num_outports, pkts, cmdline_opts ):
   pkts = pkts.draw( st.lists( pkt_strat( num_inports, num_outports ), min_size=1, max_size=100 ) )
-  trans_backend = 'verilog' if test_verilog else ''
+  trans_backend = 'verilog' if cmdline_opts['test_verilog'] else ''
   th = TestHarness( TestHeader, num_inports, num_outports, pkts )
   run_sim( th, translation=trans_backend )

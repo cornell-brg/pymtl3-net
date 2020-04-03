@@ -88,7 +88,7 @@ test_msgs = [[(0,0,11,1),(0,0,12,1),(0,1,13,2),(2,1,14,3),(0,0,15,1)],
             ]
 result_msgs = [[],[],[],[],[]]
 
-def test_normal_simple( test_verilog ):
+def test_normal_simple( cmdline_opts ):
   src_packets = [[],[],[],[],[]]
   for item in test_msgs:
     for i in range( len( item ) ):
@@ -99,17 +99,17 @@ def test_normal_simple( test_verilog ):
       result_msgs[dir_out].append( pkt )
 
   th = TestHarness( PacketType, 4, 4, 1, 1, src_packets, result_msgs, 0, 0, 0, 0 )
-  run_sim( th, translation='verilog' if test_verilog else '' )
+  run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )
 
-def test_self_simple( test_verilog ):
+def test_self_simple( cmdline_opts ):
   PacketType = mk_mesh_pkt(4, 4)
   pkt = PacketType( 0, 0, 0, 0, 0, 0xdead )
   src_pkts  = [ [], [], [], [], [pkt] ]
   sink_pkts = [ [], [], [], [], [pkt] ]
   th = TestHarness( PacketType, 4, 4, 0, 0, src_pkts, sink_pkts )
-  run_sim( th, translation='verilog' if test_verilog else ''  )
+  run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else ''  )
 
-def test_h1( test_verilog ):
+def test_h1( cmdline_opts ):
   pos_x, pos_y, ncols, nrows = 0, 0, 2, 2
   PacketType = mk_mesh_pkt( ncols, nrows )
   pkt0 = PacketType( 0, 0, 0, 1, 0, 0xdead )
@@ -123,9 +123,9 @@ def test_h1( test_verilog ):
     "top.dut.construct",
     RouteUnitType = DORYMeshRouteUnitRTL
   )
-  run_sim( th, translation='verilog' if test_verilog else ''  )
+  run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else ''  )
 
-def test_h2( test_verilog ):
+def test_h2( cmdline_opts ):
   pos_x, pos_y, ncols, nrows = 0, 0, 2, 2
   PacketType = mk_mesh_pkt( ncols, nrows )
   pkt0 = PacketType( 0, 0, 1, 0, 0, 0xdead )
@@ -142,9 +142,9 @@ def test_h2( test_verilog ):
     "top.dut.construct",
     RouteUnitType = DORYMeshRouteUnitRTL
   )
-  run_sim( th, 10, translation='verilog' if test_verilog else ''  )
+  run_sim( th, 10, translation='verilog' if cmdline_opts['test_verilog'] else ''  )
 
-def test_h3( test_verilog ):
+def test_h3( cmdline_opts ):
   pos_x, pos_y, ncols, nrows = 0, 1, 2, 2
   PacketType = mk_mesh_pkt( ncols, nrows )
   pkt0 = PacketType( 0, 1, 0, 0, 0, 0xdead )
@@ -159,4 +159,4 @@ def test_h3( test_verilog ):
     "top.dut.construct",
     RouteUnitType = DORYMeshRouteUnitRTL
   )
-  run_sim( th, 10, translation='verilog' if test_verilog else ''  )
+  run_sim( th, 10, translation='verilog' if cmdline_opts['test_verilog'] else ''  )

@@ -69,7 +69,7 @@ class TestHarness( Component ):
 # Test cases (specific for 4x4 mesh)
 #-------------------------------------------------------------------------
 
-def test_srcsink_mesh4x4( test_verilog ):
+def test_srcsink_mesh4x4( cmdline_opts ):
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
@@ -108,4 +108,4 @@ def test_srcsink_mesh4x4( test_verilog ):
     # print("sink", i, [str(y) for y in x] )
   th = TestHarness( PacketType, ncols, nrows, src_packets, sink_packets,
                     0, 0, 0, 0, arrival_pipes )
-  run_sim( th, translation='verilog' if test_verilog else '' )
+  run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )

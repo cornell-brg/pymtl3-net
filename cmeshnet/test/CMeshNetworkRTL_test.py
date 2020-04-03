@@ -55,7 +55,7 @@ def run_vector_test( model, PacketType, test_vectors, ncols, nrows ):
   sim.run_test()
   model.sim_reset()
 
-def test_vector_mesh2x2( dump_vcd, test_verilog ):
+def test_vector_mesh2x2( cmdline_opts ):
 
   ncols = 2
   nrows  = 2

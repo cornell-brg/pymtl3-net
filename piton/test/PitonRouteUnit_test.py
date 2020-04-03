@@ -12,7 +12,7 @@ from pymtl3 import *
 from pymtl3.stdlib.test import mk_test_case_table
 
 from pymtl3.stdlib.rtl.queues import BypassQueueRTL
-from ocnlib.utils import to_bits, to_bitstruct, run_sim
+from ocnlib.utils import to_bitstruct, run_sim
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
 from ocnlib.packets import MflitPacket as Packet
@@ -119,7 +119,7 @@ def mk_pkt( offchip, dst_x, dst_y, payload=[], fbits=0, mtype=0, mshr=0, opt1=0 
   chipid      = b14(1) << 13 if offchip else b14(0)
   plen        = len( payload )
   header      = PitonNoCHeader( chipid, dst_x, dst_y, fbits, plen, mtype, mshr, opt1 )
-  header_bits = to_bits( header )
+  header_bits = header.to_bits()
   flits       = [ header_bits ] + payload
   return Packet( PitonNoCHeader, flits )
 
