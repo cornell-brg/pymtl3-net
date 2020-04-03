@@ -30,10 +30,11 @@ class RouteUnitDorFL:
       if pkt.dst_x == s.pos_x and pkt.dst_y == s.pos_y:
         dst_pkts[ SELF ].append( pkt )
       else:
-        north_dist = pkt.dst_y - s.pos_y if pkt.dst_y > s.pos_y else pkt.dst_y + s.nrows - s.pos_y
-        south_dist = s.pos_y - pkt.dst_y if pkt.dst_y < s.pos_y else s.pos_y + s.nrows - pkt.dst_y
-        east_dist  = pkt.dst_x - s.pos_x if pkt.dst_x > s.pos_x else pkt.dst_x + s.ncols - s.pos_x
-        west_dist  = s.pos_x - pkt.dst_x if pkt.dst_x < s.pos_x else s.pos_x + s.ncols - pkt.dst_x
+        dst_x, dst_y = pkt.dst_x.uint(), pkt.dst_y.uint()
+        north_dist = dst_y - s.pos_y if dst_y > s.pos_y else dst_y + s.nrows - s.pos_y
+        south_dist = s.pos_y - dst_y if dst_y < s.pos_y else s.pos_y + s.nrows - dst_y
+        east_dist  = dst_x - s.pos_x if dst_x > s.pos_x else dst_x + s.ncols - s.pos_x
+        west_dist  = s.pos_x - dst_x if dst_x < s.pos_x else s.pos_x + s.ncols - dst_x
 
         if s.dimension == 'y':
           if pkt.dst_y != s.pos_y:

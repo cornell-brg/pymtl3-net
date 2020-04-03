@@ -88,7 +88,7 @@ def torus_pkt_strat( draw, ncols, nrows ):
 
 class TorusNetwork_Tests:
 
-  def test_simple( s ):
+  def test_simple( s, test_verilog ):
     ncols = 2
     nrows = 2
 
@@ -101,9 +101,9 @@ class TorusNetwork_Tests:
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th )
+    run_sim( th, translation='verilog' if test_verilog else '' )
 
-  def test_simple_3x3( s ):
+  def test_simple_3x3( s, test_verilog ):
     ncols = 3
     nrows = 3
 
@@ -116,9 +116,9 @@ class TorusNetwork_Tests:
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th )
+    run_sim( th, translation='verilog' if test_verilog else '' )
 
-  def test_simple_5x5( s ):
+  def test_simple_5x5( s, test_verilog ):
     ncols = 5
     nrows = 5
 
@@ -131,7 +131,22 @@ class TorusNetwork_Tests:
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th )
+    run_sim( th, translation='verilog' if test_verilog else '' )
+
+  def test_simple_8x8( s, test_verilog ):
+    ncols = 8
+    nrows = 8
+
+    Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
+
+    src_pkts = mk_src_pkts( ncols, nrows, [
+      #    src_x  y  dst_x  y   opq vc payload
+      Pkt(     1, 0,     0, 7,  0,  0, 0xfaceb00c ),
+      #Pkt(     1, 1,     1, 0,  0,  0, 0xdeadface ),
+    ])
+    dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
+    th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
+    run_sim( th, translation='verilog' if test_verilog else '' )
 
   @hypothesis.settings( deadline=None, max_examples=5 )
   # @hypothesis.reproduce_failure('4.24.4', 'AAMDAQEAAAQAAA==') #(1:0)>(0:4)
@@ -140,7 +155,7 @@ class TorusNetwork_Tests:
     nrows = st.integers(2, 8),
     pkts  = st.data(),
   )
-  def test_hypothesis( s, ncols, nrows, pkts ):
+  def test_hypothesis( s, ncols, nrows, pkts, test_verilog ):
     Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
 
     pkts_lst = pkts.draw(
@@ -151,4 +166,4 @@ class TorusNetwork_Tests:
     src_pkts = mk_src_pkts( ncols, nrows, pkts_lst )
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th, max_cycles=5000 )
+    run_sim( th, max_cycles=5000, translation='verilog' if test_verilog else '' )

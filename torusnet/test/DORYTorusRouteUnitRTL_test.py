@@ -46,32 +46,26 @@ class TestHarness( Component ):
     s.src.send  //= s.src_q.enq
     s.src_q.deq //= s.dut.get
 
-    for i in range ( s.dut.num_outports ):
+    for i in range ( outports ):
       s.dut.give[i].ret //= s.sinks[i].recv.msg
 
-    @s.update
+    @update
     def up_give_en():
-      for i in range (s.dut.num_outports):
-        if s.dut.give[i].rdy and s.sinks[i].recv.rdy:
-          s.dut.give[i].en   = b1(1)
-          s.sinks[i].recv.en = b1(1)
-        else:
-          s.dut.give[i].en   = b1(0)
-          s.sinks[i].recv.en = b1(0)
+      for i in range (outports):
+        both_rdy = s.dut.give[i].rdy & s.sinks[i].recv.rdy
+        s.dut.give[i].en   @= both_rdy
+        s.sinks[i].recv.en @= both_rdy
 
-    @s.update
-    def up_dut_pos():
-      s.dut.pos = MeshPos( pos_x, pos_y )
+    s.dut.pos //= MeshPos( pos_x, pos_y )
 
   def done( s ):
-    sinks_done = 1
-    for i in range( s.dut.num_outports ):
-      if not s.sinks[i].done():
-        sinks_done = 0
-    return s.src.done() and sinks_done
+    done = s.src.done()
+    for x in s.sinks:
+      done &= x.done()
+    return done
 
   def line_trace( s ):
-    return "{}".format( s.dut.line_trace() )
+    return f"{s.dut.line_trace()}"
 
 #-------------------------------------------------------------------------
 # mk_dst_pkts
@@ -97,7 +91,7 @@ class RouteUnitDorRTL_Tests:
     'pos_x, pos_y',
     product( [ 0, 1, 2, 3 ], [ 0, 1, 2, 3 ] )
   )
-  def test_simple_4x4( s, pos_x, pos_y ):
+  def test_simple_4x4( s, pos_x, pos_y, test_verilog ):
 
     ncols = 4
     nrows  = 4
@@ -113,4 +107,4 @@ class RouteUnitDorRTL_Tests:
     ]
     dst_pkts = mk_dst_pkts( pos_x, pos_y, ncols, nrows, src_pkts )
     th = TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
-    run_sim( th )
+    run_sim( th, translation='verilog' if test_verilog else '' )
