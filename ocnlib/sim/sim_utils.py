@@ -29,7 +29,7 @@ from ocnlib.ifcs.packets import (mk_bfly_pkt, mk_cmesh_pkt, mk_mesh_pkt,
 from ocnlib.ifcs.positions import mk_bfly_pos, mk_mesh_pos, mk_ring_pos
 from ocnlib.sim.CLNetWrapper import CLNetWrapper
 from pymtl3 import *
-from pymtl3.passes.backends.verilog import TranslationPass, TranslationConfigs
+from pymtl3.passes.backends.verilog import TranslationPass
 from pymtl3.passes import TracingConfigs
 from ringnet import RingNetworkRTL
 from torusnet import TorusNetworkRTL
@@ -464,7 +464,7 @@ def net_simulate( topo, opts ):
 
   vprint( f' - resetting network')
   net.sim_reset()
-  net.tick()
+  net.sim_tick()
 
   # Constants
 
@@ -571,7 +571,7 @@ def net_simulate( topo, opts ):
     if opts.verbose and ncycles % 100 == 1:
       print( f'{ncycles:4}: gen {mpkt_generated}/{mpkt_injected}/{total_generated} recv {mpkt_received}/{total_received}' )
 
-    net.tick()
+    net.sim_tick()
     ncycles += 1
 
 #-------------------------------------------------------------------------
@@ -600,7 +600,7 @@ def net_simulate_cl( topo, opts ):
 
   vprint( f' - resetting network')
   net.sim_reset()
-  net.tick()
+  net.sim_tick()
 
   # Constants
 
@@ -700,7 +700,7 @@ def net_simulate_cl( topo, opts ):
     if opts.verbose and ncycles % 100 == 1:
       print( f'{ncycles:4}: gen {mpkt_generated}/{mpkt_injected}/{total_generated} recv {mpkt_received}/{total_received}' )
 
-    net.tick()
+    net.sim_tick()
     ncycles += 1
 
 #-------------------------------------------------------------------------
@@ -780,10 +780,12 @@ def gen_verilog( topo, opts ):
   net.elaborate()
 
   vprint( f' - applying translation pass' )
-  net.config_verilog_translate = TranslationConfigs( explicit_module_name = f'{topo}' )
+  net.set_metadata( TranslationPass.enable, True )
+  net.set_metadata( TranslationPass.explicit_module_name, topo )
   net.apply( TranslationPass() )
 
-  os.system(f'mv {net.translated_top_module_name}.v {topo}.v')
+  translated_top_module = net.get_metadata( TranslationPass.translated_top_module )
+  os.system(f'mv {translated_top_module}.v {topo}.v')
 
 #-------------------------------------------------------------------------
 # smoke_test
@@ -812,7 +814,7 @@ def smoke_test( topo, opts ):
 
   vprint( f' - resetting network')
   net.sim_reset()
-  net.tick()
+  net.sim_tick()
 
   vprint( f' - simulation starts' )
   ncycles = 0
@@ -824,7 +826,7 @@ def smoke_test( topo, opts ):
   while not net.recv[0].rdy:
     if opts.trace:
       print( f'{ncycles:3}: {net.line_trace()}' )
-    net.tick()
+    net.sim_tick()
     ncycles += 1
 
   pkt_opts = deepcopy( opts )
@@ -836,7 +838,7 @@ def smoke_test( topo, opts ):
   # Tick one cycle and stops injecting
   if opts.trace:
     print( f'{ncycles:3}: {net.line_trace()}' )
-  net.tick()
+  net.sim_tick()
   ncycles += 1
   net.recv[0].en = b1(0)
 
@@ -844,7 +846,7 @@ def smoke_test( topo, opts ):
   while not net.send[ nports-1 ].en:
     if opts.trace:
       print( f'{ncycles:3}: {net.line_trace()}' )
-    net.tick()
+    net.sim_tick()
     ncycles += 1
 
   if net.send[ nports-1 ].msg.payload == p_type(1024):
@@ -853,6 +855,6 @@ def smoke_test( topo, opts ):
     erint( f' - [{_red}FAILED{_reset}]' )
 
   # Extra ticks to improve waveform
-  net.tick()
-  net.tick()
-  net.tick()
+  net.sim_tick()
+  net.sim_tick()
+  net.sim_tick()

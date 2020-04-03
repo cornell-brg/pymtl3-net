@@ -330,13 +330,13 @@ def perform( action, model, topology, terminals, dimension,
     if action == "simulate-1pkt":
       print( "{:3}:{}".format( ncycles, net.line_trace() ))
 
-    net.tick()
+    net.sim_tick()
     ncycles += 1
 
   # FIXME: To extend the period for gtkwave, but does not work yet.
-  net.tick()
-  net.tick()
-  net.tick()
+  net.sim_tick()
+  net.sim_tick()
+  net.sim_tick()
 
   if action == "verify":
     print("\33[32m.\033[0m", end="")

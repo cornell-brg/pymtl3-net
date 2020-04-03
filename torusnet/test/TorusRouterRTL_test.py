@@ -95,7 +95,7 @@ class TorusRouterRTL_Tests:
     'pos_x, pos_y',
     product( [ 0, 1, 2, 3 ], [ 0, 1, 2, 3 ] )
   )
-  def test_simple_4x4( s, pos_x, pos_y, test_verilog ):
+  def test_simple_4x4( s, pos_x, pos_y, cmdline_opts ):
     ncols = 4
     nrows = 4
 
@@ -114,13 +114,13 @@ class TorusRouterRTL_Tests:
       ncols=ncols, nrows=nrows,
       pos_x=pos_x, pos_y=pos_y,
     )
-    run_sim( th, translation="verilog" if test_verilog else '' )
+    run_sim( th, translation="verilog" if cmdline_opts['test_verilog'] else '' )
 
   @pytest.mark.parametrize(
     'pos_x, pos_y',
     product( [ 0, 1, 2, 3, 4, 5 ], [ 0, 1, 2, 3, 4, 5 ] )
   )
-  def test_simple_5x5( s, pos_x, pos_y, test_verilog ):
+  def test_simple_5x5( s, pos_x, pos_y, cmdline_opts ):
     ncols = 5
     nrows = 5
 
@@ -136,4 +136,4 @@ class TorusRouterRTL_Tests:
       ncols=ncols, nrows=nrows,
       pos_x=pos_x, pos_y=pos_y,
     )
-    run_sim( th, translation="verilog" if test_verilog else '' )
+    run_sim( th, translation="verilog" if cmdline_opts['test_verilog'] else '' )

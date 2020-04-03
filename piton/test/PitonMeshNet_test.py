@@ -105,7 +105,7 @@ def test_sanity_check():
   net.elaborate()
   net.apply( SimulationPass() )
   net.sim_reset()
-  net.tick()
+  net.sim_tick()
 
 n = False
 y = True

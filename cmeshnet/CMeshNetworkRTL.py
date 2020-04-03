@@ -98,7 +98,7 @@ class CMeshNetworkRTL( Component ):
         s.routers[i].recv[EAST].msg.payload  //=  0
 
 #    # FIXME: unable to connect a struct to a port.
-#    @s.update
+#    @update
 #    def up_pos():
     for y in range( nrows ):
       for x in range( ncols ):

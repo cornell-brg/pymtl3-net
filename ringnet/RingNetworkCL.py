@@ -53,7 +53,7 @@ class RingNetworkCL( Component ):
       s.connect(s.send[i], s.routers[i].send[SELF])
 
     # FIXME: unable to connect a struct to a port.
-    @s.update
+    @update
     def up_pos():
       for r in range( s.nrouters ):
         s.routers[r].pos = PositionType( r )

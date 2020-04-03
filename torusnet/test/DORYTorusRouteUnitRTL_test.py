@@ -91,7 +91,7 @@ class RouteUnitDorRTL_Tests:
     'pos_x, pos_y',
     product( [ 0, 1, 2, 3 ], [ 0, 1, 2, 3 ] )
   )
-  def test_simple_4x4( s, pos_x, pos_y, test_verilog ):
+  def test_simple_4x4( s, pos_x, pos_y, cmdline_opts ):
 
     ncols = 4
     nrows  = 4
@@ -107,4 +107,4 @@ class RouteUnitDorRTL_Tests:
     ]
     dst_pkts = mk_dst_pkts( pos_x, pos_y, ncols, nrows, src_pkts )
     th = TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
-    run_sim( th, translation='verilog' if test_verilog else '' )
+    run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )
