@@ -94,8 +94,7 @@ def test_basic( cmdline_opts ):
     0xace3ace2ace1ace0, 3,
   ]
   th = TestHarness( 16, 4, msgs )
-  translation = 'verilog' if cmdline_opts['test_verilog'] else ''
-  run_sim( th, max_cycles=40, translation=translation )
+  run_sim( th, cmdline_opts, max_cycles=40 )
 
 #-------------------------------------------------------------------------
 # test case: backpressure
@@ -110,8 +109,7 @@ def test_backpressure( cmdline_opts ):
   ]
   th = TestHarness( 16, 4, msgs )
   th.set_param( 'top.sink.construct', initial_delay=10, interval_delay=2 )
-  translation = 'verilog' if cmdline_opts['test_verilog'] else ''
-  run_sim( th, max_cycles=40, translation=translation )
+  run_sim( th, cmdline_opts, max_cycles=40 )
 
 #-------------------------------------------------------------------------
 # test case: src delay
@@ -126,8 +124,7 @@ def test_src_delay( cmdline_opts ):
   ]
   th = TestHarness( 32, 9, msgs )
   th.set_param( 'top.src*.construct', initial_delay=10, interval_delay=2 )
-  translation = 'verilog' if cmdline_opts['test_verilog'] else ''
-  run_sim( th, max_cycles=40, translation=translation )
+  run_sim( th, cmdline_opts, max_cycles=40 )
 
 #-------------------------------------------------------------------------
 # test case: stream
@@ -145,8 +142,7 @@ def test_stream( cmdline_opts ):
     0xfeedbabe_ace5ace4, 2,
   ]
   th = TestHarness( 32, 4, msgs )
-  translation = 'verilog' if cmdline_opts['test_verilog'] else ''
-  run_sim( th, max_cycles=40, translation=translation )
+  run_sim( th, cmdline_opts, max_cycles=40 )
 
 #-------------------------------------------------------------------------
 # test case: pyh2
@@ -168,6 +164,5 @@ def test_pyh2( out_nbits, max_nblocks, data, cmdline_opts ):
     msgs.append( l )
 
   th = TestHarness( out_nbits, max_nblocks, msgs )
-  translation = 'verilog' if cmdline_opts['test_verilog'] else ''
-  run_sim( th, translation=translation )
+  run_sim( th, cmdline_opts )
 

@@ -160,13 +160,12 @@ def test_mflit_mesh( test_params, cmdline_opts ):
   ncols = test_params.ncols
   nrows = test_params.nrows
   pkts  = test_params.msg_func( ncols, nrows )
-  trans_backend = 'verilog' if cmdline_opts['test_verilog'] else ''
 
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
 
   th = TestHarness( TestHeader, TestPosition, ncols, nrows,
                     src_pkts, dst_pkts )
-  run_sim( th, translation=trans_backend )
+  run_sim( th, cmdline_opts )
 
 #-------------------------------------------------------------------------
 # packet strategy
@@ -196,7 +195,6 @@ def pkt_strat( draw, ncols, nrows, max_plen=15 ):
 def test_pyh2( ncols, nrows, pkts, cmdline_opts ):
   pkts = pkts.draw( st.lists( pkt_strat( ncols, nrows ), min_size=1, max_size=100 ) )
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
-  trans_backend = 'verilog' if cmdline_opts['test_verilog'] else ''
   th = TestHarness( TestHeader, TestPosition, ncols, nrows,
                     src_pkts, dst_pkts )
-  run_sim( th, translation=trans_backend )
+  run_sim( th, cmdline_opts )

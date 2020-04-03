@@ -137,5 +137,4 @@ def test_xbar_route( test_params, cmdline_opts ):
     packet_interval_delay = test_params.pkt_intv,
   )
 
-  trans_backend = 'verilog' if cmdline_opts['test_verilog'] else ''
-  run_sim( th, translation=trans_backend )
+  run_sim( th, cmdline_opts )

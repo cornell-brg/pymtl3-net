@@ -78,29 +78,25 @@ def bitstruct_to_slices( cls ):
 #-------------------------------------------------------------------------
 # A generic run_sim function
 
-def run_sim( th, max_cycles=1000, translation='',
-             dut_name='dut', vl_trace=False, xinit='zeros' ):
+def run_sim(
+    th,
+    cmdline_opts={'dump_vcd':False, 'test_verilog':''},
+    max_cycles=1000,
+    dut_name='dut' ):
 
   th.elaborate()
 
-  if translation == 'verilog':
+  translation = bool(cmdline_opts['test_verilog'])
+  vl_trace    = bool(cmdline_opts['dump_vcd'])
+  xinit       = cmdline_opts['test_verilog']
+
+  if translation:
     from pymtl3.passes.backends.verilog import TranslationImportPass
 
     dut = getattr( th, dut_name )
     dut.set_metadata( TranslationImportPass.enable, True )
     dut.set_metadata( VerilatorImportPass.vl_xinit, xinit )
     dut.set_metadata( VerilatorImportPass.vl_trace, vl_trace )
-
-  elif translation == 'yosys':
-    from pymtl3.passes.backends.yosys import TranslationImportPass
-
-    dut = getattr( th, dut_name )
-    dut.set_metadata( TranslationImportPass.enable, True )
-    dut.set_metadata( VerilatorImportPass.vl_xinit, xinit )
-    dut.set_metadata( VerilatorImportPass.vl_trace, vl_trace )
-
-  elif translation:
-    assert False, f'Invalid translation backend {translation}!'
 
   if translation:
     th = TranslationImportPass()( th )

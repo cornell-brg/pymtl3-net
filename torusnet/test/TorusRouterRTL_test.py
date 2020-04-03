@@ -114,7 +114,7 @@ class TorusRouterRTL_Tests:
       ncols=ncols, nrows=nrows,
       pos_x=pos_x, pos_y=pos_y,
     )
-    run_sim( th, translation="verilog" if cmdline_opts['test_verilog'] else '' )
+    run_sim( th, cmdline_opts )
 
   @pytest.mark.parametrize(
     'pos_x, pos_y',
@@ -136,4 +136,4 @@ class TorusRouterRTL_Tests:
       ncols=ncols, nrows=nrows,
       pos_x=pos_x, pos_y=pos_y,
     )
-    run_sim( th, translation="verilog" if cmdline_opts['test_verilog'] else '' )
+    run_sim( th, cmdline_opts )

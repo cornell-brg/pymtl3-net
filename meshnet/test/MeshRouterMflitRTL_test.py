@@ -167,4 +167,4 @@ def test_mflit_mesh_router( test_params, cmdline_opts ):
   th = TestHarness( TestHeader, TestPosition,
                     test_params.pos_x, test_params.pos_y,
                     src_pkts, dst_pkts )
-  run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )
+  run_sim( th, cmdline_opts )

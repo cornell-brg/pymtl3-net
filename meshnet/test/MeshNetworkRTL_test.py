@@ -108,4 +108,4 @@ def test_srcsink_mesh4x4( cmdline_opts ):
     # print("sink", i, [str(y) for y in x] )
   th = TestHarness( PacketType, ncols, nrows, src_packets, sink_packets,
                     0, 0, 0, 0, arrival_pipes )
-  run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )
+  run_sim( th, cmdline_opts )

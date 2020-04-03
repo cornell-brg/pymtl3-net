@@ -130,7 +130,7 @@ def test_1pkt(cmdline_opts):
     mk_pkt( 0, 1, [ 0xfaceb00c, 0x8badf00d ] ),
   ]
   th = TestHarness( TestHeader, TestPosition, pkts, 0, 0 )
-  run_sim( th, max_cycles=20, translation='verilog' if cmdline_opts['test_verilog'] else '' )
+  run_sim( th, cmdline_opts, max_cycles=20 )
 
 #-------------------------------------------------------------------------
 # test_4pkt
@@ -145,4 +145,4 @@ def test_4pkt(cmdline_opts):
   ]
   th = TestHarness( TestHeader, TestPosition, pkts, 1, 1 )
   th.set_param( 'top.src.construct', packet_interval_delay = 1 )
-  run_sim( th, max_cycles=20, translation='verilog' if cmdline_opts['test_verilog'] else '' )
+  run_sim( th, cmdline_opts, max_cycles=20 )

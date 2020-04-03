@@ -107,4 +107,4 @@ class RouteUnitDorRTL_Tests:
     ]
     dst_pkts = mk_dst_pkts( pos_x, pos_y, ncols, nrows, src_pkts )
     th = TestHarness( Pkt, src_pkts, dst_pkts, ncols, nrows, pos_x, pos_y )
-    run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )
+    run_sim( th, cmdline_opts )

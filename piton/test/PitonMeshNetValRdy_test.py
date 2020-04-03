@@ -191,11 +191,9 @@ test_case_table2x7 = mk_test_case_table([
 
 @pytest.mark.parametrize( **test_case_table )
 def test_piton_mesh( test_params, cmdline_opts ):
-  ncols         = test_params.ncols
-  nrows         = test_params.nrows
-  pkts          = test_params.msg_func( ncols, nrows )
-  test_verilog  = cmdline_opts['test_verilog']
-  trans_backend = 'verilog' if test_verilog else ''
+  ncols = test_params.ncols
+  nrows = test_params.nrows
+  pkts  = test_params.msg_func( ncols, nrows )
 
   src_pkts, dst_pkts = arrange_src_sink_pkts( ncols, nrows, pkts )
 
@@ -210,15 +208,13 @@ def test_piton_mesh( test_params, cmdline_opts ):
     packet_interval_delay = test_params.sink_pintv,
     flit_interval_delay   = test_params.sink_fintv,
   )
-  run_sim( th, translation=trans_backend, xinit=test_verilog )
+  run_sim( th, cmdline_opts )
 
 @pytest.mark.parametrize( **test_case_table2x7 )
 def test_piton_mesh2x7( test_params, cmdline_opts ):
-  ncols         = 2
-  nrows         = 7
-  pkts          = test_params.msg_func( ncols, nrows )
-  test_verilog  = cmdline_opts['test_verilog']
-  trans_backend = 'verilog' if test_verilog else ''
+  ncols = 2
+  nrows = 7
+  pkts  = test_params.msg_func( ncols, nrows )
 
   src_pkts, dst_pkts = arrange_src_sink_pkts( ncols, nrows, pkts )
 
@@ -233,5 +229,5 @@ def test_piton_mesh2x7( test_params, cmdline_opts ):
     packet_interval_delay = test_params.sink_pintv,
     flit_interval_delay   = test_params.sink_fintv,
   )
-  run_sim( th, translation=trans_backend, xinit=test_verilog )
+  run_sim( th, cmdline_opts )
 

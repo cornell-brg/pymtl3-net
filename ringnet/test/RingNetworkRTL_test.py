@@ -88,7 +88,8 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    run_sim( th, translation=translation )
+    cmdline_opts={'dump_vcd':False, 'test_verilog':translation}
+    run_sim( th, cmdline_opts )
 
   def _test_cycle( s, translation='' ):
     nterminals = 4
@@ -102,7 +103,8 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    run_sim( th, translation=translation )
+    cmdline_opts={'dump_vcd':False, 'test_verilog':translation}
+    run_sim( th, cmdline_opts )
 
   def _test_anti_cycle( s, translation='' ):
     nterminals = 4
@@ -116,7 +118,8 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    run_sim( th, translation=translation )
+    cmdline_opts={'dump_vcd':False, 'test_verilog':translation}
+    run_sim( th, cmdline_opts )
 
   # Run each test with two additional backends
   def test_simple( self ):
@@ -129,19 +132,10 @@ class RingNetwork_Tests:
     self._test_anti_cycle()
 
   def test_simple_verilog( self ):
-    self._test_simple('verilog')
+    self._test_simple('zeros')
 
   def test_cycle_verilog( self ):
-    self._test_cycle('verilog')
+    self._test_cycle('zeros')
 
   def test_anti_cycle_verilog( self ):
-    self._test_anti_cycle('verilog')
-
-  # def test_simple_yosys( self ):
-    # self._test_simple('yosys')
-
-  # def test_cycle_yosys( self ):
-    # self._test_cycle('yosys')
-
-  # def test_anti_cycle_yosys( self ):
-    # self._test_anti_cycle('yosys')
+    self._test_anti_cycle('zeros')

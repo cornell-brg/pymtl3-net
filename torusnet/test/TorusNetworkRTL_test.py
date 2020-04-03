@@ -101,7 +101,7 @@ class TorusNetwork_Tests:
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )
+    run_sim( th, cmdline_opts )
 
   def test_simple_3x3( s, cmdline_opts ):
     ncols = 3
@@ -116,7 +116,7 @@ class TorusNetwork_Tests:
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )
+    run_sim( th, cmdline_opts )
 
   def test_simple_5x5( s, cmdline_opts ):
     ncols = 5
@@ -131,7 +131,7 @@ class TorusNetwork_Tests:
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )
+    run_sim( th, cmdline_opts )
 
   def test_simple_8x8( s, cmdline_opts ):
     ncols = 8
@@ -146,7 +146,7 @@ class TorusNetwork_Tests:
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th, translation='verilog' if cmdline_opts['test_verilog'] else '' )
+    run_sim( th, cmdline_opts )
 
   @hypothesis.settings( deadline=None, max_examples=5 )
   # @hypothesis.reproduce_failure('4.24.4', 'AAMDAQEAAAQAAA==') #(1:0)>(0:4)
@@ -166,4 +166,4 @@ class TorusNetwork_Tests:
     src_pkts = mk_src_pkts( ncols, nrows, pkts_lst )
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th, max_cycles=5000, translation='verilog' if cmdline_opts['test_verilog'] else '' )
+    run_sim( th, cmdline_opts, max_cycles=5000 )
