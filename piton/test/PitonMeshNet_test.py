@@ -7,6 +7,7 @@ Test cases for PitonMeshNet.
 Author : Yanghui Ou
   Date : Mar 6, 2020
 '''
+import os
 import pytest
 import hypothesis
 from hypothesis import strategies as st
@@ -189,7 +190,7 @@ def pkt_strat( draw, ncols, nrows, max_plen=15 ):
 # pyh2 test
 #-------------------------------------------------------------------------
 
-@hypothesis.settings( deadline=None, max_examples=25 )
+@hypothesis.settings( deadline=None, max_examples=25 if 'CI' not in os.environ else 5 )
 @hypothesis.given(
   ncols = st.integers(2, 4),
   nrows = st.integers(2, 4),

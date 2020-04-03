@@ -7,6 +7,7 @@ Test cases for the multi-flit xbar.
 Author : Yanghui Ou
   Date : Feb 19, 2020
 '''
+import os
 import pytest
 import hypothesis
 from hypothesis import strategies as st
@@ -191,7 +192,7 @@ def pkt_strat( draw, num_inports, num_outports, max_plen=15 ):
 # pyh2 test
 #-------------------------------------------------------------------------
 
-@hypothesis.settings( deadline=None, max_examples=50 )
+@hypothesis.settings( deadline=None, max_examples=50 if 'CI' not in os.environ else 5)
 @hypothesis.given(
   num_inports  = st.integers(1, 16),
   num_outports = st.integers(1, 16),

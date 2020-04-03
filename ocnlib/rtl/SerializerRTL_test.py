@@ -7,6 +7,7 @@ Unit tests for SerializerRTL.
 Author : Yanghui Ou
   Date : Feb 26, 2020
 '''
+import os
 import hypothesis
 from hypothesis import strategies as st
 from pymtl3.datatypes.strategies import bits
@@ -148,7 +149,7 @@ def test_stream( cmdline_opts ):
 # test case: pyh2
 #-------------------------------------------------------------------------
 
-@hypothesis.settings( deadline=None, max_examples=100 )
+@hypothesis.settings( deadline=None, max_examples=100 if 'CI' not in os.environ else 5 )
 @hypothesis.given(
   out_nbits   = st.integers(1, 64),
   max_nblocks = st.integers(2, 15),
