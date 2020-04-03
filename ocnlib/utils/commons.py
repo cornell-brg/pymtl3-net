@@ -98,7 +98,6 @@ def run_sim(
     dut.set_metadata( VerilatorImportPass.vl_xinit, xinit )
     dut.set_metadata( VerilatorImportPass.vl_trace, vl_trace )
 
-  if translation:
     th = TranslationImportPass()( th )
     th.elaborate()
 
