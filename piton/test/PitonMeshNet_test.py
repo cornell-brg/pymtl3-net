@@ -70,7 +70,7 @@ def mk_pkt( src_offchip, src_x, src_y, dst_offchip, dst_x, dst_y,
   chipid      = b14(1) << 13 if dst_offchip else b14(0)
   plen        = len( payload )
   header      = PitonNoCHeader( chipid, dst_x, dst_y, fbits, plen, mtype, mshr, opt1 )
-  header_bits = to_bits( header )
+  header_bits = header.to_bits()
   flits       = [ header_bits ] + payload
   pkt         = Packet( PitonNoCHeader, flits )
   pkt.src_offchip = src_offchip
