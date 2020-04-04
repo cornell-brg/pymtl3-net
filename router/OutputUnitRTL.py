@@ -44,7 +44,14 @@ class OutputUnitRTL( Component ):
     # No ouput queue
     else:
 
-      s.get.ret //= s.send.msg
+      s.send.msg //= s.get.ret
+
+      # s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
+      # @s.update
+      # def up_send_msg():
+      #   s.send.msg = PacketType( 0 )
+      #   if s.send.en:
+      #     s.send.msg = s.get.ret
 
       @s.update
       def up_get_send():
