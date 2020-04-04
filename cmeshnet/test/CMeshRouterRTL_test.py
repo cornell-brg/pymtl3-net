@@ -38,7 +38,8 @@ def run_vector_test( model, PacketType, test_vectors,
 
         model.recv[i].msg @= pkt
         model.recv[i].en  @= 1
-      elif model.recv[i].rdy == 0:
+      # elif model.recv[i].rdy == 0:
+      else:
         model.recv[i].en  @= 0
 
     for i in range( model.num_outports ):
@@ -49,7 +50,7 @@ def run_vector_test( model, PacketType, test_vectors,
     for i in range( model.num_outports ):
       if model.send[i].en == 1:
         pkt = model.send[i].msg
-        print('??', test_vector[4][i])
+        # print('??', test_vector[4][i])
         assert test_vector[4][i] == 'x' or pkt.payload == test_vector[4][i]
 
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
@@ -66,8 +67,8 @@ def test_vector_router4x4():
   inputs_buffer= [
 #     [dst]   term     payload          recv_rdy               send_msg
   [[4,4,7,4,5],0,[11,12,13,14,15],[1,1,1,0,1,0,0,0],[xx,xx,xx,xx,xx,xx,xx,xx]],
-  [[4,4,7,9,5],1,[21,22,23,24,25],[1,1,1,1,1,0,0,0],[xx,xx,xx,xx,xx,xx,xx,xx]],
-  [[4,4,7,8,5],2,[31,32,33,34,35],[0,0,0,0,1,0,0,0],[24,xx,21,23,xx,25,xx,xx]],
+  [[4,4,7,9,5],1,[21,22,23,24,25],[1,1,1,1,1,0,0,0],[xx,xx,11,13,xx,15,xx,xx]],
+  [[4,4,7,8,5],2,[31,32,33,34,35],[0,0,0,0,1,0,0,0],[24,xx,12,23,xx,25,xx,xx]],
   ]
 
   MeshPos = mk_mesh_pos( ncols, nrows )
