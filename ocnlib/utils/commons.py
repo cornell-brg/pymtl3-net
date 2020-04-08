@@ -157,7 +157,7 @@ def to_bitstruct( obj, BitstructType ):
 # A generic run_sim function
 
 def run_sim( th, max_cycles=1000, translation='', 
-             dut_name='dut', vl_trace=False, xinit='zeros', tb_gen=True ):
+             dut_name='dut', vl_trace=False, xinit='zeros', tb_gen=False ):
 
   th.elaborate()
 
