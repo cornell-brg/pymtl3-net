@@ -14,6 +14,9 @@ python:
 
 env:
  - CONFIG="-v --tb=short"
+ - CONFIG="-v --tb=short --test-verilog=zeros"
+ - CONFIG="-v --tb=short --test-verilog=ones"
+ - CONFIG="-v --tb=short --test-verilog=rand"
 
 #------------------------------------------------------------------------
 # install dependencies
@@ -52,7 +55,6 @@ script:
  - mkdir -p build
  - cd build
  - py.test ../ $CONFIG
- - py.test ../ $CONFIG --test-verilog
 
 #-------------------------------------------------------------------------
 # after success
