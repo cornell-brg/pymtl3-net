@@ -52,7 +52,7 @@ class OutputUnitRTL( Component ):
       # s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
       @s.update
       def up_send_msg():
-        s.send.msg = gating_out
+        s.send.msg = PacketType()
         if s.send.en:
           s.send.msg = s.get.ret
 

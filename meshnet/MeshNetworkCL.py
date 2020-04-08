@@ -39,6 +39,12 @@ class MeshNetworkCL( Component ):
     s.channels = [ ChannelCL( PacketType, latency = chl_lat)
                  for _ in range( num_channels ) ]
 
+    # Connet unused port to dummy queues
+    s.dangling_q_n = [ BoundaryUnit( default_rdy=False ) for _ in range( ncols ) ]
+    s.dangling_q_s = [ BoundaryUnit( default_rdy=False ) for _ in range( ncols ) ]
+    s.dangling_q_w = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
+    s.dangling_q_e = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
+
     # Connect routers together in Mesh
 
     chl_id  = 0
@@ -91,12 +97,6 @@ class MeshNetworkCL( Component ):
       # if i % ncols == ncols - 1:
       #   s.routers[i].send[EAST].method.method = lambda s: None
       #   s.routers[i].send[EAST].rdy.method    = lambda s: False
-      
-      # Connet unused port to dummy queues
-      s.dangling_q_n = [ BoundaryUnit( default_rdy=False ) for _ in range( ncols ) ]
-      s.dangling_q_s = [ BoundaryUnit( default_rdy=False ) for _ in range( ncols ) ]
-      s.dangling_q_w = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
-      s.dangling_q_e = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
 
       if i // ncols == 0:
         s.routers[i].send[ SOUTH ] //= s.dangling_q_s[ i % ncols ].recv

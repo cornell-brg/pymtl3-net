@@ -27,6 +27,25 @@ class DeserializerRTL( Component ):
     CountType = mk_bits( clog2( max_nblocks +1 ) )
     SelType   = mk_bits( clog2( max_nblocks ) )
 
+    s.STATE_IDLE = b1(0)
+    s.STATE_RECV = b1(1)
+
+    # Interface
+
+    s.recv = RecvIfcRTL( InType    )
+    s.len  = InPort    ( CountType )
+    s.send = SendIfcRTL( OutType   )
+
+    # Component
+
+    s.state      = Wire( Bits1 )
+    s.state_next = Wire( Bits1 )
+    s.idx        = Wire( CountType )
+    s.len_r      = Wire( CountType )
+    s.out_r      = [ Wire( InType ) for _ in range( max_nblocks ) ]
+    s.counter    = Counter( CountType )( decr=b1(0) )
+
+    s.idx //= s.counter.count
 
     # Input register
 
