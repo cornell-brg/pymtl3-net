@@ -49,12 +49,10 @@ class OutputUnitRTL( Component ):
 
       # s.send.msg //= s.get.ret
 
-      # s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
-      @s.update
-      def up_send_msg():
-        s.send.msg = PacketType()
-        if s.send.en:
-          s.send.msg = s.get.ret
+      if is_bitstruct_class( PacketType ):
+        s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
+      else:
+        s.send.msg //= lambda: s.get.ret if s.send.en else PacketType(0)
 
       @s.update
       def up_get_send():
