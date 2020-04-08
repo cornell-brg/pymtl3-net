@@ -36,7 +36,8 @@ install:
  - verilator --version
 
  # Install PyMTL3
- - pip install --requirement requirements.txt --constraint constraints.txt
+ #  - pip install --requirement requirements.txt --constraint constraints.txt
+ - pip install -U git+https://github.com/cornell-brg/pymtl3.git@master --constraint constraints.txt
  - pip list
 
 #------------------------------------------------------------------------
