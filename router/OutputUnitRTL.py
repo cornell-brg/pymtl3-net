@@ -47,12 +47,7 @@ class OutputUnitRTL( Component ):
     # No ouput queue
     else:
 
-      # s.send.msg //= s.get.ret
-
-      if is_bitstruct_class( PacketType ):
-        s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
-      else:
-        s.send.msg //= lambda: s.get.ret if s.send.en else PacketType(0)
+      s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
 
       @s.update
       def up_get_send():
