@@ -197,7 +197,7 @@ def pkt_strat( draw, ncols, nrows, max_plen=15 ):
   pkts  = st.data(),
 )
 def test_pyh2( ncols, nrows, pkts, test_verilog ):
-  pkts = pkts.draw( st.lists( pkt_strat( ncols, nrows ), min_size=1, max_size=100 ) )
+  pkts = pkts.draw( st.lists( pkt_strat( ncols, nrows ), min_size=1, max_size=20 ) )
   src_pkts, dst_pkts = arrange_src_sink_pkts( ncols, nrows, pkts )
   trans_backend = 'verilog' if test_verilog else ''
   th = TestHarness( ncols, nrows, src_pkts, dst_pkts )
