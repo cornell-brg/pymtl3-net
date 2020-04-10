@@ -157,7 +157,7 @@ def to_bitstruct( obj, BitstructType ):
 # A generic run_sim function
 
 def run_sim( th, max_cycles=1000, translation='', 
-             dut_name='dut', vl_trace=False, xinit='zeros', tb_gen=False ):
+             dut_name='dut', vl_trace=False, xinit='zeros', dump_vtb=None ):
 
   th.elaborate()
 
@@ -182,15 +182,15 @@ def run_sim( th, max_cycles=1000, translation='',
   elif translation:
     assert False, f'Invalid translation backend {translation}!'
 
-  if translation and tb_gen:
+  if translation and dump_vtb:
     th.apply( VerilogPlaceholderPass() )
 
   if translation:
     th = TranslationImportPass()( th )
     th.elaborate()
 
-  if translation and tb_gen:
-    getattr( th, dut_name ).verilog_tbgen = True
+  if translation and dump_vtb:
+    getattr( th, dut_name ).verilog_tbgen = dump_vtb
     th.apply( VerilogTBGenPass() )
 
   th.apply( SimulationPass() )

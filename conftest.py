@@ -7,6 +7,8 @@ def pytest_addoption(parser):
                     help="run verilog translation, " )
   parser.addoption( "--dump-vcd", action="store_true",
                     help="dump vcd for each test" )
+  parser.addoption( "--dump-vtb", action="store_true",
+                    help="dump verilog test bench for each test" )
 
 @pytest.fixture
 def test_verilog(request):
@@ -22,6 +24,19 @@ def dump_vcd(request):
     return '{}.{}.vcd'.format( test_module, test_name )
   else:
     return ''
+
+@pytest.fixture
+def dump_vtb(request):
+  """Dump Verilog test bench for each test"""
+  if request.config.option.dump_vtb:
+    assert request.config.option.test_verilog, \
+                "--dump-vtb requires --test-verilog"
+    test_module = request.module.__name__
+    test_name   = request.node.name
+    test_name   = test_name.replace('-', '_').replace( '[', '_' ).replace( ']', '' )
+    return test_name
+  else:
+    return None
 
 def pytest_cmdline_preparse(config, args):
   """Don't write *.pyc and __pycache__ files."""
