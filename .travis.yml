@@ -55,7 +55,7 @@ script:
  # - python --version | grep "Python 3" && futurize --write --stage2 ./pymtl3 &> /dev/null || true
  - mkdir -p build
  - cd build
- - py.test ../ $CONFIG
+ - travis_wait 30 py.test ../ $CONFIG
 
 #-------------------------------------------------------------------------
 # after success
