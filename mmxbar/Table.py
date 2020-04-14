@@ -66,7 +66,7 @@ class Table( Component ):
     # ret signals
 
     s.alloc.ret   //= s.avail_idx_r
-    s.dealloc.ret //= s.entry_r[ s.dealloc.msg ]
+    s.dealloc.ret //= lambda: s.entry_r[ s.dealloc.msg ]
 
   def line_trace( s ):
     return f'{s.alloc}(){s.dealloc}'
