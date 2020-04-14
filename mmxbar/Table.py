@@ -47,14 +47,14 @@ class Table( Component ):
     @s.update
     def up_avail_idx_next():
       s.avail_idx_next = IdxType(0)
-      for i in reversed( range( num_entries ) ):
+      for i in range( num_entries ):
         if ~s.valid_r[i]:
           s.avail_idx_next = IdxType(i)
 
     @s.update_ff
     def up_avail_idx_r():
       if s.reset:
-        s.avail_idx_r <<= IdxType(0)
+        s.avail_idx_r <<= IdxType(num_entries-1)
       else:
         s.avail_idx_r <<= s.avail_idx_next
 
