@@ -52,7 +52,9 @@ class Table( Component ):
     def up_avail_idx_next():
       s.avail_idx_next = IdxType(0)
       for i in range( num_entries ):
-        if ~s.valid_r[i] & ~( s.alloc.en & ( s.avail_idx_r == IdxType(i) ) ):
+        if ~s.valid_r[i] & \
+           ~( s.alloc.en & ( s.avail_idx_r == IdxType(i) ) ) | \
+           s.dealloc.en & ( s.dealloc.msg == IdxType(i) ):
           s.avail_idx_next = IdxType(i)
 
     @s.update_ff
@@ -88,4 +90,4 @@ class Table( Component ):
 
   def line_trace( s ):
     valid_r = ''.join([ 'v' if x else '.' for x in s.valid_r ])
-    return f'{s.alloc}({s.avail_idx_r}|{valid_r}){s.dealloc}'
+    return f'{s.alloc}({s.avail_idx_r}<={s.avail_idx_next}|{valid_r}){s.dealloc}'
