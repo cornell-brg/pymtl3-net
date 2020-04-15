@@ -52,7 +52,7 @@ def get_plen_type( cls, plen_field_name='plen' ):
   return fields_dict[ plen_field_name ]
 
 #-------------------------------------------------------------------------
-# get_field_type( cls ):
+# get_field_type:
 #-------------------------------------------------------------------------
 
 def get_field_type( cls, field_name ):
@@ -63,6 +63,15 @@ def get_field_type( cls, field_name ):
     raise AssertionError( f'{cls.__qualname__} does not have field {field_name}!' )
 
   return fields_dict[ field_name ]
+
+#-------------------------------------------------------------------------
+# has_field
+#-------------------------------------------------------------------------
+
+def has_field( cls, field_name ):
+  assert is_bitstruct_class( cls )
+  fields_dict = getattr( cls, bitstruct_fields )
+  return field_name in fields_dict:
 
 #-------------------------------------------------------------------------
 # bitstruct_to_slice_h
