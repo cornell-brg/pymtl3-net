@@ -26,7 +26,8 @@ class Table( Component ):
     # Components
 
     s.entry_r = [ Wire( EntryType ) for _ in range( num_entries ) ]
-    s.valid_r = Wire( BitsN )
+    # s.valid_r = Wire( BitsN )
+    s.valid_r = [ Wire( Bits1 ) for _ in range( num_entries )  ]
 
     s.avail_idx_r    = Wire( IdxType )
     s.avail_idx_next = Wire( IdxType )
@@ -36,11 +37,14 @@ class Table( Component ):
     @s.update_ff
     def up_entry_r_valid_r():
       if s.reset:
-        s.valid_r <<= BitsN(0)
+        # s.valid_r <<= BitsN(0)
+        for i in range( num_entries ):
+          s.valid_r[i] <<= b1(0)
       else:
         if s.alloc.en:
           s.entry_r[ s.avail_idx_r ] <<= s.alloc.msg
           s.valid_r[ s.avail_idx_r ] <<= b1(1)
+
         if s.dealloc.en:
           s.valid_r[ s.dealloc.msg ] <<= b1(0)
 
@@ -48,7 +52,7 @@ class Table( Component ):
     def up_avail_idx_next():
       s.avail_idx_next = IdxType(0)
       for i in range( num_entries ):
-        if ~s.valid_r[i]:
+        if ~s.valid_r[i] & ~( s.alloc.en & ( s.avail_idx_r == IdxType(i) ) ):
           s.avail_idx_next = IdxType(i)
 
     @s.update_ff
@@ -60,8 +64,22 @@ class Table( Component ):
 
     # rdy signals
 
-    s.alloc.rdy   //= lambda: ~reduce_and( s.valid_r )
-    s.dealloc.rdy //= lambda: reduce_or( s.valid_r )
+    # s.alloc.rdy   //= lambda: ~reduce_and( s.valid_r )
+    # s.dealloc.rdy //= lambda: reduce_or( s.valid_r )
+
+    @s.update
+    def up_alloc_rdy():
+      s.alloc.rdy = b1(0)
+      for i in range( num_entries ):
+        if ~s.valid_r[i]:
+          s.alloc.rdy = b1(1)
+
+    @s.update
+    def up_dealloc_rdy():
+      s.dealloc.rdy = b1(0)
+      for i in range( num_entries ):
+        if s.valid_r[i]:
+          s.dealloc.rdy = b1(1)
 
     # ret signals
 
@@ -69,4 +87,5 @@ class Table( Component ):
     s.dealloc.ret //= lambda: s.entry_r[ s.dealloc.msg ]
 
   def line_trace( s ):
-    return f'{s.alloc}(){s.dealloc}'
+    valid_r = ''.join([ 'v' if x else '.' for x in s.valid_r ])
+    return f'{s.alloc}({s.avail_idx_r}|{valid_r}){s.dealloc}'
