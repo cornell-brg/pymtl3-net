@@ -15,7 +15,7 @@ class Table( Component ):
 
     # Local parameters
 
-    IdxType = mk_bits( clog2( num_entries ) )
+    IdxType = Bits1 if num_entries==1 else mk_bits( clog2( num_entries ) )
     BitsN   = mk_bits( num_entries )
 
     # Interface
