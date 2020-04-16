@@ -35,7 +35,7 @@ class DstLogicSingleResp( Component ):
 
 class ReqAdapter( Component ):
 
-  def construct( s, Req, Resp, id, 
+  def construct( s, Req, Resp, id,
                  num_requesters, num_responders, max_req_in_flight=2,
                  DstLogicT=DstLogicSingleResp ):
 
@@ -61,7 +61,7 @@ class ReqAdapter( Component ):
     sl_src = slice( 0, src_nbits )
     sl_idx = slice( src_nbits, src_nbits+idx_nbits )
 
-    NetReq  = mk_req_msg ( Req, num_responders  )
+    NetReq  = mk_req_msg ( Req,  num_responders )
     NetResp = mk_resp_msg( Resp, num_requesters )
 
     # Interface
@@ -85,24 +85,78 @@ class ReqAdapter( Component ):
 
     # Logic
 
-    s.minion.req.rdy //= lambda s.table.alloc.rdy & s.master.req.rdy
-    s.minion.resp.en //= lambda s.master.resp.en
+    s.minion.req.rdy //= lambda: s.table.alloc.rdy & s.master.req.rdy
+    s.minion.resp.en //= lambda: s.master.resp.en
 
-    s.master.req.en   //= lambda s.minion.req.en
-    s.master.resp.rdy //= lambda s.minion.resp.rdy
+    s.master.req.en   //= lambda: s.minion.req.en
+    s.master.resp.rdy //= lambda: s.minion.resp.rdy
 
     @s.update
-    def up_master_req():
-      s.master.req.dst = s.dst_logic.req.dst
-      s.master.req.msg.payload = s.minion.req
+    def up_master_req_msg():
+      s.master.req.msg.dst = s.dst_logic.req.dst
+      s.master.req.msg.payload = s.minion.req.msg
       s.master.req.msg.payload.opaque[ sl_src ] = SrcT(id)
-      s.master.req.msg.payload.opaque[ sl_idx ] = s.table.alloc.ret
 
     @s.update
-    def up_minion_resp():
-      s.minion.resp = s.master.resp.payload
+    def up_minion_resp_msg():
+      s.minion.resp.msg = s.master.resp.payload
       s.minion.resp.msg.opaque = s.table.dealloc.ret
 
   def line_trace( s ):
-    return f'{s.minion}(){s.master}'
+    return f'{s.minion}({s.table.line_trace()}){s.master}'
 
+#-------------------------------------------------------------------------
+# RespAdapter
+#-------------------------------------------------------------------------
+
+class RespAdapter( Component ):
+
+  def construct( s, Req, Resp, id, num_requesters, num_responders ):
+
+    # Local parameter
+
+    assert num_requesters > 0
+    assert num_responders > 0
+    assert has_type( Req,  'opaque' )
+    assert has_type( Resp, 'opaque' )
+
+    src_nbits = 1 if num_requesters==1 else clog2( num_requesters )
+    dst_nbits = 1 if num_responders==1 else clog2( num_responders )
+    OpaqueT = get_field_type( Resp, 'opaque' )
+    SrcT    = mk_bits( src_nbits )
+    DstT    = mk_bits( dst_nbits )
+
+    assert src_nbits + idx_nbits <= OpaqueT.nbits, \
+      f'opaque field of {Resp.__qualname__} has only {opaque.nbits} bits ' \
+      f'but {src_nbits} bits is needed for src id and {idx_nbits} for ROB index!'
+
+    sl_src = slice( 0, src_nbits )
+    sl_idx = slice( src_nbits, src_nbits+idx_nbits )
+
+    NetReq  = mk_req_msg ( Req,  num_responders )
+    NetResp = mk_resp_msg( Resp, num_requesters )
+
+    # Interface
+
+    s.minion = MemMinionIfcRTL( NettReq, NetResp )
+    s.master = MemMasterIfcRTL( Req,     Resp    )
+
+    # Logic
+
+    s.minion.req.rdy //= s.master.req.rdy
+    s.minion.resp.en //= s.master.resp.en
+
+    s.master.req.en   //= s.minion.req.en
+    s.master.resp.rdy //= s.minion.resp.rdy
+
+    @s.update
+    def up_master_req_msg():
+      s.master.req.msg = s.minion.req.msg.payload
+
+    @s.update
+    def up_minion_resp_msg():
+      s.minion.resp.msg.dst     = s.minion.resp.msg.payload[ sl_src ]
+      s.minion.resp.msg,payload = s.minion.resp.msg.payload
+
+  def line_trace( s ):
+    return f'{s.minion}({s.id}){s.master}'
