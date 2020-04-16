@@ -71,7 +71,7 @@ def get_field_type( cls, field_name ):
 def has_field( cls, field_name ):
   assert is_bitstruct_class( cls )
   fields_dict = getattr( cls, bitstruct_fields )
-  return field_name in fields_dict:
+  return field_name in fields_dict
 
 #-------------------------------------------------------------------------
 # bitstruct_to_slice_h

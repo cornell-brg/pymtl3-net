@@ -10,7 +10,7 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs.mem_ifcs import MemMasterIfcRTL, MemMinionIfcRTL
-from ocnlib.utils.commons import has_type, get_field_type
+from ocnlib.utils.commons import has_field, get_field_type
 
 from .msg_types import mk_req_msg, mk_resp_msg
 from .Table import Table
@@ -43,8 +43,8 @@ class ReqAdapter( Component ):
 
     assert num_requesters > 0
     assert num_responders > 0
-    assert has_type( Req,  'opaque' )
-    assert has_type( Resp, 'opaque' )
+    assert has_field( Req,  'opaque' )
+    assert has_field( Resp, 'opaque' )
 
     src_nbits = 1 if num_requesters==1 else clog2( num_requesters )
     dst_nbits = 1 if num_responders==1 else clog2( num_responders )
@@ -75,12 +75,12 @@ class ReqAdapter( Component ):
     s.table.alloc.en    //= s.minion.req.en
     s.table.alloc.msg   //= s.minion.req.msg.opaque
     s.table.dealloc.en  //= s.master.resp.en
-    s.table.dealloc.msg //= s.master.resp.msg.opaque[ sl_idx ]
+    s.table.dealloc.msg //= s.master.resp.msg.payload.opaque[ sl_idx ]
 
     # Destination logic
 
     s.dst_logic = DstLogicT( Req, SrcT, DstT )
-    s.dst_logic.in_req    //= s.minion.req
+    s.dst_logic.in_req    //= s.minion.req.msg
     s.dst_logic.in_src_id //= SrcT(id)
 
     # Logic
@@ -93,13 +93,13 @@ class ReqAdapter( Component ):
 
     @s.update
     def up_master_req_msg():
-      s.master.req.msg.dst = s.dst_logic.req.dst
+      s.master.req.msg.dst = s.dst_logic.out_dst
       s.master.req.msg.payload = s.minion.req.msg
       s.master.req.msg.payload.opaque[ sl_src ] = SrcT(id)
 
     @s.update
     def up_minion_resp_msg():
-      s.minion.resp.msg = s.master.resp.payload
+      s.minion.resp.msg = s.master.resp.msg.payload
       s.minion.resp.msg.opaque = s.table.dealloc.ret
 
   def line_trace( s ):
@@ -117,8 +117,8 @@ class RespAdapter( Component ):
 
     assert num_requesters > 0
     assert num_responders > 0
-    assert has_type( Req,  'opaque' )
-    assert has_type( Resp, 'opaque' )
+    assert has_field( Req,  'opaque' )
+    assert has_field( Resp, 'opaque' )
 
     src_nbits = 1 if num_requesters==1 else clog2( num_requesters )
     dst_nbits = 1 if num_responders==1 else clog2( num_responders )
