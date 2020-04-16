@@ -126,20 +126,19 @@ class RespAdapter( Component ):
     SrcT    = mk_bits( src_nbits )
     DstT    = mk_bits( dst_nbits )
 
-    assert src_nbits + idx_nbits <= OpaqueT.nbits, \
+    assert src_nbits <= OpaqueT.nbits, \
       f'opaque field of {Resp.__qualname__} has only {opaque.nbits} bits ' \
-      f'but {src_nbits} bits is needed for src id and {idx_nbits} for ROB index!'
+      f'but {src_nbits} bits is needed for src id!'
 
     sl_src = slice( 0, src_nbits )
-    sl_idx = slice( src_nbits, src_nbits+idx_nbits )
 
     NetReq  = mk_req_msg ( Req,  num_responders )
     NetResp = mk_resp_msg( Resp, num_requesters )
 
     # Interface
 
-    s.minion = MemMinionIfcRTL( NettReq, NetResp )
-    s.master = MemMasterIfcRTL( Req,     Resp    )
+    s.minion = MemMinionIfcRTL( NetReq, NetResp )
+    s.master = MemMasterIfcRTL( Req,    Resp    )
 
     # Logic
 
@@ -155,8 +154,8 @@ class RespAdapter( Component ):
 
     @s.update
     def up_minion_resp_msg():
-      s.minion.resp.msg.dst     = s.minion.resp.msg.payload[ sl_src ]
-      s.minion.resp.msg,payload = s.minion.resp.msg.payload
+      s.minion.resp.msg.dst = s.master.resp.msg.opaque[ sl_src ]
+      s.minion.resp.msg.payload = s.master.resp.msg
 
   def line_trace( s ):
     return f'{s.minion}({s.id}){s.master}'
