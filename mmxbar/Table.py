@@ -86,7 +86,7 @@ class Table( Component ):
     # ret signals
 
     s.alloc.ret   //= s.avail_idx_r
-    s.dealloc.ret //= lambda: s.entry_r[ s.dealloc.msg ]
+    s.dealloc.ret //= lambda: s.entry_r[ s.dealloc.msg ] if s.valid_r[ s.dealloc.msg ] else EntryType(-1)
 
   def line_trace( s ):
     valid_r = ''.join([ 'v' if x else '.' for x in s.valid_r ])
