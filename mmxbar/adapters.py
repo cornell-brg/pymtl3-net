@@ -8,6 +8,7 @@ currently hard-coded to be 'opaque'.
 Author : Yanghui Ou
   Date : Apr 11, 2020
 '''
+from copy import deepcopy
 from pymtl3 import *
 from pymtl3.stdlib.ifcs.mem_ifcs import MemMasterIfcRTL, MemMinionIfcRTL
 from ocnlib.utils.commons import has_field, get_field_type
@@ -94,12 +95,13 @@ class ReqAdapter( Component ):
     @s.update
     def up_master_req_msg():
       s.master.req.msg.dst = s.dst_logic.out_dst
-      s.master.req.msg.payload = s.minion.req.msg
+      s.master.req.msg.payload = deepcopy( s.minion.req.msg )
       s.master.req.msg.payload.opaque[ sl_src ] = SrcT(id)
+      s.master.req.msg.payload.opaque[ sl_idx ] = s.table.alloc.ret
 
     @s.update
     def up_minion_resp_msg():
-      s.minion.resp.msg = s.master.resp.msg.payload
+      s.minion.resp.msg = deepcopy( s.master.resp.msg.payload )
       s.minion.resp.msg.opaque = s.table.dealloc.ret
 
   def line_trace( s ):
