@@ -133,6 +133,7 @@ class RespAdapter( Component ):
       f'but {src_nbits} bits is needed for src id!'
 
     sl_src = slice( 0, src_nbits )
+    s.id = DstT(id)
 
     NetReq  = mk_req_msg ( Req,  num_responders )
     NetResp = mk_resp_msg( Resp, num_requesters )
@@ -152,12 +153,12 @@ class RespAdapter( Component ):
 
     @s.update
     def up_master_req_msg():
-      s.master.req.msg = s.minion.req.msg.payload
+      s.master.req.msg = deepcopy( s.minion.req.msg.payload )
 
     @s.update
     def up_minion_resp_msg():
       s.minion.resp.msg.dst = s.master.resp.msg.opaque[ sl_src ]
-      s.minion.resp.msg.payload = s.master.resp.msg
+      s.minion.resp.msg.payload = deepcopy( s.master.resp.msg )
 
   def line_trace( s ):
     return f'{s.minion}({s.id}){s.master}'
