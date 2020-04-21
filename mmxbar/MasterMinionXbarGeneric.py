@@ -17,7 +17,7 @@ from pymtl3.stdlib.ifcs.mem_ifcs import MemMasterIfcRTL, MemMinionIfcRTL
 
 from .adapters import DstLogicSingleResp, ReqAdapter, RespAdapter
 from .msg_types import mk_req_msg, mk_resp_msg
-from ..xbar import XbarRTL
+from xbar.XbarRTL import XbarRTL
 
 class MasterMinionXbarGeneric( Component ):
 
@@ -42,6 +42,16 @@ class MasterMinionXbarGeneric( Component ):
     s.resp_adapter = [ RespAdapter( Req, Resp, i, num_requesters, num_responders ) for i  in range( num_responders ) ]
 
     # Connections
+
+    for i in range( num_requesters ):
+      s.req_adapter[i].minion      //= s.minion[i]
+      s.req_adapter[i].master.req  //= s.req_net.recv[i]
+      s.req_adapter[i].master.resp //= s.resp_net.send[i]
+
+    for i in range( num_responders ):
+      s.resp_adapter[i].minion.req  //= s.req_net.send[i]
+      s.resp_adapter[i].minion.resp //= s.resp_net.recv[i]
+      s.resp_adapter[i].master      //= s.master[i]
 
   def line_trace( s ):
     return f'()'
