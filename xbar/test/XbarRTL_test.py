@@ -102,6 +102,8 @@ def basic_pkts( n_in, n_out ):
 
 test_cases = [
   (                      'msg_func         n_in n_out init intv' ),
+  [ 'basic1x2',           basic_pkts,      1,   2,    0,   0     ],
+  [ 'basic2x1',           basic_pkts,      2,   1,    0,   0     ],
   [ 'basic2x2',           basic_pkts,      2,   2,    0,   0     ],
 ]
 
