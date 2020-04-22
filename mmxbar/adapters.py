@@ -72,11 +72,11 @@ class ReqAdapter( Component ):
 
     # Opaque table
 
-    s.table = Table( OpaqueT, max_req_in_flight )
-    s.table.alloc.en    //= s.minion.req.en
-    s.table.alloc.msg   //= s.minion.req.msg.opaque
-    s.table.dealloc.en  //= s.master.resp.en
-    s.table.dealloc.msg //= s.master.resp.msg.payload.opaque[ sl_idx ]
+    s.opq_table = Table( OpaqueT, max_req_in_flight )
+    s.opq_table.alloc.en    //= s.minion.req.en
+    s.opq_table.alloc.msg   //= s.minion.req.msg.opaque
+    s.opq_table.dealloc.en  //= s.master.resp.en
+    s.opq_table.dealloc.msg //= s.master.resp.msg.payload.opaque[ sl_idx ]
 
     # Destination logic
 
@@ -86,7 +86,7 @@ class ReqAdapter( Component ):
 
     # Logic
 
-    s.minion.req.rdy //= lambda: s.table.alloc.rdy & s.master.req.rdy
+    s.minion.req.rdy //= lambda: s.opq_table.alloc.rdy & s.master.req.rdy
     s.minion.resp.en //= lambda: s.master.resp.en
 
     s.master.req.en   //= lambda: s.minion.req.en
@@ -97,15 +97,15 @@ class ReqAdapter( Component ):
       s.master.req.msg.dst = s.dst_logic.out_dst
       s.master.req.msg.payload = deepcopy( s.minion.req.msg )
       s.master.req.msg.payload.opaque[ sl_src ] = SrcT(id)
-      s.master.req.msg.payload.opaque[ sl_idx ] = s.table.alloc.ret
+      s.master.req.msg.payload.opaque[ sl_idx ] = s.opq_table.alloc.ret
 
     @s.update
     def up_minion_resp_msg():
       s.minion.resp.msg = deepcopy( s.master.resp.msg.payload )
-      s.minion.resp.msg.opaque = s.table.dealloc.ret
+      s.minion.resp.msg.opaque = s.opq_table.dealloc.ret
 
   def line_trace( s ):
-    return f'{s.minion}({s.table.line_trace()}){s.master}'
+    return f'{s.minion}({s.opq_table.line_trace()}){s.master}'
 
 #-------------------------------------------------------------------------
 # RespAdapter
