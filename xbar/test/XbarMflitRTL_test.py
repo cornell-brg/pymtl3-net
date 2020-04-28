@@ -138,6 +138,18 @@ def product_pkts( num_inports, num_outports ):
   return pkts
 
 #-------------------------------------------------------------------------
+# test case: hotspot
+#-------------------------------------------------------------------------
+
+def hotspot_pkts( num_inports, num_outports ):
+  pkts  = []
+  npkts = 10
+  for i in range( num_inports ):
+    for j in range( npkts ):
+      pkts.append( mk_pkt( i, num_outports-1, [ 0xbad0+i, 0xace0+j ] ) )
+  return pkts
+
+#-------------------------------------------------------------------------
 # test case table
 #-------------------------------------------------------------------------
 
@@ -154,6 +166,11 @@ test_cases = [
   [ 'product8x8',         product_pkts,    8,   8,    0,   0,     2       ],
   [ 'product3x4',         product_pkts,    3,   4,    0,   0,     1       ],
   [ 'product7x3',         product_pkts,    7,   3,    0,   0,     1       ],
+  [ 'product8x1',         product_pkts,    8,   1,    0,   0,     0       ],
+  [ 'product8x1_delay',   product_pkts,    8,   1,    0,   0,     10      ],
+  [ 'product8x1_delay',   product_pkts,    8,   1,    0,   0,     10      ],
+  [ 'hotspot4x1',         hotspot_pkts,    4,   1,    0,   0,     0       ],
+  [ 'hotspot4x1_delay',   hotspot_pkts,    4,   1,    0,   0,     13      ],
 ]
 
 test_case_table = mk_test_case_table( test_cases )
