@@ -36,12 +36,17 @@ class SwitchUnitGrantHoldRTL( Component ):
     s.granted_get_rdy = Wire( Bits1 )
     s.any_hold        = Wire( Bits1 )
 
-    s.arbiter = GrantHoldArbiter( nreqs=num_inports )( hold = s.any_hold )
-    s.mux     = Mux( s.Type, num_inports )( out = s.give.ret )
-    s.encoder = Encoder( num_inports, s.sel_width )(
-      in_ = s.arbiter.grants,
-      out = s.mux.sel,
-    )
+    s.arbiter = GrantHoldArbiter( nreqs=num_inports )
+    s.arbiter.hold //= s.any_hold
+    s.arbiter.en   //= lambda: ~s.any_hold & s.give.en
+
+    s.mux = Mux( s.Type, num_inports )
+    s.mux.out //= s.give.ret
+
+    s.encoder = Encoder( num_inports, s.sel_width )
+    s.encoder.in_  //= s.arbiter.grants
+    s.encoder.out  //= s.mux.sel
+
 
     # Combinational Logic
     @s.update
@@ -60,6 +65,7 @@ class SwitchUnitGrantHoldRTL( Component ):
 
     for i in range( num_inports ):
       s.get[i].rdy //= s.arbiter.reqs[i]
+      # s.arbiter.reqs[i] //= lambda: s.get[i].rdy if s.give.rdy else b1(0)
       s.get[i].ret //= s.mux.in_[i]
 
     for i in range( num_inports ):
