@@ -25,7 +25,6 @@ class GrantHoldArbiter( Component ):
     # Components
     s.arb    = RoundRobinArbiterEn( nreqs )
     s.last_r = Wire( BitsN )
-    s.hold_r = Wire( Bits1 )
 
     # Logic
     s.arb.en   //= s.en
@@ -33,9 +32,8 @@ class GrantHoldArbiter( Component ):
     s.grants   //= lambda: s.arb.grants if ~s.hold else s.last_r
 
     @s.update_ff
-    def up_r():
+    def up_last_r():
       s.last_r <<= s.grants
-      s.hold_r <<= s.hold
     
   def line_trace( s ):
     hold = 'h' if s.hold else ' '
