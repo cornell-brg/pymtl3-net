@@ -20,6 +20,7 @@ def test_simple():
   print()
   arb.reqs = b4(0b0011)
   arb.hold = b1(0)
+  arb.en   = b1(1)
   arb.eval_combinational()
   print( arb.line_trace() )
   arb.tick()
@@ -30,6 +31,7 @@ def test_simple():
   arb.tick()
 
   arb.hold = b1(1)
+  arb.en   = b1(0)
   arb.eval_combinational()
   print( arb.line_trace() )
   assert arb.grants == g0
