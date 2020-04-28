@@ -87,5 +87,4 @@ class XbarMflitRTL( Component ):
   def line_trace( s ):
     in_trace  = '|'.join([ f'{ifc}' for ifc in s.recv ])
     out_trace = '|'.join([ f'{ifc}' for ifc in s.send ])
-    arb_trace = f'{s.switch_units[0].arbiter.line_trace()}'
-    return f'{in_trace}({arb_trace}){out_trace}'
+    return f'{in_trace}(){out_trace}'
