@@ -141,9 +141,9 @@ def wr_rd_each_msg( ncaches ):
 test_cases = [
   (            'msg_func         ncaches max_in_flight lat init        intv' ),
   [ '1pkt_2',   one_msg,         2,      4,            5,  [0,9,   ],  [0,0    ] ],
-  [ '1pkt_4',   one_msg,         4,      4,            3,  [0,9,0,0],  [0,0,0,0] ],
+  [ '1pkt_4',   one_msg,         4,      4,            3,  [0,9,0,0],  [9,0,9,0] ],
   [ 'wr_rd_2',  wr_rd_each_msg,  2,      4,            4,  [0,9,   ],  [0,0    ] ],
-  [ 'wr_rd_4',  wr_rd_each_msg,  4,      4,            6,  [0,9,0,0],  [0,0,0,0] ],
+  [ 'wr_rd_4',  wr_rd_each_msg,  4,      4,            6,  [0,9,0,0],  [0,9,0,9] ],
 ]
 
 test_case_table = mk_test_case_table( test_cases )
