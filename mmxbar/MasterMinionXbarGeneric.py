@@ -54,4 +54,6 @@ class MasterMinionXbarGeneric( Component ):
       s.resp_adapter[i].master      //= s.master[i]
 
   def line_trace( s ):
-    return f'()'
+    minion = ' || '.join( f'{ifc}' for ifc in s.minion )
+    master = ' || '.join( f'{ifc}' for ifc in s.master )
+    return f'{minion}(){master}'
