@@ -135,6 +135,21 @@ def wr_rd_each_msg( ncaches ):
   return mk_src_sink_msgs( msgs )
 
 #-------------------------------------------------------------------------
+# test case: stream
+#-------------------------------------------------------------------------
+
+def stream_msg( ncaches ):
+  msgs = [ [] for _ in range( ncaches ) ]
+  for i in range( 20 ):
+    msgs[0].append( req( wr, i, 0x1000*i, hexwords[i%10] ) )
+    msgs[0].append( resp( wr, i, 0, 0 ) )
+
+  for i in range( 20 ):
+    msgs[0].append( req( rd, i, 0x1000*i,0 ) )
+    msgs[0].append( resp( rd, i, 0, hexwords[i%10] ) )
+  return mk_src_sink_msgs( msgs )
+
+#-------------------------------------------------------------------------
 # test case table
 #-------------------------------------------------------------------------
 
@@ -144,6 +159,8 @@ test_cases = [
   [ '1pkt_4',   one_msg,         4,      4,            3,  [0,9,0,0],  [9,0,9,0] ],
   [ 'wr_rd_2',  wr_rd_each_msg,  2,      4,            4,  [0,9,   ],  [0,0    ] ],
   [ 'wr_rd_4',  wr_rd_each_msg,  4,      4,            6,  [0,9,0,0],  [0,9,0,9] ],
+  [ 'stream',   stream_msg,      2,      8,            5,  [0,100   ], [0,0    ] ],
+  [ 'stream_d', stream_msg,      2,      4,            3,  [0,100   ], [0,0    ] ],
 ]
 
 test_case_table = mk_test_case_table( test_cases )
