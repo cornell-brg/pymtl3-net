@@ -8,7 +8,6 @@ currently hard-coded to be 'opaque'.
 Author : Yanghui Ou
   Date : Apr 11, 2020
 '''
-from copy import deepcopy
 from pymtl3 import *
 from pymtl3.stdlib.ifcs.mem_ifcs import MemMasterIfcRTL, MemMinionIfcRTL
 from ocnlib.utils.commons import has_field, get_field_type
@@ -82,7 +81,7 @@ class ReqAdapter( Component ):
 
     s.dst_logic = DstLogicT( Req, SrcT, DstT )
     s.dst_logic.in_req    //= s.minion.req.msg
-    s.dst_logic.in_src_id //= SrcT(id)
+    s.dst_logic.in_src_id //= id
 
     # Logic
 
@@ -92,17 +91,17 @@ class ReqAdapter( Component ):
     s.master.req.en   //= lambda: s.minion.req.en
     s.master.resp.rdy //= lambda: s.minion.resp.rdy
 
-    @s.update
+    @update
     def up_master_req_msg():
-      s.master.req.msg.dst = s.dst_logic.out_dst
-      s.master.req.msg.payload = deepcopy( s.minion.req.msg )
-      s.master.req.msg.payload.opaque[ sl_src ] = SrcT(id)
-      s.master.req.msg.payload.opaque[ sl_idx ] = s.opq_table.alloc.ret
+      s.master.req.msg.dst @= s.dst_logic.out_dst
+      s.master.req.msg.payload @= s.minion.req.msg
+      s.master.req.msg.payload.opaque[ sl_src ] @= id
+      s.master.req.msg.payload.opaque[ sl_idx ] @= s.opq_table.alloc.ret
 
-    @s.update
+    @update
     def up_minion_resp_msg():
-      s.minion.resp.msg = deepcopy( s.master.resp.msg.payload )
-      s.minion.resp.msg.opaque = s.opq_table.dealloc.ret
+      s.minion.resp.msg @= s.master.resp.msg.payload
+      s.minion.resp.msg.opaque @= s.opq_table.dealloc.ret
 
   def line_trace( s ):
     return f'{s.minion}({s.opq_table.line_trace()}){s.master}'
@@ -151,14 +150,14 @@ class RespAdapter( Component ):
     s.master.req.en   //= s.minion.req.en
     s.master.resp.rdy //= s.minion.resp.rdy
 
-    @s.update
+    @update
     def up_master_req_msg():
-      s.master.req.msg = deepcopy( s.minion.req.msg.payload )
+      s.master.req.msg @= s.minion.req.msg.payload
 
-    @s.update
+    @update
     def up_minion_resp_msg():
-      s.minion.resp.msg.dst = s.master.resp.msg.opaque[ sl_src ]
-      s.minion.resp.msg.payload = deepcopy( s.master.resp.msg )
+      s.minion.resp.msg.dst @= s.master.resp.msg.opaque[ sl_src ]
+      s.minion.resp.msg.payload @= s.master.resp.msg
 
   def line_trace( s ):
     return f'{s.minion}({s.id}){s.master}'

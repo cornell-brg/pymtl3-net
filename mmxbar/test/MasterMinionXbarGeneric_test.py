@@ -35,7 +35,10 @@ hexwords = [
 #-------------------------------------------------------------------------
 
 def req( type_, opq, addr, data ):
-  return Req( type_, opq, addr, 0, data )
+  # PP: I have to allow truncation because the int is too big to fit into
+  # a Bits32.
+  TypeData = mk_bits( Req.get_field_type('data').nbits )
+  return Req( type_, opq, addr, 0, TypeData( data, trunc_int=True ) )
 
 #-------------------------------------------------------------------------
 # resp
@@ -97,17 +100,17 @@ def test_sanity():
   dut.elaborate()
   dut.apply( SimulationPass() )
   dut.sim_reset()
-  dut.tick()
-  dut.tick()
-  dut.tick()
+  dut.sim_tick()
+  dut.sim_tick()
+  dut.sim_tick()
 
   th = TestHarness( 2, 2, [ [], [] ], [ [], [] ] )
   th.elaborate()
   th.apply( SimulationPass() )
   th.sim_reset()
-  th.tick()
-  th.tick()
-  th.tick()
+  th.sim_tick()
+  th.sim_tick()
+  th.sim_tick()
 
 #-------------------------------------------------------------------------
 # test case: 1msg

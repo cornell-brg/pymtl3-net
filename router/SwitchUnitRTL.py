@@ -38,13 +38,14 @@ class SwitchUnitRTL( Component ):
     s.get_en  = [ Wire( Bits1 ) for _ in range( s.num_inports ) ]
     s.get_rdy = [ Wire( Bits1 ) for _ in range( s.num_inports ) ]
 
-    s.arbiter = RoundRobinArbiterEn( num_inports )( en = 1 )
-    s.mux = Mux( PacketType, num_inports )( out = s.give.ret )
+    s.arbiter = RoundRobinArbiterEn( num_inports )
+    s.arbiter.en //= 1
+    s.mux = Mux( PacketType, num_inports )
+    s.mux.out //= s.give.ret
 
-    s.encoder = Encoder( num_inports, s.sel_width )(
-      in_ = s.arbiter.grants,
-      out = s.mux.sel
-    )
+    s.encoder = Encoder( num_inports, s.sel_width )
+    s.encoder.in_ //= s.arbiter.grants
+    s.encoder.out //= s.mux.sel
 
     # Connections
 
@@ -54,14 +55,14 @@ class SwitchUnitRTL( Component ):
       s.get[i].en  //= s.get_en[i]
       s.get[i].rdy //= s.get_rdy[i]
 
-    @s.update
+    @update
     def up_give():
-      s.give.rdy = s.arbiter.grants > GrantType(0)
+      s.give.rdy @= s.arbiter.grants > GrantType(0)
 
-    @s.update
+    @update
     def up_get_en():
       for i in range( num_inports ):
-        s.get_en[i] = s.give.en & ( s.mux.sel==SelType(i) )
+        s.get_en[i] @= s.give.en & ( s.mux.sel==SelType(i) )
 
   # Line trace
 

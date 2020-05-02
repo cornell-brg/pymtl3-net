@@ -38,19 +38,19 @@ class XbarRouteUnitRTL( Component ):
 
     # Routing logic
 
-    @s.update
+    @update
     def up_ru_routing():
-      s.out_dir = DirT( s.get.ret.dst )
+      s.out_dir @= DirT( s.get.ret.dst )
 
       for i in range( num_outports ):
-        s.give[i].rdy = b1(0)
+        s.give[i].rdy @= b1(0)
 
       if s.get.rdy:
-        s.give[ s.out_dir ].rdy = b1(1)
+        s.give[ s.out_dir ].rdy @= b1(1)
 
-    @s.update
+    @update
     def up_ru_give_en():
-      s.get.en = s.give_ens > BitsN(0)
+      s.get.en @= s.give_ens > BitsN(0)
 
   # Line trace
   def line_trace( s ):

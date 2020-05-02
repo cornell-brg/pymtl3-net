@@ -34,30 +34,30 @@ class Table( Component ):
 
     # Logic
 
-    @s.update_ff
+    @update_ff
     def up_entry_r_valid_r():
       if s.reset:
         # s.valid_r <<= BitsN(0)
         for i in range( num_entries ):
-          s.valid_r[i] <<= b1(0)
+          s.valid_r[i] <<= 0
       else:
         if s.alloc.en:
           s.entry_r[ s.avail_idx_r ] <<= s.alloc.msg
-          s.valid_r[ s.avail_idx_r ] <<= b1(1)
+          s.valid_r[ s.avail_idx_r ] <<= 1
 
         if s.dealloc.en:
-          s.valid_r[ s.dealloc.msg ] <<= b1(0)
+          s.valid_r[ s.dealloc.msg ] <<= 0
 
-    @s.update
+    @update
     def up_avail_idx_next():
-      s.avail_idx_next = IdxType(0)
+      s.avail_idx_next @= 0
       for i in range( num_entries ):
         if ~s.valid_r[i] & \
-           ~( s.alloc.en & ( s.avail_idx_r == IdxType(i) ) ) | \
-           s.dealloc.en & ( s.dealloc.msg == IdxType(i) ):
-          s.avail_idx_next = IdxType(i)
+           ~( s.alloc.en & ( s.avail_idx_r == i ) ) | \
+           s.dealloc.en & ( s.dealloc.msg == i ):
+          s.avail_idx_next @= i
 
-    @s.update_ff
+    @update_ff
     def up_avail_idx_r():
       if s.reset:
         s.avail_idx_r <<= IdxType(num_entries-1)
@@ -69,19 +69,19 @@ class Table( Component ):
     # s.alloc.rdy   //= lambda: ~reduce_and( s.valid_r )
     # s.dealloc.rdy //= lambda: reduce_or( s.valid_r )
 
-    @s.update
+    @update
     def up_alloc_rdy():
-      s.alloc.rdy = b1(0)
+      s.alloc.rdy @= 0
       for i in range( num_entries ):
         if ~s.valid_r[i]:
-          s.alloc.rdy = b1(1)
+          s.alloc.rdy @= 1
 
-    @s.update
+    @update
     def up_dealloc_rdy():
-      s.dealloc.rdy = b1(0)
+      s.dealloc.rdy @= 0
       for i in range( num_entries ):
         if s.valid_r[i]:
-          s.dealloc.rdy = b1(1)
+          s.dealloc.rdy @= 1
 
     # ret signals
 

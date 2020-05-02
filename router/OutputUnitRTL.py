@@ -34,25 +34,25 @@ class OutputUnitRTL( Component ):
       s.get.ret       //= s.queue.enq.msg
       s.queue.deq.ret //= s.send.msg
 
-      @s.update
+      @update
       def up_get_deq():
-        s.get.en       = s.get.rdy & s.queue.enq.rdy
-        s.queue.enq.en = s.get.rdy & s.queue.enq.rdy
+        s.get.en       @= s.get.rdy & s.queue.enq.rdy
+        s.queue.enq.en @= s.get.rdy & s.queue.enq.rdy
 
-      @s.update
+      @update
       def up_deq_send():
-        s.send.en      = s.send.rdy & s.queue.deq.rdy
-        s.queue.deq.en = s.send.rdy & s.queue.deq.rdy
+        s.send.en      @= s.send.rdy & s.queue.deq.rdy
+        s.queue.deq.en @= s.send.rdy & s.queue.deq.rdy
 
     # No ouput queue
     else:
 
       s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
 
-      @s.update
+      @update
       def up_get_send():
-        s.get.en  = s.get.rdy & s.send.rdy
-        s.send.en = s.get.rdy & s.send.rdy
+        s.get.en  @= s.get.rdy & s.send.rdy
+        s.send.en @= s.get.rdy & s.send.rdy
 
   def line_trace( s ):
     if s.QueueType != None:
