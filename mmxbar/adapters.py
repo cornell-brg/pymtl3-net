@@ -10,7 +10,7 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs.mem_ifcs import MemMasterIfcRTL, MemMinionIfcRTL
-from ocnlib.utils.commons import has_field, get_field_type
+from pymtl3_net.ocnlib.utils.commons import has_field, get_field_type
 
 from .msg_types import mk_req_msg, mk_resp_msg
 from .Table import Table
@@ -55,7 +55,7 @@ class ReqAdapter( Component ):
     IdxT    = mk_bits( idx_nbits )
 
     assert src_nbits + idx_nbits <= OpaqueT.nbits, \
-      f'opaque field of {Req.__qualname__} has only {opaque.nbits} bits ' \
+      f'opaque field of {Req.__qualname__} has only {OpaqueT.nbits} bits ' \
       f'but {src_nbits} bits is needed for src id and {idx_nbits} for ROB index!'
 
     sl_src = slice( 0, src_nbits )
@@ -128,7 +128,7 @@ class RespAdapter( Component ):
     DstT    = mk_bits( dst_nbits )
 
     assert src_nbits <= OpaqueT.nbits, \
-      f'opaque field of {Resp.__qualname__} has only {opaque.nbits} bits ' \
+      f'opaque field of {Resp.__qualname__} has only {OpaqueT.nbits} bits ' \
       f'but {src_nbits} bits is needed for src id!'
 
     sl_src = slice( 0, src_nbits )

@@ -17,7 +17,7 @@ from pymtl3.stdlib.ifcs.mem_ifcs import MemMasterIfcRTL, MemMinionIfcRTL
 
 from .adapters import DstLogicSingleResp, ReqAdapter, RespAdapter
 from .msg_types import mk_req_msg, mk_resp_msg
-from xbar.XbarRTL import XbarRTL
+from pymtl3_net.xbar.XbarRTL import XbarRTL
 
 class MasterMinionXbarGeneric( Component ):
 
