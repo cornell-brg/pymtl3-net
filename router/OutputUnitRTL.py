@@ -15,6 +15,9 @@ from pymtl3.stdlib.rtl.queues import NormalQueueRTL
 class OutputUnitRTL( Component ):
   def construct( s, PacketType, QueueType=None ):
 
+    # Local parameter
+    gating_out = PacketType()
+
     # Interface
     s.get  = GetIfcRTL ( PacketType )
     s.send = SendIfcRTL( PacketType )
@@ -46,7 +49,7 @@ class OutputUnitRTL( Component ):
     # No ouput queue
     else:
 
-      s.get.ret //= s.send.msg
+      s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
 
       @update
       def up_get_send():

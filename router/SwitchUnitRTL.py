@@ -42,9 +42,9 @@ class SwitchUnitRTL( Component ):
     s.mux = Mux( PacketType, num_inports )
     s.mux.out //= s.give.ret
 
-    s.encoder = m = Encoder( num_inports, s.sel_width )
-    m.in_ //= s.arbiter.grants
-    m.out //= s.mux.sel
+    s.encoder = Encoder( num_inports, s.sel_width )
+    s.encoder.in_ //= s.arbiter.grants
+    s.encoder.out //= s.mux.sel
 
     # Connections
 

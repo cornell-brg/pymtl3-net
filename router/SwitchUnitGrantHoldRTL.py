@@ -35,13 +35,14 @@ class SwitchUnitGrantHoldRTL( Component ):
 
     s.arbiter = GrantHoldArbiter( nreqs=num_inports )
     s.arbiter.hold //= s.any_hold
+    s.arbiter.en   //= lambda: ~s.any_hold & s.give.en
 
     s.mux = Mux( s.Type, num_inports )
     s.mux.out //= s.give.ret
 
-    s.encoder = m = Encoder( num_inports, s.sel_width )
-    m.in_ //= s.arbiter.grants
-    m.out //= s.mux.sel
+    s.encoder = Encoder( num_inports, s.sel_width )
+    s.encoder.in_  //= s.arbiter.grants
+    s.encoder.out  //= s.mux.sel
 
     # Combinational Logic
     @update

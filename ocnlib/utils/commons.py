@@ -9,6 +9,10 @@ Author : Yanghui Ou
 '''
 from functools import reduce
 from pymtl3 import *
+from pymtl3.passes.backends.verilog import (
+  VerilogPlaceholderPass,
+  VerilogTBGenPass,
+)
 from pymtl3.datatypes.bitstructs import(
   is_bitstruct_class,
   is_bitstruct_inst,
@@ -31,7 +35,7 @@ def get_plen_type( cls, plen_field_name='plen' ):
   return fields_dict[ plen_field_name ]
 
 #-------------------------------------------------------------------------
-# get_field_type( cls ):
+# get_field_type:
 #-------------------------------------------------------------------------
 
 def get_field_type( cls, field_name ):
@@ -42,6 +46,15 @@ def get_field_type( cls, field_name ):
     raise AssertionError( f'{cls.__qualname__} does not have field {field_name}!' )
 
   return fields_dict[ field_name ]
+
+#-------------------------------------------------------------------------
+# has_field
+#-------------------------------------------------------------------------
+
+def has_field( cls, field_name ):
+  assert is_bitstruct_class( cls )
+  fields_dict = getattr( cls, bitstruct_fields )
+  return field_name in fields_dict
 
 #-------------------------------------------------------------------------
 # bitstruct_to_slice_h
@@ -80,7 +93,7 @@ def bitstruct_to_slices( cls ):
 
 def run_sim(
     th,
-    cmdline_opts={'dump_vcd':False, 'test_verilog':''},
+    cmdline_opts={'dump_vcd':False, 'test_verilog':'', 'dump_vtb':False},
     max_cycles=1000,
     dut_name='dut' ):
 
@@ -89,6 +102,9 @@ def run_sim(
   translation = bool(cmdline_opts['test_verilog'])
   vl_trace    = bool(cmdline_opts['dump_vcd'])
   xinit       = cmdline_opts['test_verilog']
+
+  if translation and dump_vtb:
+    th.apply( VerilogPlaceholderPass() )
 
   if translation:
     from pymtl3.passes.backends.verilog import TranslationImportPass
@@ -100,6 +116,10 @@ def run_sim(
 
     th = TranslationImportPass()( th )
     th.elaborate()
+
+  if translation and dump_vtb:
+    getattr( th, dut_name ).verilog_tbgen = dump_vtb
+    th.apply( VerilogTBGenPass() )
 
   th.apply( SimulationPass(print_line_trace=True) )
   th.sim_reset()

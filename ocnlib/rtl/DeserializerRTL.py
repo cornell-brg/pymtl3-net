@@ -121,8 +121,9 @@ class DeserializerRTL( Component ):
           s.counter.load_value @= 1
 
         else:
-          s.state_next   @= s.STATE_IDLE
-          s.counter.load @= 0
+          s.state_next         @= s.STATE_IDLE
+          s.counter.load       @= 0
+          s.counter.load_value @= CountType(0)
 
       else: # STATE_RECV
         if ( s.idx == s.len_r ) & s.send.en:

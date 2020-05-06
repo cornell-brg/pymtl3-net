@@ -105,8 +105,8 @@ def basic_pkts( ncols, nrows ):
   return [
     #      src                    dst
     #      off       x  y       | off      x  y        payload
-    mk_pkt( n,       0, 0,        n, ncols-1, nrows-1, [ 0x8badf00d             ] ),
-    mk_pkt( n, ncols-1, nrows-1,  n,       0, 0,       [ 0x8badf00d, 0xdeadbeef ] ),
+    # mk_pkt( n,       0, 0,        n, ncols-1, nrows-1, [ 0x8badf00d             ] ),
+    mk_pkt( n, ncols-1, nrows-1,  n,       1, 0,       [ 0x8badf00d, 0xdeadbeef ] ),
   ]
 
 #-------------------------------------------------------------------------
@@ -147,8 +147,27 @@ def neighbor_pkts( ncols, nrows ):
     dst_y = ( ( i+1 ) % nterminals ) // ncols
     payload = [ x for x in range( i % 10 ) ]
     pkts.append( mk_pkt( n, src_x, src_y, n, dst_x, dst_y, payload ) )
-
   return pkts
+
+#-------------------------------------------------------------------------
+# test case: hotspot
+#-------------------------------------------------------------------------
+
+def mk_hotspot_func( dst_x, dst_y, dst_offchip=False ):
+
+  def hotspot_pkts( ncols, nrows ):
+    if dst_offchip: assert dst_x == dst_y == 0
+    pkts = []
+    nterminals = ncols * nrows
+    pkts.append( mk_pkt( y, 0, 0, dst_offchip, dst_x, dst_y ) )
+    for i in range( nterminals ):
+      src_x = i %  ncols
+      src_y = i // ncols
+      payload = [ x for x in range( i % 10 ) ]
+      pkts.append( mk_pkt( n, src_x, src_y, dst_offchip, dst_x, dst_y, payload ) )
+    return pkts
+
+  return hotspot_pkts
 
 #-------------------------------------------------------------------------
 # test case table
@@ -170,19 +189,65 @@ test_case_table = mk_test_case_table([
 ])
 
 #-------------------------------------------------------------------------
-# test case table
+# test case table - specific for 2x7
 #-------------------------------------------------------------------------
 
 test_case_table2x7 = mk_test_case_table([
-  (                  'msg_func              src_init src_pintv  src_fintv sink_init sink_pintv sink_fintv' ),
-  [ 'basic2x7',       basic_pkts,           0,       0,         0,       0,        0,          0,          ],
-  [ 'basic2x7_bp',    basic_pkts,           0,       0,         0,       20,       0,          0,          ],
-  [ 'offchip2x7',     basic_offchip_pkts,   0,       0,         0,       0,        0,          0,          ],
-  [ 'offchip2x7_bp',  basic_offchip_pkts,   0,       0,         0,       20,       10,         3,          ],
-  [ 'long2x7',        offchip_long_pkts,    0,       0,         0,       0,        0,          0,          ],
-  [ 'long2x7_bp',     offchip_long_pkts,    0,       0,         0,       10,       15,         5,          ],
-  [ 'neighbor2x7',    neighbor_pkts,        0,       0,         0,       0,        0,          0,          ],
-  [ 'neighbor2x7_bp', neighbor_pkts,        0,       0,         0,       10,       10,         5,          ],
+  (                       'msg_func                   src_init src_pintv  src_fintv sink_init sink_pintv sink_fintv' ),
+  [ 'basic',               basic_pkts,                0,       0,         0,        0,        0,          0,         ],
+  [ 'basic_bp',            basic_pkts,                0,       0,         0,        20,       0,          0,         ],
+  [ 'offchip',             basic_offchip_pkts,        0,       0,         0,        0,        0,          0,         ],
+  [ 'offchip_bp',          basic_offchip_pkts,        0,       0,         0,        20,       10,         3,         ],
+  [ 'long',                offchip_long_pkts,         0,       0,         0,        0,        0,          0,         ],
+  [ 'long_bp',             offchip_long_pkts,         0,       0,         0,        10,       15,         5,         ],
+  [ 'neighbor',            neighbor_pkts,             0,       0,         0,        0,        0,          0,         ],
+  [ 'neighbor_src',        neighbor_pkts,             0,       0,         0,        0,        0,          0,         ],
+  [ 'neighbor_bp',         neighbor_pkts,             0,       0,         0,        10,       10,         5,         ],
+  [ 'hotspot_offchip',     mk_hotspot_func(0,0,True), 0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot0_0',          mk_hotspot_func(0,0),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot0_1',          mk_hotspot_func(0,1),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot0_2',          mk_hotspot_func(0,2),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot0_3',          mk_hotspot_func(0,3),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot0_4',          mk_hotspot_func(0,4),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot0_5',          mk_hotspot_func(0,5),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot0_6',          mk_hotspot_func(0,6),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot1_0',          mk_hotspot_func(1,0),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot1_1',          mk_hotspot_func(1,1),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot1_2',          mk_hotspot_func(1,2),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot1_3',          mk_hotspot_func(1,3),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot1_4',          mk_hotspot_func(1,4),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot1_5',          mk_hotspot_func(1,5),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot1_6',          mk_hotspot_func(1,6),      0,       0,         0,        0,        0,          0,         ],
+  [ 'hotspot_offchip_src', mk_hotspot_func(0,0,True), 0,       1,         0,        0,        0,          0,         ],
+  [ 'hotspot0_0_src',      mk_hotspot_func(0,0),      0,       2,         1,        0,        0,          0,         ],
+  [ 'hotspot0_1_src',      mk_hotspot_func(0,1),      0,       3,         0,        0,        0,          0,         ],
+  [ 'hotspot0_2_src',      mk_hotspot_func(0,2),      0,       4,         2,        0,        0,          0,         ],
+  [ 'hotspot0_3_src',      mk_hotspot_func(0,3),      0,       5,         0,        0,        0,          0,         ],
+  [ 'hotspot0_4_src',      mk_hotspot_func(0,4),      0,       6,         3,        0,        0,          0,         ],
+  [ 'hotspot0_5_src',      mk_hotspot_func(0,5),      0,       7,         0,        0,        0,          0,         ],
+  [ 'hotspot0_6_src',      mk_hotspot_func(0,6),      0,       8,         4,        0,        0,          0,         ],
+  [ 'hotspot1_0_src',      mk_hotspot_func(1,0),      0,       9,         0,        0,        0,          0,         ],
+  [ 'hotspot1_1_src',      mk_hotspot_func(1,1),      0,       10,        5,        0,        0,          0,         ],
+  [ 'hotspot1_2_src',      mk_hotspot_func(1,2),      0,       11,        0,        0,        0,          0,         ],
+  [ 'hotspot1_3_src',      mk_hotspot_func(1,3),      0,       12,        6,        0,        0,          0,         ],
+  [ 'hotspot1_4_src',      mk_hotspot_func(1,4),      0,       13,        0,        0,        0,          0,         ],
+  [ 'hotspot1_5_src',      mk_hotspot_func(1,5),      0,       14,        7,        0,        0,          0,         ],
+  [ 'hotspot1_6_src',      mk_hotspot_func(1,6),      0,       15,        0,        0,        0,          0,         ],
+  [ 'hotspot_offchip_bp',  mk_hotspot_func(0,0,True), 0,       0,         0,        10,       0,          0,         ],
+  [ 'hotspot0_0_bp',       mk_hotspot_func(0,0),      0,       0,         0,        12,       1,          1,         ],
+  [ 'hotspot0_1_bp',       mk_hotspot_func(0,1),      0,       0,         0,        14,       2,          0,         ],
+  [ 'hotspot0_2_bp',       mk_hotspot_func(0,2),      0,       0,         0,        16,       3,          2,         ],
+  [ 'hotspot0_3_bp',       mk_hotspot_func(0,3),      0,       0,         0,        18,       4,          0,         ],
+  [ 'hotspot0_4_bp',       mk_hotspot_func(0,4),      0,       0,         0,        20,       5,          3,         ],
+  [ 'hotspot0_5_bp',       mk_hotspot_func(0,5),      0,       0,         0,        22,       6,          0,         ],
+  [ 'hotspot0_6_bp',       mk_hotspot_func(0,6),      0,       0,         0,        24,       7,          4,         ],
+  [ 'hotspot1_0_bp',       mk_hotspot_func(1,0),      0,       0,         0,        26,       8,          0,         ],
+  [ 'hotspot1_1_bp',       mk_hotspot_func(1,1),      0,       0,         0,        28,       9,          5,         ],
+  [ 'hotspot1_2_bp',       mk_hotspot_func(1,2),      0,       0,         0,        30,       10,         0,         ],
+  [ 'hotspot1_3_bp',       mk_hotspot_func(1,3),      0,       0,         0,        32,       11,         6,         ],
+  [ 'hotspot1_4_bp',       mk_hotspot_func(1,4),      0,       0,         0,        34,       12,         0,         ],
+  [ 'hotspot1_5_bp',       mk_hotspot_func(1,5),      0,       0,         0,        36,       13,         7,         ],
+  [ 'hotspot1_6_bp',       mk_hotspot_func(1,6),      0,       0,         0,        38,       14,         0,         ],
 ])
 
 #-------------------------------------------------------------------------
@@ -219,12 +284,12 @@ def test_piton_mesh2x7( test_params, cmdline_opts ):
   src_pkts, dst_pkts = arrange_src_sink_pkts( ncols, nrows, pkts )
 
   th = TestHarness( ncols, nrows, src_pkts, dst_pkts )
-  th.set_param( 'top.src*.construct', 
+  th.set_param( 'top.src*.construct',
     initial_delay         = test_params.src_init,
     packet_interval_delay = test_params.src_pintv,
     flit_interval_delay   = test_params.src_fintv,
   )
-  th.set_param( 'top.sink*.construct', 
+  th.set_param( 'top.sink*.construct',
     initial_delay         = test_params.sink_init,
     packet_interval_delay = test_params.sink_pintv,
     flit_interval_delay   = test_params.sink_fintv,

@@ -18,6 +18,7 @@ def test_simple():
 
   arb.reqs @= 0b0011
   arb.hold @= 0
+  arb.en   @= 1
   arb.sim_tick()
 
   g0 = arb.grants.clone()

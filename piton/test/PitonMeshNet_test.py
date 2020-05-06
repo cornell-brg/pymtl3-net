@@ -190,7 +190,7 @@ def pkt_strat( draw, ncols, nrows, max_plen=15 ):
 # pyh2 test
 #-------------------------------------------------------------------------
 
-@hypothesis.settings( deadline=None, max_examples=25 if 'CI' not in os.environ else 5 )
+@hypothesis.settings( deadline=None, max_examples=20 )
 @hypothesis.given(
   ncols = st.integers(2, 4),
   nrows = st.integers(2, 4),
