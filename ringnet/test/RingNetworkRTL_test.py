@@ -88,7 +88,7 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    cmdline_opts={'dump_vcd':False, 'test_verilog':translation}
+    cmdline_opts={'dump_vcd':False, 'test_verilog':translation, 'dump_vtb':False}
     run_sim( th, cmdline_opts )
 
   def _test_cycle( s, translation='' ):
@@ -103,7 +103,7 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    cmdline_opts={'dump_vcd':False, 'test_verilog':translation}
+    cmdline_opts={'dump_vcd':False, 'test_verilog':translation, 'dump_vtb':False}
     run_sim( th, cmdline_opts )
 
   def _test_anti_cycle( s, translation='' ):
@@ -118,7 +118,7 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    cmdline_opts={'dump_vcd':False, 'test_verilog':translation}
+    cmdline_opts={'dump_vcd':False, 'test_verilog':translation, 'dump_vtb':False}
     run_sim( th, cmdline_opts )
 
   # Run each test with two additional backends
