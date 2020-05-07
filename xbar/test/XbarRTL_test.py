@@ -34,8 +34,8 @@ def test_sanity():
   dut.elaborate()
   dut.apply( SimulationPass() )
   dut.sim_reset()
-  dut.tick()
-  dut.tick()
+  dut.sim_tick()
+  dut.sim_tick()
 
 #-------------------------------------------------------------------------
 # arrange_src_sink_pkts
@@ -114,12 +114,11 @@ test_case_table = mk_test_case_table( test_cases )
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_sflit_xbar( test_params, test_verilog ):
+def test_sflit_xbar( test_params, cmdline_opts ):
   pkts = test_params.msg_func( test_params.n_in, test_params.n_out )
-  trans_backend = 'verilog' if test_verilog else ''
   th = TestHarness( test_params.n_in, test_params.n_out, pkts )
   th.set_param( 'top.sink*.construct',
     initial_delay  = test_params.init,
     interval_delay = test_params.intv,
   )
-  run_sim( th, translation=trans_backend )
+  run_sim( th, cmdline_opts )

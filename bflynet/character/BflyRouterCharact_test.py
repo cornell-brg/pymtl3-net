@@ -199,4 +199,4 @@ def test_char( k_ary, n_fly ):
   th = TestHarness( PacketType, k_ary, n_fly, pos_row, pos_fly,
                     src_packets, sink_packets, 0, 0, 0, 0 )
 
-  run_sim( th, cmdline_opts={'dump_vcd':False, 'test_verilog':'zeros'} )
+  run_sim( th, cmdline_opts={'dump_vcd':False, 'test_verilog':'zeros', 'dump_vtb':False} )

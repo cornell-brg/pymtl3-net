@@ -40,7 +40,7 @@ class XbarRouteUnitRTL( Component ):
 
     @update
     def up_ru_routing():
-      s.out_dir @= DirT( s.get.ret.dst )
+      s.out_dir @= trunc( s.get.ret.dst, dir_nbits )
 
       for i in range( num_outports ):
         s.give[i].rdy @= b1(0)
@@ -50,7 +50,7 @@ class XbarRouteUnitRTL( Component ):
 
     @update
     def up_ru_give_en():
-      s.get.en @= s.give_ens > BitsN(0)
+      s.get.en @= s.give_ens > 0
 
   # Line trace
   def line_trace( s ):

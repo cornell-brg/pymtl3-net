@@ -19,7 +19,7 @@ def test_sanity_check():
   dut.sim_tick()
   dut.sim_tick()
 
-def test_adhoc_8( test_verilog ):
+def test_adhoc_8( cmdline_opts ):
   print()
   dut = Table( Bits8, 4 )
   dut.elaborate()

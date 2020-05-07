@@ -46,14 +46,6 @@ class MeshNetworkCL( Component ):
     s.dangling_q_e = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
 
     # Connect routers together in Mesh
-
-    # Connect unused port to dummy queues
-
-    s.dangling_q_n = [ BoundaryUnit( default_rdy=False ) for _ in range( ncols ) ]
-    s.dangling_q_s = [ BoundaryUnit( default_rdy=False ) for _ in range( ncols ) ]
-    s.dangling_q_w = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
-    s.dangling_q_e = [ BoundaryUnit( default_rdy=False ) for _ in range( nrows ) ]
-
     chl_id  = 0
     for i in range( s.num_routers ):
       if i // ncols > 0:

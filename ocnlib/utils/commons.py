@@ -102,6 +102,9 @@ def run_sim(
   translation = bool(cmdline_opts['test_verilog'])
   vl_trace    = bool(cmdline_opts['dump_vcd'])
   xinit       = cmdline_opts['test_verilog']
+  dump_vtb    = False
+  # FIXME: add dump_vtb to pytest plugin!
+  # dump_vtb    = bool(cmdline_opts['dump_vtb'])
 
   if translation and dump_vtb:
     th.apply( VerilogPlaceholderPass() )
