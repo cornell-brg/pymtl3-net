@@ -95,6 +95,7 @@ def run_sim(
     th,
     cmdline_opts={'dump_vcd':False, 'test_verilog':'', 'dump_vtb':False},
     max_cycles=1000,
+    line_trace=True,
     dut_name='dut' ):
 
   th.elaborate()
@@ -122,7 +123,7 @@ def run_sim(
     getattr( th, dut_name ).verilog_tbgen = dump_vtb
     th.apply( VerilogTBGenPass() )
 
-  th.apply( SimulationPass(print_line_trace=True) )
+  th.apply( SimulationPass(print_line_trace=line_trace) )
   th.sim_reset()
 
   # Run simulation
