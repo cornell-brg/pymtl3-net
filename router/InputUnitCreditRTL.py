@@ -10,9 +10,9 @@ Author : Yanghui Ou
 from ocnlib.ifcs.CreditIfc import CreditRecvIfcRTL
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GiveIfcRTL
-from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
-from pymtl3.stdlib.rtl.Encoder import Encoder
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
+from pymtl3.stdlib.basic_rtl.arbiters import RoundRobinArbiterEn
+from pymtl3.stdlib.basic_rtl import Encoder
+from pymtl3.stdlib.queues import NormalQueueRTL
 
 
 class InputUnitCreditRTL( Component ):

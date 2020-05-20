@@ -10,7 +10,7 @@
 from ocnlib.ifcs.PhysicalDimension import PhysicalDimension
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
+from pymtl3.stdlib.queues import NormalQueueRTL
 
 
 class ChannelRTL( Component ):

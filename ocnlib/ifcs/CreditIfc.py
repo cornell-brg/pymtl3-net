@@ -9,10 +9,16 @@ Author : Yanghui Ou
 """
 from ocnlib.rtl import Counter
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL, enrdy_to_str
-from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
-from pymtl3.stdlib.rtl.Encoder import Encoder
-from pymtl3.stdlib.rtl.queues import BypassQueueRTL
+from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.basic_rtl.arbiters import RoundRobinArbiterEn
+from pymtl3.stdlib.basic_rtl import Encoder
+from pymtl3.stdlib.queues import BypassQueueRTL
+
+def enrdy_to_str( msg, en, rdy, trace_len=15 ):                            
+    if     en  and not rdy: return "X".ljust( trace_len )                      
+    if             not rdy: return "#".ljust( trace_len )                      
+    if not en  and     rdy: return " ".ljust( trace_len )                      
+    return f"{msg}".ljust( trace_len ) # en and rdy 
 
 #-------------------------------------------------------------------------
 # RTL interfaces

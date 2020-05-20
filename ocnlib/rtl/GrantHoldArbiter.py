@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Jan 22, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
+from pymtl3.stdlib.basic_rtl import RoundRobinArbiterEn
 
 
 class GrantHoldArbiter( Component ):
