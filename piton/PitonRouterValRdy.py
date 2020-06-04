@@ -9,6 +9,7 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
+from pymtl3.passes.backends.verilog import *
 
 from ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
 
@@ -24,7 +25,7 @@ class PitonRouterValRdy( Component ):
 
     # Metadata
 
-    s.set_metadata( TranslationPass.explicit_module_name, f'pyocn_router' )
+    s.set_metadata( VerilogTranslationPass.explicit_module_name, f'pyocn_router' )
 
     # Interface
 
@@ -39,6 +40,8 @@ class PitonRouterValRdy( Component ):
     s.router   = PitonRouter( PositionType )
 
     # Connections
+
+    s.pos //= s.router.pos
 
     for i in range(5):
       s.in_[i]          //= s.in2send[i].in_
