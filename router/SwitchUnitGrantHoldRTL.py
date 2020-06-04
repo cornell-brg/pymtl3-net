@@ -10,8 +10,7 @@ Author : Yanghui Ou
   Date : Jan 26, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.rtl import Mux
-from pymtl3.stdlib.rtl.Encoder import Encoder
+from pymtl3.stdlib.basic_rtl import Mux, Encoder
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, SendIfcRTL
 from ocnlib.rtl import Counter, GrantHoldArbiter
 

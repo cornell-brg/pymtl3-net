@@ -36,7 +36,7 @@ class MflitPacketSourceCL( Component ):
     s.p_delay = packet_interval_delay
 
     # Update block
-    @update
+    @update_once
     def up_src_send():
       if s.count > 0:
         s.count -= 1

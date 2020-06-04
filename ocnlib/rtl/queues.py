@@ -11,9 +11,9 @@ Author : Yanghui Ou
 
 
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import DeqIfcRTL, EnqIfcRTL
-from pymtl3.stdlib.rtl.arithmetics import Mux
-from pymtl3.stdlib.rtl.RegisterFile import RegisterFile
+from pymtl3.stdlib.queues import DeqIfcRTL, EnqIfcRTL
+from pymtl3.stdlib.basic_rtl.arithmetics import Mux
+from pymtl3.stdlib.basic_rtl import RegisterFile
 
 #-------------------------------------------------------------------------
 # Dpath and Ctrl for NormalQueueRTL

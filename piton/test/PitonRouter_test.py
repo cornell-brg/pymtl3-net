@@ -20,7 +20,7 @@ Author : Yanghui Ou
 '''
 import pytest
 from pymtl3 import *
-from pymtl3.stdlib.test import mk_test_case_table
+from pymtl3.stdlib.test_utils import mk_test_case_table
 from ocnlib.utils import run_sim
 from ocnlib.packets import MflitPacket as Packet
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
@@ -94,7 +94,7 @@ def mk_pkt( src_offchip, src_x, src_y, dst_offchip, dst_x, dst_y,
 def test_sanity_check():
   dut = PitonRouter( PitonPosition )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
   dut.sim_tick()
 

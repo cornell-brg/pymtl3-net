@@ -36,7 +36,7 @@ class MflitPacketSinkCL( Component ):
     s.done_flag    = False
     s.recv_called  = False
 
-    @update
+    @update_once
     def up_sink_count():
       # Raise exception at the start of next cycle so that the errored
       # line trace gets printed out
