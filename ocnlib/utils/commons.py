@@ -9,10 +9,7 @@ Author : Yanghui Ou
 '''
 from functools import reduce
 from pymtl3 import *
-from pymtl3.passes.backends.verilog import (
-  VerilogPlaceholderPass,
-  VerilogTBGenPass,
-)
+from pymtl3.passes.backends.verilog import *
 from pymtl3.datatypes.bitstructs import(
   is_bitstruct_class,
   is_bitstruct_inst,
@@ -109,14 +106,14 @@ def run_sim(
     th.apply( VerilogPlaceholderPass() )
 
   if translation:
-    from pymtl3.passes.backends.verilog import TranslationImportPass
+    from pymtl3.passes.backends.verilog import VerilogTranslationImportPass
 
     dut = getattr( th, dut_name )
-    dut.set_metadata( TranslationImportPass.enable, True )
-    dut.set_metadata( VerilatorImportPass.vl_xinit, xinit )
-    dut.set_metadata( VerilatorImportPass.vl_trace, vl_trace )
+    dut.set_metadata( VerilogTranslationImportPass.enable, True )
+    dut.set_metadata( VerilogVerilatorImportPass.vl_xinit, xinit )
+    dut.set_metadata( VerilogVerilatorImportPass.vl_trace, vl_trace )
 
-    th = TranslationImportPass()( th )
+    th = VerilogTranslationImportPass()( th )
     th.elaborate()
 
   if translation and dump_vtb:

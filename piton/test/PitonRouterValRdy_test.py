@@ -170,7 +170,7 @@ def offchip_pkts( pos_x, pos_y ):
     mk_pkt( n, pos_x, pos_y,  y,     0, 0,     [ 0xbad0 + i for i in range(10)      ]      ),
     mk_pkt( n,     0, 6,      y,     0, 0,     [ 0xdeadbeef                         ]      ),
     mk_pkt( y,     0, 0,      n, pos_x, 0,     [                                    ]      ),
-  ]# 
+  ]#
 
 
 #-------------------------------------------------------------------------
@@ -204,7 +204,7 @@ test_case_table = mk_test_case_table( table )
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_mflit_mesh_router( test_params ):
+def test_mflit_mesh_router( test_params, cmdline_opts ):
   ref  = PitonRouterFL( test_params.pos_x, test_params.pos_y )
   pkts = test_params.msg_func( test_params.pos_x, test_params.pos_y )
 
@@ -212,4 +212,4 @@ def test_mflit_mesh_router( test_params ):
   dst_pkts = ref.route( src_pkts )
 
   th = TestHarness( test_params.pos_x, test_params.pos_y, src_pkts, dst_pkts )
-  run_sim( th )
+  run_sim( th, cmdline_opts )
