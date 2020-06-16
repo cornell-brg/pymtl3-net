@@ -9,8 +9,8 @@ Author : Yanghui Ou
 '''
 import pytest
 from pymtl3 import *
-from pymtl3.stdlib.test import mk_test_case_table
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL as TestSource
+from pymtl3.stdlib.test_utils import mk_test_case_table
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL as TestSource
 from ocnlib.ifcs.packets import mk_generic_pkt, mk_xbar_pkt
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL as TestSink
@@ -32,7 +32,7 @@ def test_sanity():
   PktT = mk_generic_pkt( nrouters=4, opaque_nbits=8, vc=0, payload_nbits=32 )
   dut = XbarRTL( PktT, 2, 2 )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
   dut.sim_tick()
   dut.sim_tick()
