@@ -9,11 +9,10 @@ Author : Yanghui Ou
 '''
 import pytest
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import mk_mem_msg, MemMsgType
-from pymtl3.stdlib.cl.MemoryCL import MemoryCL
-from pymtl3.stdlib.test.test_srcs import TestSrcCL as TestSource
-from pymtl3.stdlib.test.test_sinks import TestSinkCL as TestSink
-from pymtl3.stdlib.test import run_sim, mk_test_case_table
+from pymtl3.stdlib.mem import mk_mem_msg, MemMsgType, MagicMemoryCL as MemoryCL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL as TestSource
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkCL as TestSink
+from pymtl3.stdlib.test_utils import run_sim, mk_test_case_table
 
 from ..MasterMinionXbarGeneric import MasterMinionXbarGeneric as Xbar
 
@@ -98,7 +97,7 @@ class TestHarness( Component ):
 def test_sanity():
   dut = Xbar( Req, Resp, 2, 1 )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
   dut.sim_tick()
   dut.sim_tick()
@@ -106,7 +105,7 @@ def test_sanity():
 
   th = TestHarness( 2, 2, [ [], [] ], [ [], [] ] )
   th.elaborate()
-  th.apply( SimulationPass() )
+  th.apply( DefaultPassGroup() )
   th.sim_reset()
   th.sim_tick()
   th.sim_tick()

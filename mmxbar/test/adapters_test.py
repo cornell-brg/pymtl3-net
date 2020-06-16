@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Apr 14, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import mk_mem_msg, MemMsgType
+from pymtl3.stdlib.mem import mk_mem_msg, MemMsgType
 
 from ..adapters import ReqAdapter, RespAdapter
 
@@ -28,7 +28,7 @@ def test_req_sanity_check():
   dut = ReqAdapter( Req, Resp, id=0, num_requesters=4, num_responders=1,
                     max_req_in_flight=8 )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
   dut.sim_tick()
   dut.sim_tick()
@@ -40,7 +40,7 @@ def test_req_sanity_check():
 def test_resp_sanity_check():
   dut = RespAdapter( Req, Resp, id=0, num_requesters=4, num_responders=1 )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
   dut.sim_tick()
   dut.sim_tick()
@@ -54,7 +54,7 @@ def test_req_adhoc():
                     max_req_in_flight=16 )
   print()
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
 
   dut.minion.resp.rdy @= b1(1)
   dut.master.req.rdy  @= b1(1)
@@ -166,7 +166,7 @@ def test_resp_adhoc():
   dut = RespAdapter( Req, Resp, id=0, num_requesters=16, num_responders=1 )
   print()
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
 
   dut.minion.resp.rdy @= b1(1)
   dut.master.req.rdy  @= b1(1)

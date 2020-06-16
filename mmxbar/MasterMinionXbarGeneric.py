@@ -13,7 +13,7 @@ Author : Yanghui Ou
   Date : Apr 15, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.ifcs.mem_ifcs import MemMasterIfcRTL, MemMinionIfcRTL
+from pymtl3.stdlib.mem import MemMasterIfcRTL, MemMinionIfcRTL
 from xbar.XbarRTL import XbarRTL
 
 from .adapters import DstLogicSingleResp, ReqAdapter, RespAdapter
