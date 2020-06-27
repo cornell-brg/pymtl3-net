@@ -9,7 +9,7 @@ Author : Yanghui Ou
   Date : Apr 11, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.ifcs.mem_ifcs import MemMasterIfcRTL, MemMinionIfcRTL
+from pymtl3.stdlib.mem import MemMasterIfcRTL, MemMinionIfcRTL
 from pymtl3_net.ocnlib.utils.commons import has_field, get_field_type
 
 from .msg_types import mk_req_msg, mk_resp_msg

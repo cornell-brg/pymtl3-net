@@ -9,7 +9,7 @@ Author : Yanghui Ou, Cheng Tan
 """
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
+from pymtl3.stdlib.queues import NormalQueueRTL
 
 
 class OutputUnitRTL( Component ):

@@ -9,9 +9,7 @@ Author : Yanghui Ou, Cheng Tan
 """
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, SendIfcRTL
-from pymtl3.stdlib.rtl import Mux
-from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
-from pymtl3.stdlib.rtl.Encoder import Encoder
+from pymtl3.stdlib.basic_rtl import Mux, RoundRobinArbiterEn, Encoder
 
 
 class SwitchUnitRTL( Component ):
