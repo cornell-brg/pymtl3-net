@@ -34,7 +34,7 @@ class TestHarness( Component ):
     # Connections
     s.src.send //= s.dut.recv
 
-    @update
+    @update_once
     def up_give_en():
       if s.dut.give.rdy() and s.sink.recv.rdy():
         s.sink.recv( s.dut.give() )

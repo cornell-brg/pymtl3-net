@@ -34,7 +34,7 @@ class TestHarness( Component ):
       s.src[i].send  //= s.src_q[i].enq
       s.src_q[i].deq //= s.dut.get[i]
 
-    @update
+    @update_once
     def up_give_recv():
       if s.dut.give.rdy() and s.sink.recv.rdy():
         s.sink.recv( s.dut.give() )
