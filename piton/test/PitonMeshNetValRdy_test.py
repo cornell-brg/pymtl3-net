@@ -9,7 +9,7 @@ Author : Yanghui Ou
 '''
 import pytest
 from pymtl3 import *
-from pymtl3.stdlib.test import mk_test_case_table
+from pymtl3.stdlib.test_utils import mk_test_case_table
 from ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
 from ocnlib.utils import run_sim
 from ocnlib.packets import MflitPacket as Packet

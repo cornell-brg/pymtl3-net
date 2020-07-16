@@ -16,7 +16,7 @@ from ocnlib.ifcs.positions import mk_mesh_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 from torusnet.TorusNetworkFL import torusnet_fl
 from torusnet.TorusNetworkRTL import TorusNetworkRTL
 

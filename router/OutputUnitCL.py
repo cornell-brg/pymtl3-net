@@ -25,19 +25,19 @@ class OutputUnitCL( Component ):
       # TODO: add type for QueueType when pymtl3 has that.
       s.queue = QueueType()
 
-      @update
+      @update_once
       def up_ou_get_enq():
         if s.get.rdy() and s.queue.enq.rdy():
           s.queue.enq( s.get() )
 
-      @update
+      @update_once
       def up_ou_deq_send():
         if s.queue.deq.rdy() and s.send.rdy():
           s.send( s.queue.deq() )
 
     # No ouput queue
     else:
-      @update
+      @update_once
       def up_ou_get_send():
         if s.get.rdy() and s.send.rdy():
           s.send( s.get() )

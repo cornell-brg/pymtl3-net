@@ -7,12 +7,13 @@ Test for credit based interfaces.
 Author : Yanghui Ou
   Date : June 10, 2019
 """
+from pymtl3 import *
+from pymtl3.stdlib.queues import NormalQueueRTL
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
-from pymtl3.stdlib.test.test_sinks import TestSinkRTL
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 
 from .CreditIfc import (CreditRecvIfcRTL, CreditRecvRTL2SendRTL,
                         CreditSendIfcRTL, RecvRTL2CreditSendRTL)

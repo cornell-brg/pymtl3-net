@@ -8,7 +8,10 @@
 
 import hypothesis
 from hypothesis import strategies as st
+from pymtl3 import *
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 
+from router.InputUnitRTL import InputUnitRTL
 from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from meshnet.MeshRouterRTL import MeshRouterRTL
@@ -16,9 +19,6 @@ from ocnlib.ifcs.packets import mk_mesh_pkt
 from ocnlib.ifcs.positions import mk_mesh_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 from router.SwitchUnitRTL import SwitchUnitRTL
 

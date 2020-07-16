@@ -7,11 +7,11 @@ Test for SwitchUnitRTL.
  Author : Yanghui Ou, Cheng Tan
    Date : June 22, 2019
 """
-from ocnlib.ifcs.packets import mk_generic_pkt
 from pymtl3 import *
-from pymtl3.stdlib.test.test_sinks import TestSinkCL
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkCL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
 from router.SwitchUnitRTL import SwitchUnitRTL
+from ocnlib.ifcs.packets import mk_generic_pkt
 
 #-------------------------------------------------------------------------
 # Test cases
@@ -20,7 +20,7 @@ from router.SwitchUnitRTL import SwitchUnitRTL
 def test_switch_unit_simple():
   dut = SwitchUnitRTL( Bits32, num_inports=5 )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
 
   dut.get[0].rdy @= 1

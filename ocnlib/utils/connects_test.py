@@ -75,7 +75,7 @@ def test_bitstruct_to_slices():
 def test_connect_bitstruct_simple():
   a = Bits2Bitstruct()
   a.elaborate()
-  a.apply( SimulationPass() )
+  a.apply( DefaultPassGroup() )
   a.pt_bits @= 0xeda
   a.sim_eval_combinational()
   assert a.pt_bitstruct.x == 0xed
@@ -83,7 +83,7 @@ def test_connect_bitstruct_simple():
 
   b = Bitstruct2Bits()
   b.elaborate()
-  b.apply( SimulationPass() )
+  b.apply( DefaultPassGroup() )
   b.pt_bitstruct.x @= 0xed
   b.pt_bitstruct.y @= 0xa
   b.sim_eval_combinational()
@@ -92,7 +92,7 @@ def test_connect_bitstruct_simple():
 def test_connect_bitstruct_nested():
   a = Bits2BitstructNested()
   a.elaborate()
-  a.apply( SimulationPass() )
+  a.apply( DefaultPassGroup() )
   a.pt_bits @= concat( b6(0x3f), b12(0xeda), b1(1) )
   a.sim_eval_combinational()
   assert a.pt_bitstruct.z    == 0x3f
@@ -102,7 +102,7 @@ def test_connect_bitstruct_nested():
 
   b = Bitstruct2BitsNested()
   b.elaborate()
-  b.apply( SimulationPass() )
+  b.apply( DefaultPassGroup() )
   b.pt_bitstruct.z    @= 0x3f
   b.pt_bitstruct.pt.x @= 0xed
   b.pt_bitstruct.pt.y @= 0xa

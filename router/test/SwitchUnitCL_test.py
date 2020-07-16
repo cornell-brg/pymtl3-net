@@ -8,11 +8,11 @@ Author: Yanghui Ou
 """
 import pytest
 
+from pymtl3 import *
+from pymtl3.stdlib.queues import BypassQueueCL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkCL as TestSinkCL
-from pymtl3 import *
-from pymtl3.stdlib.cl.queues import BypassQueueCL
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
 from router.SwitchUnitCL import SwitchUnitCL
 
 #-------------------------------------------------------------------------

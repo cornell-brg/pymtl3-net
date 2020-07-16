@@ -12,7 +12,7 @@ from ..SwitchUnitGrantHoldRTL import SwitchUnitGrantHoldRTL
 def test_sanity_check():
   dut = SwitchUnitGrantHoldRTL( Bits16, num_inports=5 )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
   dut.sim_tick()
 
@@ -25,7 +25,7 @@ def test_sanity_check():
 def test_adhoc():
   dut = SwitchUnitGrantHoldRTL( Bits16, num_inports=5 )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
 
   # Cycle 1 - first flit, no competitor

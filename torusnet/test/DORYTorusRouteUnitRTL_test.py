@@ -8,16 +8,15 @@ Author : Yanghui Ou
   Date : June 28, 2019
 """
 from itertools import product
-
 import pytest
 
+from pymtl3 import *
+from pymtl3.stdlib.queues import BypassQueueRTL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 from ocnlib.ifcs.packets import mk_mesh_pkt
 from ocnlib.ifcs.positions import mk_mesh_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import BypassQueueRTL
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from torusnet.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
 from torusnet.RouteUnitDorFL import RouteUnitDorFL
 

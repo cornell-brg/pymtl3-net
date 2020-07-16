@@ -7,14 +7,16 @@ Composition test for input/output unit with credit based interfaces.
 Author : Yanghui Ou
   Date : June 22, 2019
 """
-from ocnlib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
-                                      RecvRTL2CreditSendRTL)
+from pymtl3 import *
+from pymtl3.stdlib.queues import BypassQueueRTL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from ocnlib.ifcs.CreditIfc import (
+  CreditRecvRTL2SendRTL,
+  RecvRTL2CreditSendRTL
+)
 from ocnlib.ifcs.packets import mk_generic_pkt
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import BypassQueueRTL
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 
 from ..InputUnitCreditRTL import InputUnitCreditRTL
 from ..OutputUnitCreditRTL import OutputUnitCreditRTL

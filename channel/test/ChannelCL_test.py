@@ -10,9 +10,9 @@ import pytest
 
 from ocnlib.utils import run_sim
 from pymtl3 import *
-from pymtl3.stdlib.cl.queues import NormalQueueCL
-from pymtl3.stdlib.test.test_sinks import TestSinkCL
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from pymtl3.stdlib.queues import NormalQueueCL
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkCL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
 
 from ..ChannelCL import ChannelCL
 

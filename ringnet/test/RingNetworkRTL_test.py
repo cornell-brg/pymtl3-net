@@ -7,12 +7,12 @@ Test for RingNetworkRTL
 Author : Yanghui Ou, Cheng Tan
   Date : June 28, 2019
 """
+from pymtl3 import *
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 from ocnlib.ifcs.packets import mk_ring_pkt
 from ocnlib.ifcs.positions import mk_ring_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from ringnet.RingNetworkRTL import RingNetworkRTL
 
 from ..RingNetworkFL import ringnet_fl

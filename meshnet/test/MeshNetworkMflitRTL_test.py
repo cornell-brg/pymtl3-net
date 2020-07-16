@@ -12,7 +12,8 @@ import pytest
 import hypothesis
 from hypothesis import strategies as st
 from pymtl3 import *
-from pymtl3.stdlib.test import mk_test_case_table
+from pymtl3.stdlib.test_utils import mk_test_case_table
+
 from ocnlib.utils import run_sim
 from ocnlib.packets import MflitPacket as Packet
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
@@ -106,7 +107,7 @@ def arrange_src_sink_pkts( Header, ncols, nrows, pkt_lst ):
 def test_sanity_check():
   net = MeshNetworkMflitRTL( TestHeader, TestPosition, ncols=2, nrows=2 )
   net.elaborate()
-  net.apply( SimulationPass() )
+  net.apply( DefaultPassGroup() )
   net.sim_reset()
   net.sim_tick()
 

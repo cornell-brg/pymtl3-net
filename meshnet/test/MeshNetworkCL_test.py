@@ -15,8 +15,8 @@ from ocnlib.ifcs.positions import mk_mesh_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkCL
 from pymtl3 import *
-from pymtl3.stdlib.test import mk_test_case_table
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from pymtl3.stdlib.test_utils import mk_test_case_table
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
 from router.InputUnitCL import InputUnitCL
 
 #-------------------------------------------------------------------------

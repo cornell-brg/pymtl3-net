@@ -12,9 +12,9 @@ from ocnlib.ifcs.positions import *
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.queues import NormalQueueRTL
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 
 #-------------------------------------------------------------------------
 # TestHarness

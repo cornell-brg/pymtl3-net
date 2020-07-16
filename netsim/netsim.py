@@ -72,7 +72,7 @@ from meshnet.MeshNetworkRTL import MeshNetworkRTL
 from ocnlib.ifcs.packets import *
 from ocnlib.ifcs.positions import *
 from pymtl3 import *
-from pymtl3.stdlib.test import TestVectorSimulator
+from pymtl3.stdlib.test_utils import TestVectorSimulator
 from ringnet.RingNetworkRTL import RingNetworkRTL
 from torusnet.TorusNetworkRTL import TorusNetworkRTL
 
@@ -319,7 +319,7 @@ def simulate( opts, injection_rate, pattern, drain_limit, dump_vcd, trace, verbo
     model.set_param( "top.routers*.construct", k_ary=k_ary )
     model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
 
-  sim = model.apply( SimulationPass() )
+  sim = model.apply( DefaultPassGroup() )
 
   # Source Queues - Modeled as Bypass Queues
   src = [ deque() for x in range( num_nodes ) ]

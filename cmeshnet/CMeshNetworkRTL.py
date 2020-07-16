@@ -9,7 +9,7 @@ Author : Cheng Tan
 """
 from channel.ChannelRTL import ChannelRTL
 from pymtl3 import *
-from pymtl3.stdlib.ifcs.SendRecvIfc import *
+from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
 
 from .CMeshRouterRTL import CMeshRouterRTL
 from .directions import *

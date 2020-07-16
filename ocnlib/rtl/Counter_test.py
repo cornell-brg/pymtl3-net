@@ -15,7 +15,7 @@ from .Counter import Counter
 
 def test_simple():
   dut = Counter( Bits4, reset_value=9 )
-  dut.apply( SimulationPass(print_line_trace=True) )
+  dut.apply( DefaultPassGroup(print_line_trace=True) )
   dut.sim_reset()
 
   dut.incr @= 1
@@ -43,7 +43,7 @@ def test_simple():
 
 def test_load():
   dut = Counter( Bits4, reset_value=9 )
-  dut.apply( SimulationPass(print_line_trace=True) )
+  dut.apply( DefaultPassGroup(print_line_trace=True) )
 
   dut.sim_reset()
 

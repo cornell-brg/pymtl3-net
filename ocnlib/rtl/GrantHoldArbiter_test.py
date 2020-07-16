@@ -13,7 +13,7 @@ from .GrantHoldArbiter import GrantHoldArbiter
 def test_simple():
   arb = GrantHoldArbiter( nreqs=4 )
   arb.elaborate()
-  arb.apply( SimulationPass() )
+  arb.apply( DefaultPassGroup() )
   arb.sim_reset()
 
   arb.reqs @= 0b0011

@@ -117,7 +117,7 @@ def run_sim(
     th.elaborate()
 
   if translation and dump_vtb:
-    getattr( th, dut_name ).verilog_tbgen = dump_vtb
+    getattr( th, dut_name ).set_metadata( VerilogTBGenPass.case_name, dump_vtb )
     th.apply( VerilogTBGenPass() )
 
   th.apply( DefaultPassGroup(print_line_trace=line_trace) )

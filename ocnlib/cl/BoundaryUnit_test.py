@@ -13,7 +13,7 @@ from .BoundaryUnit import BoundaryUnit
 def test_false():
   m = BoundaryUnit( default_rdy=False )
   m.elaborate()
-  m.apply( SimulationPass() )
+  m.apply( DefaultPassGroup() )
   m.sim_reset()
 
   assert not m.recv.rdy()
@@ -29,7 +29,7 @@ def test_false():
 def test_true():
   m = BoundaryUnit( default_rdy=True )
   m.elaborate()
-  m.apply( SimulationPass() )
+  m.apply( DefaultPassGroup() )
   m.sim_reset()
 
   assert m.recv.rdy()

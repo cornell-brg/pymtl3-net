@@ -460,7 +460,7 @@ def net_simulate( topo, opts ):
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )
   net.elaborate()
-  net.apply( SimulationPass() )
+  net.apply( DefaultPassGroup() )
 
   vprint( f' - resetting network')
   net.sim_reset()
@@ -596,7 +596,7 @@ def net_simulate_cl( topo, opts ):
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )
   net.elaborate()
-  net.apply( SimulationPass() )
+  net.apply( DefaultPassGroup() )
 
   vprint( f' - resetting network')
   net.sim_reset()
@@ -810,7 +810,7 @@ def smoke_test( topo, opts ):
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )
   net.elaborate()
-  net.apply( SimulationPass() )
+  net.apply( DefaultPassGroup() )
 
   vprint( f' - resetting network')
   net.sim_reset()

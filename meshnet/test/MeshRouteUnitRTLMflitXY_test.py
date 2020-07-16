@@ -8,7 +8,8 @@ Author : Yanghui Ou
   Date : 11 Feb, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import BypassQueueRTL
+from pymtl3.stdlib.queues import BypassQueueRTL
+
 from ocnlib.utils import run_sim
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink

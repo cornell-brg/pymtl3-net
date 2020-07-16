@@ -7,15 +7,16 @@
  Author : Cheng Tan, Yanghui Ou
    Date : April 16, 2019
 """
-from cmeshnet.CMeshRouterRTL import CMeshRouterRTL
-from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
+from pymtl3 import *
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+
 from ocnlib.ifcs.packets import *
 from ocnlib.ifcs.positions import *
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from cmeshnet.CMeshRouterRTL import CMeshRouterRTL
+from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
 from router.InputUnitRTL import InputUnitRTL
 from test_helpers import dor_routing
 

@@ -26,7 +26,7 @@ from ocn_pclib.ifcs.positions import *
 from pymtl3 import *
 from pymtl3.passes import TracingConfigs
 from pymtl3.passes.backends.yosys import ImportPass, TranslationPass
-from pymtl3.stdlib.test import TestVectorSimulator
+from pymtl3.stdlib.test_utils import TestVectorSimulator
 from ringnet.RingNetworkRTL import RingNetworkRTL
 from torusnet.TorusNetworkRTL import TorusNetworkRTL
 
@@ -167,14 +167,14 @@ def perform( action, model, topology, terminals, dimension,
     os.system("[ ! -e "+topology+"NetworkRTL.sv ] || rm "+topology+"NetworkRTL.sv")
     net.yosys_translate = True
     net.apply( TranslationPass() )
-    sim = net.apply( SimulationPass() )
+    sim = net.apply( DefaultPassGroup() )
     os.system("mv "+topology+"*.sv "+topology+"NetworkRTL.sv")
     return
 
   if action == "simulate-1pkt":
     net.config_tracing = TracingConfigs( tracing='vcd', vcd_file_name=f'{topology}-sim1pkt' )
 
-  net.apply( SimulationPass() )
+  net.apply( DefaultPassGroup() )
 
   # Source Queues - Modeled as Bypass Queues
   src_queue = [ deque() for x in range( terminals ) ]

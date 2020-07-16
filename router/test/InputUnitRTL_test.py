@@ -10,11 +10,11 @@ Author: Yanghui Ou
 import pytest
 
 from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import (BypassQueueRTL, NormalQueueRTL,
+from pymtl3.stdlib.queues import (BypassQueueRTL, NormalQueueRTL,
                                       PipeQueueRTL)
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_sinks import TestSinkRTL
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 from router.InputUnitRTL import InputUnitRTL
 
 from .InputUnitCL_test import InputUnitCL_Tests as BaseTests

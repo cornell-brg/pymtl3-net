@@ -13,6 +13,10 @@ import hypothesis
 import pytest
 from hypothesis import strategies as st
 
+from pymtl3 import *
+from pymtl3.datatypes import strategies as pst
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
+
 from meshnet.DORXMeshRouteUnitCL import DORXMeshRouteUnitCL
 from meshnet.MeshRouterCL import MeshRouterCL
 from meshnet.MeshRouterFL import MeshRouterFL
@@ -20,9 +24,6 @@ from ocnlib.ifcs.packets import mk_mesh_pkt
 from ocnlib.ifcs.positions import mk_mesh_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkCL as TestSinkCL
-from pymtl3 import *
-from pymtl3.datatypes import strategies as pst
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
 
 #-------------------------------------------------------------------------
 # TestHarness

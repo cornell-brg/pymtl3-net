@@ -12,10 +12,10 @@ import hypothesis
 from hypothesis import strategies as st
 from pymtl3.datatypes.strategies import bits
 from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL as TestSource
-from pymtl3.stdlib.test.test_sinks import TestSinkRTL as TestSink
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL as TestSource
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL as TestSink
 from ocnlib.utils import run_sim
-# from pymtl3.stdlib.test import run_sim
+# from pymtl3.stdlib.test_utils import run_sim
 
 from .SerializerRTL import SerializerRTL
 
@@ -72,14 +72,14 @@ class TestHarness( Component ):
 def test_sanity_check():
   dut = SerializerRTL( out_nbits=16, max_nblocks=4 )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
   dut.sim_tick()
   dut.sim_tick()
 
   th = TestHarness( 16, 8, [] )
   th.elaborate()
-  th.apply( SimulationPass() )
+  th.apply( DefaultPassGroup() )
   th.sim_tick()
   th.sim_tick()
 

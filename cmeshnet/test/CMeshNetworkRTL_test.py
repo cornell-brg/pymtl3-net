@@ -7,20 +7,21 @@ Test for CMeshNetworkRTL
 Author : Cheng Tan, Yanghui Ou
   Date : April 16, 2019
 """
+from pymtl3 import *
+from pymtl3.stdlib.queues import NormalQueueRTL
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+
+from ocnlib.ifcs.packets import *
+from ocnlib.ifcs.positions import *
+from ocnlib.utils import run_sim
+from ocnlib.test.net_sinks import TestNetSinkRTL
 from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
 from cmeshnet.DORXCMeshRouteUnitRTL import DORXCMeshRouteUnitRTL
 from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
 from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from meshnet.MeshNetworkRTL import MeshNetworkRTL
-from ocnlib.ifcs.packets import *
-from ocnlib.ifcs.positions import *
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 
 
 #-------------------------------------------------------------------------

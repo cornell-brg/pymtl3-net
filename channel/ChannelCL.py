@@ -8,7 +8,7 @@
 #   Date : May 19, 2019
 
 from pymtl3 import *
-from pymtl3.stdlib.cl.queues import NormalQueueCL
+from pymtl3.stdlib.queues import NormalQueueCL
 
 
 class ChannelCL( Component ):
@@ -38,7 +38,7 @@ class ChannelCL( Component ):
 
       s.recv //= s.queues[0].enq
 
-      @update
+      @update_once
       def chnl_up_send():
 
         for i in range( s.latency-1 ):
