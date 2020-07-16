@@ -8,7 +8,7 @@
 
 from directions import *
 from pymtl3 import *
-from pymtl3.stdlib.cl.queues import BypassQueueCL
+from pymtl3.stdlib.queues import BypassQueueCL
 
 
 class DORYMeshRouteUnitCL( Component ):

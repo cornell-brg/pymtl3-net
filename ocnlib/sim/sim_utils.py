@@ -29,8 +29,8 @@ from ocnlib.ifcs.packets import (mk_bfly_pkt, mk_cmesh_pkt, mk_mesh_pkt,
 from ocnlib.ifcs.positions import mk_bfly_pos, mk_mesh_pos, mk_ring_pos
 from ocnlib.sim.CLNetWrapper import CLNetWrapper
 from pymtl3 import *
-from pymtl3.passes.backends.verilog import TranslationPass
-from pymtl3.passes import TracingConfigs
+from pymtl3.passes.backends.verilog import VerilogTranslationPass
+from pymtl3.passes import VcdGenerationPass
 from ringnet import RingNetworkRTL
 from torusnet import TorusNetworkRTL
 
@@ -780,11 +780,11 @@ def gen_verilog( topo, opts ):
   net.elaborate()
 
   vprint( f' - applying translation pass' )
-  net.set_metadata( TranslationPass.enable, True )
-  net.set_metadata( TranslationPass.explicit_module_name, topo )
-  net.apply( TranslationPass() )
+  net.set_metadata( VerilogTranslationPass.enable, True )
+  net.set_metadata( VerilogTranslationPass.explicit_module_name, topo )
+  net.apply( VerilogTranslationPass() )
 
-  translated_top_module = net.get_metadata( TranslationPass.translated_top_module )
+  translated_top_module = net.get_metadata( VerilogTranslationPass.translated_top_module )
   os.system(f'mv {translated_top_module}.v {topo}.v')
 
 #-------------------------------------------------------------------------
@@ -805,7 +805,8 @@ def smoke_test( topo, opts ):
 
   if opts.dump_vcd:
     vprint( f' - enabling vcd dumping' )
-    net.config_tracing = TracingConfigs( tracing='vcd', vcd_file_name=f'{topo}-{nports}-test' )
+    # net.config_tracing = TracingConfigs( tracing='vcd', vcd_file_name=f'{topo}-{nports}-test' )
+    net.set_metadata( VcdGenerationPass.vcd_file_name, f'{topo}-{nports}-test' )
 
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )
