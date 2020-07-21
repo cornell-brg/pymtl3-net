@@ -33,11 +33,18 @@ class DummyNode( Component ):
     s.addr_r     = Wire( Bits5 )
     s.recv_rdy_r = Wire( Bits1 )
 
+
     # Component
 
     s.reg_file = RegisterFile( s.PhitType, nregs=32 )
     s.reg_file.raddr[0] //= s.addr_r
     s.reg_file.waddr[0] //= s.addr_r
+
+    # NOTE: test bitstruct/bits conversion
+    # s.header_wire = Wire( Header )
+    # @update
+    # def up_bs():
+    #   s.header_wire @= s.reg_file.rdata[0]
 
     # Sequential logic
 
