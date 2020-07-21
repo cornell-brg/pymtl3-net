@@ -25,8 +25,8 @@ class DummyNode( Component ):
 
     # Interface
 
-    s.send = SendIfcRTL( Header )
-    s.recv = RecvIfcRTL( Header )
+    s.send = SendIfcRTL( s.PhitType )
+    s.recv = RecvIfcRTL( s.PhitType )
 
     # Regs and wires
 
@@ -35,7 +35,7 @@ class DummyNode( Component ):
 
     # Component
 
-    s.reg_file = RegisterFile( Header, nregs=32 )
+    s.reg_file = RegisterFile( s.PhitType, nregs=32 )
     s.reg_file.raddr[0] //= s.addr_r
     s.reg_file.waddr[0] //= s.addr_r
 
