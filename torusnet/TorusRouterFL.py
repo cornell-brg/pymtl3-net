@@ -36,32 +36,36 @@ class TorusRouterFL:
       if pkt.src_x == s.pos_x and pkt.src_y == s.pos_y:
         in_dir = SELF
 
-      elif s.dimension=='y':
+      elif s.dimension == 'y':
+        src_x = pkt.src_x.uint()
+        src_y = pkt.src_y.uint()
+        dst_x = pkt.dst_x.uint()
+        dst_y = pkt.dst_y.uint()
 
         # Same x - either comes from north or south
-        if pkt.src_x == s.pos_x:
-          north_dist = pkt.dst_y - pkt.src_y if pkt.dst_y > pkt.src_y else pkt.dst_y + s.nrows - pkt.src_y
-          south_dist = pkt.src_y - pkt.dst_y if pkt.dst_y < pkt.src_y else pkt.src_y + s.nrows - pkt.dst_y
+        if src_x == s.pos_x:
+          north_dist = dst_y - src_y if dst_y > src_y else dst_y + s.nrows - src_y
+          south_dist = src_y - dst_y if dst_y < src_y else src_y + s.nrows - dst_y
           in_dir = SOUTH if north_dist < south_dist else NORTH
 
         # Different x - either comes from west or east
         else:
-          east_dist  = pkt.dst_x - pkt.src_x if pkt.dst_x > pkt.src_x else pkt.dst_x + s.ncols - pkt.src_x
-          west_dist  = pkt.src_x - pkt.dst_x if pkt.dst_x < pkt.src_x else pkt.src_x + s.ncols - pkt.dst_x
+          east_dist  = dst_x - src_x if dst_x > src_x else dst_x + s.ncols - src_x
+          west_dist  = src_x - dst_x if dst_x < src_x else src_x + s.ncols - dst_x
           in_dir = EAST if west_dist < east_dist else WEST
 
       else: # s.dimension=='x'
 
         # Same y - either comes from west or east
-        if pkt.src_x == s.pos_x:
-          east_dist  = pkt.dst_x - pkt.src_x if pkt.dst_x > pkt.src_x else pkt.dst_x + s.ncols - pkt.src_x
-          west_dist  = pkt.src_x - pkt.dst_x if pkt.dst_x < pkt.src_x else pkt.src_x + s.ncols - pkt.dst_x
+        if src_x == s.pos_x:
+          east_dist  = dst_x - src_x if dst_x > src_x else dst_x + s.ncols - src_x
+          west_dist  = src_x - dst_x if dst_x < src_x else src_x + s.ncols - dst_x
           in_dir = EAST if west_dist < east_dist else WEST
 
         # Different y - either comes from north or south
         else:
-          north_dist = pkt.dst_y - pkt.src_y if pkt.dst_y > pkt.src_y else pkt.dst_y + s.nrows - pkt.src_y
-          south_dist = pkt.src_y - pkt.dst_y if pkt.dst_y < pkt.src_y else pkt.src_y + s.nrows - pkt.dst_y
+          north_dist = dst_y - src_y if dst_y > src_y else dst_y + s.nrows - src_y
+          south_dist = src_y - dst_y if dst_y < src_y else src_y + s.nrows - dst_y
           in_dir = SOUTH if north_dist < south_dist else NORTH
 
       src_pkts[ in_dir ].append( pkt )

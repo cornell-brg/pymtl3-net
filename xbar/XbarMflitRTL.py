@@ -9,7 +9,6 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
-from ocnlib.utils import get_nbits
 from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 from router.SwitchUnitGrantHoldRTL import SwitchUnitGrantHoldRTL
@@ -41,7 +40,7 @@ class XbarMflitRTL( Component ):
 
     s.num_inports  = num_inports
     s.num_outports = num_outports
-    s.PhitType     = mk_bits( get_nbits( Header ) )
+    s.PhitType     = mk_bits( Header.nbits )
 
     # Special case for num_inports = 1
     if num_inports == 1: SwitchUnitType = SwitchUnitNullRTL

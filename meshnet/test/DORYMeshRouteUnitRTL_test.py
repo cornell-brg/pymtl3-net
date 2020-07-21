@@ -6,14 +6,15 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : Mar 25, 2019
 
-from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from pymtl3 import *
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+
 from ocnlib.ifcs.packets import mk_mesh_pkt
 from ocnlib.ifcs.positions import mk_mesh_pos
 from ocnlib.utils import run_sim
-from pymtl3 import *
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_sinks import TestSinkRTL
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -42,15 +43,12 @@ class TestHarness( Component ):
     for i in range ( s.dut.num_outports ):
       s.dut.give[i].ret //= s.sinks[i].recv.msg
 
-    @s.update
+    @update
     def up_give_en():
       for i in range (s.dut.num_outports):
-        if s.dut.give[i].rdy and s.sinks[i].recv.rdy:
-          s.dut.give[i].en   = 1
-          s.sinks[i].recv.en = 1
-        else:
-          s.dut.give[i].en   = 0
-          s.sinks[i].recv.en = 0
+        both_rdy = s.dut.give[i].rdy & s.sinks[i].recv.rdy
+        s.dut.give[i].en @= both_rdy
+        s.sinks[i].recv.en @= both_rdy
 
     # FIXME: connect send to get
     # s.connect( s.src.send.rdy, Bits1( 1 )    )

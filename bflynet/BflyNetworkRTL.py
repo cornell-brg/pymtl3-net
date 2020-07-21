@@ -7,10 +7,11 @@ RTL implementation of a butterfly network.
 Author : Cheng Tan
   Date : April 6, 2019
 """
+from pymtl3 import *
+from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
+
 from channel.ChannelRTL import ChannelRTL
 from ocnlib.ifcs.PhysicalDimension import PhysicalDimension
-from pymtl3 import *
-from pymtl3.stdlib.ifcs.SendRecvIfc import *
 
 from .BflyRouterRTL import BflyRouterRTL
 

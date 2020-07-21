@@ -19,7 +19,7 @@ from pymtl3 import *
 def mk_generic_pkt( nrouters=4, opaque_nbits=8, vc=2, payload_nbits=16,
                     prefix="GenericPacket" ):
 
-  IdType = mk_bits( clog2( nrouters ) )
+  IdType  = mk_bits( clog2( nrouters ) )
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
 
@@ -55,6 +55,31 @@ def mk_generic_pkt( nrouters=4, opaque_nbits=8, vc=2, payload_nbits=16,
     )
 
 #=========================================================================
+# xbar packet
+#=========================================================================
+
+def mk_xbar_pkt( num_inports=2, num_outports=2, opaque_nbits=8, 
+                 payload_nbits=32 ):
+  SrcT = Bits1 if num_inports==1  else mk_bits( clog2( num_inports ) )
+  DstT = Bits1 if num_outports==1 else mk_bits( clog2( num_outports ) )
+  OpqT = mk_bits( opaque_nbits )
+  PldT = mk_bits( payload_nbits )
+
+  new_name = f'XbarPacket{num_inports}x{num_outports}_{opaque_nbits}_{payload_nbits}'
+
+  def str_func( s ):
+    return f'{s.src}>{s.dst}:{s.opaque}:{s.payload}'
+
+  return mk_bitstruct( new_name, {
+      'src'     : SrcT,
+      'dst'     : DstT,
+      'opaque'  : OpqT,
+      'payload' : PldT,
+    },
+    namespace = { '__str__' : str_func },
+  ) 
+
+#=========================================================================
 # ring packet
 #=========================================================================
 
@@ -70,7 +95,7 @@ def mk_mesh_pkt( ncols=2, nrows=2,
   assert ncols > 0 and nrows > 0
 
   XType       = mk_bits(clog2( ncols )) if ncols != 1 else Bits1
-  YType       = mk_bits(clog2( nrows)) if nrows!= 1 else Bits1
+  YType       = mk_bits(clog2( nrows )) if nrows != 1 else Bits1
   OpqType     = mk_bits(opaque_nbits)
   PayloadType = mk_bits(payload_nbits)
 

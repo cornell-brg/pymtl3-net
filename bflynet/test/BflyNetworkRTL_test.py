@@ -12,127 +12,9 @@ from ocnlib.ifcs.positions import *
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-
-#-------------------------------------------------------------------------
-# Test Vector
-#-------------------------------------------------------------------------
-
-def run_vector_test( model, PacketType, test_vectors, k_ary, n_fly ):
-
-  def tv_in( model, test_vector ):
-
-    num_routers   = n_fly * ( k_ary ** ( n_fly - 1 ) )
-    num_terminals = k_ary * ( k_ary ** ( n_fly - 1 ) )
-    r_rows        = k_ary ** ( n_fly - 1 )
-    BflyPosition  = mk_bfly_pos( k_ary, n_fly )
-
-    if test_vector[0] != 'x':
-      terminal_id = test_vector[0]
-      if r_rows == 1 or k_ary == 1:
-        DstType = mk_bits( n_fly )
-      else:
-        DstType = mk_bits( clog2( k_ary ) * n_fly )
-      dst = test_vector[1][0]
-      bf_dst = DstType(0)
-      tmp = 0
-      for i in range( n_fly ):
-        tmp = dst // (k_ary**(n_fly-i-1))
-        dst = dst % (k_ary**(n_fly-i-1))
-        bf_dst = DstType(bf_dst | DstType(tmp))
-        if i != n_fly - 1:
-          if k_ary == 1:
-            bf_dst = bf_dst * 2
-          else:
-            bf_dst = bf_dst * k_ary
-
-      pkt = PacketType( terminal_id, bf_dst, 0, test_vector[1][1])
-
-      # Enable the network interface on specific router
-      for i in range (num_terminals):
-        model.recv[i].en  = 0
-      model.recv[terminal_id].msg = pkt
-      model.recv[terminal_id].en  = 1
-
-    for i in range (num_terminals):
-      model.send[i].rdy = 1
-
-  def tv_out( model, test_vector ):
-    if test_vector[2] != 'x':
-      assert model.send[test_vector[2]].msg.payload == test_vector[3]
-
-  model.elaborate()
-  sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
-  sim.run_test()
-  model.sim_reset()
-
-def test_vector_2ary_1fly( dump_vcd, test_verilog ):
-
-  k_ary = 2
-  n_fly = 1
-  num_routers = n_fly * ( k_ary ** ( n_fly - 1 ) )
-  r_rows      = k_ary ** ( n_fly - 1 )
-  BflyPosition = mk_bfly_pos( k_ary, n_fly )
-  BflyPacket   = mk_bfly_pkt( k_ary, n_fly )
-  model = BflyNetworkRTL( BflyPacket, BflyPosition, k_ary, n_fly, 0 )
-
-  # model.set_param( "top.routers*.construct",
-  #                  k_ary=k_ary )
-  # model.set_param( "top.routers*.route_units*.construct",
-  #                  n_fly=n_fly )
-  model.set_param( "top.routers*.input_units*.construct",
-                   QueueType=NormalQueueRTL )
-
-  x = 'x'
-
-  # Specific for wire connection (link delay = 0) in 2x2 Torus topology
-  simple_2_test = [
-  # terminal [packet]   arr_term   msg
-  [  0,    [0,1001],     x,       x  ],
-  [  0,    [1,1002],     0,     1001 ],
-  [  0,    [1,1003],     1,     1002 ],
-  [  0,    [1,1004],     1,     1003 ],
-  [  0,    [0,1005],     1,     1004 ],
-  [  x,    [0,0000],     1,     1005 ],
-  [  x,    [0,0000],     x,       x  ],
-  [  x,    [0,0000],     x,       x  ],
-  [  x,    [0,0000],     x,       x  ],
-  [  x,    [0,0000],     x,       x  ],
-  [  x,    [0,0000],     x,       x  ],
-  [  x,    [0,0000],     x,       x  ],
-  ]
-
-  run_vector_test( model, BflyPacket, simple_2_test, k_ary, n_fly)
-
-def test_vector_2ary_2fly( dump_vcd, test_verilog ):
-
-  k_ary = 2
-  n_fly = 2
-  num_routers  = n_fly * ( k_ary ** ( n_fly - 1 ) )
-  r_rows = k_ary ** ( n_fly - 1 )
-  BflyPos = mk_bfly_pos( r_rows, n_fly )
-  PacketType   = mk_bfly_pkt( k_ary, n_fly )
-  model = BflyNetworkRTL( PacketType, BflyPos, k_ary, n_fly, 0 )
-
-  model.set_param( "top.routers*.route_units*.construct", n_fly=n_fly )
-
-  x = 'x'
-  # Specific for wire connection (link delay = 0) in 2x2 bfly topology
-  simple_4_test = [
-  # terminal [packet]   arr_term   msg
-  [  0,      [0,1001],     x,       x  ],
-  [  0,      [2,1002],     x,       x  ],
-  [  0,      [3,1003],     0,     1001 ],
-  [  x,      [0,0000],     2,     1002 ],
-  [  0,      [1,1004],     3,     1003 ],
-  [  0,      [0,1005],     x,       x  ],
-  [  x,      [0,0000],     1,     1004 ],
-  [  x,      [0,0000],     0,     1005 ],
-  ]
-
-  run_vector_test( model, PacketType, simple_4_test, k_ary, n_fly )
+from pymtl3.stdlib.queues import NormalQueueRTL
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -236,8 +118,6 @@ def test_srcsink_4ary_2fly():
 
   th = TestHarness( PacketType, k_ary, n_fly, src_packets, sink_packets,
                     0, 0, 0, 0 )
-
-  th.set_param( "top.dut.line_trace",  )
 
   run_sim( th )
   th.dut.elaborate_physical()

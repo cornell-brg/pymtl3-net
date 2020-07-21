@@ -9,7 +9,7 @@ Author : Yanghui Ou, Cheng Tan
 """
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GiveIfcRTL, RecvIfcRTL
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
+from pymtl3.stdlib.queues import NormalQueueRTL
 
 
 class InputUnitRTL( Component ):
@@ -23,7 +23,9 @@ class InputUnitRTL( Component ):
 
     # Component
 
-    s.queue = QueueType( PacketType )( enq = s.recv, deq = s.give )
+    s.queue = QueueType( PacketType )
+    s.queue.enq //= s.recv
+    s.queue.deq //= s.give
 
   def line_trace( s ):
     return f"{s.recv}({s.queue.count}){s.give}"

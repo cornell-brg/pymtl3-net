@@ -8,7 +8,10 @@
 
 import hypothesis
 from hypothesis import strategies as st
+from pymtl3 import *
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 
+from router.InputUnitRTL import InputUnitRTL
 from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from meshnet.MeshRouterRTL import MeshRouterRTL
@@ -16,9 +19,6 @@ from ocnlib.ifcs.packets import mk_mesh_pkt
 from ocnlib.ifcs.positions import mk_mesh_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
-from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 from router.SwitchUnitRTL import SwitchUnitRTL
 
@@ -30,8 +30,8 @@ class TestHarness( Component ):
 
   def construct( s,
                  MsgType       = None,
-                 ncols      = 2,
-                 nrows       = 2 ,
+                 ncols         = 2,
+                 nrows         = 2 ,
                  pos_x         = 0,
                  pos_y         = 0,
                  src_msgs      = [],
@@ -45,7 +45,7 @@ class TestHarness( Component ):
 
     MeshPos = mk_mesh_pos( ncols, nrows )
     s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = InputUnitRTL,
-        RouteUnitType = DORYMeshRouteUnitRTL )
+                           RouteUnitType = DORYMeshRouteUnitRTL )
     match_func = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL    ( MsgType, src_msgs[i],  src_initial,  src_interval  )
@@ -59,9 +59,7 @@ class TestHarness( Component ):
       s.srcs[i].send //= s.dut.recv[i]
       s.dut.send[i]  //= s.sinks[i].recv
 
-    @s.update
-    def up_pos():
-      s.dut.pos = MeshPos( pos_x, pos_y )
+    s.dut.pos //= MeshPos( pos_x, pos_y )
 
   def done( s ):
     srcs_done = 1
@@ -90,7 +88,7 @@ test_msgs = [[(0,0,11,1),(0,0,12,1),(0,1,13,2),(2,1,14,3),(0,0,15,1)],
             ]
 result_msgs = [[],[],[],[],[]]
 
-def test_normal_simple():
+def test_normal_simple( cmdline_opts ):
   src_packets = [[],[],[],[],[]]
   for item in test_msgs:
     for i in range( len( item ) ):
@@ -101,17 +99,17 @@ def test_normal_simple():
       result_msgs[dir_out].append( pkt )
 
   th = TestHarness( PacketType, 4, 4, 1, 1, src_packets, result_msgs, 0, 0, 0, 0 )
-  run_sim( th )
+  run_sim( th, cmdline_opts )
 
-def test_self_simple():
+def test_self_simple( cmdline_opts ):
   PacketType = mk_mesh_pkt(4, 4)
   pkt = PacketType( 0, 0, 0, 0, 0, 0xdead )
   src_pkts  = [ [], [], [], [], [pkt] ]
   sink_pkts = [ [], [], [], [], [pkt] ]
   th = TestHarness( PacketType, 4, 4, 0, 0, src_pkts, sink_pkts )
-  run_sim( th )
+  run_sim( th, cmdline_opts )
 
-def test_h1():
+def test_h1( cmdline_opts ):
   pos_x, pos_y, ncols, nrows = 0, 0, 2, 2
   PacketType = mk_mesh_pkt( ncols, nrows )
   pkt0 = PacketType( 0, 0, 0, 1, 0, 0xdead )
@@ -125,9 +123,9 @@ def test_h1():
     "top.dut.construct",
     RouteUnitType = DORYMeshRouteUnitRTL
   )
-  run_sim( th )
+  run_sim( th, cmdline_opts )
 
-def test_h2():
+def test_h2( cmdline_opts ):
   pos_x, pos_y, ncols, nrows = 0, 0, 2, 2
   PacketType = mk_mesh_pkt( ncols, nrows )
   pkt0 = PacketType( 0, 0, 1, 0, 0, 0xdead )
@@ -144,9 +142,9 @@ def test_h2():
     "top.dut.construct",
     RouteUnitType = DORYMeshRouteUnitRTL
   )
-  run_sim( th, 10 )
+  run_sim( th, cmdline_opts, max_cycles=10 )
 
-def test_h3():
+def test_h3( cmdline_opts ):
   pos_x, pos_y, ncols, nrows = 0, 1, 2, 2
   PacketType = mk_mesh_pkt( ncols, nrows )
   pkt0 = PacketType( 0, 1, 0, 0, 0, 0xdead )
@@ -161,4 +159,4 @@ def test_h3():
     "top.dut.construct",
     RouteUnitType = DORYMeshRouteUnitRTL
   )
-  run_sim( th, 10 )
+  run_sim( th, cmdline_opts, max_cycles=10 )

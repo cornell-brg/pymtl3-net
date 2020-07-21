@@ -14,87 +14,59 @@ from .Counter import Counter
 
 
 def test_simple():
-  print()
   dut = Counter( Bits4, reset_value=9 )
-  dut.apply( SimulationPass() )
-  dut.incr = b1(0)
-  dut.decr = b1(0)
-  dut.load = b1(0)
-  dut.load = b4(0)
-
+  dut.apply( DefaultPassGroup(print_line_trace=True) )
   dut.sim_reset()
-  print( dut.line_trace() )
-  dut.incr = b1(1)
-  dut.eval_combinational()
-  dut.tick()
-  print( dut.line_trace() )
+
+  dut.incr @= 1
+  dut.decr @= 0
+  dut.load @= 0
+
+  dut.sim_tick()
   assert dut.count == b4(10)
-  dut.tick()
-  print( dut.line_trace() )
+  dut.sim_tick()
   assert dut.count == b4(11)
-  dut.tick()
-  print( dut.line_trace() )
+  dut.sim_tick()
   assert dut.count == b4(12)
 
-  dut.decr = b1(1)
-  dut.eval_combinational()
-  dut.tick()
-  print( dut.line_trace() )
+  dut.decr @= 1
+  dut.sim_tick()
   assert dut.count == b4(12)
 
-  dut.incr = b1(0)
-  dut.eval_combinational()
-  dut.tick()
-  print( dut.line_trace() )
+  dut.incr @= 0
+  dut.sim_tick()
   assert dut.count == b4(11)
-  dut.tick()
-  print( dut.line_trace() )
+  dut.sim_tick()
   assert dut.count == b4(10)
-  dut.tick()
-  print( dut.line_trace() )
+  dut.sim_tick()
   assert dut.count == b4(9)
 
-def _test_load():
-  print
+def test_load():
   dut = Counter( Bits4, reset_value=9 )
-  dut.apply( SimulationPass() )
-  dut.incr = b1(0)
-  dut.decr = b1(0)
-  dut.load = b1(0)
-  dut.load = b4(0)
+  dut.apply( DefaultPassGroup(print_line_trace=True) )
 
   dut.sim_reset()
-  print( dut.line_trace() )
-  dut.incr = b1(1)
-  dut.load = b1(1)
-  dut.load_value = b4(3)
-  dut.eval_combinational()
-  dut.tick()
-  print( dut.line_trace() )
+
+  dut.incr @= 1
+  dut.decr @= 0
+  dut.load @= 1
+  dut.load_value @= 3
+  dut.sim_tick()
   assert dut.count == b4(3)
-  dut.load = b1(0)
-  dut.eval_combinational()
-  dut.tick()
-  print( dut.line_trace() )
+  dut.load @= 0
+  dut.sim_tick()
   assert dut.count == b4(4)
-  dut.tick()
-  print( dut.line_trace() )
+  dut.sim_tick()
   assert dut.count == b4(5)
 
-  dut.decr = b1(1)
-  dut.eval_combinational()
-  dut.tick()
-  print( dut.line_trace() )
+  dut.decr @= 1
+  dut.sim_tick()
   assert dut.count == b4(5)
 
-  dut.incr = b1(0)
-  dut.eval_combinational()
-  dut.tick()
-  print( dut.line_trace() )
+  dut.incr @= 0
+  dut.sim_tick()
   assert dut.count == b4(4)
-  dut.tick()
-  print( dut.line_trace() )
+  dut.sim_tick()
   assert dut.count == b4(3)
-  dut.tick()
-  print( dut.line_trace() )
+  dut.sim_tick()
   assert dut.count == b4(2)

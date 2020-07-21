@@ -19,7 +19,7 @@ class SwitchUnitNullRTL( Component ):
     # Interface
 
     s.get  = [ GetIfcRTL( Type ) for _ in range( num_inports )  ]
-    s.hold = [ InPort( Bits1 ) for _ in range( num_inports ) ]
+    s.hold = [ InPort() for _ in range( num_inports ) ]
     s.give = GiveIfcRTL( Type )
 
     connect( s.give, s.get[0] )

@@ -28,7 +28,7 @@ def command( cmd ):
 
 def test_gen():
   for net in nets:
-    filename = f"{net}.v"
+    filename = f"{net}__pickled.v"
     if os.path.exists( filename ):
       os.remove( filename )
     command( [ sim, 'gen', net ] )

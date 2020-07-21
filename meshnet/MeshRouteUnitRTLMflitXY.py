@@ -10,12 +10,12 @@ It requires no tail flit and that the header flit should have a field that
 indicates the length of the payload in terms of number of flits.
 
 Authour : Yanghui Ou
-   Date : Feb 9, 2020  
+   Date : Feb 9, 2020
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 from ocnlib.rtl import Counter, GrantHoldArbiter
-from ocnlib.utils import get_nbits, get_plen_type
+from ocnlib.utils import get_plen_type
 from ocnlib.utils.connects import connect_bitstruct
 from .directions import *
 
@@ -29,7 +29,7 @@ class MeshRouteUnitRTLMflitXY( Component ):
     # Meta data
     s.num_outports = 5
     s.HeaderFormat = HeaderFormat
-    s.PhitType     = mk_bits( get_nbits( HeaderFormat ) )
+    s.PhitType     = mk_bits( HeaderFormat.nbits )
     s.STATE_HEADER = b1(0)
     s.STATE_BODY   = b1(1)
 
@@ -50,90 +50,93 @@ class MeshRouteUnitRTLMflitXY( Component ):
     s.out_dir     = Wire( Bits3 )
     s.any_give_en = Wire( Bits1 )
 
-    s.counter = Counter( PLenType )(
-      incr=b1(0),
-      load_value=s.header.plen,
-    )
+    s.counter = m = Counter( PLenType )
+    m.incr //= 0
+    m.load_value //= s.header.plen
 
-    connect_bitstruct( s.get.ret, s.header )
-    
+    @update
+    def up_get_ret():
+      s.header @= s.get.ret
+
     for i in range( 5 ):
       s.get.ret //= s.give[i].ret
     s.get.en //= s.any_give_en
 
-    @s.update
+    @update
     def up_any_give_en():
-      s.any_give_en = b1(0)
+      s.any_give_en @= 0
       for i in range( s.num_outports ):
         if s.give[i].en:
-          s.any_give_en = b1(1)
+          s.any_give_en @= 1
 
     # State transition logic
-    @s.update_ff
+    @update_ff
     def up_state_r():
       if s.reset:
         s.state <<= s.STATE_HEADER
       else:
         s.state <<= s.state_next
 
-    @s.update
+    @update
     def up_state_next():
       if s.state == s.STATE_HEADER:
         # If the packet has body flits
-        if s.any_give_en & ( s.header.plen > PLenType(0) ):
-          s.state_next = s.STATE_BODY
+        if s.any_give_en & ( s.header.plen > 0 ):
+          s.state_next @= s.STATE_BODY
 
         else:
-          s.state_next = s.STATE_HEADER
+          s.state_next @= s.STATE_HEADER
 
       else: # STATE_BODY
-        if ( s.counter.count == PLenType(1) ) & s.any_give_en:
-          s.state_next = s.STATE_HEADER
+        if ( s.counter.count == 1 ) & s.any_give_en:
+          s.state_next @= s.STATE_HEADER
+        else:
+          s.state_next @= s.STATE_BODY
 
     # State output logic
-    @s.update
+    @update
     def up_counter_decr():
       if s.state == s.STATE_HEADER:
-        s.counter.decr = b1(0)
+        s.counter.decr @= 0
       else:
-        s.counter.decr = s.any_give_en
+        s.counter.decr @= s.any_give_en
 
-    @s.update
+    @update
     def up_counter_load():
       if s.state == s.STATE_HEADER:
-        s.counter.load = ( s.state_next == s.STATE_BODY )
+        s.counter.load @= ( s.state_next == s.STATE_BODY )
       else:
-        s.counter.load = b1(0)
+        s.counter.load @= 0
 
 
     # Routing logic
     # TODO: Figure out how to encode dest id
-    @s.update
+    @update
     def up_out_dir():
       if ( s.state == s.STATE_HEADER ) & s.get.rdy:
         if ( s.header.dst_x == s.pos.pos_x ) & ( s.header.dst_y == s.pos.pos_y ):
-          s.out_dir = b3( SELF )
+          s.out_dir @= SELF
         elif s.header.dst_x < s.pos.pos_x:
-          s.out_dir = b3( WEST )
+          s.out_dir @= WEST
         elif s.header.dst_x > s.pos.pos_x:
-          s.out_dir = b3( EAST )
+          s.out_dir @= EAST
         elif s.header.dst_y < s.pos.pos_y:
-          s.out_dir = b3( SOUTH )
+          s.out_dir @= SOUTH
         else:
-          s.out_dir = b3( NORTH )
-       
-      else:
-        s.out_dir = s.out_dir_r
+          s.out_dir @= NORTH
 
-    @s.update_ff
+      else:
+        s.out_dir @= s.out_dir_r
+
+    @update_ff
     def up_out_dir_r():
       s.out_dir_r <<= s.out_dir
 
-    @s.update
+    @update
     def up_give_rdy_hold():
       for i in range( s.num_outports ):
-        s.give[i].rdy = ( b3(i) == s.out_dir ) & s.get.rdy
-        s.hold[i]     = ( b3(i) == s.out_dir ) & ( s.state == s.STATE_BODY )
+        s.give[i].rdy @= ( i == s.out_dir ) & s.get.rdy
+        s.hold[i]     @= ( i == s.out_dir ) & ( s.state == s.STATE_BODY )
 
   #-----------------------------------------------------------------------
   # line_trace

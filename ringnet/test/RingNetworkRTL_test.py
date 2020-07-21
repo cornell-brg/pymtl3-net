@@ -7,12 +7,12 @@ Test for RingNetworkRTL
 Author : Yanghui Ou, Cheng Tan
   Date : June 28, 2019
 """
+from pymtl3 import *
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 from ocnlib.ifcs.packets import mk_ring_pkt
 from ocnlib.ifcs.positions import mk_ring_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 from ringnet.RingNetworkRTL import RingNetworkRTL
 
 from ..RingNetworkFL import ringnet_fl
@@ -78,7 +78,8 @@ class RingNetwork_Tests:
   def setup_class( cls ):
     cls.DutType = RingNetworkRTL
 
-  def test_simple( s ):
+  # Refactor common test functinos
+  def _test_simple( s, translation='' ):
     nterminals = 4
     Pkt = mk_ring_pkt( nterminals )
     src_pkts = mk_src_pkts( nterminals, [
@@ -87,9 +88,10 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    run_sim( th )
+    cmdline_opts={'dump_vcd':False, 'test_verilog':translation, 'dump_vtb':False}
+    run_sim( th, cmdline_opts )
 
-  def test_cycle( s ):
+  def _test_cycle( s, translation='' ):
     nterminals = 4
     Pkt = mk_ring_pkt( nterminals )
     src_pkts = mk_src_pkts( nterminals, [
@@ -101,9 +103,10 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    run_sim( th )
+    cmdline_opts={'dump_vcd':False, 'test_verilog':translation, 'dump_vtb':False}
+    run_sim( th, cmdline_opts )
 
-  def test_anti_cycle( s ):
+  def _test_anti_cycle( s, translation='' ):
     nterminals = 4
     Pkt = mk_ring_pkt( nterminals )
     src_pkts = mk_src_pkts( nterminals, [
@@ -115,4 +118,24 @@ class RingNetwork_Tests:
     ])
     dst_pkts = ringnet_fl( src_pkts )
     th = TestHarness( Pkt, nterminals, src_pkts, dst_pkts )
-    run_sim( th )
+    cmdline_opts={'dump_vcd':False, 'test_verilog':translation, 'dump_vtb':False}
+    run_sim( th, cmdline_opts )
+
+  # Run each test with two additional backends
+  def test_simple( self ):
+    self._test_simple()
+
+  def test_cycle( self ):
+    self._test_cycle()
+
+  def test_anti_cycle( self ):
+    self._test_anti_cycle()
+
+  def test_simple_verilog( self ):
+    self._test_simple('zeros')
+
+  def test_cycle_verilog( self ):
+    self._test_cycle('zeros')
+
+  def test_anti_cycle_verilog( self ):
+    self._test_anti_cycle('zeros')

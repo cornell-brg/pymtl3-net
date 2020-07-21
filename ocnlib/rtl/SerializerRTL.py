@@ -9,7 +9,7 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
-from pymtl3.stdlib.rtl import Mux
+from pymtl3.stdlib.basic_rtl import Mux
 
 from .Counter import Counter
 
@@ -45,20 +45,21 @@ class SerializerRTL( Component ):
     s.in_r       = Wire( InType    )
     s.len_r      = Wire( CountType )
 
-    s.counter    = Counter( CountType )( decr=b1(0) )
+    s.counter    = Counter( CountType )
+    s.counter.decr //= 0
     s.mux        = Mux( OutType, max_nblocks )
 
     # Input register
 
-    @s.update_ff
+    @update_ff
     def up_in_r():
       if s.recv.en & ( s.state_next != s.STATE_IDLE ):
         s.in_r  <<= s.recv.msg
         # Force len to 1 if it is set to be 0 to avoid undefined behavior
-        s.len_r <<= s.len if s.len > CountType(0) else CountType(1)
+        s.len_r <<= s.len if s.len > 0 else 1
       else:
         s.in_r  <<= s.in_r
-        s.len_r <<= CountType(0) if s.state_next == s.STATE_IDLE else s.len_r
+        s.len_r <<= 0 if s.state_next == s.STATE_IDLE else s.len_r
 
     # Mux logic
 
@@ -71,61 +72,61 @@ class SerializerRTL( Component ):
     s.counter.load //= lambda: s.recv.en | ( s.state_next == s.STATE_IDLE )
     s.counter.incr //= lambda: s.send.en & ( s.state_next != s.STATE_IDLE )
 
-    @s.update
+    @update
     def up_counter_load_value():
       if ( s.state == s.STATE_IDLE ) & s.send.rdy & ( s.state_next != s.STATE_IDLE ):
-        s.counter.load_value = CountType(1)
+        s.counter.load_value @= 1
       else:
-        s.counter.load_value = CountType(0)
+        s.counter.load_value @= 0
 
     # Recv logic
 
     s.recv.rdy //= lambda: s.state == s.STATE_IDLE
-    
+
     # Send logic
 
-    @s.update
+    @update
     def up_send_msg():
       if ( s.state == s.STATE_IDLE ) & s.recv.en & s.send.rdy:
-        s.send.msg = s.recv.msg[0:out_nbits]
+        s.send.msg @= s.recv.msg[0:out_nbits]
       else:
-        s.send.msg = s.mux.out
+        s.send.msg @= s.mux.out
 
-    @s.update
+    @update
     def up_send_en():
       if ( s.state == s.STATE_IDLE ) & s.recv.en & s.send.rdy | \
          ( s.state == s.STATE_SEND ) & s.send.rdy:
-        s.send.en = b1(1)
+        s.send.en @= 1
       else:
-        s.send.en = b1(0)
+        s.send.en @= 0
 
     # State transition logic
 
-    @s.update_ff
+    @update_ff
     def up_state():
       if s.reset:
         s.state <<= s.STATE_IDLE
       else:
         s.state <<= s.state_next
 
-    @s.update
+    @update
     def up_state_next():
       if s.state == s.STATE_IDLE:
         # If length is 1, bypass to IDLE
-        if ( s.len == CountType(1) ) & s.send.en:
-          s.state_next = s.STATE_IDLE
+        if ( s.len == 1 ) & s.send.en:
+          s.state_next @= s.STATE_IDLE
 
         elif s.recv.en:
-          s.state_next = s.STATE_SEND
+          s.state_next @= s.STATE_SEND
 
         else:
-          s.state_next = s.STATE_IDLE
+          s.state_next @= s.STATE_IDLE
 
       else: # STATE_SEND
-        if ( s.counter.count == s.len_r - CountType(1) ) & s.send.rdy:
-          s.state_next = s.STATE_IDLE
+        if ( s.counter.count == s.len_r - 1 ) & s.send.rdy:
+          s.state_next @= s.STATE_IDLE
         else:
-          s.state_next = s.STATE_SEND
+          s.state_next @= s.STATE_SEND
 
   #-----------------------------------------------------------------------
   # line trace

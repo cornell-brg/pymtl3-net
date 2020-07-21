@@ -67,12 +67,10 @@ def test_simple():
   ]
   th = TestHarness( SimpleFormat, pkts )
   th.elaborate()
-  th.apply( SimulationPass() )
-
-  print()
+  th.apply( DefaultPassGroup() )
+  th.sim_reset()
   for i in range(10):
-    th.tick()
-    print( f'{i:3}:{th.line_trace()}' )
+    th.sim_tick()
 
   assert th.done()
 
@@ -89,11 +87,10 @@ def test_src_delay():
   th = TestHarness( SimpleFormat, pkts )
   th.set_param( 'top.src.construct', initial_delay=5, flit_interval_delay=2 )
   th.elaborate()
-  th.apply( SimulationPass() )
-  print()
+  th.apply( DefaultPassGroup() )
+  th.sim_reset()
   for i in range( 25 ):
-    th.tick()
-    print( f'{i:3}:{th.line_trace()}' )
+    th.sim_tick()
   assert th.done()
 
 #-------------------------------------------------------------------------
@@ -109,11 +106,10 @@ def test_sink_delay():
   th = TestHarness( SimpleFormat, pkts )
   th.set_param( 'top.sink.construct', initial_delay=5, flit_interval_delay=2 )
   th.elaborate()
-  th.apply( SimulationPass() )
-  print()
+  th.apply( DefaultPassGroup() )
+  th.sim_reset()
   for i in range( 25 ):
-    th.tick()
-    print( f'{i:3}:{th.line_trace()}' )
+    th.sim_tick()
   assert th.done()
 
 #-------------------------------------------------------------------------
@@ -132,11 +128,10 @@ def test_mix_delay():
   th.set_param( 'top.sink.construct', initial_delay=5, flit_interval_delay=2 )
   th.set_param( 'top.src.construct',  packet_interval_delay=5 )
   th.elaborate()
-  th.apply( SimulationPass() )
-  print()
+  th.apply( DefaultPassGroup() )
+  th.sim_reset()
   for i in range( 50 ):
-    th.tick()
-    print( f'{i:3}:{th.line_trace()}' )
+    th.sim_tick()
   assert th.done()
 
 #-------------------------------------------------------------------------
@@ -151,11 +146,9 @@ def test_simple_rtl():
   ]
   th = TestHarnessRTL( SimpleFormat, pkts )
   th.elaborate()
-  th.apply( SimulationPass() )
-
-  print()
+  th.apply( DefaultPassGroup() )
+  th.sim_reset()
   for i in range(10):
-    th.tick()
-    print( f'{i:3}:{th.line_trace()}' )
+    th.sim_tick()
 
   assert th.done()

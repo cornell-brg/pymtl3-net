@@ -10,9 +10,9 @@ Author : Yanghui Ou
 from ocnlib.ifcs.CreditIfc import CreditRecvIfcRTL
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GiveIfcRTL
-from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
-from pymtl3.stdlib.rtl.Encoder import Encoder
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
+from pymtl3.stdlib.basic_rtl.arbiters import RoundRobinArbiterEn
+from pymtl3.stdlib.basic_rtl import Encoder
+from pymtl3.stdlib.queues import NormalQueueRTL
 
 
 class InputUnitCreditRTL( Component ):
@@ -27,9 +27,6 @@ class InputUnitCreditRTL( Component ):
     s.recv = CreditRecvIfcRTL( PacketType, vc=vc )
     s.give = [ GiveIfcRTL( PacketType ) for _ in range( vc ) ]
 
-    # Component
-    VcIDType = mk_bits( clog2( vc ) ) if vc > 1 else Bits1
-
     s.buffers = [ QueueType( PacketType, num_entries=credit_line )
                   for _ in range( vc ) ]
 
@@ -38,14 +35,14 @@ class InputUnitCreditRTL( Component ):
       s.buffers[i].deq     //= s.give[i]
       s.recv.yum[i]        //= s.give[i].en
 
-    @s.update
+    @update
     def up_enq():
       if s.recv.en:
         for i in range( vc ):
-          s.buffers[i].enq.en = s.recv.msg.vc_id == VcIDType(i)
+          s.buffers[i].enq.en @= s.recv.msg.vc_id == i
       else:
         for i in range( vc ):
-          s.buffers[i].enq.en = b1(0)
+          s.buffers[i].enq.en @= 0
 
   def line_trace( s ):
     return "{}({}){}".format(

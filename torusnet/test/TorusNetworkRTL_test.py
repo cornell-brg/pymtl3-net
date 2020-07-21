@@ -6,6 +6,8 @@
 # Author : Yanghui Ou, Cheng Tan
 #   Date : July 1, 2019
 
+import os
+import pytest
 import hypothesis
 from hypothesis import strategies as st
 
@@ -14,7 +16,7 @@ from ocnlib.ifcs.positions import mk_mesh_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 from torusnet.TorusNetworkFL import torusnet_fl
 from torusnet.TorusNetworkRTL import TorusNetworkRTL
 
@@ -88,7 +90,7 @@ def torus_pkt_strat( draw, ncols, nrows ):
 
 class TorusNetwork_Tests:
 
-  def test_simple( s ):
+  def test_simple( s, cmdline_opts ):
     ncols = 2
     nrows = 2
 
@@ -101,9 +103,9 @@ class TorusNetwork_Tests:
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th )
+    run_sim( th, cmdline_opts )
 
-  def test_simple_3x3( s ):
+  def test_simple_3x3( s, cmdline_opts ):
     ncols = 3
     nrows = 3
 
@@ -116,9 +118,10 @@ class TorusNetwork_Tests:
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th )
+    run_sim( th, cmdline_opts )
 
-  def test_simple_5x5( s ):
+  @pytest.mark.skipif('CI' in os.environ, reason='too long on CI')
+  def test_simple_5x5( s, cmdline_opts ):
     ncols = 5
     nrows = 5
 
@@ -131,8 +134,25 @@ class TorusNetwork_Tests:
     ])
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th )
+    run_sim( th, cmdline_opts )
 
+  @pytest.mark.skipif('CI' in os.environ, reason='too long on CI')
+  def test_simple_8x8( s, cmdline_opts ):
+    ncols = 8
+    nrows = 8
+
+    Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
+
+    src_pkts = mk_src_pkts( ncols, nrows, [
+      #    src_x  y  dst_x  y   opq vc payload
+      Pkt(     1, 0,     0, 7,  0,  0, 0xfaceb00c ),
+      #Pkt(     1, 1,     1, 0,  0,  0, 0xdeadface ),
+    ])
+    dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
+    th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
+    run_sim( th, cmdline_opts )
+
+  @pytest.mark.skipif('CI' in os.environ, reason='too long on CI')
   @hypothesis.settings( deadline=None, max_examples=5 )
   # @hypothesis.reproduce_failure('4.24.4', 'AAMDAQEAAAQAAA==') #(1:0)>(0:4)
   @hypothesis.given(
@@ -140,7 +160,7 @@ class TorusNetwork_Tests:
     nrows = st.integers(2, 8),
     pkts  = st.data(),
   )
-  def test_hypothesis( s, ncols, nrows, pkts ):
+  def test_hypothesis( s, ncols, nrows, pkts, cmdline_opts ):
     Pkt = mk_mesh_pkt( ncols, nrows, vc=2 )
 
     pkts_lst = pkts.draw(
@@ -151,4 +171,4 @@ class TorusNetwork_Tests:
     src_pkts = mk_src_pkts( ncols, nrows, pkts_lst )
     dst_pkts = torusnet_fl( ncols, nrows, src_pkts )
     th = TestHarness( Pkt, ncols, nrows, src_pkts, dst_pkts )
-    run_sim( th, max_cycles=5000 )
+    run_sim( th, cmdline_opts, max_cycles=5000 )

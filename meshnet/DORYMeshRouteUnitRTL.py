@@ -34,29 +34,29 @@ class DORYMeshRouteUnitRTL( Component ):
       s.give_ens[i] //= s.give[i].en
 
     # Routing logic
-    @s.update
+    @update
     def up_ru_routing():
-      s.give[0].rdy = b1(0)
-      s.give[1].rdy = b1(0)
-      s.give[2].rdy = b1(0)
-      s.give[3].rdy = b1(0)
-      s.give[4].rdy = b1(0)
+      s.give[0].rdy @= 0
+      s.give[1].rdy @= 0
+      s.give[2].rdy @= 0
+      s.give[3].rdy @= 0
+      s.give[4].rdy @= 0
 
       if s.get.rdy:
-        if s.pos.pos_x == s.get.ret.dst_x and s.pos.pos_y == s.get.ret.dst_y:
-          s.give[4].rdy = b1(1)
+        if (s.pos.pos_x == s.get.ret.dst_x) & (s.pos.pos_y == s.get.ret.dst_y):
+          s.give[4].rdy @= 1
         elif s.get.ret.dst_y < s.pos.pos_y:
-          s.give[1].rdy = b1(1)
+          s.give[1].rdy @= 1
         elif s.get.ret.dst_y > s.pos.pos_y:
-          s.give[0].rdy = b1(1)
+          s.give[0].rdy @= 1
         elif s.get.ret.dst_x < s.pos.pos_x:
-          s.give[2].rdy = b1(1)
+          s.give[2].rdy @= 1
         else:
-          s.give[3].rdy = b1(1)
+          s.give[3].rdy @= 1
 
-    @s.update
+    @update
     def up_ru_get_en():
-      s.get.en = s.give_ens > b5(0)
+      s.get.en @= s.give_ens > 0
 
   # Line trace
   def line_trace( s ):

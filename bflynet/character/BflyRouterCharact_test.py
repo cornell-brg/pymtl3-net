@@ -16,8 +16,8 @@ from ocnlib.ifcs.positions import mk_bfly_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
 from router.SwitchUnitRTL import SwitchUnitRTL
@@ -71,9 +71,9 @@ class TestHarness( Component ):
       s.dut.send[i]  //= s.sinks[i].recv
 
     #TODO: provide pos for router...
-    @s.update
+    @update
     def up_pos():
-      s.dut.pos = BflyPos( pos_r, pos_f )
+      s.dut.pos @= BflyPos( pos_r, pos_f )
 
   def done( s ):
     srcs_done = 1
@@ -199,4 +199,4 @@ def test_char( k_ary, n_fly ):
   th = TestHarness( PacketType, k_ary, n_fly, pos_row, pos_fly,
                     src_packets, sink_packets, 0, 0, 0, 0 )
 
-  run_sim( th, translation='verilog' )
+  run_sim( th, cmdline_opts={'dump_vcd':False, 'test_verilog':'zeros', 'dump_vtb':False} )

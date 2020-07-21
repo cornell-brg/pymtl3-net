@@ -7,12 +7,13 @@ Test for credit based interfaces.
 Author : Yanghui Ou
   Date : June 10, 2019
 """
+from pymtl3 import *
+from pymtl3.stdlib.queues import NormalQueueRTL
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
-from pymtl3.stdlib.test.test_sinks import TestSinkRTL
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 
 from .CreditIfc import (CreditRecvIfcRTL, CreditRecvRTL2SendRTL,
                         CreditSendIfcRTL, RecvRTL2CreditSendRTL)
@@ -50,7 +51,7 @@ class TestHarness( Component ):
 #-------------------------------------------------------------------------
 
 def test_simple():
-  Pkt = mk_generic_pkt( vc=2 )
+  Pkt = mk_generic_pkt( vc=2, payload_nbits=32 )
   msgs = [
     Pkt( 0, 1, 0x04, 0, 0xdeadbabe ),
     Pkt( 0, 2, 0x02, 1, 0xfaceb00c ),
@@ -60,7 +61,7 @@ def test_simple():
   run_sim( th )
 
 def test_backpresure():
-  Pkt = mk_generic_pkt( vc=2 )
+  Pkt = mk_generic_pkt( vc=2, payload_nbits=32 )
   msgs = [
      # src dst opq vc_id  payload
     Pkt( 0, 1, 0x04, 0, 0xdeadbabe ),

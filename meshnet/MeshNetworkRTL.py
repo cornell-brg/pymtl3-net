@@ -7,9 +7,10 @@ Mesh network implementation.
 Author : Yanghui Ou, Cheng Tan
   Date : Mar 10, 2019
 """
-from channel.ChannelRTL import ChannelRTL
 from pymtl3 import *
-from pymtl3.stdlib.ifcs.SendRecvIfc import *
+from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+
+from channel.ChannelRTL import ChannelRTL
 
 from .directions import *
 from .MeshRouterRTL import MeshRouterRTL

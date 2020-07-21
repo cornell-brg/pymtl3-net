@@ -6,54 +6,42 @@
 # Author : Yanghui Ou
 #   Date : Feb 20, 2019
 
-from pymtl import *
+from pymtl3 import *
 from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
-from pymtl3.stdlib.ifcs.EnRdyIfc import InEnRdyIfc, OutEnRdyIfc
+from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
 
 #-------------------------------------------------------------------------
-# ValRdy2EnRdy
+# InValRdy2Send
 #-------------------------------------------------------------------------
 
-class ValRdy2EnRdy( RTLComponent ):
+class InValRdy2Send( Component ):
 
-  def construct( s, MsgType ):
+  def construct( s, Type ):
 
-    s.in_ = InValRdyIfc( MsgType )
-    s.out = OutEnRdyIfc( MsgType )
+    s.in_  = InValRdyIfc( Type )
+    s.send = SendIfcRTL ( Type )
 
-    @s.update
-    def comb_logic0():
-      s.in_.rdy = s.out.rdy
-
-    @s.update
-    def comb_logic1():
-      s.out.en  = s.out.rdy and s.in_.val
-      s.out.msg = s.in_.msg
+    s.in_.rdy  //= s.send.rdy
+    s.send.en  //= lambda: s.send.rdy & s.in_.val
+    s.send.msg //= s.in_.msg
 
   def line_trace( s ):
-
-    return f"{s.in_}(){s.out}"
+    return f'{s.in_}(){s.send}'
 
 #-------------------------------------------------------------------------
-# EnRdy2ValRdy
+# Recv2OutValRdy
 #-------------------------------------------------------------------------
 
-class EnRdy2ValRdy( RTLComponent ):
+class Recv2OutValRdy( Component ):
 
-  def construct( s, MsgType ):
+  def construct( s, Type ):
 
-    s.in_ = InEnRdyIfc  ( MsgType )
-    s.out = OutValRdyIfc( MsgType )
+    s.recv = RecvIfcRTL  ( Type )
+    s.out  = OutValRdyIfc( Type )
 
-    @s.update
-    def comb_logic0():
-      s.in_.rdy = s.out.rdy
-
-    @s.update
-    def comb_logic1():
-      s.out.val = s.in_.en
-      s.out.msg = s.in_.msg
+    s.recv.rdy //= s.out.rdy
+    s.out.val  //= s.recv.en
+    s.out.msg  //= s.recv.msg
 
   def line_trace( s ):
-
-    return f"{s.in_}(){s.out}"
+    return f"{s.recv}(){s.out}"

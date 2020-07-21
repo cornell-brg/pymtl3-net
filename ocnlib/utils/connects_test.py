@@ -69,32 +69,32 @@ def test_bitstruct_to_slices():
   assert slices_nested[3] == slice(13, 19)
 
 #-------------------------------------------------------------------------
-# Unit test fos connect_bitstruct 
+# Unit test fos connect_bitstruct
 #-------------------------------------------------------------------------
 
-def test_connet_bitstruct_simple():
+def test_connect_bitstruct_simple():
   a = Bits2Bitstruct()
   a.elaborate()
-  a.apply( SimulationPass() )
-  a.pt_bits = b12( 0xeda )
-  a.eval_combinational()
+  a.apply( DefaultPassGroup() )
+  a.pt_bits @= 0xeda
+  a.sim_eval_combinational()
   assert a.pt_bitstruct.x == 0xed
   assert a.pt_bitstruct.y == 0xa
 
   b = Bitstruct2Bits()
   b.elaborate()
-  b.apply( SimulationPass() )
-  b.pt_bitstruct.x = b8( 0xed )
-  b.pt_bitstruct.y = b4( 0xa  )
-  b.eval_combinational()
+  b.apply( DefaultPassGroup() )
+  b.pt_bitstruct.x @= 0xed
+  b.pt_bitstruct.y @= 0xa
+  b.sim_eval_combinational()
   assert b.pt_bits == 0xeda
 
 def test_connect_bitstruct_nested():
   a = Bits2BitstructNested()
   a.elaborate()
-  a.apply( SimulationPass() )
-  a.pt_bits = concat( b6(0x3f), b12(0xeda), b1(1) )
-  a.eval_combinational()
+  a.apply( DefaultPassGroup() )
+  a.pt_bits @= concat( b6(0x3f), b12(0xeda), b1(1) )
+  a.sim_eval_combinational()
   assert a.pt_bitstruct.z    == 0x3f
   assert a.pt_bitstruct.pt.x == 0xed
   assert a.pt_bitstruct.pt.y == 0xa
@@ -102,11 +102,11 @@ def test_connect_bitstruct_nested():
 
   b = Bitstruct2BitsNested()
   b.elaborate()
-  b.apply( SimulationPass() )
-  b.pt_bitstruct.z    = b6( 0x3f )
-  b.pt_bitstruct.pt.x = b8( 0xed )
-  b.pt_bitstruct.pt.y = b4( 0xa  )
-  b.pt_bitstruct.flag = b1( 0x1  )
-  b.eval_combinational()
+  b.apply( DefaultPassGroup() )
+  b.pt_bitstruct.z    @= 0x3f
+  b.pt_bitstruct.pt.x @= 0xed
+  b.pt_bitstruct.pt.y @= 0xa
+  b.pt_bitstruct.flag @= 0x1
+  b.sim_eval_combinational()
   assert b.pt_bits == concat( b6(0x3f), b12(0xeda), b1(1) )
 
