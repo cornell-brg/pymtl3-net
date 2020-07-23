@@ -25,8 +25,9 @@ class MeshNetworkMflitRTL( Component ):
 
     # Local parameters
 
-    s.nterminals = ncols * nrows
-    s.PhitType   = mk_bits( Header.nbits )
+    s.nterminals   = ncols * nrows
+    s.PhitType     = mk_bits( Header.nbits )
+    s.num_channels = (nrows*(ncols-1)+ncols*(nrows-1)) * 2
 
     # Interface
 
