@@ -33,6 +33,7 @@ def test_translate():
 
   dut = MeshTile( Header64, Position )
   dut.set_param( 'top.router.input_units*.construct', QueueType=Queue )
+  dut.set_param( 'top.router.output_units*.construct', data_gating=False )
   dut.set_metadata( VerilogTranslationPass.explicit_module_name, f'MeshTile' )
   dut.set_metadata( VerilogTranslationImportPass.enable, True )
   dut.elaborate()
