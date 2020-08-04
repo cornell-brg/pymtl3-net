@@ -9,6 +9,7 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
+from ocnlib.rtl.queues import NormalQueueRTL as Queue
 
 from ..MeshTile import MeshTile
 
@@ -31,6 +32,7 @@ def test_translate():
   assert Position.nbits == 16
 
   dut = MeshTile( Header64, Position )
+  dut.set_param( 'top.router.input_units*.construct', QueueType=Queue )
   dut.set_metadata( VerilogTranslationPass.explicit_module_name, f'MeshTile' )
   dut.set_metadata( VerilogTranslationImportPass.enable, True )
   dut.elaborate()

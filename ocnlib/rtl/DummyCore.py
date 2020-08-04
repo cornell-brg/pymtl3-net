@@ -10,7 +10,7 @@ Author: Yanghui Ou
 
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
-from pymtl3.stdlib.queues import NormalQueueRTL
+from .queues import NormalQueueRTL
 
 class DummyCore( Component ):
 
