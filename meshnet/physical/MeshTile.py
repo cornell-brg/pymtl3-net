@@ -11,7 +11,7 @@ from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3.stdlib.basic_rtl import Reg
 
-from ocnlib.rtl.DummyNode import DummyNode
+from ocnlib.rtl.DummyCore import DummyCore
 
 from ..MeshRouterMflitRTL import MeshRouterMflitRTL
 
@@ -31,7 +31,7 @@ class MeshTile( Component ):
 
     # Component
 
-    s.core    = DummyNode( Header )
+    s.core    = DummyCore( Header )
     s.router  = MeshRouterMflitRTL( Header, Position )
     s.pos_reg = Reg( Position )
 
@@ -47,3 +47,4 @@ class MeshTile( Component ):
   
   def line_trace( s ):
     return s.router.line_trace()
+
