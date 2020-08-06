@@ -27,6 +27,12 @@ from ocnlib.utils.connects import connect_bitstruct
 from .directions import *
 from .PitonNoCHeader import PitonNoCHeader
 
+FBITS_NORTH = 0b0010
+FBITS_SOUTH = 0b0011
+FBITS_WEST  = 0b0100
+FBITS_EAST  = 0b0101
+FBITS_PROC  = 0b0000
+
 class PitonRouteUnit( Component ):
 
   #-----------------------------------------------------------------------
@@ -138,12 +144,24 @@ class PitonRouteUnit( Component ):
 
       if ( s.state == s.STATE_HEADER ) & s.get.rdy:
         s.out_dir @= 0
+
         # Offchip port
         if ( s.pos.pos_x == 0 ) & ( s.pos.pos_y == 0 ) & s.offchip:
           s.out_dir @= WEST
 
         elif ( s.dst_x == s.pos.pos_x ) & ( s.dst_y == s.pos.pos_y ):
-          s.out_dir @= SELF
+          # Use fbits to route to final destination
+          if s.header.fbits == FBITS_NORTH:
+            s.out_dir @= NORTH
+          elif s.header.fbits == FBITS_SOUTH:
+            s.out_dir @= SOUTH
+          elif s.header.fbits == FBITS_WEST:
+            s.out_dir @= WEST
+          elif s.header.fbits == FBITS_EAST:
+            s.out_dir @= EAST
+          else:
+            s.out_dir @= SELF
+
         elif s.dst_x < s.pos.pos_x:
           s.out_dir @= WEST
         elif s.dst_x > s.pos.pos_x:
