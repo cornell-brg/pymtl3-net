@@ -78,6 +78,7 @@ def mk_pkt( src_offchip, src_x, src_y, dst_offchip, dst_x, dst_y,
             payload=[], fbits=0, mtype=0, mshr=0, opt1=0 ):
   chipid      = b14(1) << 13 if dst_offchip else b14(0)
   plen        = len( payload )
+  fbits       = 0b0010 if dst_offchip else 0
   header      = PitonNoCHeader( chipid, dst_x, dst_y, fbits, plen, mtype, mshr, opt1 )
   header_bits = header.to_bits()
   flits       = [ header_bits ] + payload
