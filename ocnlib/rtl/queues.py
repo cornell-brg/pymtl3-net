@@ -207,7 +207,7 @@ class PipeQueueCtrlRTL( Component ):
     s.enq_xfer //= lambda: s.enq_en & s.enq_rdy
     s.deq_xfer //= lambda: s.deq_en & s.deq_rdy
 
-    @s.update_ff
+    @update_ff
     def up_reg():
 
       if s.reset:
@@ -357,7 +357,7 @@ class BypassQueueCtrlRTL( Component ):
     s.enq_xfer //= lambda: s.enq_en & s.enq_rdy
     s.deq_xfer //= lambda: s.deq_en & s.deq_rdy
 
-    @s.update_ff
+    @update_ff
     def up_reg():
 
       if s.reset:
@@ -454,7 +454,7 @@ class NormalQueue1EntryRTL( Component ):
     s.enq.rdy //= lambda: ~s.full
     s.deq.rdy //= lambda: s.full
 
-    @s.update_ff
+    @update_ff
     def ff_normal1():
       s.full <<= ~s.reset & ( ~s.deq.en & (s.enq.en | s.full) )
       if s.enq.en:
@@ -491,7 +491,7 @@ class PipeQueue1EntryRTL( Component ):
     s.enq.rdy //= lambda: ~s.full | s.deq.en
     s.deq.rdy //= lambda: s.full
 
-    @s.update_ff
+    @update_ff
     def ff_pipe1():
       s.full <<= ~s.reset & ( s.enq.en | s.full & ~s.deq.en )
 
@@ -533,7 +533,7 @@ class BypassQueue1EntryRTL( Component ):
     s.enq.rdy //= lambda: ~s.full
     s.deq.rdy //= lambda: ( s.full | s.enq.en )
 
-    @s.update_ff
+    @update_ff
     def ff_bypass1():
       s.full <<= ~s.reset & ( ~s.deq.en & (s.enq.en | s.full) )
 
