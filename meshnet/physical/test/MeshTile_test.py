@@ -54,7 +54,7 @@ class Header512:
   dst_x : Bits8
   dst_y : Bits8
   plen  : Bits4
-  filler: mk_bits(476) 
+  filler: mk_bits(476)
 
 @bitstruct
 class Position:

@@ -42,15 +42,25 @@ class ChannelRTL( Component ):
         s.queues[i+1].enq.msg //= s.queues[i].deq.ret
       s.queues[-1].deq.ret //= s.send.msg
 
-      @update
-      def process():
-        s.queues[0].enq.en @= s.recv.en & s.queues[0].enq.rdy
-        for i in range(s.latency - 1):
-          s.queues[i+1].enq.en @= s.queues[i].deq.rdy & s.queues[i+1].enq.rdy
-          s.queues[i].deq.en   @= s.queues[i].deq.rdy & s.queues[i+1].enq.rdy
+      if s.latency > 1:
 
-        s.send.en @= s.send.rdy & s.queues[s.latency-1].deq.rdy
-        s.queues[s.latency-1].deq.en @= s.send.rdy & s.queues[s.latency-1].deq.rdy
+        @update
+        def process():
+          s.queues[0].enq.en @= s.recv.en & s.queues[0].enq.rdy
+          for i in range(s.latency - 1):
+            s.queues[i+1].enq.en @= s.queues[i].deq.rdy & s.queues[i+1].enq.rdy
+            s.queues[i].deq.en   @= s.queues[i].deq.rdy & s.queues[i+1].enq.rdy
+
+          s.send.en @= s.send.rdy & s.queues[s.latency-1].deq.rdy
+          s.queues[s.latency-1].deq.en @= s.send.rdy & s.queues[s.latency-1].deq.rdy
+      else:
+        assert s.latency == 1
+        @update
+        def process():
+          s.queues[0].enq.en @= s.recv.en & s.queues[0].enq.rdy
+
+          s.send.en @= s.send.rdy & s.queues[s.latency-1].deq.rdy
+          s.queues[s.latency-1].deq.en @= s.send.rdy & s.queues[s.latency-1].deq.rdy
 
     else:
 

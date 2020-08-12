@@ -20,7 +20,7 @@ class MeshTile( Component ):
   def construct( s, Header, Position, ):
 
     # Local parameter
-    
+
     s.PhitType = mk_bits( Header.nbits )
 
     # Interface
@@ -44,7 +44,6 @@ class MeshTile( Component ):
 
     s.router.send[4] //= s.core.recv
     s.router.recv[4] //= s.core.send
-  
+
   def line_trace( s ):
     return s.router.line_trace()
-
