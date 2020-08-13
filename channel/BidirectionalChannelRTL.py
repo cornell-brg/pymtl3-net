@@ -15,14 +15,14 @@ from .ChannelRTL import ChannelRTL
 
 class BidirectionalChannelRTL( Component ):
 
-  def construct( s, PacketType, QueueType=NormalQueueRTL, latency=0 ):
+  def construct( s, PacketType, QueueType=NormalQueueRTL, latency=[0,0] ):
 
     # Interface
 
     s.recv = [ RecvIfcRTL( PacketType ) for _ in range(2) ]
     s.send = [ SendIfcRTL( PacketType ) for _ in range(2) ]
 
-    s.chnls = [ ChannelRTL( PacketType, QueueType, latency ) for _ in range(2) ]
+    s.chnls = [ ChannelRTL( PacketType, QueueType, latency[i] ) for i in range(2) ]
 
     for i in range(2):
       s.recv[i] //= s.chnls[i].recv
