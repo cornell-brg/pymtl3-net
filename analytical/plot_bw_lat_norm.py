@@ -128,8 +128,8 @@ def assign_color( name ):
 # mk_plot
 #-------------------------------------------------------------------------
 
-def mk_plot( area_constraints=[ 0.1, 0.25 ] ):
-  msg_sizes = [ 64, 512 ]
+def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
+  msg_sizes = [ 64, 256 ]
   bc_lst    = [ 32, 64, 128, 256, 512 ]
 
   ncols = len( area_constraints )
@@ -149,19 +149,19 @@ def mk_plot( area_constraints=[ 0.1, 0.25 ] ):
 
   xlimit = [
     [ 4*K, 8*K ],
-    [ 4*K, 12*K ],
+    [ 4*K, 8*K ],
   ]
 
   xticks = [
     [ 0, 1*K, 2*K, 3*K, 4*K ], [ 0, 2*K, 4*K, 6*K, 8*K ],
-    [ 0, 1*K, 2*K, 3*K, 4*K ], [ 0, 4*K, 8*K, 12*K ],
+    [ 0, 1*K, 2*K, 3*K, 4*K ], [ 0, 2*K, 4*K, 6*K, 8*K ],
   ]
 
-  xticklabels = [ [ f'{x//K}Kb' if x>0 else '0' for x in rows ] for rows in xticks ]
+  xticklabels = [ [ f'{x//K}K' if x>0 else '0' for x in rows ] for rows in xticks ]
 
   offsets = [
     [ {}, {} ],
-    [ { 'mesh-c8': (-0.2*K, 0), 'mesh-c4': (-0.2*K, 0), 'torus-c8': (0, -0.8) }, { 'mesh-c8': (-0.4*K, 0), 'mesh-c1e2': (0.2*K, -0.5), 'torus-c8': (-0.65*K, 0.5), 'mesh-c8e1':(0, -1.5), 'mesh-c4e1':(-0.6*K, -1), 'torus-c4':(0,-1.5) } ],
+    [ { 'mesh-c8': (-0.2*K, 0), 'mesh-c4': (-0.2*K, 0), 'torus-c8': (0, -0.8) }, { 'mesh-c8': (-0.4*K, 0.5), 'mesh-c1e2': (0.2*K, -0.5), 'torus-c8': (-0.65*K, 0.5), 'mesh-c8e1':(0, -1.5), 'mesh-c4e1':(-0.6*K, -2), 'mesh-c4e2':(0, -1), 'torus-c4':(0,0.5) } ],
   ]
 
   for r, msg_size in enumerate( msg_sizes ):
@@ -525,9 +525,10 @@ def mk_plot( area_constraints=[ 0.1, 0.25 ] ):
         axes[r][c].spines['right'].set_visible( False )
         axes[r][c].set_ylim( top=limit[r][c]*1.2, bottom=0 )
         axes[r][c].set_xlim( 0, xlimit[r][c]*1.2 )
+        axes[r][c].set_xticks( xticks[r*ncols+c] )
         axes[r][c].set_xticklabels( xticklabels[c+r*ncols] )
-        axes[r][c].set_ylabel( 'zero load latency', fontproperties=font )
-        axes[r][c].set_xlabel( 'bisection bandwidth', fontproperties=font )
+        axes[r][c].set_ylabel( 'zero load latency (cycles)', fontproperties=font )
+        axes[r][c].set_xlabel( 'bisection bandwidth (b/cycle)', fontproperties=font )
         # axes[r][c].grid()
         axes[r][c].grid( color='grey', linestyle='--' )
         for tick in axes[r][c].get_xticklabels():
@@ -559,7 +560,7 @@ def mk_plot( area_constraints=[ 0.1, 0.25 ] ):
                    transform=axes[0][0].transAxes )
 
 
-  axes[0][1].text( 0.5, -0.325, '(b) A = 25%, M = 64',
+  axes[0][1].text( 0.5, -0.325, '(b) A = 20%, M = 64',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[0][1].transAxes )
 
@@ -572,12 +573,12 @@ def mk_plot( area_constraints=[ 0.1, 0.25 ] ):
   bbox[1] -= 0.08
   axes[1][1].set_position(bbox)
 
-  axes[1][0].text( 0.5, -0.325, f'(c) A = 10%, M = 512',
+  axes[1][0].text( 0.5, -0.325, f'(c) A = 10%, M = 256',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[1][0].transAxes )
 
 
-  axes[1][1].text( 0.5, -0.325, f'(d) A = 25%, M = 512',
+  axes[1][1].text( 0.5, -0.325, f'(d) A = 20%, M = 256',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[1][1].transAxes )
 

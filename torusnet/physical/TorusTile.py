@@ -41,29 +41,38 @@ class TorusTile( Component ):
                                credit_line=credit_line, ncols=16, nrows=16 )
     s.pos_reg = Reg( PositionType )
 
-    s.channel_ns = Channel( PhitType, latency=[latency,latency] )
-    s.channel_we = Channel( PhitType, latency=[latency,latency] )
+    # s.channel_ns = Channel( PhitType, latency=[latency,latency] )
+    # s.channel_we = Channel( PhitType, latency=[latency,latency] )
+
+    s.channels = [ Channel( PhitType ) for _ in range(4) ]
 
     # Connections
 
     s.pos //= s.pos_reg.in_
     s.pos_reg.out //= s.router.pos
 
-    s.router.send[NORTH] //= s.channel_ns.recv[0]
-    s.channel_ns.send[0] //= s.send[NORTH]
-    s.router.recv[NORTH] //= s.channel_ns.send[1]
-    s.channel_ns.recv[1] //= s.recv[NORTH]
+    # s.router.send[NORTH] //= s.channel_ns.recv[0]
+    # s.channel_ns.send[0] //= s.send[NORTH]
+    # s.router.recv[NORTH] //= s.channel_ns.send[1]
+    # s.channel_ns.recv[1] //= s.recv[NORTH]
 
-    s.router.send[SOUTH] //= s.send[SOUTH]
-    s.router.recv[SOUTH] //= s.recv[SOUTH]
+    # s.router.send[SOUTH] //= s.send[SOUTH]
+    # s.router.recv[SOUTH] //= s.recv[SOUTH]
 
-    s.router.send[EAST] //= s.channel_we.recv[0]
-    s.channel_we.send[0] //= s.send[EAST]
-    s.router.recv[EAST] //= s.channel_we.send[1]
-    s.channel_we.recv[1] //= s.recv[EAST]
+    # s.router.send[EAST] //= s.channel_we.recv[0]
+    # s.channel_we.send[0] //= s.send[EAST]
+    # s.router.recv[EAST] //= s.channel_we.send[1]
+    # s.channel_we.recv[1] //= s.recv[EAST]
 
-    s.router.send[WEST] //= s.send[WEST]
-    s.router.recv[WEST] //= s.recv[WEST]
+    # s.router.send[WEST] //= s.send[WEST]
+    # s.router.recv[WEST] //= s.recv[WEST]
+
+    for i in range(4):
+      s.router.send[i]      //= s.channels[i].recv[0]
+      s.channels[i].send[0] //= s.send[i]
+
+      s.router.recv[i]      //= s.channels[i].send[1]
+      s.channels[i].recv[1] //= s.recv[i]
 
     # Hacky connection
     s.router.send[SELF].msg    //= s.core.recv.msg

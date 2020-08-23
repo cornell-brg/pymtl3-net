@@ -85,6 +85,25 @@ def test_translate_32b0p():
   dut.sim_tick()
   dut.sim_tick()
 
+def test_translate_32b1p():
+  nbits                  = 32
+  pipe_statge            = 1
+  assert Header32.nbits  == nbits
+  assert Position.nbits  == 16
+
+  dut = MeshTile( Header32, Position )
+  dut.set_param( 'top.router.input_units*.construct', QueueType=Queue )
+  dut.set_param( 'top.router.output_units*.construct', QueueType=Queue, data_gating=False )
+  dut.set_metadata( VerilogTranslationPass.explicit_module_name, f'MeshTile_{nbits}b{pipe_statge}p' )
+  dut.set_metadata( VerilogTranslationImportPass.enable, True )
+  dut.elaborate()
+  dut = VerilogTranslationImportPass()( dut )
+
+  dut.apply( DefaultPassGroup() )
+  dut.sim_reset()
+  dut.sim_tick()
+  dut.sim_tick()
+
 def test_translate_64b1p():
   assert Header64.nbits == 64
   assert Position.nbits == 16

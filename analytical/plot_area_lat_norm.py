@@ -124,7 +124,7 @@ def assign_color( name ):
 #-------------------------------------------------------------------------
 
 def mk_plot( norm_bws=[ 2048, 4096 ] ):
-  msg_sizes = [ 64, 512 ]
+  msg_sizes = [ 64, 256 ]
   bc_lst    = [ 32, 64, 128, 256, 512 ]
 
   ncols = len( norm_bws )
@@ -469,8 +469,16 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
         chnl  = [ x.chnl for x in data if x.chnl <= msg_size ]
         area  = [ x.area for x in data if x.chnl <= msg_size ]
 
+        style = assign_style( data[0].name )
+        color = assign_color( data[0].name )
+        if data[0].name == 'mesh-c1e1q0':
+          facecolor = 'none'
+        else:
+          facecolor = color
+
         if bw[-1]  < norm_bw:
           print( f'{data[0].name} cannot reach bandwidth of {norm_bw}' )
+          axes[r][c].plot( [], [], style, color=color, label=data[0].name, markersize=6, markerfacecolor=facecolor, linewidth=0 )
           continue
 
         elif bw[0] > norm_bw:
@@ -490,16 +498,11 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
 
         print( f'[{norm_bw}]: processing {data[0].name}... normalized channel: {norm_chnl}b, area {norm_area}' )
 
-        style = assign_style( data[0].name )
-        color = assign_color( data[0].name )
 
         # if len( lat ) > 0:
         #   optimal_bw  = [ bw[-1] ]
         #   optimal_lat = [lat[-1] ]
-        if data[0].name == 'mesh-c1e1q0':
-          facecolor = 'none'
-        else:
-          facecolor = color
+
 
         axes[r][c].plot( [norm_area], [norm_lat], style, color=color, label=data[0].name, markersize=6, markerfacecolor=facecolor, linewidth=0 )
 
@@ -560,12 +563,12 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
   bbox[1] -= 0.08
   axes[1][1].set_position(bbox)
 
-  axes[1][0].text( 0.5, -0.325, r'(c) B = 2K, M = 512',
+  axes[1][0].text( 0.5, -0.325, r'(c) B = 2K, M = 256',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[1][0].transAxes )
 
 
-  axes[1][1].text( 0.5, -0.325, r'(d) B = 4K, M = 512',
+  axes[1][1].text( 0.5, -0.325, r'(d) B = 4K, M = 256',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[1][1].transAxes )
 

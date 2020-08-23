@@ -18,7 +18,7 @@ from ocnlib.ifcs.packets import mk_generic_pkt
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 
-from ..InputUnitCreditRTL import InputUnitCreditRTL
+from ..InputUnitISlipCreditRTL import InputUnitISlipCreditRTL as InputUnitCreditRTL
 from ..OutputUnitCreditRTL import OutputUnitCreditRTL
 from ..SwitchUnitRTL import SwitchUnitRTL
 
@@ -33,30 +33,33 @@ class TestHarness( Component ):
     s.src_q = BypassQueueRTL( Type, num_entries=1 )
     s.output_unit = OutputUnitCreditRTL( Type, vc=vc, credit_line=credit_line )
     s.input_unit  = InputUnitCreditRTL( Type, vc=vc, credit_line=credit_line )
-    s.switch_unit = SwitchUnitRTL( Type, num_inports=vc )
+    # s.switch_unit = SwitchUnitRTL( Type, num_inports=vc )
     s.sink = TestNetSinkRTL( Type, sink_msgs )
 
     s.src.send             //= s.src_q.enq
     s.src_q.deq            //= s.output_unit.get
     s.output_unit.send     //= s.input_unit.recv
-    s.switch_unit.give.ret //= s.sink.recv.msg
-    for i in range( vc ):
-      s.input_unit.give[i] //= s.switch_unit.get[i]
+    # s.switch_unit.give.ret //= s.sink.recv.msg
+    # for i in range( vc ):
+    #   s.input_unit.give[i] //= s.switch_unit.get[i]
+    # s.input_unit.give //= s.output_unit.get
 
     @update
     def up_sink_recv():
-      both_rdy = s.switch_unit.give.rdy & s.sink.recv.rdy
-      s.sink.recv.en        @= both_rdy
-      s.switch_unit.give.en @= both_rdy
+      both_rdy = s.input_unit.give.rdy & s.sink.recv.rdy
+      s.sink.recv.en       @= both_rdy
+      s.input_unit.give.en @= both_rdy
+      s.sink.recv.msg @= s.input_unit.give.ret
 
   def line_trace( s ):
-    return "{} >>> {} >>> {} >>> {} >>> {}".format(
-      s.src.line_trace(),
-      s.output_unit.line_trace(),
-      s.input_unit.line_trace(),
-      s.switch_unit.line_trace(),
-      s.sink.line_trace()
-    )
+    # return "{} >>> {} >>> {} >>> {}".format(
+    #   s.src.line_trace(),
+    #   s.output_unit.line_trace(),
+    #   s.input_unit.line_trace(),
+    #   # s.switch_unit.line_trace(),
+    #   s.sink.line_trace()
+    # )
+    return s.input_unit.line_trace()
 
   def done( s ):
     return s.src.done() and s.sink.done()
@@ -73,7 +76,7 @@ def test_simple():
     Pkt( 0, 3, 0x03, 0, 0xdeadface ),
   ]
   th = TestHarness( Pkt, msgs, msgs )
-  run_sim( th )
+  run_sim( th, max_cycles=20 )
 
 def test_backpresure():
   Pkt = mk_generic_pkt( vc=2, payload_nbits=32 )
