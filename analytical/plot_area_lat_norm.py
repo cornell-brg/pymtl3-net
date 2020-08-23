@@ -27,7 +27,7 @@ font.set_size( 15 )
 anno_font = FontProperties()
 anno_font.set_family( 'serif' )
 anno_font.set_name( 'Times New Roman' )
-anno_font.set_size( 10 )
+anno_font.set_size( 12 )
 
 #-------------------------------------------------------------------------
 # interp_value
@@ -148,11 +148,11 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
   ]
 
   xticks = [
-    [ [0, 0.05, 0.10             ], [ 0, 0.05, 0.10, 0.15] ],
-    [ [0, 0.05, 0.10, 0.15,      ], [ 0, 0.05, 0.1, 0.15, 0.2,] ],
+    [ [ 0.05, 0.075, 0.10, 0.125 ], [ 0.10, 0.125, 0.15] ],
+    [ [ 0.05, 0.10, 0.15,],  [ 0.1,  0.15,  0.2,] ],
   ]
 
-  xticklabels = [ [ [ f'{int(x*100)}' if x>0 else f'0' for x in lst ] for lst in row ] for row in xticks ]
+  xticklabels = [ [ [ f'{(x*100):.1f}' if x>0 else f'0' for x in lst ] for lst in row ] for row in xticks ]
 
   offsets = [
     [ { 'mesh-c4r3' : (-0.005, -0.8) }, { } ],
@@ -478,7 +478,7 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
 
         if bw[-1]  < norm_bw:
           print( f'{data[0].name} cannot reach bandwidth of {norm_bw}' )
-          axes[r][c].plot( [], [], style, color=color, label=data[0].name, markersize=8, markerfacecolor=facecolor, linewidth=0 )
+          axes[r][c].plot( [], [], style, color=color, label=data[0].name, markersize=11, markerfacecolor=facecolor, linewidth=0 )
           continue
 
         elif bw[0] > norm_bw:
@@ -504,7 +504,7 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
         #   optimal_lat = [lat[-1] ]
 
 
-        axes[r][c].plot( [norm_area], [norm_lat], style, color=color, label=data[0].name, markersize=8, markerfacecolor=facecolor, linewidth=0 )
+        axes[r][c].plot( [norm_area], [norm_lat], style, color=color, label=data[0].name, markersize=11, markerfacecolor=facecolor, linewidth=0 )
 
         if data[0].name in offsets[r][c]:
           x_offset, y_offset = offsets[r][c][data[0].name]
@@ -515,13 +515,13 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
 
         axes[r][c].spines['top'  ].set_visible( False )
         axes[r][c].spines['right'].set_visible( False )
-        axes[r][c].set_ylim( bottom=0, top=ylimit[r][c]*1.2)
+        axes[r][c].set_ylim( bottom=0, top=ylimit[r][c]*1.05)
         # axes[r][c].set_xlim( 0, xlimit[r][c]*1.1 )
-        axes[r][c].set_xlim( 0, xlimit[r][c]*1.2 )
+        axes[r][c].set_xlim( min(xticks[r][c]), xlimit[r][c]*1.05 )
 
         axes[r][c].grid( color='grey', linestyle='--' )
         axes[r][c].set_ylabel( 'Zero Load Latency (cycles)', fontproperties=font )
-        axes[r][c].set_xlabel( 'Area (%)', fontproperties=font )
+        axes[r][c].set_xlabel( 'OCN Area Overhead (%)', fontproperties=font )
 
         axes[r][c].set_xticks( xticks[r][c] )
         axes[r][c].set_xticklabels( xticklabels[r][c], fontproperties=font)
@@ -545,12 +545,12 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
   # axes[1][0].set_xticklabels( [ '1K', '2K', '3K', '4K', '5K' ] )
   # axes[1][1].set_xticklabels( [ '2K', '4K', '6K', '8K', '10K', '12K' ] )
 
-  axes[0][0].text( 0.5, -0.28, r'(a) $B_B$ = 2K, M = 64',
+  axes[0][0].text( 0.5, -0.28, r'(a) B = 2K, M = 64',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[0][0].transAxes )
 
 
-  axes[0][1].text( 0.5, -0.28, r'(b) $B_B$ = 4K, M = 64',
+  axes[0][1].text( 0.5, -0.28, r'(b) B = 4K, M = 64',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[0][1].transAxes )
 

@@ -31,7 +31,7 @@ font.set_size( 15 )
 anno_font = FontProperties()
 anno_font.set_family( 'serif' )
 anno_font.set_name( 'Times New Roman' )
-anno_font.set_size( 10 )
+anno_font.set_size( 12 )
 
 K = 1024
 
@@ -510,7 +510,7 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
         else:
           facecolor = color
 
-        axes[r][c].plot( [norm_bw], [norm_lat], style, color=color, label=data[0].name, markersize=8, markerfacecolor=facecolor, linewidth=0 )
+        axes[r][c].plot( [norm_bw], [norm_lat], style, color=color, label=data[0].name, markersize=11, markerfacecolor=facecolor, linewidth=0 )
 
 
         # Annotate
@@ -523,8 +523,8 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
 
         axes[r][c].spines['top'  ].set_visible( False )
         axes[r][c].spines['right'].set_visible( False )
-        axes[r][c].set_ylim( top=limit[r][c]*1.2, bottom=0 )
-        axes[r][c].set_xlim( 0, xlimit[r][c]*1.2 )
+        axes[r][c].set_ylim( top=limit[r][c]*1.05, bottom=0 )
+        axes[r][c].set_xlim( 0, xlimit[r][c]*1.05 )
         axes[r][c].set_xticks( xticks[r*ncols+c] )
         axes[r][c].set_xticklabels( xticklabels[c+r*ncols] )
         axes[r][c].set_ylabel( 'Zero Load Latency (cycles)', fontproperties=font )
@@ -566,11 +566,11 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
 
   # Move second row down a little
   bbox = list( axes[1][0].get_position().bounds )
-  bbox[1] -= 0.08
+  bbox[1] -= 0.06
   axes[1][0].set_position(bbox)
 
   bbox = list( axes[1][1].get_position().bounds )
-  bbox[1] -= 0.08
+  bbox[1] -= 0.06
   axes[1][1].set_position(bbox)
 
   axes[1][0].text( 0.5, -0.28, f'(c) A = 10%, M = 256',
