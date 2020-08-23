@@ -70,12 +70,12 @@ bw_factor = {
   'mesh-c1': 32,
   'mesh-c4': 16,
   'mesh-c8': 8,
-  'mesh-c1e1': 96,
-  'mesh-c4e1': 48,
-  'mesh-c8e1': 24,
-  'mesh-c1e2': 128,
-  'mesh-c4e2': 64,
-  'mesh-c8e2': 32,
+  'mesh-c1r2': 96,
+  'mesh-c4r2': 48,
+  'mesh-c8r2': 24,
+  'mesh-c1r3': 128,
+  'mesh-c4r3': 64,
+  'mesh-c8r3': 32,
 
   'torus-c1': 64,
   'torus-c4': 32,
@@ -108,8 +108,8 @@ def assign_style( name ):
   lst = name.split( '-' )
   # skip factor
   marker = 'x' if lst[0]    == 'torus' else \
-           's' if lst[1].endswith('e2') else \
-           '^' if lst[1].endswith('e1') else \
+           's' if lst[1].endswith('r3') else \
+           '^' if lst[1].endswith('r2') else \
            'o'
 
   line   = '-'  if lst[0]== 'mesh' else \
@@ -143,8 +143,8 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
   # font.set_size( 13 )
 
   limit = [
-    [ 25, 25 ],
-    [ 40, 40 ],
+    [ 24, 24 ],
+    [ 28, 28 ],
   ]
 
   xlimit = [
@@ -161,7 +161,7 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
 
   offsets = [
     [ {}, {} ],
-    [ { 'mesh-c8': (-0.2*K, 0), 'mesh-c4': (-0.2*K, 0), 'torus-c8': (0, -0.8) }, { 'mesh-c8': (-0.4*K, 0.5), 'mesh-c1e2': (0.2*K, -0.5), 'torus-c8': (-0.65*K, 0.5), 'mesh-c8e1':(0, -1.5), 'mesh-c4e1':(-0.6*K, -2), 'mesh-c4e2':(0, -1), 'torus-c4':(0,0.5) } ],
+    [ { 'mesh-c8': (-0.2*K, 0), 'mesh-c4': (-0.2*K, 0), 'mesh-c4r3': (0.05*K, 0.5), 'mesh-c8r2': (-0.25*K, -1.8), 'torus-c4':(0,-1.8), 'torus-c8': (0, -0.8) }, { 'mesh-c8': (-0.4*K, 0.5), 'mesh-c1r3': (0.2*K, -0.5), 'torus-c8': (-0.65*K, 0.5), 'mesh-c8r2':(0, -1.5), 'mesh-c4r2':(-0.6*K, -2), 'mesh-c4r3':(0, -1), 'torus-c4':(0,0.5) } ],
   ]
 
   for r, msg_size in enumerate( msg_sizes ):
@@ -226,8 +226,8 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
       area     = mesh_c1s2_area( bc, tile_h, tile_w )
       mc1s2.append(
         Entry(
-          name  = 'mesh-c1e1',
-          bw    = bc * bw_factor[ 'mesh-c1e1' ],
+          name  = 'mesh-c1r2',
+          bw    = bc * bw_factor[ 'mesh-c1r2' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -243,8 +243,8 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
       area     = mesh_c4s2_area( bc, tile_h, tile_w )
       mc4s2.append(
         Entry(
-          name  = 'mesh-c4e1',
-          bw    = bc * bw_factor[ 'mesh-c4e1' ],
+          name  = 'mesh-c4r2',
+          bw    = bc * bw_factor[ 'mesh-c4r2' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -260,8 +260,8 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
       area     = mesh_c8s2_area( bc, tile_h, tile_w )
       mc8s2.append(
         Entry(
-          name  = 'mesh-c8e1',
-          bw    = bc * bw_factor[ 'mesh-c8e1' ],
+          name  = 'mesh-c8r2',
+          bw    = bc * bw_factor[ 'mesh-c8r2' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -277,8 +277,8 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
       area     = mesh_c1s3_area( bc, tile_h, tile_w )
       mc1s3.append(
         Entry(
-          name  = 'mesh-c1e2',
-          bw    = bc * bw_factor[ 'mesh-c1e2' ],
+          name  = 'mesh-c1r3',
+          bw    = bc * bw_factor[ 'mesh-c1r3' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -294,8 +294,8 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
       area     = mesh_c4s3_area( bc, tile_h, tile_w )
       mc4s3.append(
         Entry(
-          name  = 'mesh-c4e2',
-          bw    = bc * bw_factor[ 'mesh-c4e2' ],
+          name  = 'mesh-c4r3',
+          bw    = bc * bw_factor[ 'mesh-c4r3' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -311,8 +311,8 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
       area     = mesh_c8s3_area( bc, tile_h, tile_w )
       mc8s3.append(
         Entry(
-          name  = 'mesh-c8e2',
-          bw    = bc * bw_factor[ 'mesh-c8e2' ],
+          name  = 'mesh-c8r3',
+          bw    = bc * bw_factor[ 'mesh-c8r3' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -510,7 +510,7 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
         else:
           facecolor = color
 
-        axes[r][c].plot( [norm_bw], [norm_lat], style, color=color, label=data[0].name, markersize=6, markerfacecolor=facecolor, linewidth=0 )
+        axes[r][c].plot( [norm_bw], [norm_lat], style, color=color, label=data[0].name, markersize=8, markerfacecolor=facecolor, linewidth=0 )
 
 
         # Annotate
@@ -527,8 +527,8 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
         axes[r][c].set_xlim( 0, xlimit[r][c]*1.2 )
         axes[r][c].set_xticks( xticks[r*ncols+c] )
         axes[r][c].set_xticklabels( xticklabels[c+r*ncols] )
-        axes[r][c].set_ylabel( 'zero load latency (cycles)', fontproperties=font )
-        axes[r][c].set_xlabel( 'bisection bandwidth (b/cycle)', fontproperties=font )
+        axes[r][c].set_ylabel( 'Zero Load Latency (cycles)', fontproperties=font )
+        axes[r][c].set_xlabel( 'Bisection Bandwidth (b/cycle)', fontproperties=font )
         # axes[r][c].grid()
         axes[r][c].grid( color='grey', linestyle='--' )
         for tick in axes[r][c].get_xticklabels():
@@ -555,12 +555,12 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
   # axes[1][0].set_xticklabels( [ '1K', '2K', '3K', '4K', '5K' ] )
   # axes[1][1].set_xticklabels( [ '2K', '4K', '6K', '8K', '10K', '12K' ] )
 
-  axes[0][0].text( 0.5, -0.325, '(a) A = 10%, M = 64',
+  axes[0][0].text( 0.5, -0.28, '(a) A = 10%, M = 64',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[0][0].transAxes )
 
 
-  axes[0][1].text( 0.5, -0.325, '(b) A = 20%, M = 64',
+  axes[0][1].text( 0.5, -0.28, '(b) A = 20%, M = 64',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[0][1].transAxes )
 
@@ -573,18 +573,18 @@ def mk_plot( area_constraints=[ 0.1, 0.2 ] ):
   bbox[1] -= 0.08
   axes[1][1].set_position(bbox)
 
-  axes[1][0].text( 0.5, -0.325, f'(c) A = 10%, M = 256',
+  axes[1][0].text( 0.5, -0.28, f'(c) A = 10%, M = 256',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[1][0].transAxes )
 
 
-  axes[1][1].text( 0.5, -0.325, f'(d) A = 20%, M = 256',
+  axes[1][1].text( 0.5, -0.28, f'(d) A = 20%, M = 256',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[1][1].transAxes )
 
-  plt.legend( bbox_to_anchor=(1.0, -0.375 ), ncol=4, prop=font, frameon=False )
+  plt.legend( bbox_to_anchor=(1.1, -0.29 ), ncol=4, prop=font, frameon=False )
   # plt.title( f'msg size: {msg_size}')
-  plt.savefig( f'norm-lat-bw.pdf', bbox_inches='tight' )
+  plt.savefig( f'norm-lat-bw.pdf', bbox_inches='tight', pad_inches=0 )
 
 
     # area vs lat under bandwidth

@@ -11,7 +11,7 @@ from ubmark_data import *
 font = FontProperties()
 font.set_family( 'serif' )
 font.set_name( 'Times New Roman' )
-font.set_size( 12.5 )
+font.set_size( 15 )
 
 def extrap_value( val, x, y ):
   fn = np.polyfit( x, y, 2 )
@@ -34,8 +34,8 @@ router_db = {
 db= db_850
 
 if __name__ == '__main__':
-  fig = plt.figure( figsize=(4.5, 2.5) )
-  ax0 = fig.add_subplot(2, 1, 1)
+  fig = plt.figure( figsize=(6, 2.8) )
+  ax0 = fig.add_subplot(1, 2, 2)
   ax0.plot( distance, reg2reg, '-o', markersize=6, linewidth=1 )
   ax0.set_xlim(0, 660)
   ax0.set_ylim(0, 360)
@@ -46,7 +46,7 @@ if __name__ == '__main__':
   ax0.set_xlabel( r'Distance (um)', fontproperties=font )
   ax0.set_xticks([0, 100, 200, 300, 400, 500, 600])
 
-  ax0.text( 0.5, -0.5, '(a) Channel Latency Results',
+  ax0.text( 0.5, -0.34, '(b) Channel Latency Results',
             horizontalalignment='center', multialignment='left', fontproperties=font,
             transform=ax0.transAxes )
   for tick in ax0.get_xticklabels():
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     tick.set_fontproperties( font )
 
 
-  ax1 = fig.add_subplot(2, 1, 2)
+  ax1 = fig.add_subplot(1, 2, 1)
   for nbits in [32, 64, 128, 256 ]:
     radix = [ x.radix for x in db if x.channel_nbits == nbits ]
     area  = [ x.area for x in db  if x.channel_nbits == nbits ]
@@ -64,7 +64,8 @@ if __name__ == '__main__':
   ax1.spines['top'  ].set_visible( False )
   ax1.spines['right'].set_visible( False )
   ax1.grid( color='grey', linestyle='--' )
-  # ax1.legend(bbox_to_anchor=(0.9, -0.3 ), frameon=False, ncol=2, prop=font)
+
+  ax1.legend(frameon=False, ncol=1, prop=font, loc='best')
   ax1.set_yticks([0, 4000, 8000, 12000])
   ax1.set_yticklabels(['0', '4k', '8k', '12k'], fontproperties=font)
   ax1.set_ylim(0, 13000)
@@ -73,11 +74,11 @@ if __name__ == '__main__':
   for tick in ax1.get_xticklabels():
     tick.set_fontproperties( font )
 
-  bbox = list( ax1.get_position().bounds )
-  bbox[1] -= 0.4
-  ax1.set_position(bbox)
-  ax1.text( 0.5, -0.5, '(b) Router Area Results',
+  # bbox = list( ax1.get_position().bounds )
+  # bbox[1] -= 0.4
+  # ax1.set_position(bbox)
+  ax1.text( 0.5, -0.34, '(a) Router Area Results',
             horizontalalignment='center', multialignment='left', fontproperties=font,
             transform=ax1.transAxes )
-  # plt.tight_layout()
-  plt.savefig( f'ubmark.pdf', bbox_inches='tight' )
+  plt.tight_layout(pad=0,h_pad=0, w_pad=0)
+  plt.savefig( f'ubmark.pdf', bbox_inches='tight', pad_inches=0 )

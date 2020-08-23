@@ -64,12 +64,12 @@ bw_factor = {
   'mesh-c1': 32,
   'mesh-c4': 16,
   'mesh-c8': 8,
-  'mesh-c1e1': 96,
-  'mesh-c4e1': 48,
-  'mesh-c8e1': 24,
-  'mesh-c1e2': 128,
-  'mesh-c4e2': 64,
-  'mesh-c8e2': 32,
+  'mesh-c1r2': 96,
+  'mesh-c4r2': 48,
+  'mesh-c8r2': 24,
+  'mesh-c1r3': 128,
+  'mesh-c4r3': 64,
+  'mesh-c8r3': 32,
 
   'torus-c1': 64,
   'torus-c4': 32,
@@ -103,8 +103,8 @@ def assign_style( name ):
   lst = name.split( '-' )
   # skip factor
   marker = 'x' if lst[0]    == 'torus' else \
-           's' if lst[1].endswith('e2') else \
-           '^' if lst[1].endswith('e1') else \
+           's' if lst[1].endswith('r3') else \
+           '^' if lst[1].endswith('r2') else \
            'o'
 
   line   = '-'  if lst[0]== 'mesh' else \
@@ -138,25 +138,25 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
   # font.set_size( 13 )
 
   ylimit = [
-    [ 25, 25, 25 ],
-    [ 40, 40, 40 ],
+    [ 24, 24, 24 ],
+    [ 28, 28, 28 ],
   ]
 
   xlimit = [
     [ 0.10, 0.15 ],
-    [ 0.2,  0.3 ],
+    [ 0.15,  0.2 ],
   ]
 
   xticks = [
     [ [0, 0.05, 0.10             ], [ 0, 0.05, 0.10, 0.15] ],
-    [ [0, 0.05, 0.10, 0.15, 0.20 ], [ 0, 0.1,  0.2,  0.3] ],
+    [ [0, 0.05, 0.10, 0.15,      ], [ 0, 0.05, 0.1, 0.15, 0.2,] ],
   ]
 
   xticklabels = [ [ [ f'{int(x*100)}' if x>0 else f'0' for x in lst ] for lst in row ] for row in xticks ]
 
   offsets = [
-    [ { 'mesh-c4e2' : (-0.005, -0.8) }, { } ],
-    [ { 'torus-c8': (-0.002, -1.8) }, { 'torus-c4': (-0.03, -2), 'mesh-c4e1': (0,-2), 'mesh-c8e1' : (0,-2), 'torus-c8':(-0.035,-0.5) } ],
+    [ { 'mesh-c4r3' : (-0.005, -0.8) }, { } ],
+    [ { 'torus-c8': (-0.002, -1.8) }, { 'torus-c4': (-0.015, -2), 'mesh-c4r2': (0,-2), 'mesh-c8r2' : (0,-2), 'torus-c8':(-0.025,-1.0) } ],
   ]
   for r, msg_size in enumerate( msg_sizes ):
 
@@ -220,8 +220,8 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
       area     = mesh_c1s2_area( bc, tile_h, tile_w )
       mc1s2.append(
         Entry(
-          name  = 'mesh-c1e1',
-          bw    = bc * bw_factor[ 'mesh-c1e1' ],
+          name  = 'mesh-c1r2',
+          bw    = bc * bw_factor[ 'mesh-c1r2' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -237,8 +237,8 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
       area     = mesh_c4s2_area( bc, tile_h, tile_w )
       mc4s2.append(
         Entry(
-          name  = 'mesh-c4e1',
-          bw    = bc * bw_factor[ 'mesh-c4e1' ],
+          name  = 'mesh-c4r2',
+          bw    = bc * bw_factor[ 'mesh-c4r2' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -254,8 +254,8 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
       area     = mesh_c8s2_area( bc, tile_h, tile_w )
       mc8s2.append(
         Entry(
-          name  = 'mesh-c8e1',
-          bw    = bc * bw_factor[ 'mesh-c8e1' ],
+          name  = 'mesh-c8r2',
+          bw    = bc * bw_factor[ 'mesh-c8r2' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -271,8 +271,8 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
       area     = mesh_c1s3_area( bc, tile_h, tile_w )
       mc1s3.append(
         Entry(
-          name  = 'mesh-c1e2',
-          bw    = bc * bw_factor[ 'mesh-c1e2' ],
+          name  = 'mesh-c1r3',
+          bw    = bc * bw_factor[ 'mesh-c1r3' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -288,8 +288,8 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
       area     = mesh_c4s3_area( bc, tile_h, tile_w )
       mc4s3.append(
         Entry(
-          name  = 'mesh-c4e2',
-          bw    = bc * bw_factor[ 'mesh-c4e2' ],
+          name  = 'mesh-c4r3',
+          bw    = bc * bw_factor[ 'mesh-c4r3' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -305,8 +305,8 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
       area     = mesh_c8s3_area( bc, tile_h, tile_w )
       mc8s3.append(
         Entry(
-          name  = 'mesh-c8e2',
-          bw    = bc * bw_factor[ 'mesh-c8e2' ],
+          name  = 'mesh-c8r3',
+          bw    = bc * bw_factor[ 'mesh-c8r3' ],
           chnl  = bc,
           s_lat = ser_lat,
           h_lat = h_lat,
@@ -478,7 +478,7 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
 
         if bw[-1]  < norm_bw:
           print( f'{data[0].name} cannot reach bandwidth of {norm_bw}' )
-          axes[r][c].plot( [], [], style, color=color, label=data[0].name, markersize=6, markerfacecolor=facecolor, linewidth=0 )
+          axes[r][c].plot( [], [], style, color=color, label=data[0].name, markersize=8, markerfacecolor=facecolor, linewidth=0 )
           continue
 
         elif bw[0] > norm_bw:
@@ -504,7 +504,7 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
         #   optimal_lat = [lat[-1] ]
 
 
-        axes[r][c].plot( [norm_area], [norm_lat], style, color=color, label=data[0].name, markersize=6, markerfacecolor=facecolor, linewidth=0 )
+        axes[r][c].plot( [norm_area], [norm_lat], style, color=color, label=data[0].name, markersize=8, markerfacecolor=facecolor, linewidth=0 )
 
         if data[0].name in offsets[r][c]:
           x_offset, y_offset = offsets[r][c][data[0].name]
@@ -520,8 +520,8 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
         axes[r][c].set_xlim( 0, xlimit[r][c]*1.2 )
 
         axes[r][c].grid( color='grey', linestyle='--' )
-        axes[r][c].set_ylabel( 'zero load latency (cycles)', fontproperties=font )
-        axes[r][c].set_xlabel( 'area (%)', fontproperties=font )
+        axes[r][c].set_ylabel( 'Zero Load Latency (cycles)', fontproperties=font )
+        axes[r][c].set_xlabel( 'Area (%)', fontproperties=font )
 
         axes[r][c].set_xticks( xticks[r][c] )
         axes[r][c].set_xticklabels( xticklabels[r][c], fontproperties=font)
@@ -545,39 +545,41 @@ def mk_plot( norm_bws=[ 2048, 4096 ] ):
   # axes[1][0].set_xticklabels( [ '1K', '2K', '3K', '4K', '5K' ] )
   # axes[1][1].set_xticklabels( [ '2K', '4K', '6K', '8K', '10K', '12K' ] )
 
-  axes[0][0].text( 0.5, -0.325, r'(a) B = 2K, M = 64',
+  axes[0][0].text( 0.5, -0.28, r'(a) $B_B$ = 2K, M = 64',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[0][0].transAxes )
 
 
-  axes[0][1].text( 0.5, -0.325, r'(b) B = 4K, M = 64',
+  axes[0][1].text( 0.5, -0.28, r'(b) $B_B$ = 4K, M = 64',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[0][1].transAxes )
 
   # Move second row down a little
   bbox = list( axes[1][0].get_position().bounds )
-  bbox[1] -= 0.08
+  bbox[1] -= 0.06
   axes[1][0].set_position(bbox)
 
   bbox = list( axes[1][1].get_position().bounds )
-  bbox[1] -= 0.08
+  bbox[1] -= 0.06
   axes[1][1].set_position(bbox)
 
-  axes[1][0].text( 0.5, -0.325, r'(c) B = 2K, M = 256',
+  axes[1][0].text( 0.5, -0.28, r'(c) B = 2K, M = 256',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[1][0].transAxes )
 
 
-  axes[1][1].text( 0.5, -0.325, r'(d) B = 4K, M = 256',
+  axes[1][1].text( 0.5, -0.28, r'(d) B = 4K, M = 256',
                    horizontalalignment='center', multialignment='left', fontproperties=font,
                    transform=axes[1][1].transAxes )
 
   # plt.legend( bbox_to_anchor=( 0, -0.375, 0.5, 0.5), ncol=4, prop=font, frameon=False, mode='expand' )
   # plt.legend(  ncol=4, prop=font, frameon=False, mode='expand' )
-  plt.legend( bbox_to_anchor=(1.0, -0.375 ), ncol=4, prop=font, frameon=False )
+  plt.legend( bbox_to_anchor=(1.1, -0.29 ), ncol=4, prop=font, frameon=False )
 
   # plt.title( f'msg size: {msg_size}')
-  plt.savefig( f'norm-lat-area.pdf', bbox_inches='tight' )
+  # plt.tight_layout(pad=0,h_pad=0, w_pad=0)
+  # plt.tight_layout()
+  plt.savefig( f'norm-lat-area.pdf', bbox_inches='tight', pad_inches=0 )
 
 
     # area vs lat under bandwidth
