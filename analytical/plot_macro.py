@@ -14,9 +14,9 @@ font.set_name( 'Times New Roman' )
 font.set_size( 13 )
 
 bw_factor = {
-  'mesh-c1': 32,
-  'mesh-c1q0': 32,
-  'mesh-c4': 16,
+  'mesh-c1r0': 32,
+  'mesh-c1r0q0': 32,
+  'mesh-c4r0': 16,
   'mesh-c8': 8,
   'mesh-c1r2': 96,
   'mesh-c4r2': 48,
@@ -25,7 +25,7 @@ bw_factor = {
   'mesh-c4r3': 64,
   'mesh-c8r3': 32,
 
-  'torus-c1': 64,
+  'torus-c1r0': 64,
   'torus-c4': 32,
   'torus-c8': 16,
   'torus-c1eN': 96,
@@ -42,23 +42,24 @@ class Design:
 
 macros = {
 
-  'mesh-c1'   : [ Design( 32, 0.04979591837, 21.25 ),
-                  Design( 64, 0.06742857143, 21.25 ),
+  'mesh-c1r0'   : [ Design( 32, 0.05959183673, 21.25 ),
+                  Design( 64, 0.09632653061, 21.25 ),
                   Design( 128, 0.1632653061, 21.25 ),
                   Design( 256, 0.3534693878, 21.25 ) ],
 
-  'mesh-c1q0' : [ Design( 32, 0.07869387755, 10.625 ),
+  'mesh-c1r0q0' : [ Design( 32, 0.07869387755, 10.625 ),
                   Design( 64, 0.1379591837,  10.625 ) ],
 
-  'mesh-c4'   : [ Design( 32,  0.0266466504,  10.5 ),
+  'mesh-c4r0'   : [ Design( 32,  0.0266466504,  10.5 ),
                   Design( 64,  0.04597485457, 10.5 ),
-                  Design( 128, 0.1020829424,  10.5 ) ],
+                  Design( 128, 0.1020829424,  10.5 ),
+                  Design( 256, 0.1816475887,  10.5 ) ],
 
   'mesh-c4r2' : [ Design( 32 , 0.06458997936, 6.25 ),
                   Design( 64 , 0.107524864, 6.25 ),
                   Design( 128, 0.2253706136,  6.25 ) ],
 
-  'torus-c1'  : [ Design( 32, 0.08620408163, 8 ),
+  'torus-c1r0'  : [ Design( 32, 0.08620408163, 8 ),
                   Design( 64, 0.1771428571,  8 ),
                   Design( 128, 0.3755102041, 8 ) ],
 
@@ -93,8 +94,14 @@ def assign_color( name ):
 # main
 #-------------------------------------------------------------------------
 
+linewidth     = 2
+markersize    = 7
+text_offset   = -0.33
+legend_offset = -0.3
+
+
 if __name__ == '__main__':
-  fig = plt.figure( figsize=(4.5*3, 4) )
+  fig = plt.figure( figsize=(4.5*3, 2.5) )
 
   #-----------------------------------------------------------------------
   # bw vs area
@@ -112,15 +119,15 @@ if __name__ == '__main__':
     else:
       facecolor = color
 
-    ax0.plot( area, bw, style, color=color, label=name, markersize=6, markerfacecolor=facecolor, linewidth=1 )
+    ax0.plot( area, bw, style, color=color, label=name, markersize=markersize, markerfacecolor=facecolor, linewidth=linewidth )
 
   xticks = [ 0, 0.1, 0.2, 0.3 ]
-  yticks = [ x*K for x in range(9) ]
+  yticks = [ x*K for x in [0,2,4,6,8] ]
 
   xticklabels = [ f'{int(x*100)}' for x in xticks ]
   yticklabels = [ f'{y//K}' for y in yticks ]
-  ax0.set_xlim(0, 0.38)
-  ax0.set_ylim(0, 8.2*K)
+  ax0.set_xlim(0, 0.39)
+  ax0.set_ylim(0, 8.3*K)
   ax0.spines['top'  ].set_visible( False )
   ax0.spines['right'].set_visible( False )
   ax0.grid( color='grey', linestyle='--' )
@@ -131,7 +138,7 @@ if __name__ == '__main__':
   ax0.set_xticklabels( xticklabels )
   ax0.set_yticklabels( yticklabels )
 
-  ax0.text( 0.5, -0.22, '(a)',
+  ax0.text( 0.5, text_offset, '(a) Bandwidth vs. Area',
             horizontalalignment='center', multialignment='left', fontproperties=font,
             transform=ax0.transAxes )
   for tick in ax0.get_xticklabels():
@@ -156,7 +163,7 @@ if __name__ == '__main__':
     else:
       facecolor = color
 
-    ax1.plot( area, lat, style, color=color, label=name, markersize=6, markerfacecolor=facecolor, linewidth=1 )
+    ax1.plot( area, lat, style, color=color, label=name, markersize=markersize, markerfacecolor=facecolor, linewidth=linewidth )
 
   xticks = [ 0, 0.05, 0.1, 0.15, 0.2 ]
   yticks = [ 0, 5, 10, 15, 20, 25 ]
@@ -175,7 +182,7 @@ if __name__ == '__main__':
   ax1.set_xticklabels( xticklabels )
   ax1.set_yticklabels( yticklabels )
 
-  ax1.text( 0.5, -0.22, '(b) M = 64',
+  ax1.text( 0.5, text_offset, '(b) Latency vs. Area, M = 64',
             horizontalalignment='center', multialignment='left', fontproperties=font,
             transform=ax1.transAxes )
   for tick in ax1.get_xticklabels():
@@ -200,7 +207,7 @@ if __name__ == '__main__':
     else:
       facecolor = color
 
-    ax2.plot( area, lat, style, color=color, label=name, markersize=6, markerfacecolor=facecolor, linewidth=1 )
+    ax2.plot( area, lat, style, color=color, label=name, markersize=markersize, markerfacecolor=facecolor, linewidth=linewidth )
 
   xticks = [ 0, 0.1, 0.2, 0.3, 0.4 ]
   yticks = [ 0, 10, 20, 30 ]
@@ -219,7 +226,7 @@ if __name__ == '__main__':
   ax2.set_xticklabels( xticklabels )
   ax2.set_yticklabels( yticklabels )
 
-  ax2.text( 0.5, -0.22, '(b) M = 256',
+  ax2.text( 0.5, text_offset, '(b) Latency vs. Area, M = 256',
             horizontalalignment='center', multialignment='left', fontproperties=font,
             transform=ax2.transAxes )
   for tick in ax2.get_xticklabels():
@@ -228,6 +235,6 @@ if __name__ == '__main__':
     tick.set_fontproperties( font )
 
   # plt.tight_layout()
-  plt.legend( bbox_to_anchor=(0.5, -0.2 ), ncol=5, prop=font, frameon=False )
+  plt.legend( bbox_to_anchor=(0.5, legend_offset ), ncol=5, prop=font, frameon=False )
 
   plt.savefig( f'macro-plots.pdf', bbox_inches='tight', pad_inches=0 )
