@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
 
   ax1 = fig.add_subplot(2, 1, 2)
-  for nbits in [32, 64, 128, 256 ]:
+  for nbits in [256, 32, 64, 128, ]:
     radix = [ x.radix for x in db if x.channel_nbits == nbits ]
     area  = [ x.area for x in db  if x.channel_nbits == nbits ]
     ax1.plot( radix, area, '-o', markersize=6, linewidth=1, label=f'{nbits}b' )
@@ -65,6 +65,7 @@ if __name__ == '__main__':
   ax1.spines['right'].set_visible( False )
   ax1.grid( color='grey', linestyle='--' )
   # ax1.legend(bbox_to_anchor=(0.9, -0.3 ), frameon=False, ncol=2, prop=font)
+  ax1.legend(frameon=False, ncol=2, prop=font)
   ax1.set_yticks([0, 4000, 8000, 12000])
   ax1.set_yticklabels(['0', '4k', '8k', '12k'], fontproperties=font)
   ax1.set_ylim(0, 13000)
@@ -80,4 +81,4 @@ if __name__ == '__main__':
             horizontalalignment='center', multialignment='left', fontproperties=font,
             transform=ax1.transAxes )
   # plt.tight_layout()
-  plt.savefig( f'ubmark.pdf', bbox_inches='tight' )
+  plt.savefig( f'ubmark.pdf', bbox_inches='tight', pad_inches=0 )

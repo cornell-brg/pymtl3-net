@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
 
   ax1 = fig.add_subplot(1, 2, 1)
-  for nbits in [32, 64, 128, 256 ]:
+  for nbits in [ 256, 128, 64, 32 ]:
     radix = [ x.radix for x in db if x.channel_nbits == nbits ]
     area  = [ x.area for x in db  if x.channel_nbits == nbits ]
     ax1.plot( radix, area, '-o', markersize=6, linewidth=1, label=f'{nbits}b' )
