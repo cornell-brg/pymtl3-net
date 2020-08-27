@@ -27,10 +27,10 @@ from ocnlib.utils.connects import connect_bitstruct
 from .directions import *
 from .PitonNoCHeader import PitonNoCHeader
 
-FBITS_NORTH = 0b0010
+FBITS_WEST  = 0b0010
 FBITS_SOUTH = 0b0011
-FBITS_WEST  = 0b0100
-FBITS_EAST  = 0b0101
+FBITS_EAST  = 0b0100
+FBITS_NORTH = 0b0101
 FBITS_PROC  = 0b0000
 
 class PitonRouteUnit( Component ):
