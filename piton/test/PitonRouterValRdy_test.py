@@ -37,8 +37,9 @@ from ..PitonRouterFL import PitonRouterFL
 
 @bitstruct
 class PitonPosition:
-  pos_x : Bits8
-  pos_y : Bits8
+  chipid : Bits14
+  pos_x  : Bits8
+  pos_y  : Bits8
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -62,7 +63,7 @@ class TestHarness( Component ):
       s.dut.out[i]      //= s.in2send[i].in_
       s.in2send[i].send //= s.sink[i].recv
 
-    s.dut.pos //= PitonPosition( pos_x, pos_y )
+    s.dut.pos //= PitonPosition( 0, pos_x, pos_y )
 
   def done( s ):
     src_done = True

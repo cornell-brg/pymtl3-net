@@ -31,7 +31,7 @@ class PitonRouterFL:
         src_x = 0 if pkt.src_offchip else pkt.src_x
         src_y = 0 if pkt.src_offchip else pkt.src_y
         if pkt.src_offchip and s.pos_x == 0 and s.pos_y == 0:
-          src_pkts[ WEST ].append( pkt )
+          src_pkts[ NORTH ].append( pkt )
         elif src_x == s.pos_x and src_y == s.pos_y:
           src_pkts[ SELF ].append( pkt )
         elif src_x == s.pos_x:
@@ -49,7 +49,7 @@ class PitonRouterFL:
         src_x = 0 if pkt.src_offchip else pkt.src_x
         src_y = 0 if pkt.src_offchip else pkt.src_y
         if pkt.src_offchip and s.pos_x == 0 and s.pos_y == 0:
-          src_pkts[ WEST ].append( pkt )
+          src_pkts[ NORTH ].append( pkt )
         elif src_x == s.pos_x and src_y == s.pos_y:
           src_pkts[ SELF ].append( pkt )
         elif src_y == s.pos_y:
@@ -77,7 +77,7 @@ class PitonRouterFL:
           dst_x = 0 if header.chipid[13] else header.xpos
           dst_y = 0 if header.chipid[13] else header.ypos
           dst = (
-            WEST  if header.chipid[13] and s.pos_x == 0 and s.pos_y == 0 else
+            NORTH if header.chipid[13] and s.pos_x == 0 and s.pos_y == 0 else
             SELF  if dst_x == s.pos_x and dst_y == s.pos_y else
             SOUTH if dst_y > s.pos_y else
             NORTH if dst_y < s.pos_y else
@@ -93,7 +93,7 @@ class PitonRouterFL:
           dst_x = 0 if header.chipid[13] else header.xpos
           dst_y = 0 if header.chipid[13] else header.ypos
           dst = (
-            WEST  if header.chipid[13] and s.pos_x == 0 and s.pos_y == 0 else
+            NORTH if header.chipid[13] and s.pos_x == 0 and s.pos_y == 0 else
             SELF  if dst_x == s.pos_x and dst_y == s.pos_y else
             EAST  if dst_x > s.pos_x else
             WEST  if dst_x < s.pos_x else
