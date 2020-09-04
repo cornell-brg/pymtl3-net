@@ -32,7 +32,7 @@ def route_unit_fl( pkt_lst, pos_x, pos_y, first_dimension='x' ):
     for pkt in pkt_lst:
       header = PitonNoCHeader.from_bits( pkt.flits[0] )
       if header.chipid[13] and pos_x == 0 and pos_y == 0:
-        sink_pkts[ WEST ].append( pkt ) # North west port is the offchip port
+        sink_pkts[ NORTH ].append( pkt ) # North west port is the offchip port
 
       elif header.xpos == pos_x and header.ypos == pos_y:
         sink_pkts[ SELF ].append( pkt )
@@ -49,7 +49,7 @@ def route_unit_fl( pkt_lst, pos_x, pos_y, first_dimension='x' ):
     for pkt in pkt_lst:
       header = PitonNoCHeader.from_bits( pkt.flits[0] )
       if header.chipid[13] and pos_x == 0 and pos_y == 0:
-        sink_pkts[ WEST ].append( pkt ) # North west port is the offchip port
+        sink_pkts[ NORTH ].append( pkt ) # North west port is the offchip port
       if header.chipid[13]:
         pos_x = 0
         pos_y = 0
@@ -86,7 +86,7 @@ class TestHarness( Component ):
 
     s.src.send  //= s.src_q.enq
     s.src_q.deq //= s.dut.get
-    s.dut.pos   //= PositionType( x, y )
+    s.dut.pos   //= PositionType( 0, x, y )
 
     for i in range(5):
       s.sink[i].recv.msg //= s.dut.give[i].ret
@@ -108,8 +108,9 @@ class TestHarness( Component ):
 
 @bitstruct
 class PitonPosition:
-  pos_x : Bits8
-  pos_y : Bits8
+  chipid : Bits14
+  pos_x  : Bits8
+  pos_y  : Bits8
 
 #-------------------------------------------------------------------------
 # mk_pkt

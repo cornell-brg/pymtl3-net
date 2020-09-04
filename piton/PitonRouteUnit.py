@@ -128,7 +128,7 @@ class PitonRouteUnit( Component ):
 
     # Routing logic
 
-    s.offchip //= s.header.chipid[13]
+    s.offchip //= lambda: s.header.chipid != s.pos.chipid
 
     @update
     def up_dst():
@@ -147,7 +147,7 @@ class PitonRouteUnit( Component ):
 
         # Offchip port
         if ( s.pos.pos_x == 0 ) & ( s.pos.pos_y == 0 ) & s.offchip:
-          s.out_dir @= WEST
+          s.out_dir @= NORTH
 
         elif ( s.dst_x == s.pos.pos_x ) & ( s.dst_y == s.pos.pos_y ):
           # Use fbits to route to final destination
