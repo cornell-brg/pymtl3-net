@@ -168,7 +168,7 @@ class PitonRouteUnit( Component ):
           s.out_dir @= EAST
         elif s.dst_y < s.pos.pos_y:
           s.out_dir @= NORTH
-        elif s.dst_y > s.pos.pos_y:
+        else: # s.dst_y > s.pos.pos_y:
           s.out_dir @= SOUTH
 
     @update_ff
