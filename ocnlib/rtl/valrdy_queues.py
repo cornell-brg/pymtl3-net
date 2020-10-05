@@ -27,7 +27,7 @@ class NormalQueueDpathRTL( Component ):
     # Interface
 
     s.enq_msg =  InPort( EntryType )
-    s.deq_ret = OutPort( EntryType )
+    s.deq_msg = OutPort( EntryType )
 
     s.wen   = InPort( Bits1 )
     s.waddr = InPort( mk_bits( clog2( num_entries ) ) )
@@ -37,7 +37,7 @@ class NormalQueueDpathRTL( Component ):
 
     s.queue = m = RegisterFile( EntryType, num_entries )
     m.raddr[0] //= s.raddr
-    m.rdata[0] //= s.deq_ret
+    m.rdata[0] //= s.deq_msg
     m.wen[0]   //= s.wen
     m.waddr[0] //= s.waddr
     m.wdata[0] //= s.enq_msg
@@ -150,7 +150,7 @@ class NormalQueueRTL( Component ):
       connect( s.deq.rdy, s.ctrl.deq_rdy  )
       connect( s.count,   s.ctrl.count    )
       connect( s.enq.msg, s.dpath.enq_msg )
-      connect( s.deq.ret, s.dpath.deq_ret )
+      connect( s.deq.msg, s.dpath.deq_msg )
 
   # Line trace
 
@@ -461,7 +461,7 @@ class NormalQueue1EntryRTL( Component ):
     s.enq.rdy //= lambda: ~s.full
     s.deq.val //= lambda: s.full
 
-    @s.update_ff
+    @update_ff
     def ff_normal1():
       s.full <<= ~s.reset & ( ~s.deq_xfer & (s.enq_xfer | s.full) )
       if s.enq_xfer:

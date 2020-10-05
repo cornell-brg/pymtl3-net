@@ -13,7 +13,7 @@ from pymtl3.stdlib.queues import NormalQueueRTL
 
 
 class OutputUnitRTL( Component ):
-  def construct( s, PacketType, QueueType=None ):
+  def construct( s, PacketType, QueueType=None, data_gating=False ):
 
     # Local parameter
     gating_out = PacketType()
@@ -49,7 +49,10 @@ class OutputUnitRTL( Component ):
     # No ouput queue
     else:
 
-      s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
+      if data_gating:
+        s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
+      else:
+        s.send.msg //= lambda: s.get.ret
 
       @update
       def up_get_send():
