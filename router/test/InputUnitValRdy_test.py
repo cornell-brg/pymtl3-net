@@ -35,22 +35,12 @@ class TestHarness( Component ):
     s.recv2out = Recv2OutValRdy( MsgType )
     s.in2send  = InValRdy2Send ( MsgType )
 
+    # Connections
+
     s.src.send     //= s.recv2out.recv
     s.recv2out.out //= s.dut.in_
     s.dut.out      //= s.in2send.in_
     s.in2send.send //= s.sink.recv
-
-    # # Connections
-    # s.src.send     //= s.dut.recv
-    # s.dut.give.ret //= s.sink.recv.msg
-
-
-
-    # @update
-    # def up_give_en():
-    #   both_rdy = s.dut.give.rdy & s.sink.recv.rdy
-    #   s.dut.give.en  @= both_rdy
-    #   s.sink.recv.en @= both_rdy
 
   def done( s ):
     return s.src.done() and s.sink.done()
