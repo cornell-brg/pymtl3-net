@@ -41,7 +41,7 @@ class PitonRouteUnitOpt( Component ):
   # construct
   #-----------------------------------------------------------------------
 
-  def construct( s, PositionType, RoutingLogicType=PitonRoutingLogic, 
+  def construct( s, PositionType, RoutingLogicType=PitonRoutingLogic,
                  plen_field_name='plen' ):
 
     # Local parameter
@@ -61,10 +61,14 @@ class PitonRouteUnitOpt( Component ):
     # Interface
 
     s.get  = GetIfcRTL( s.PhitType )
-    s.pos  = InPort( PositionType ) # TODO: figure out a way to encode position
+    s.pos  = InPort( PositionType )
 
     s.give = [ GiveIfcRTL( s.PhitType ) for _ in range( s.num_outports ) ]
     s.hold = [ OutPort( Bits1 ) for _ in range( s.num_outports ) ]
+
+    s.is_straight = OutPort( Bits1 )
+    s.is_header   = OutPort( Bits1 )
+    s.is_tail     = OutPort( Bits1 )
 
     # Components
 
@@ -75,10 +79,6 @@ class PitonRouteUnitOpt( Component ):
     s.out_dir     = Wire( Bits3 )
     s.any_give_en = Wire( Bits1 )
 
-    s.offchip     = Wire( Bits1 )
-    s.dst_x       = Wire( Bits8 )
-    s.dst_y       = Wire( Bits8 )
-
     s.counter = Counter( PLenType )
     s.counter.incr //= 0
     s.counter.load_value //= s.header.plen
@@ -86,7 +86,6 @@ class PitonRouteUnitOpt( Component ):
     s.routing_logic = RoutingLogicType( PositionType )
     s.routing_logic.in_header //= s.header
     s.routing_logic.in_pos    //= s.pos
-    # s.routing_logic.out_dir   //= s.out_dir
 
     connect_bitstruct( s.get.ret, s.header )
     # s.header //= s.get.ret
