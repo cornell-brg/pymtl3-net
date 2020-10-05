@@ -60,7 +60,7 @@ class SwitchUnitGrantHoldValRdy( Component ):
       s.in_[i].msg //= s.mux.in_[i]
 
     for i in range( num_inports ):
-      s.in_[i].rdy //= lambda: s.out.rdy & ( s.mux.sel == i )
+      s.in_[i].rdy //= lambda: s.out.rdy & ( s.mux.sel == i ) & ( s.arbiter.grants > 0 )
 
     s.out.val //= s.granted_out_val
 
