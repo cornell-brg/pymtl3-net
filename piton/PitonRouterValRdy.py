@@ -11,7 +11,7 @@ from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
 
-from ocnlib.rtl.valrdy_queues import NormalQueueRTL
+from ocnlib.rtl.valrdy_queues import NormalQueueValRdy
 from router.InputUnitValRdy import InputUnitValRdy
 from router.OutputUnitValRdy import OutputUnitValRdy
 from router.SwitchUnitGrantHoldValRdy import SwitchUnitGrantHoldValRdy
@@ -52,7 +52,7 @@ class PitonRouterValRdy( Component ):
 
     # Components
 
-    s.input_units  = [ InputUnitType( s.PhitType, QueueType=NormalQueueRTL )
+    s.input_units  = [ InputUnitType( s.PhitType, QueueType=NormalQueueValRdy )
                        for _ in range( s.num_inports ) ]
 
     s.route_units  = [ RouteUnitType( PositionType )

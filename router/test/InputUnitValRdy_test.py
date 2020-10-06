@@ -15,7 +15,7 @@ from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 
 from ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
-from ocnlib.rtl.valrdy_queues import NormalQueueRTL
+from ocnlib.rtl.valrdy_queues import NormalQueueValRdy as NormalQueueRTL
 
 from .InputUnitCL_test import InputUnitCL_Tests as BaseTests
 from ..InputUnitValRdy import InputUnitValRdy
@@ -55,7 +55,6 @@ class TestHarness( Component ):
 #-------------------------------------------------------------------------
 # Test cases
 #-------------------------------------------------------------------------
-
 
 class InputUnitValRdy_Tests( BaseTests ):
 

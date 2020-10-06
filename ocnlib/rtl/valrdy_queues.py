@@ -20,7 +20,7 @@ from pymtl3.stdlib.basic_rtl import RegisterFile
 # Dpath and Ctrl for NormalQueueRTL
 #-------------------------------------------------------------------------
 
-class NormalQueueDpathRTL( Component ):
+class NormalQueueDpathValRdy( Component ):
 
   def construct( s, EntryType, num_entries=2 ):
 
@@ -42,7 +42,7 @@ class NormalQueueDpathRTL( Component ):
     m.waddr[0] //= s.waddr
     m.wdata[0] //= s.enq_msg
 
-class NormalQueueCtrlRTL( Component ):
+class NormalQueueCtrlValRdy( Component ):
 
   def construct( s, num_entries=2 ):
 
@@ -110,10 +110,10 @@ class NormalQueueCtrlRTL( Component ):
           s.count <<= s.count - 1
 
 #-------------------------------------------------------------------------
-# NormalQueueRTL
+# NormalQueueValRdy
 #-------------------------------------------------------------------------
 
-class NormalQueueRTL( Component ):
+class NormalQueueValRdy( Component ):
 
   def construct( s, EntryType, num_entries=2 ):
 
@@ -127,14 +127,14 @@ class NormalQueueRTL( Component ):
 
     assert num_entries > 0
     if num_entries == 1:
-      s.q = NormalQueue1EntryRTL( EntryType )
+      s.q = NormalQueue1EntryValRdy( EntryType )
       connect( s.enq,   s.q.enq )
       connect( s.deq,   s.q.deq )
       connect( s.count, s.q.count )
 
     else:
-      s.ctrl  = NormalQueueCtrlRTL ( num_entries )
-      s.dpath = NormalQueueDpathRTL( EntryType, num_entries )
+      s.ctrl  = NormalQueueCtrlValRdy ( num_entries )
+      s.dpath = NormalQueueDpathValRdy( EntryType, num_entries )
 
       # Connect ctrl to data path
 
@@ -431,7 +431,7 @@ class NormalQueueRTL( Component ):
 # NormalQueue1EntryRTL
 #-------------------------------------------------------------------------
 
-class NormalQueue1EntryRTL( Component ):
+class NormalQueue1EntryValRdy( Component ):
 
   def construct( s, EntryType ):
 

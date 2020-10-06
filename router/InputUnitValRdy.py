@@ -12,12 +12,12 @@ from pymtl3 import *
 # from pymtl3.stdlib.queues import NormalQueueRTL
 from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
 
-from ocnlib.rtl.valrdy_queues import NormalQueueRTL
+from ocnlib.rtl.valrdy_queues import NormalQueueValRdy
 
 
 class InputUnitValRdy( Component ):
 
-  def construct( s, PacketType, QueueType = NormalQueueRTL ):
+  def construct( s, PacketType, QueueType = NormalQueueValRdy ):
 
     # Interface
 

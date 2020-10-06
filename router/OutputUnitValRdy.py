@@ -10,8 +10,6 @@ Author : Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
 
-from ocnlib.rtl.valrdy_queues import NormalQueueRTL
-
 
 class OutputUnitValRdy( Component ):
 
