@@ -12,6 +12,8 @@ from pymtl3 import *
 from pymtl3.stdlib.test_utils import mk_test_case_table
 
 from pymtl3.stdlib.queues import BypassQueueRTL
+
+from ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
 from ocnlib.utils import run_sim
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
@@ -20,28 +22,6 @@ from ocnlib.packets import MflitPacket as Packet
 from ..directions import *
 from ..PitonRouteUnitOpt import PitonRouteUnitOpt
 from ..PitonNoCHeader import PitonNoCHeader
-
-#-------------------------------------------------------------------------
-# TestPosition
-#-------------------------------------------------------------------------
-
-@bitstruct
-class PitonPosition:
-  chipid : Bits14
-  pos_x  : Bits8
-  pos_y  : Bits8
-
-#-------------------------------------------------------------------------
-# Sanity check
-#-------------------------------------------------------------------------
-
-def test_sanity_check():
-  dut = PitonRouteUnitOpt( PitonPosition )
-  dut.elaborate()
-  dut.apply( DefaultPassGroup() )
-  dut.sim_reset()
-  dut.sim_tick()
-  dut.sim_tick()
 
 #-------------------------------------------------------------------------
 # Helper stuff
@@ -102,18 +82,21 @@ class TestHarness( Component ):
     sink_pkts = route_unit_fl( pkts, x, y, )
 
     s.src   = TestSource( PitonNoCHeader, pkts )
-    s.src_q = BypassQueueRTL( PhitType, num_entries=1 )
     s.dut   = PitonRouteUnitOpt( PositionType )
     s.sink  = [ TestSink( PitonNoCHeader, sink_pkts[i] ) for i in range(5) ]
 
-    s.src.send  //= s.src_q.enq
-    s.src_q.deq //= s.dut.get
+    s.recv2out = Recv2OutValRdy( PhitType )
+    s.in2send  = [ InValRdy2Send( PhitType ) for _ in range(5) ]
+
+    s.src.send     //= s.recv2out.recv
+    s.recv2out.out //= s.dut.in_
     s.dut.pos   //= PositionType( 0, x, y )
 
     for i in range(5):
-      s.sink[i].recv.msg //= s.dut.give[i].ret
-      s.sink[i].recv.en  //= lambda: s.dut.give[i].rdy & s.sink[i].recv.rdy
-      s.dut.give[i].en   //= lambda: s.dut.give[i].rdy & s.sink[i].recv.rdy
+      s.dut.out[i].val      //= s.in2send[i].in_.val
+      s.dut.out[i].rdy      //= s.in2send[i].in_.rdy
+      s.dut.out[i].msg.flit //= s.in2send[i].in_.msg
+      s.in2send[i].send     //= s.sink[i].recv
 
   def done( s ):
     sinks_done = True
@@ -122,8 +105,17 @@ class TestHarness( Component ):
     return s.src.done() and sinks_done
 
   def line_trace( s ):
-    return s.dut.line_trace()
+    return f' {s.src.line_trace()} >>> {s.dut.line_trace()}'
 
+#-------------------------------------------------------------------------
+# TestPosition
+#-------------------------------------------------------------------------
+
+@bitstruct
+class PitonPosition:
+  chipid : Bits14
+  pos_x  : Bits8
+  pos_y  : Bits8
 
 #-------------------------------------------------------------------------
 # mk_pkt

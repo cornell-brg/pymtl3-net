@@ -23,3 +23,13 @@ class PitonNoCHeader:
   def __str__( s ):
     return f'{s.chipid[13]:({s.xpos},{s.ypos}):{s.plen}}'
 
+@bitstruct
+class PitonInternalFlit:
+  is_head : Bits1
+  is_tail : Bits1
+  flit    : Bits64
+
+  def __str__( s ):
+    head = 'h' if s.is_head else ' '
+    tail = 't' if s.is_tail else ' '
+    return f'{head}{tail}:{s.flit}'
