@@ -785,7 +785,7 @@ def gen_verilog( topo, opts ):
   net.apply( VerilogTranslationPass() )
 
   translated_top_module = net.get_metadata( VerilogTranslationPass.translated_top_module )
-  os.system(f'mv {translated_top_module}.v {topo}.v')
+  os.system(f'mv {translated_top_module}__pickled.v {topo}.v')
 
 #-------------------------------------------------------------------------
 # smoke_test
