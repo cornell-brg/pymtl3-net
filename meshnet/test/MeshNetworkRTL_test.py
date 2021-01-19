@@ -15,9 +15,9 @@ from ocnlib.ifcs.positions import mk_mesh_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.queues import NormalQueueRTL
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 from router.InputUnitRTL import InputUnitRTL
 
 #-------------------------------------------------------------------------
@@ -69,7 +69,7 @@ class TestHarness( Component ):
 # Test cases (specific for 4x4 mesh)
 #-------------------------------------------------------------------------
 
-def test_srcsink_mesh4x4():
+def test_srcsink_mesh4x4( cmdline_opts ):
 
   #           src, dst, payload
   test_msgs = [ (0, 15, 101), (1, 14, 102), (2, 13, 103), (3, 12, 104),
@@ -102,10 +102,10 @@ def test_srcsink_mesh4x4():
     src_packets [src].append( pkt )
     sink_packets[dst].append( pkt )
 
-  for i,x in enumerate(src_packets):
-    print("src", i, [str(y) for y in x] )
-  for i,x in enumerate(sink_packets):
-    print("sink", i, [str(y) for y in x] )
+  # for i,x in enumerate(src_packets):
+    # print("src", i, [str(y) for y in x] )
+  # for i,x in enumerate(sink_packets):
+    # print("sink", i, [str(y) for y in x] )
   th = TestHarness( PacketType, ncols, nrows, src_packets, sink_packets,
                     0, 0, 0, 0, arrival_pipes )
-  run_sim( th )
+  run_sim( th, cmdline_opts )

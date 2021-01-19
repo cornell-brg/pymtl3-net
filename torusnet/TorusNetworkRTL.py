@@ -67,7 +67,7 @@ class TorusNetworkRTL( Component ):
       s.routers[i].send[SELF] //= s.send_adapters[i].recv
       s.send_adapters[i].send //= s.send[i]
 
-#    @s.update
+#    @update
 #    def up_pos():
     for y in range( nrows ):
       for x in range( ncols ):

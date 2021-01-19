@@ -56,10 +56,10 @@ class RingNetworkRTL( Component ):
       s.routers[i].send[SELF]       //= s.send_adp[i].recv
       s.send_adp[i].send            //= s.send[i]
 
-    @s.update
+    @update
     def up_pos():
       for r in range( s.num_routers ):
-        s.routers[r].pos = PositionType( r )
+        s.routers[r].pos @= r
 
   def line_trace( s, level='1pkt' ):
 

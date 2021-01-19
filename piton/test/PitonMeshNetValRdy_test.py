@@ -9,9 +9,9 @@ Author : Yanghui Ou
 '''
 import pytest
 from pymtl3 import *
-from pymtl3.stdlib.test import mk_test_case_table
+from pymtl3.stdlib.test_utils import mk_test_case_table
 from ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
-from ocnlib.utils import to_bitstruct, run_sim
+from ocnlib.utils import run_sim
 from ocnlib.packets import MflitPacket as Packet
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
@@ -71,7 +71,7 @@ def mk_pkt( src_offchip, src_x, src_y, dst_offchip, dst_x, dst_y,
   chipid      = b14(1) << 13 if dst_offchip else b14(0)
   plen        = len( payload )
   header      = PitonNoCHeader( chipid, dst_x, dst_y, fbits, plen, mtype, mshr, opt1 )
-  header_bits = to_bits( header )
+  header_bits = header.to_bits()
   flits       = [ header_bits ] + payload
   pkt         = Packet( PitonNoCHeader, flits )
   pkt.src_offchip = src_offchip
@@ -89,7 +89,7 @@ def arrange_src_sink_pkts( ncols, nrows, pkt_lst ):
   sink_pkts = [ [] for _ in range( nterminals+1 ) ]
 
   for pkt in pkt_lst:
-    header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
+    header = PitonNoCHeader.from_bits( pkt.flits[0] )
     src_id = nterminals if pkt.src_offchip else pkt.src_x + pkt.src_y * ncols
     dst_id = nterminals if header.chipid[13] else header.xpos.uint() + header.ypos.uint() * ncols
     src_pkts [ src_id ].append( pkt )
@@ -254,34 +254,32 @@ test_case_table2x7 = mk_test_case_table([
 # test driver
 #-------------------------------------------------------------------------
 
-# @pytest.mark.parametrize( **test_case_table )
-# def test_piton_mesh( test_params, test_verilog ):
-#   ncols = test_params.ncols
-#   nrows = test_params.nrows
-#   pkts  = test_params.msg_func( ncols, nrows )
-#   trans_backend = 'verilog' if test_verilog else ''
+@pytest.mark.parametrize( **test_case_table )
+def test_piton_mesh( test_params, cmdline_opts ):
+  ncols = test_params.ncols
+  nrows = test_params.nrows
+  pkts  = test_params.msg_func( ncols, nrows )
 
-#   src_pkts, dst_pkts = arrange_src_sink_pkts( ncols, nrows, pkts )
+  src_pkts, dst_pkts = arrange_src_sink_pkts( ncols, nrows, pkts )
 
-#   th = TestHarness( ncols, nrows, src_pkts, dst_pkts )
-#   th.set_param( 'top.src*.construct',
-#     initial_delay         = test_params.src_init,
-#     packet_interval_delay = test_params.src_pintv,
-#     flit_interval_delay   = test_params.src_fintv,
-#   )
-#   th.set_param( 'top.sink*.construct',
-#     initial_delay         = test_params.sink_init,
-#     packet_interval_delay = test_params.sink_pintv,
-#     flit_interval_delay   = test_params.sink_fintv,
-#   )
-#   run_sim( th, translation=trans_backend, xinit=test_verilog )
+  th = TestHarness( ncols, nrows, src_pkts, dst_pkts )
+  th.set_param( 'top.src*.construct', 
+    initial_delay         = test_params.src_init,
+    packet_interval_delay = test_params.src_pintv,
+    flit_interval_delay   = test_params.src_fintv,
+  )
+  th.set_param( 'top.sink*.construct', 
+    initial_delay         = test_params.sink_init,
+    packet_interval_delay = test_params.sink_pintv,
+    flit_interval_delay   = test_params.sink_fintv,
+  )
+  run_sim( th, cmdline_opts )
 
 @pytest.mark.parametrize( **test_case_table2x7 )
-def test_piton_mesh2x7( test_params, test_verilog, dump_vtb ):
+def test_piton_mesh2x7( test_params, cmdline_opts ):
   ncols = 2
   nrows = 7
   pkts  = test_params.msg_func( ncols, nrows )
-  trans_backend = 'verilog' if test_verilog else ''
 
   src_pkts, dst_pkts = arrange_src_sink_pkts( ncols, nrows, pkts )
 
@@ -296,5 +294,5 @@ def test_piton_mesh2x7( test_params, test_verilog, dump_vtb ):
     packet_interval_delay = test_params.sink_pintv,
     flit_interval_delay   = test_params.sink_fintv,
   )
-  run_sim( th, max_cycles=1000, translation=trans_backend, xinit=test_verilog, dump_vtb=dump_vtb )
+  run_sim( th, cmdline_opts )
 

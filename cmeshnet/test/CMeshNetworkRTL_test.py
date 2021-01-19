@@ -7,20 +7,21 @@ Test for CMeshNetworkRTL
 Author : Cheng Tan, Yanghui Ou
   Date : April 16, 2019
 """
+from pymtl3 import *
+from pymtl3.stdlib.queues import NormalQueueRTL
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+
+from ocnlib.ifcs.packets import *
+from ocnlib.ifcs.positions import *
+from ocnlib.utils import run_sim
+from ocnlib.test.net_sinks import TestNetSinkRTL
 from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
 from cmeshnet.DORXCMeshRouteUnitRTL import DORXCMeshRouteUnitRTL
 from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
 from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
 from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 from meshnet.MeshNetworkRTL import MeshNetworkRTL
-from ocnlib.ifcs.packets import *
-from ocnlib.ifcs.positions import *
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
 
 
 #-------------------------------------------------------------------------
@@ -40,12 +41,12 @@ def run_vector_test( model, PacketType, test_vectors, ncols, nrows ):
 
       # Enable the network interface on specific router
       for i in range (num_routers):
-        model.recv[i].en  = 0
-      model.recv[router_id].msg = pkt
-      model.recv[router_id].en  = 1
+        model.recv[i].en @= 0
+      model.recv[router_id].msg @= pkt
+      model.recv[router_id].en  @= 1
 
     for i in range (num_routers*4):
-      model.send[i].rdy = 1
+      model.send[i].rdy @= 1
 
   def tv_out( model, test_vector ):
     if test_vector[3] != 'x':
@@ -55,7 +56,7 @@ def run_vector_test( model, PacketType, test_vectors, ncols, nrows ):
   sim.run_test()
   model.sim_reset()
 
-def test_vector_mesh2x2( dump_vcd, test_verilog ):
+def test_vector_mesh2x2( cmdline_opts ):
 
   ncols = 2
   nrows  = 2

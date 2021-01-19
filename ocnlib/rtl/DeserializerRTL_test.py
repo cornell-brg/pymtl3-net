@@ -7,12 +7,14 @@ Unit tests for DeserializerRTL.
 Author : Yanghui Ou
   Date : Feb 26, 2020
 '''
+import os
 import hypothesis
 from hypothesis import strategies as st
 from pymtl3 import *
-from pymtl3.datatypes.strategies import bits 
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL as TestSource
-from pymtl3.stdlib.test.test_sinks import TestSinkRTL as TestSink
+from pymtl3.datatypes.strategies import bits
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL as TestSource
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL as TestSink
+
 from ocnlib.utils import run_sim
 
 from .DeserializerRTL import DeserializerRTL
@@ -28,7 +30,7 @@ def mk_msgs( in_nbits, max_nblocks, msgs ):
   sink_msgs = [ OutType(x) for x in msgs[::2] ]
   len_lst   = [ LenType(x) for x in msgs[1::2] ]
 
-  sink_msgs = [ data[0:in_nbits*length.uint()] for data, length in zip( sink_msgs, len_lst ) ]
+  sink_msgs = [ zext(data[0:in_nbits*length.uint()], OutType) for data, length in zip( sink_msgs, len_lst ) ]
 
   src_msgs = []
   for data, length in zip( sink_msgs, len_lst ):
@@ -78,22 +80,22 @@ class TestHarness( Component ):
 def test_sanity_check():
   dut = DeserializerRTL( in_nbits=16, max_nblocks=4 )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
-  dut.tick()
-  dut.tick()
+  dut.sim_tick()
+  dut.sim_tick()
 
   th = TestHarness( 16, 8, [] )
   th.elaborate()
-  th.apply( SimulationPass() )
-  th.tick()
-  th.tick()
+  th.apply( DefaultPassGroup() )
+  th.sim_tick()
+  th.sim_tick()
 
 #-------------------------------------------------------------------------
 # test case: basic
 #-------------------------------------------------------------------------
 
-def test_basic( test_verilog ):
+def test_basic( cmdline_opts ):
   msgs = [
     0xfaceb00c,         2,
     0xdeadbeef,         1,
@@ -101,14 +103,13 @@ def test_basic( test_verilog ):
     0xace3ace2ace1ace0, 3,
   ]
   th = TestHarness( 16, 4, msgs )
-  translation = 'verilog' if test_verilog else ''
-  run_sim( th, max_cycles=20, translation=translation )
+  run_sim( th, cmdline_opts, max_cycles=20 )
 
 #-------------------------------------------------------------------------
 # test case: backpressure
 #-------------------------------------------------------------------------
 
-def test_backpressure( test_verilog ):
+def test_backpressure( cmdline_opts ):
   msgs = [
     0xfaceb00c,         2,
     0xdeadbeef,         1,
@@ -117,14 +118,13 @@ def test_backpressure( test_verilog ):
   ]
   th = TestHarness( 16, 4, msgs )
   th.set_param( 'top.sink.construct', initial_delay=10, interval_delay=2 )
-  translation = 'verilog' if test_verilog else ''
-  run_sim( th, max_cycles=40, translation=translation )
+  run_sim( th, cmdline_opts, max_cycles=40 )
 
 #-------------------------------------------------------------------------
 # test case: src delay
 #-------------------------------------------------------------------------
 
-def test_src_delay( test_verilog ):
+def test_src_delay( cmdline_opts ):
   msgs = [
     0xdeadbeef_faceb00c,                   2,
     0xbad0bad0_deadbeef,                   1,
@@ -133,14 +133,13 @@ def test_src_delay( test_verilog ):
   ]
   th = TestHarness( 32, 9, msgs )
   th.set_param( 'top.src*.construct', initial_delay=10, interval_delay=2 )
-  translation = 'verilog' if test_verilog else ''
-  run_sim( th, max_cycles=200, translation=translation )
+  run_sim( th, cmdline_opts, max_cycles=200 )
 
 #-------------------------------------------------------------------------
 # test case: stream
 #-------------------------------------------------------------------------
 
-def test_stream( test_verilog ):
+def test_stream( cmdline_opts ):
   msgs = [
     0xdeadbeef, 1,
     0xbad0bad0, 1,
@@ -152,22 +151,21 @@ def test_stream( test_verilog ):
     0xfeedbabe_ace5ace4, 2,
   ]
   th = TestHarness( 32, 4, msgs )
-  translation = 'verilog' if test_verilog else ''
-  run_sim( th, max_cycles=40, translation=translation )
+  run_sim( th, cmdline_opts, max_cycles=40 )
 
 #-------------------------------------------------------------------------
 # test case: pyh2
 #-------------------------------------------------------------------------
 
-@hypothesis.settings( deadline=None, max_examples=100 )
+@hypothesis.settings( deadline=None, max_examples=100 if 'CI' not in os.environ else 5 )
 @hypothesis.given(
   in_nbits    = st.integers(1, 64),
   max_nblocks = st.integers(2, 15),
   data        = st.data(),
 )
-def test_pyh2( in_nbits, max_nblocks, data, test_verilog ):
+def test_pyh2( in_nbits, max_nblocks, data, cmdline_opts ):
   len_msgs = data.draw( st.lists( st.integers(1, max_nblocks), min_size=1, max_size=100 ) )
-  src_msgs = [ data.draw( bits(x*in_nbits) ) for x in len_msgs ]
+  src_msgs = [ data.draw( st.integers(0, 2**(x*in_nbits)-1) ) for x in len_msgs ]
 
   msgs = []
   for x, l in zip( src_msgs, len_msgs ):
@@ -175,6 +173,4 @@ def test_pyh2( in_nbits, max_nblocks, data, test_verilog ):
     msgs.append( l )
 
   th = TestHarness( in_nbits, max_nblocks, msgs )
-  translation = 'verilog' if test_verilog else ''
-  run_sim( th, translation=translation )
-
+  run_sim( th, cmdline_opts )

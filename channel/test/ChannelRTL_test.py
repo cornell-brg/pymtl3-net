@@ -11,10 +11,10 @@ import pytest
 from channel.ChannelRTL import ChannelRTL
 from ocnlib.utils import run_sim
 from pymtl3 import *
-from pymtl3.stdlib.rtl.queues import NormalQueueRTL
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_sinks import TestSinkRTL
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.queues import NormalQueueRTL
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -45,6 +45,12 @@ class TestHarness( Component ):
 
 test_msgs = [ b16(4), b16(1), b16(2), b16(3) ]
 
-def test_normal2_simple():
+def test_passthrough():
   th = TestHarness( Bits16, test_msgs, test_msgs)
   run_sim( th )
+
+def test_normal2_simple():
+  th = TestHarness( Bits16, test_msgs, test_msgs)
+  th.set_param("top.dut.construct", latency=2)
+  run_sim( th )
+

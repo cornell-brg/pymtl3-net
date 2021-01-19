@@ -8,7 +8,7 @@
 
 from directions import *
 from pymtl3 import *
-from pymtl3.stdlib.cl.queues import BypassQueueCL
+from pymtl3.stdlib.queues import BypassQueueCL
 
 
 class DORYMeshRouteUnitCL( Component ):
@@ -30,7 +30,7 @@ class DORYMeshRouteUnitCL( Component ):
     s.rdy_lst = [ False for _ in range( s.num_outports ) ]
     s.pkt     = None
 
-    @s.update
+    @update
     def ru_up_route():
       if s.pkt is None and s.get.rdy():
         s.pkt = s.get()

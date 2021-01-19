@@ -20,7 +20,7 @@ class DORXCMeshRouteUnitRTL( Component ):
     # Constants
 
     s.num_outports = num_outports
-    TType = mk_bits( num_outports )
+    TType = mk_bits( clog2(num_outports) )
 
     # Interface
 
@@ -31,7 +31,7 @@ class DORXCMeshRouteUnitRTL( Component ):
     # Componets
 
     s.give_ens = Wire( mk_bits( s.num_outports ) )
-    s.give_rdy = [ Wire( Bits1 ) for _ in range( s.num_outports )]
+    s.give_rdy = [ Wire() for _ in range( s.num_outports )]
 
     # Connections
 
@@ -42,28 +42,28 @@ class DORXCMeshRouteUnitRTL( Component ):
 
     # Routing logic
 
-    @s.update
+    @update
     def up_ru_routing():
 
-      s.out_dir = 0
+      s.out_dir @= 0
       for i in range( s.num_outports ):
-        s.give_rdy[i] = Bits1(0)
+        s.give_rdy[i] @= Bits1(0)
 
       if s.get.rdy:
-        if s.pos.pos_x == s.get.ret.dst_x and s.pos.pos_y == s.get.ret.dst_y:
-          s.give_rdy[ Bits3( 4 ) + s.get.ret.dst_ter ] = Bits1(1)
+        if (s.pos.pos_x == s.get.ret.dst_x) & (s.pos.pos_y == s.get.ret.dst_y):
+          s.give_rdy[ Bits3( 4 ) + s.get.ret.dst_ter ] @= 1
         elif s.get.ret.dst_x < s.pos.pos_x:
-          s.give_rdy[2] = Bits1(1)
+          s.give_rdy[2] @= 1
         elif s.get.ret.dst_x > s.pos.pos_x:
-          s.give_rdy[3] = Bits1(1)
+          s.give_rdy[3] @= 1
         elif s.get.ret.dst_y < s.pos.pos_y:
-          s.give_rdy[1] = Bits1(1)
+          s.give_rdy[1] @= 1
         else:
-          s.give_rdy[0] = Bits1(1)
+          s.give_rdy[0] @= 1
 
-    @s.update
+    @update
     def up_ru_get_en():
-      s.get.en = s.give_ens > TType(0)
+      s.get.en = s.give_ens > 0
 
   # Line trace
 

@@ -7,15 +7,16 @@
  Author : Cheng Tan, Yanghui Ou
    Date : April 16, 2019
 """
-from cmeshnet.CMeshRouterRTL import CMeshRouterRTL
-from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
+from pymtl3 import *
+from pymtl3.stdlib.test_utils import TestVectorSimulator
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+
 from ocnlib.ifcs.packets import *
 from ocnlib.ifcs.positions import *
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
-from pymtl3 import *
-from pymtl3.stdlib.test import TestVectorSimulator
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from cmeshnet.CMeshRouterRTL import CMeshRouterRTL
+from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
 from router.InputUnitRTL import InputUnitRTL
 from test_helpers import dor_routing
 
@@ -29,27 +30,29 @@ def run_vector_test( model, PacketType, test_vectors,
   def tv_in( model, test_vector ):
 
     MeshPos    = mk_mesh_pos( ncols, nrows )
-    model.pos  = MeshPos( pos_x, pos_y )
+    model.pos @= MeshPos( pos_x, pos_y )
 
     for i in range( model.num_outports ):
       if model.recv[i].rdy and test_vector[3][i]:
         pkt = PacketType( 0, 0, test_vector[0][i]%4, test_vector[0][i]//4,
                       test_vector[1], 1, test_vector[2][i] )
 
-        model.recv[i].msg = pkt
-        model.recv[i].en = 1
-      elif model.recv[i].rdy == 0:
-        model.recv[i].en = 0
+        model.recv[i].msg @= pkt
+        model.recv[i].en  @= 1
+      # elif model.recv[i].rdy == 0:
+      else:
+        model.recv[i].en  @= 0
 
     for i in range( model.num_outports ):
-      model.send[i].rdy = 1
+      model.send[i].rdy @= 1
 
   def tv_out( model, test_vector ):
 
     for i in range( model.num_outports ):
       if model.send[i].en == 1:
         pkt = model.send[i].msg
-        assert pkt.payload == test_vector[4][i]
+        # print('??', test_vector[4][i])
+        assert test_vector[4][i] == 'x' or pkt.payload == test_vector[4][i]
 
   sim = TestVectorSimulator( model, test_vectors, tv_in, tv_out )
   sim.run_test()
@@ -65,8 +68,8 @@ def test_vector_router4x4():
   inputs_buffer= [
 #     [dst]   term     payload          recv_rdy               send_msg
   [[4,4,7,4,5],0,[11,12,13,14,15],[1,1,1,0,1,0,0,0],[xx,xx,xx,xx,xx,xx,xx,xx]],
-  [[4,4,7,9,5],1,[21,22,23,24,25],[1,1,1,1,1,0,0,0],[xx,xx,xx,xx,xx,xx,xx,xx]],
-  [[4,4,7,8,5],2,[31,32,33,34,35],[0,0,0,0,1,0,0,0],[24,xx,21,23,xx,25,xx,xx]],
+  [[4,4,7,9,5],1,[21,22,23,24,25],[1,1,1,1,1,0,0,0],[xx,xx,11,13,xx,15,xx,xx]],
+  [[4,4,7,8,5],2,[31,32,33,34,35],[0,0,0,0,1,0,0,0],[24,xx,12,23,xx,25,xx,xx]],
   ]
 
   MeshPos = mk_mesh_pos( ncols, nrows )
@@ -103,9 +106,9 @@ class TestHarness( Component ):
       s.srcs[i].send //= s.dut.recv[i]
       s.dut.send[i]  //= s.sinks[i].recv
 
-    @s.update
+    @update
     def up_pos():
-      s.dut.pos = MeshPos(1,1)
+      s.dut.pos @= MeshPos(1,1)
 
   def done( s ):
     srcs_done = 1

@@ -9,10 +9,16 @@ Author : Yanghui Ou
 """
 from ocnlib.rtl import Counter
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL, enrdy_to_str
-from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
-from pymtl3.stdlib.rtl.Encoder import Encoder
-from pymtl3.stdlib.rtl.queues import BypassQueueRTL
+from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.basic_rtl.arbiters import RoundRobinArbiterEn
+from pymtl3.stdlib.basic_rtl import Encoder
+from pymtl3.stdlib.queues import BypassQueueRTL
+
+def enrdy_to_str( msg, en, rdy, trace_len=15 ):                            
+    if     en  and not rdy: return "X".ljust( trace_len )                      
+    if             not rdy: return "#".ljust( trace_len )                      
+    if not en  and     rdy: return " ".ljust( trace_len )                      
+    return f"{msg}".ljust( trace_len ) # en and rdy 
 
 #-------------------------------------------------------------------------
 # RTL interfaces
@@ -23,9 +29,9 @@ class CreditRecvIfcRTL( Interface ):
   def construct( s, MsgType, vc=1 ):
     assert vc > 1, "We only support multiple virtual channels!"
 
-    s.en  = InPort ( Bits1   )
+    s.en  = InPort ()
     s.msg = InPort ( MsgType )
-    s.yum = [ OutPort( Bits1 ) for i in range( vc ) ]
+    s.yum = [ OutPort() for i in range( vc ) ]
 
     s.MsgType = MsgType
     s.vc    = vc
@@ -46,12 +52,12 @@ class CreditSendIfcRTL( Interface ):
   def construct( s, MsgType, vc=1 ):
     assert vc > 1, "We only support multiple virtual channels!"
 
-    s.en  = OutPort( Bits1   )
+    s.en  = OutPort()
     s.msg = OutPort( MsgType )
-    s.yum = [ InPort( Bits1 ) for _ in range( vc ) ]
+    s.yum = [ InPort() for _ in range( vc ) ]
 
     s.MsgType = MsgType
-    s.vc    = vc
+    s.vc      = vc
 
   def __str__( s ):
     try:
@@ -77,7 +83,7 @@ class CreditSendIfcCL( Interface ):
     s.recv_credit = [ CalleePort() for _ in range( vc ) ]
 
     s.MsgType = MsgType
-    s.vc    = vc
+    s.vc      = vc
 
   def __str__( s ):
     return ""
@@ -116,7 +122,6 @@ class RecvRTL2CreditSendRTL( Component ):
     # Components
 
     CreditType = mk_bits( clog2(credit_line+1) )
-    VcIDType   = mk_bits( clog2( vc ) if vc > 1 else 1 )
 
     # FIXME: use multiple buffers to avoid deadlock.
     s.buffer = BypassQueueRTL( MsgType, num_entries=1 )
@@ -125,25 +130,25 @@ class RecvRTL2CreditSendRTL( Component ):
     s.recv           //=  s.buffer.enq
     s.buffer.deq.ret //=  s.send.msg
 
-    @s.update
+    @update
     def up_credit_send():
-      s.send.en = b1(0)
-      s.buffer.deq.en = b1(0)
+      s.send.en @= 0
+      s.buffer.deq.en @= 0
       if s.buffer.deq.rdy:
         for i in range( vc ):
-          if VcIDType(i) == s.buffer.deq.ret.vc_id and s.credit[i].count > CreditType(0):
-            s.send.en = b1(1)
-            s.buffer.deq.en = b1(1)
+          if ( i == s.buffer.deq.ret.vc_id ) & ( s.credit[i].count > 0 ):
+            s.send.en @= 1
+            s.buffer.deq.en @= 1
 
-    @s.update
+    @update
     def up_counter_decr():
       for i in range( vc ):
-        s.credit[i].decr = s.send.en & ( VcIDType(i) == s.send.msg.vc_id )
+        s.credit[i].decr @= s.send.en & ( i == s.send.msg.vc_id )
 
     for i in range( vc ):
       s.credit[i].incr       //= s.send.yum[i]
-      s.credit[i].load       //= b1(0)
-      s.credit[i].load_value //= CreditType(0)
+      s.credit[i].load       //= 0
+      s.credit[i].load_value //= 0
 
   def line_trace( s ):
     return "{}({},{}){}".format(
@@ -169,8 +174,6 @@ class CreditRecvRTL2SendRTL( Component ):
     # Components
 
     CreditType = mk_bits( clog2(credit_line+1) )
-    ArbReqType = mk_bits( vc )
-    VcIDType   = mk_bits( clog2( vc ) if vc > 1 else 1 )
 
     s.buffers = [ QType( MsgType, num_entries=credit_line )
                   for _ in range( vc ) ]
@@ -183,31 +186,31 @@ class CreditRecvRTL2SendRTL( Component ):
     s.arbiter.grants //= s.encoder.in_
     s.arbiter.en     //= s.send.en
 
-    @s.update
+    @update
     def up_enq():
       if s.recv.en:
         for i in range( vc ):
-          s.buffers[i].enq.en = s.recv.msg.vc_id == VcIDType(i)
+          s.buffers[i].enq.en @= s.recv.msg.vc_id == i
       else:
         for i in range( vc ):
-          s.buffers[i].enq.en = b1(0)
+          s.buffers[i].enq.en @= 0
 
-    @s.update
+    @update
     def up_deq_and_send():
       for i in range( vc ):
-        s.buffers[i].deq.en = b1(0)
+        s.buffers[i].deq.en @= 0
 
-      s.send.msg = s.buffers[ s.encoder.out ].deq.ret
-      if s.send.rdy & ( s.arbiter.grants > ArbReqType(0) ):
-        s.send.en = b1(1)
-        s.buffers[ s.encoder.out ].deq.en = b1(1)
+      s.send.msg @= s.buffers[ s.encoder.out ].deq.ret
+      if s.send.rdy & ( s.arbiter.grants > 0 ):
+        s.send.en @= 1
+        s.buffers[ s.encoder.out ].deq.en @= 1
       else:
-        s.send.en = b1(0)
+        s.send.en @= 0
 
-    @s.update
+    @update
     def up_yummy():
       for i in range( vc ):
-        s.recv.yum[i] = s.buffers[i].deq.en
+        s.recv.yum[i] @= s.buffers[i].deq.en
 
   def line_trace( s ):
     return "{}(){}".format( s.recv, s.send )

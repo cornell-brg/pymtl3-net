@@ -7,12 +7,14 @@ Test cases for multi-flit mesh.
 Author : Yanghui Ou
   Date : Feb 14, 2020
 '''
+import os
 import pytest
 import hypothesis
 from hypothesis import strategies as st
 from pymtl3 import *
-from pymtl3.stdlib.test import mk_test_case_table
-from ocnlib.utils import to_bitstruct, run_sim
+from pymtl3.stdlib.test_utils import mk_test_case_table
+
+from ocnlib.utils import run_sim
 from ocnlib.packets import MflitPacket as Packet
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
@@ -76,7 +78,7 @@ class TestHarness( Component ):
 def mk_pkt( src_x, src_y, dst_x, dst_y, payload=[], opaque=0 ):
   plen        = len( payload )
   header      = TestHeader( opaque, src_x, src_y, dst_x, dst_y, plen )
-  header_bits = to_bits( header )
+  header_bits = header.to_bits()
   flits       = [ header_bits ] + payload
   return Packet( TestHeader, flits )
 
@@ -90,7 +92,7 @@ def arrange_src_sink_pkts( Header, ncols, nrows, pkt_lst ):
   sink_pkts = [ [] for _ in range( nterminals ) ]
 
   for pkt in pkt_lst:
-    header = to_bitstruct( pkt.flits[0], Header )
+    header = Header.from_bits( pkt.flits[0] )
     src_id = header.src_x.uint() + header.src_y.uint() * ncols
     dst_id = header.dst_x.uint() + header.dst_y.uint() * ncols
     src_pkts [ src_id ].append( pkt )
@@ -105,9 +107,9 @@ def arrange_src_sink_pkts( Header, ncols, nrows, pkt_lst ):
 def test_sanity_check():
   net = MeshNetworkMflitRTL( TestHeader, TestPosition, ncols=2, nrows=2 )
   net.elaborate()
-  net.apply( SimulationPass() )
+  net.apply( DefaultPassGroup() )
   net.sim_reset()
-  net.tick()
+  net.sim_tick()
 
 #-------------------------------------------------------------------------
 # test case: basic
@@ -156,17 +158,16 @@ test_case_table = mk_test_case_table([
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_mflit_mesh( test_params, test_verilog ):
+def test_mflit_mesh( test_params, cmdline_opts ):
   ncols = test_params.ncols
   nrows = test_params.nrows
   pkts  = test_params.msg_func( ncols, nrows )
-  trans_backend = 'verilog' if test_verilog else ''
 
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
 
   th = TestHarness( TestHeader, TestPosition, ncols, nrows,
                     src_pkts, dst_pkts )
-  run_sim( th, translation=trans_backend )
+  run_sim( th, cmdline_opts )
 
 #-------------------------------------------------------------------------
 # packet strategy
@@ -187,16 +188,15 @@ def pkt_strat( draw, ncols, nrows, max_plen=15 ):
 # pyh2 test
 #-------------------------------------------------------------------------
 
-@hypothesis.settings( deadline=None, max_examples=50 )
+@hypothesis.settings( deadline=None, max_examples=50 if 'CI' not in os.environ else 5 )
 @hypothesis.given(
   ncols = st.integers(2, 4),
   nrows = st.integers(2, 4),
   pkts  = st.data(),
 )
-def test_pyh2( ncols, nrows, pkts, test_verilog ):
+def test_pyh2( ncols, nrows, pkts, cmdline_opts ):
   pkts = pkts.draw( st.lists( pkt_strat( ncols, nrows ), min_size=1, max_size=100 ) )
   src_pkts, dst_pkts = arrange_src_sink_pkts( TestHeader, ncols, nrows, pkts )
-  trans_backend = 'verilog' if test_verilog else ''
   th = TestHarness( TestHeader, TestPosition, ncols, nrows,
                     src_pkts, dst_pkts )
-  run_sim( th, translation=trans_backend )
+  run_sim( th, cmdline_opts )

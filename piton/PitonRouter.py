@@ -9,7 +9,6 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
-from ocnlib.utils import get_nbits
 from ocnlib.rtl.queues import NormalQueueRTL
 from router.InputUnitRTL import InputUnitRTL
 from router.OutputUnitRTL import OutputUnitRTL
@@ -40,7 +39,7 @@ class PitonRouter( Component ):
 
     s.num_inports  = 5
     s.num_outports = 5
-    assert get_nbits( PitonNoCHeader ) == 64
+    assert PitonNoCHeader.nbits == 64
     s.PhitType     = Bits64
 
     # Interface

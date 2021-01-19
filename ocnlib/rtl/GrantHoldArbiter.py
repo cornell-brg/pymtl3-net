@@ -8,33 +8,32 @@ Author : Yanghui Ou
   Date : Jan 22, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.rtl.arbiters import RoundRobinArbiterEn
+from pymtl3.stdlib.basic_rtl import RoundRobinArbiterEn
 
 
 class GrantHoldArbiter( Component ):
 
   def construct( s, nreqs ):
-    BitsN = mk_bits( nreqs )
 
     # Interface
-    s.reqs   = InPort ( BitsN )
-    s.hold   = InPort ( Bits1 )
-    s.en     = InPort ( Bits1 )
-    s.grants = OutPort( BitsN )
+    s.reqs   = InPort ( nreqs ) 
+    s.grants = OutPort( nreqs )
+    s.hold   = InPort ()
+    s.en     = InPort ()
 
     # Components
     s.arb    = RoundRobinArbiterEn( nreqs )
-    s.last_r = Wire( BitsN )
+    s.last_r = Wire( nreqs )
 
     # Logic
-    s.arb.en   //= s.en
-    s.arb.reqs //= lambda: BitsN(0) if s.hold else s.reqs
+    s.arb.reqs //= lambda: 0 if s.hold else s.reqs
+    s.arb.en   //= lambda: s.en
     s.grants   //= lambda: s.arb.grants if ~s.hold else s.last_r
 
-    @s.update_ff
+    @update_ff
     def up_last_r():
       s.last_r <<= s.grants
-    
+
   def line_trace( s ):
     hold = 'h' if s.hold else ' '
     en   = 'e' if s.arb.en else ' '

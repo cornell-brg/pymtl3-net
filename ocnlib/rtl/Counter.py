@@ -17,28 +17,28 @@ class Counter( Component ):
 
     # Interface
 
-    s.incr       = InPort ( Bits1 )
-    s.decr       = InPort ( Bits1 )
-    s.load       = InPort ( Bits1 )
-    s.load_value = InPort ( Type  )
-    s.count      = OutPort( Type  )
+    s.incr       = InPort ()
+    s.decr       = InPort ()
+    s.load       = InPort ()
+    s.load_value = InPort ( Type )
+    s.count      = OutPort( Type )
 
     # Logic
 
-    @s.update_ff
+    @update_ff
     def up_count():
 
       if s.reset:
-        s.count <<= Type( reset_value )
+        s.count <<= reset_value
 
       elif s.load:
         s.count <<= s.load_value
 
       elif s.incr & ~s.decr:
-        s.count <<= s.count + Type(1)
+        s.count <<= s.count + 1
 
       elif ~s.incr & s.decr:
-        s.count <<= s.count - Type(1)
+        s.count <<= s.count - 1
 
   def line_trace( s ):
-    return "{}".format( s.count )
+    return f"{s.count}"

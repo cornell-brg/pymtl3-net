@@ -67,7 +67,7 @@ class TorusNetworkCL( Component ):
       s.recv[i] //= s.routers[i].recv[SELF]
       s.send[i] //= s.routers[i].send[SELF]
 
-    @s.update
+    @update
     def up_pos():
       for y in range( nrows ):
         for x in range( ncols ):

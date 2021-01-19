@@ -14,9 +14,9 @@ from hypothesis import strategies as st
 from ocnlib.utils import run_sim
 from pymtl3 import *
 from pymtl3.datatypes import strategies as pst
-from pymtl3.stdlib.cl.queues import BypassQueueCL, NormalQueueCL, PipeQueueCL
-from pymtl3.stdlib.test.test_sinks import TestSinkCL
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
+from pymtl3.stdlib.queues import BypassQueueCL, NormalQueueCL, PipeQueueCL
+from pymtl3.stdlib.test_utils.test_sinks import TestSinkCL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
 from router.InputUnitCL import InputUnitCL
 
 #-------------------------------------------------------------------------
@@ -34,7 +34,7 @@ class TestHarness( Component ):
     # Connections
     s.src.send //= s.dut.recv
 
-    @s.update
+    @update_once
     def up_give_en():
       if s.dut.give.rdy() and s.sink.recv.rdy():
         s.sink.recv( s.dut.give() )

@@ -21,13 +21,14 @@ Author : Yanghui Ou
 import pytest
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import mk_test_case_table
+from ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
 from ocnlib.utils import run_sim
 from ocnlib.packets import MflitPacket as Packet
 from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
 from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
 
 from ..PitonNoCHeader import PitonNoCHeader
-from ..PitonRouter import PitonRouter
+from ..PitonRouterValRdy import PitonRouterValRdy
 from ..PitonRouterFL import PitonRouterFL
 
 #-------------------------------------------------------------------------
@@ -49,12 +50,17 @@ class TestHarness( Component ):
     nports = 5
 
     s.src  = [ TestSource( PitonNoCHeader, src_pkts[i] ) for i in range( nports ) ]
-    s.dut  = PitonRouter( PitonPosition )
+    s.dut  = PitonRouterValRdy( PitonPosition )
     s.sink = [ TestSink( PitonNoCHeader, sink_pkts[i] ) for i in range( nports ) ]
 
+    s.recv2out = [ Recv2OutValRdy( Bits64 ) for _ in range( nports ) ]
+    s.in2send  = [ InValRdy2Send ( Bits64 ) for _ in range( nports ) ]
+
     for i in range( nports ):
-      s.src[i].send //= s.dut.recv[i]
-      s.dut.send[i] //= s.sink[i].recv
+      s.src[i].send     //= s.recv2out[i].recv
+      s.recv2out[i].out //= s.dut.in_[i]
+      s.dut.out[i]      //= s.in2send[i].in_
+      s.in2send[i].send //= s.sink[i].recv
 
     s.dut.pos //= PitonPosition( pos_x, pos_y )
 
@@ -92,7 +98,7 @@ def mk_pkt( src_offchip, src_x, src_y, dst_offchip, dst_x, dst_y,
 #-------------------------------------------------------------------------
 
 def test_sanity_check():
-  dut = PitonRouter( PitonPosition )
+  dut = PitonRouterValRdy( PitonPosition )
   dut.elaborate()
   dut.apply( DefaultPassGroup() )
   dut.sim_reset()
@@ -164,7 +170,7 @@ def offchip_pkts( pos_x, pos_y ):
     mk_pkt( n, pos_x, pos_y,  y,     0, 0,     [ 0xbad0 + i for i in range(10)      ]      ),
     mk_pkt( n,     0, 6,      y,     0, 0,     [ 0xdeadbeef                         ]      ),
     mk_pkt( y,     0, 0,      n, pos_x, 0,     [                                    ]      ),
-  ]# 
+  ]#
 
 
 #-------------------------------------------------------------------------
@@ -198,7 +204,7 @@ test_case_table = mk_test_case_table( table )
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_mflit_mesh_router( test_params ):
+def test_mflit_mesh_router( test_params, cmdline_opts ):
   ref  = PitonRouterFL( test_params.pos_x, test_params.pos_y )
   pkts = test_params.msg_func( test_params.pos_x, test_params.pos_y )
 
@@ -206,4 +212,4 @@ def test_mflit_mesh_router( test_params ):
   dst_pkts = ref.route( src_pkts )
 
   th = TestHarness( test_params.pos_x, test_params.pos_y, src_pkts, dst_pkts )
-  run_sim( th )
+  run_sim( th, cmdline_opts )

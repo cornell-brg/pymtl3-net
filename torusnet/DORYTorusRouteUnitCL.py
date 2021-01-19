@@ -37,7 +37,7 @@ class DORYTorusRouteUnitCL( Component ):
 
     # Routing logic
 
-    @s.update
+    @update
     def up_ru_routing():
 
       if s.msg is None and s.get.rdy():

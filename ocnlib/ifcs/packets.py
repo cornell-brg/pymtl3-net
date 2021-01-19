@@ -19,7 +19,7 @@ from pymtl3 import *
 def mk_generic_pkt( nrouters=4, opaque_nbits=8, vc=2, payload_nbits=16,
                     prefix="GenericPacket" ):
 
-  IdType = mk_bits( clog2( nrouters ) )
+  IdType  = mk_bits( clog2( nrouters ) )
   OpqType = mk_bits( opaque_nbits )
   PayloadType = mk_bits( payload_nbits )
 
@@ -95,7 +95,7 @@ def mk_mesh_pkt( ncols=2, nrows=2,
   assert ncols > 0 and nrows > 0
 
   XType       = mk_bits(clog2( ncols )) if ncols != 1 else Bits1
-  YType       = mk_bits(clog2( nrows)) if nrows!= 1 else Bits1
+  YType       = mk_bits(clog2( nrows )) if nrows != 1 else Bits1
   OpqType     = mk_bits(opaque_nbits)
   PayloadType = mk_bits(payload_nbits)
 

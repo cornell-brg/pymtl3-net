@@ -35,7 +35,7 @@ class DORXMeshRouteUnitRTL( Component ):
       s.give_ens[i] //= s.give[i].en
 
     # Routing logic
-    @s.update
+    @update
     def up_ru_routing():
 
       s.out_dir = Bits3(0)
@@ -55,7 +55,7 @@ class DORXMeshRouteUnitRTL( Component ):
           s.out_dir = SOUTH
         s.give[ s.out_dir ].rdy = Bits1(1)
 
-    @s.update
+    @update
     def up_ru_give_en():
       s.get.en = s.give_ens > Bits5(0)
 

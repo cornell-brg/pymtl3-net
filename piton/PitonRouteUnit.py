@@ -21,7 +21,7 @@ Authour : Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
 from ocnlib.rtl import Counter, GrantHoldArbiter
-from ocnlib.utils import get_nbits, get_field_type
+from ocnlib.utils import get_field_type
 from ocnlib.utils.connects import connect_bitstruct
 
 from .directions import *
@@ -37,11 +37,11 @@ class PitonRouteUnit( Component ):
 
     # Local parameter
 
-    assert get_nbits( PitonNoCHeader ) == 64
+    assert PitonNoCHeader.nbits == 64
     s.num_outports = 5
     s.PhitType     = Bits64
-    s.STATE_HEADER = b1(0)
-    s.STATE_BODY   = b1(1)
+    s.STATE_HEADER = 0
+    s.STATE_BODY   = 1
 
     PLenType = Bits8
     XType    = get_field_type( PositionType, 'pos_x' )
@@ -68,10 +68,9 @@ class PitonRouteUnit( Component ):
     s.dst_x       = Wire( Bits8 )
     s.dst_y       = Wire( Bits8 )
 
-    s.counter = Counter( PLenType )(
-      incr=b1(0),
-      load_value=s.header.plen,
-    )
+    s.counter = Counter( PLenType )
+    s.counter.incr //= 0
+    s.counter.load_value //= s.header.plen
 
     connect_bitstruct( s.get.ret, s.header )
 
@@ -79,90 +78,90 @@ class PitonRouteUnit( Component ):
       s.get.ret //= s.give[i].ret
     s.get.en //= s.any_give_en
 
-    @s.update
+    @update
     def up_any_give_en():
-      s.any_give_en = b1(0)
+      s.any_give_en @= 0
       for i in range( s.num_outports ):
         if s.give[i].en:
-          s.any_give_en = b1(1)
+          s.any_give_en @= 1
 
     # State transition logic
 
-    @s.update_ff
+    @update_ff
     def up_state_r():
       if s.reset:
         s.state <<= s.STATE_HEADER
       else:
         s.state <<= s.state_next
 
-    @s.update
+    @update
     def up_state_next():
-      s.state_next = s.state
+      s.state_next @= s.state
       if s.state == s.STATE_HEADER:
         # If the packet has body flits
-        if s.any_give_en & ( s.header.plen > PLenType(0) ):
-          s.state_next = s.STATE_BODY
+        if s.any_give_en & ( s.header.plen > 0 ):
+          s.state_next @= s.STATE_BODY
 
       else: # STATE_BODY
-        if ( s.counter.count == PLenType(1) ) & s.any_give_en:
-          s.state_next = s.STATE_HEADER
+        if ( s.counter.count == 1 ) & s.any_give_en:
+          s.state_next @= s.STATE_HEADER
 
     # State output logic
 
-    @s.update
+    @update
     def up_counter_decr():
-      s.counter.decr = b1(0)
+      s.counter.decr @= 0
       if s.state != s.STATE_HEADER:
-        s.counter.decr = s.any_give_en
+        s.counter.decr @= s.any_give_en
 
-    @s.update
+    @update
     def up_counter_load():
-      s.counter.load = b1(0)
+      s.counter.load @= 0
       if s.state == s.STATE_HEADER:
-        s.counter.load = ( s.state_next == s.STATE_BODY )
+        s.counter.load @= ( s.state_next == s.STATE_BODY )
 
     # Routing logic
 
     s.offchip //= s.header.chipid[13]
 
-    @s.update
+    @update
     def up_dst():
-      s.dst_x = XType(0)
-      s.dst_y = YType(0)
+      s.dst_x @= 0
+      s.dst_y @= 0
       if ~s.offchip:
-        s.dst_x = s.header.xpos
-        s.dst_y = s.header.ypos
+        s.dst_x @= s.header.xpos
+        s.dst_y @= s.header.ypos
 
-    @s.update
+    @update
     def up_out_dir():
-      s.out_dir = s.out_dir_r
+      s.out_dir @= s.out_dir_r
 
       if ( s.state == s.STATE_HEADER ) & s.get.rdy:
-        s.out_dir = b3(0)
+        s.out_dir @= 0
         # Offchip port
-        if ( s.pos.pos_x == XType(0) ) & ( s.pos.pos_y == YType(0) ) & s.offchip:
-          s.out_dir = b3( WEST )
+        if ( s.pos.pos_x == 0 ) & ( s.pos.pos_y == 0 ) & s.offchip:
+          s.out_dir @= WEST
 
         elif ( s.dst_x == s.pos.pos_x ) & ( s.dst_y == s.pos.pos_y ):
-          s.out_dir = b3( SELF )
+          s.out_dir @= SELF
         elif s.dst_x < s.pos.pos_x:
-          s.out_dir = b3( WEST )
+          s.out_dir @= WEST
         elif s.dst_x > s.pos.pos_x:
-          s.out_dir = b3( EAST )
+          s.out_dir @= EAST
         elif s.dst_y < s.pos.pos_y:
-          s.out_dir = b3( NORTH )
+          s.out_dir @= NORTH
         elif s.dst_y > s.pos.pos_y:
-          s.out_dir = b3( SOUTH )
+          s.out_dir @= SOUTH
 
-    @s.update_ff
+    @update_ff
     def up_out_dir_r():
       s.out_dir_r <<= s.out_dir
 
-    @s.update
+    @update
     def up_give_rdy_hold():
       for i in range( s.num_outports ):
-        s.give[i].rdy = ( b3(i) == s.out_dir ) & s.get.rdy
-        s.hold[i]     = ( b3(i) == s.out_dir ) & ( s.state == s.STATE_BODY )
+        s.give[i].rdy @= ( i == s.out_dir ) & s.get.rdy
+        s.hold[i]     @= ( i == s.out_dir ) & ( s.state == s.STATE_BODY )
 
   #-----------------------------------------------------------------------
   # line_trace

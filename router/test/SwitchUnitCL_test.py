@@ -8,11 +8,11 @@ Author: Yanghui Ou
 """
 import pytest
 
+from pymtl3 import *
+from pymtl3.stdlib.queues import BypassQueueCL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkCL as TestSinkCL
-from pymtl3 import *
-from pymtl3.stdlib.cl.queues import BypassQueueCL
-from pymtl3.stdlib.test.test_srcs import TestSrcCL
 from router.SwitchUnitCL import SwitchUnitCL
 
 #-------------------------------------------------------------------------
@@ -34,7 +34,7 @@ class TestHarness( Component ):
       s.src[i].send  //= s.src_q[i].enq
       s.src_q[i].deq //= s.dut.get[i]
 
-    @s.update
+    @update_once
     def up_give_recv():
       if s.dut.give.rdy() and s.sink.recv.rdy():
         s.sink.recv( s.dut.give() )

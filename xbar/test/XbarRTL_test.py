@@ -9,8 +9,8 @@ Author : Yanghui Ou
 '''
 import pytest
 from pymtl3 import *
-from pymtl3.stdlib.test import mk_test_case_table
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL as TestSource
+from pymtl3.stdlib.test_utils import mk_test_case_table
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL as TestSource
 from ocnlib.ifcs.packets import mk_generic_pkt, mk_xbar_pkt
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL as TestSink
@@ -32,10 +32,10 @@ def test_sanity():
   PktT = mk_generic_pkt( nrouters=4, opaque_nbits=8, vc=0, payload_nbits=32 )
   dut = XbarRTL( PktT, 2, 2 )
   dut.elaborate()
-  dut.apply( SimulationPass() )
+  dut.apply( DefaultPassGroup() )
   dut.sim_reset()
-  dut.tick()
-  dut.tick()
+  dut.sim_tick()
+  dut.sim_tick()
 
 #-------------------------------------------------------------------------
 # arrange_src_sink_pkts
@@ -114,12 +114,11 @@ test_case_table = mk_test_case_table( test_cases )
 #-------------------------------------------------------------------------
 
 @pytest.mark.parametrize( **test_case_table )
-def test_sflit_xbar( test_params, test_verilog ):
+def test_sflit_xbar( test_params, cmdline_opts ):
   pkts = test_params.msg_func( test_params.n_in, test_params.n_out )
-  trans_backend = 'verilog' if test_verilog else ''
   th = TestHarness( test_params.n_in, test_params.n_out, pkts )
   th.set_param( 'top.sink*.construct',
     initial_delay  = test_params.init,
     interval_delay = test_params.intv,
   )
-  run_sim( th, translation=trans_backend )
+  run_sim( th, cmdline_opts )

@@ -9,7 +9,9 @@ Author : Yanghui Ou, Cheng Tan
 """
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, SendIfcRTL
-from pymtl3.stdlib.basic_rtl import Mux, RoundRobinArbiterEn, Encoder
+from pymtl3.stdlib.basic_rtl import Mux
+from pymtl3.stdlib.basic_rtl import RoundRobinArbiterEn
+from pymtl3.stdlib.basic_rtl import Encoder
 
 
 class SwitchUnitRTL( Component ):
@@ -20,8 +22,6 @@ class SwitchUnitRTL( Component ):
 
     s.num_inports = num_inports
     s.sel_width   = clog2( num_inports )
-    GrantType     = mk_bits( num_inports )
-    SelType       = mk_bits( s.sel_width )
     s.set_ocp = 0
     s.clear_ocp = 0
 
@@ -29,15 +29,16 @@ class SwitchUnitRTL( Component ):
 
     s.get  = [ GetIfcRTL( PacketType ) for _ in range( s.num_inports ) ]
     s.give = GiveIfcRTL( PacketType )
-    s.out_ocp = OutPort( Bits1 )
+    s.out_ocp = OutPort()
 
     # Components
 
-    s.get_en  = [ Wire( Bits1 ) for _ in range( s.num_inports ) ]
-    s.get_rdy = [ Wire( Bits1 ) for _ in range( s.num_inports ) ]
+    s.get_en  = [ Wire() for _ in range( s.num_inports ) ]
+    s.get_rdy = [ Wire() for _ in range( s.num_inports ) ]
 
     s.arbiter = RoundRobinArbiterEn( num_inports )
     s.arbiter.en //= 1
+
     s.mux = Mux( PacketType, num_inports )
     s.mux.out //= s.give.ret
 
@@ -55,12 +56,12 @@ class SwitchUnitRTL( Component ):
 
     @update
     def up_give():
-      s.give.rdy @= s.arbiter.grants > GrantType(0)
+      s.give.rdy @= s.arbiter.grants > 0
 
     @update
     def up_get_en():
       for i in range( num_inports ):
-        s.get_en[i] @= s.give.en & ( s.mux.sel==SelType(i) )
+        s.get_en[i] @= s.give.en & ( s.mux.sel == i )
 
   # Line trace
 

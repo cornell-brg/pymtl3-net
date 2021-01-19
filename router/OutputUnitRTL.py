@@ -36,13 +36,15 @@ class OutputUnitRTL( Component ):
 
       @update
       def up_get_deq():
-        s.get.en       @= s.get.rdy & s.queue.enq.rdy
-        s.queue.enq.en @= s.get.rdy & s.queue.enq.rdy
+        both_rdy = s.get.rdy & s.queue.enq.rdy
+        s.get.en       @= both_rdy
+        s.queue.enq.en @= both_rdy
 
       @update
       def up_deq_send():
-        s.send.en      @= s.send.rdy & s.queue.deq.rdy
-        s.queue.deq.en @= s.send.rdy & s.queue.deq.rdy
+        both_rdy = s.send.rdy & s.queue.deq.rdy
+        s.send.en      @= both_rdy
+        s.queue.deq.en @= both_rdy
 
     # No ouput queue
     else:
@@ -51,8 +53,9 @@ class OutputUnitRTL( Component ):
 
       @update
       def up_get_send():
-        s.get.en  @= s.get.rdy & s.send.rdy
-        s.send.en @= s.get.rdy & s.send.rdy
+        both_rdy = s.get.rdy & s.send.rdy
+        s.get.en  @= both_rdy
+        s.send.en @= both_rdy
 
   def line_trace( s ):
     if s.QueueType != None:

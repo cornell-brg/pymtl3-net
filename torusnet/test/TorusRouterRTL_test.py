@@ -11,14 +11,13 @@ from itertools import product
 
 import pytest
 
-from ocnlib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
-                                      RecvRTL2CreditSendRTL)
+from ocnlib.ifcs.CreditIfc import CreditRecvRTL2SendRTL, RecvRTL2CreditSendRTL
 from ocnlib.ifcs.packets import mk_mesh_pkt
 from ocnlib.ifcs.positions import mk_mesh_pos
 from ocnlib.utils import run_sim
 from ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.stdlib.test.test_srcs import TestSrcRTL
+from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 from torusnet.TorusRouterFL import TorusRouterFL
 from torusnet.TorusRouterRTL import TorusRouterRTL
 
@@ -55,29 +54,24 @@ class TestHarness( Component ):
                         for _ in range( 5 ) ]
 
     # Connections
-    for i in range ( s.dut.num_outports ):
+    for i in range (5):
       s.srcs[i].send          //= s.src_adapters[i].recv
       s.src_adapters[i].send  //= s.dut.recv[i]
       s.dut.send[i]           //= s.sink_adapters[i].recv
       s.sink_adapters[i].send //= s.sinks[i].recv
 
-    @s.update
-    def up_pos():
-      s.dut.pos = MeshPos( pos_x, pos_y )
+    s.dut.pos //= MeshPos( pos_x, pos_y )
 
   def done( s ):
-    srcs_done = True
-    sinks_done = True
+    done = True
     for x in s.srcs:
-      if not x.done():
-        srcs_done = False
+      done &= x.done()
     for x in s.sinks:
-      if not x.done():
-        sinks_done = False
-    return srcs_done and sinks_done
+      done &= x.done()
+    return done
 
   def line_trace( s ):
-    return "{}".format( s.dut.line_trace() )
+    return f"{s.dut.line_trace()}"
 
 #-------------------------------------------------------------------------
 # mk_srcsink_pkts
@@ -101,7 +95,7 @@ class TorusRouterRTL_Tests:
     'pos_x, pos_y',
     product( [ 0, 1, 2, 3 ], [ 0, 1, 2, 3 ] )
   )
-  def test_simple_4x4( s, pos_x, pos_y ):
+  def test_simple_4x4( s, pos_x, pos_y, cmdline_opts ):
     ncols = 4
     nrows = 4
 
@@ -120,13 +114,13 @@ class TorusRouterRTL_Tests:
       ncols=ncols, nrows=nrows,
       pos_x=pos_x, pos_y=pos_y,
     )
-    run_sim( th )
+    run_sim( th, cmdline_opts )
 
   @pytest.mark.parametrize(
     'pos_x, pos_y',
     product( [ 0, 1, 2, 3, 4, 5 ], [ 0, 1, 2, 3, 4, 5 ] )
   )
-  def test_simple_5x5( s, pos_x, pos_y ):
+  def test_simple_5x5( s, pos_x, pos_y, cmdline_opts ):
     ncols = 5
     nrows = 5
 
@@ -142,4 +136,4 @@ class TorusRouterRTL_Tests:
       ncols=ncols, nrows=nrows,
       pos_x=pos_x, pos_y=pos_y,
     )
-    run_sim( th )
+    run_sim( th, cmdline_opts )

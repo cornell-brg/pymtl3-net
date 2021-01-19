@@ -8,7 +8,6 @@ Author : Yanghui Ou
   Date : Mar 5, 2020
 """
 from pymtl3 import *
-from ocnlib.utils import to_bitstruct
 
 from .directions import *
 from .PitonNoCHeader import PitonNoCHeader
@@ -74,7 +73,7 @@ class PitonRouterFL:
     if s.first_dimension == 'y':
       for pkts in src_pkts:
         for pkt in pkts:
-          header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
+          header = PitonNoCHeader.from_bits( pkt.flits[0] )
           dst_x = 0 if header.chipid[13] else header.xpos
           dst_y = 0 if header.chipid[13] else header.ypos
           dst = (
@@ -90,7 +89,7 @@ class PitonRouterFL:
     elif s.first_dimension == 'x':
       for pkts in src_pkts:
         for pkt in pkts:
-          header = to_bitstruct( pkt.flits[0], PitonNoCHeader )
+          header = PitonNoCHeader.from_bits( pkt.flits[0] )
           dst_x = 0 if header.chipid[13] else header.xpos
           dst_y = 0 if header.chipid[13] else header.ypos
           dst = (

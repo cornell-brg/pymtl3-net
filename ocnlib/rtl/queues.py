@@ -11,9 +11,9 @@ Author : Yanghui Ou
 
 
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import DeqIfcRTL, EnqIfcRTL
-from pymtl3.stdlib.rtl.arithmetics import Mux
-from pymtl3.stdlib.rtl.RegisterFile import RegisterFile
+from pymtl3.stdlib.queues import DeqIfcRTL, EnqIfcRTL
+from pymtl3.stdlib.basic_rtl.arithmetics import Mux
+from pymtl3.stdlib.basic_rtl import RegisterFile
 
 #-------------------------------------------------------------------------
 # Dpath and Ctrl for NormalQueueRTL
@@ -34,13 +34,12 @@ class NormalQueueDpathRTL( Component ):
 
     # Component
 
-    s.queue = RegisterFile( EntryType, num_entries )(
-      raddr = { 0: s.raddr   },
-      rdata = { 0: s.deq_ret },
-      wen   = { 0: s.wen     },
-      waddr = { 0: s.waddr   },
-      wdata = { 0: s.enq_msg },
-    )
+    s.queue = m = RegisterFile( EntryType, num_entries )
+    m.raddr[0] //= s.raddr
+    m.rdata[0] //= s.deq_ret
+    m.wen[0]   //= s.wen
+    m.waddr[0] //= s.waddr
+    m.wdata[0] //= s.enq_msg
 
 class NormalQueueCtrlRTL( Component ):
 
@@ -84,30 +83,30 @@ class NormalQueueCtrlRTL( Component ):
     connect( s.raddr, s.head     )
 
     s.enq_rdy //= lambda: s.count < s.num_entries
-    s.deq_rdy //= lambda: s.count > CountType(0)
+    s.deq_rdy //= lambda: s.count > 0
 
     s.enq_xfer //= lambda: s.enq_en & s.enq_rdy
     s.deq_xfer //= lambda: s.deq_en & s.deq_rdy
 
-    @s.update_ff
+    @update_ff
     def up_reg():
 
       if s.reset:
-        s.head  <<= PtrType(0)
-        s.tail  <<= PtrType(0)
-        s.count <<= CountType(0)
+        s.head  <<= 0
+        s.tail  <<= 0
+        s.count <<= 0
 
       else:
         if s.deq_xfer:
-          s.head <<= s.head + PtrType(1) if s.head < s.last_idx else PtrType(0)
+          s.head <<= s.head + 1 if s.head < s.last_idx else 0
 
         if s.enq_xfer:
-          s.tail <<= s.tail + PtrType(1) if s.tail < s.last_idx else PtrType(0)
+          s.tail <<= s.tail + 1 if s.tail < s.last_idx else 0
 
         if s.enq_xfer & ~s.deq_xfer:
-          s.count <<= s.count + CountType(1)
+          s.count <<= s.count + 1
         if ~s.enq_xfer & s.deq_xfer:
-          s.count <<= s.count - CountType(1)
+          s.count <<= s.count - 1
 
 #-------------------------------------------------------------------------
 # NormalQueueRTL
@@ -202,7 +201,7 @@ class PipeQueueCtrlRTL( Component ):
     connect( s.waddr, s.tail     )
     connect( s.raddr, s.head     )
 
-    s.deq_rdy //= lambda: s.count > CountType(0)
+    s.deq_rdy //= lambda: s.count > 0
     s.enq_rdy //= lambda: ( s.count < s.num_entries ) | s.deq_en
 
     s.enq_xfer //= lambda: s.enq_en & s.enq_rdy
@@ -212,21 +211,21 @@ class PipeQueueCtrlRTL( Component ):
     def up_reg():
 
       if s.reset:
-        s.head  <<= PtrType(0)
-        s.tail  <<= PtrType(0)
-        s.count <<= CountType(0)
+        s.head  <<= 0
+        s.tail  <<= 0
+        s.count <<= 0
 
       else:
         if s.deq_xfer:
-          s.head <<= s.head + PtrType(1) if s.head < s.last_idx else PtrType(0)
+          s.head <<= s.head + 1 if s.head < s.last_idx else 0
 
         if s.enq_xfer:
-          s.tail <<= s.tail + PtrType(1) if s.tail < s.last_idx else PtrType(0)
+          s.tail <<= s.tail + 1 if s.tail < s.last_idx else 0
 
         if s.enq_xfer & ~s.deq_xfer:
-          s.count <<= s.count + CountType(1)
+          s.count <<= s.count + 1
         if ~s.enq_xfer & s.deq_xfer:
-          s.count <<= s.count - CountType(1)
+          s.count <<= s.count - 1
 
 #-------------------------------------------------------------------------
 # PipeQueueRTL
@@ -296,18 +295,17 @@ class BypassQueueDpathRTL( Component ):
 
     # Component
 
-    s.queue = RegisterFile( EntryType, num_entries )(
-      raddr = { 0: s.raddr   },
-      wen   = { 0: s.wen     },
-      waddr = { 0: s.waddr   },
-      wdata = { 0: s.enq_msg },
-    )
+    s.queue = m =RegisterFile( EntryType, num_entries )
+    m.raddr[0] //= s.raddr
+    m.wen[0]   //= s.wen
+    m.waddr[0] //= s.waddr
+    m.wdata[0] //= s.enq_msg
 
-    s.mux = Mux( EntryType, 2 )(
-      sel = s.mux_sel,
-      in_ = { 0: s.queue.rdata[0], 1: s.enq_msg },
-      out = s.deq_ret,
-    )
+    s.mux = Mux( EntryType, 2 )
+    s.mux.sel    //= s.mux_sel
+    s.mux.in_[0] //= s.queue.rdata[0]
+    s.mux.in_[1] //= s.enq_msg
+    s.mux.out    //= s.deq_ret
 
 class BypassQueueCtrlRTL( Component ):
 
@@ -352,9 +350,9 @@ class BypassQueueCtrlRTL( Component ):
     connect( s.raddr, s.head     )
 
     s.enq_rdy //= lambda: s.count < s.num_entries
-    s.deq_rdy //= lambda: ( s.count > CountType(0) ) | s.enq_en
+    s.deq_rdy //= lambda: ( s.count > 0 ) | s.enq_en
 
-    s.mux_sel //= lambda: s.count == CountType(0)
+    s.mux_sel //= lambda: s.count == 0
 
     s.enq_xfer //= lambda: s.enq_en & s.enq_rdy
     s.deq_xfer //= lambda: s.deq_en & s.deq_rdy
@@ -369,15 +367,15 @@ class BypassQueueCtrlRTL( Component ):
 
       else:
         if s.deq_xfer:
-          s.head <<= s.head + PtrType(1) if s.head < s.last_idx else PtrType(0)
+          s.head <<= s.head + 1 if s.head < s.last_idx else 0
 
         if s.enq_xfer:
-          s.tail <<= s.tail + PtrType(1) if s.tail < s.last_idx else PtrType(0)
+          s.tail <<= s.tail + 1 if s.tail < s.last_idx else 0
 
         if s.enq_xfer & ~s.deq_xfer:
-          s.count <<= s.count + CountType(1)
+          s.count <<= s.count + 1
         if ~s.enq_xfer & s.deq_xfer:
-          s.count <<= s.count - CountType(1)
+          s.count <<= s.count - 1
 
 #-------------------------------------------------------------------------
 # BypassQueueRTL
@@ -522,11 +520,11 @@ class BypassQueue1EntryRTL( Component ):
     s.entry = Wire( EntryType )
     s.full  = Wire( Bits1 )
 
-    s.bypass_mux = Mux( EntryType, 2 )(
-      in_ = { 0: s.enq.msg, 1: s.entry },
-      out = s.deq.ret,
-      sel = s.full,
-    )
+    s.bypass_mux = Mux( EntryType, 2 )
+    s.bypass_mux.in_[0] //= s.enq.msg
+    s.bypass_mux.in_[1] //= s.entry
+    s.bypass_mux.out    //= s.deq.ret
+    s.bypass_mux.sel    //= s.full
 
     # Logic
 

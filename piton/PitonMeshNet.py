@@ -27,7 +27,7 @@ class PitonMeshNet( Component ):
     # Local parameters
 
     s.nterminals = ncols * nrows
-    assert get_nbits( PitonNoCHeader ) == 64
+    assert PitonNoCHeader.nbits == 64
     s.PhitType   = Bits64
 
     # Interface
