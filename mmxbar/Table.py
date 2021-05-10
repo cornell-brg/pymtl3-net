@@ -40,6 +40,7 @@ class Table( Component ):
         # s.valid_r <<= BitsN(0)
         for i in range( num_entries ):
           s.valid_r[i] <<= 0
+          s.entry_r[i] <<= 0
       else:
         if s.alloc.en:
           s.entry_r[ s.avail_idx_r ] <<= s.alloc.msg
