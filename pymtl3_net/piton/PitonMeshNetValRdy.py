@@ -9,8 +9,8 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
-from ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL as InValRdyIfc, SendIfcRTL as OutValRdyIfc
+from pymtl3_net.ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
 
 from .PitonMeshNet import PitonMeshNet
 

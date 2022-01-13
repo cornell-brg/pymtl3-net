@@ -10,11 +10,11 @@ Author : Yanghui Ou
 import pytest
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import mk_test_case_table
-from ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
-from ocnlib.utils import run_sim
-from ocnlib.packets import MflitPacket as Packet
-from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
-from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
+from pymtl3_net.ocnlib.ifcs.enrdy_adapters import InValRdy2Send, Recv2OutValRdy
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.packets import MflitPacket as Packet
+from pymtl3_net.ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
+from pymtl3_net.ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
 
 from ..PitonNoCHeader import PitonNoCHeader
 from ..PitonMeshNetValRdy import PitonMeshNetValRdy

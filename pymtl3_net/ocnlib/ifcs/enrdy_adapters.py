@@ -7,8 +7,8 @@
 #   Date : Feb 20, 2019
 
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import InValRdyIfc, OutValRdyIfc
-from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL as InValRdyIfc, SendIfcRTL as OutValRdyIfc
+from pymtl3.stdlib.ifcs   import SendIfcRTL, RecvIfcRTL
 
 #-------------------------------------------------------------------------
 # InValRdy2Send

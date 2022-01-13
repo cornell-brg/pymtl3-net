@@ -20,9 +20,9 @@ Authour : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
-from ocnlib.rtl import Counter, GrantHoldArbiter
-from ocnlib.utils import get_field_type
-from ocnlib.utils.connects import connect_bitstruct
+from pymtl3_net.ocnlib.rtl import Counter, GrantHoldArbiter
+from pymtl3_net.ocnlib.utils import get_field_type
+from pymtl3_net.ocnlib.utils.connects import connect_bitstruct
 
 from .directions import *
 from .PitonNoCHeader import PitonNoCHeader
