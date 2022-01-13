@@ -10,10 +10,10 @@ Author : Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.queues import BypassQueueRTL
 
-from ocnlib.utils import run_sim
-from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
-from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
-from ocnlib.packets import MflitPacket as Packet
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
+from pymtl3_net.ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
+from pymtl3_net.ocnlib.packets import MflitPacket as Packet
 
 from ..directions import *
 from ..MeshRouteUnitRTLMflitXY import MeshRouteUnitRTLMflitXY

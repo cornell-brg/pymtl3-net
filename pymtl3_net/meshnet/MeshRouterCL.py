@@ -8,10 +8,10 @@ Author : Yanghui Ou
   Date : May 16, 2019
 """
 from pymtl3 import *
-from router.InputUnitCL import InputUnitCL
-from router.OutputUnitCL import OutputUnitCL
-from router.Router import Router
-from router.SwitchUnitCL import SwitchUnitCL
+from pymtl3_net.router.InputUnitCL import InputUnitCL
+from pymtl3_net.router.OutputUnitCL import OutputUnitCL
+from pymtl3_net.router.Router import Router
+from pymtl3_net.router.SwitchUnitCL import SwitchUnitCL
 
 from .DORXMeshRouteUnitCL import DORXMeshRouteUnitCL
 

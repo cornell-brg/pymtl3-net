@@ -9,15 +9,15 @@ Author : Yanghui Ou
 """
 import pytest
 
-from meshnet.MeshNetworkCL import MeshNetworkCL
-from ocnlib.ifcs.packets import mk_mesh_pkt
-from ocnlib.ifcs.positions import mk_mesh_pos
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkCL
+from pymtl3_net.meshnet.MeshNetworkCL import MeshNetworkCL
+from pymtl3_net.ocnlib.ifcs.packets import mk_mesh_pkt
+from pymtl3_net.ocnlib.ifcs.positions import mk_mesh_pos
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkCL
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import mk_test_case_table
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
-from router.InputUnitCL import InputUnitCL
+from pymtl3_net.router.InputUnitCL import InputUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness

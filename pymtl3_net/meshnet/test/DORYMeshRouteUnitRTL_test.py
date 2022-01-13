@@ -11,10 +11,10 @@ from pymtl3.stdlib.test_utils import TestVectorSimulator
 from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 
-from ocnlib.ifcs.packets import mk_mesh_pkt
-from ocnlib.ifcs.positions import mk_mesh_pos
-from ocnlib.utils import run_sim
-from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from pymtl3_net.ocnlib.ifcs.packets import mk_mesh_pkt
+from pymtl3_net.ocnlib.ifcs.positions import mk_mesh_pos
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
 
 #-------------------------------------------------------------------------
 # TestHarness

@@ -10,7 +10,7 @@ Author : Yanghui Ou, Cheng Tan
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
 
-from channel.ChannelRTL import ChannelRTL
+from pymtl3_net.channel.ChannelRTL import ChannelRTL
 
 from .directions import *
 from .MeshRouterRTL import MeshRouterRTL
