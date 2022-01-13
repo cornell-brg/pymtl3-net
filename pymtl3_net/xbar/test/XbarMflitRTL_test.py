@@ -13,10 +13,10 @@ import hypothesis
 from hypothesis import strategies as st
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import mk_test_case_table
-from ocnlib.utils import run_sim
-from ocnlib.packets import MflitPacket as Packet
-from ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
-from ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.packets import MflitPacket as Packet
+from pymtl3_net.ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
+from pymtl3_net.ocnlib.test.test_sinks import MflitPacketSinkRTL as TestSink
 from ..XbarMflitRTL import XbarMflitRTL
 
 #-------------------------------------------------------------------------
@@ -209,7 +209,12 @@ def pkt_strat( draw, num_inports, num_outports, max_plen=15 ):
 # pyh2 test
 #-------------------------------------------------------------------------
 
-@hypothesis.settings( deadline=None, max_examples=50 if 'CI' not in os.environ else 5)
+# FIXME: figure out a way to work around the health check
+@hypothesis.settings(
+  deadline=None,
+  max_examples=50 if 'CI' not in os.environ else 5,
+  suppress_health_check=[ hypothesis.HealthCheck.function_scoped_fixture ],
+)
 @hypothesis.given(
   num_inports  = st.integers(1, 16),
   num_outports = st.integers(1, 16),

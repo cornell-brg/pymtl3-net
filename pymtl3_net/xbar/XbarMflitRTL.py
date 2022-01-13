@@ -9,10 +9,10 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
-from router.InputUnitRTL import InputUnitRTL
-from router.OutputUnitRTL import OutputUnitRTL
-from router.SwitchUnitGrantHoldRTL import SwitchUnitGrantHoldRTL
-from router.SwitchUnitNullRTL import SwitchUnitNullRTL
+from pymtl3_net.router.InputUnitRTL import InputUnitRTL
+from pymtl3_net.router.OutputUnitRTL import OutputUnitRTL
+from pymtl3_net.router.SwitchUnitGrantHoldRTL import SwitchUnitGrantHoldRTL
+from pymtl3_net.router.SwitchUnitNullRTL import SwitchUnitNullRTL
 
 from .XbarRouteUnitMflitRTL import XbarRouteUnitMflitRTL
 
