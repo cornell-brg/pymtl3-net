@@ -9,8 +9,8 @@
 from pymtl3 import *
 from pymtl3.stdlib.queues import BypassQueueCL
 
-from ocnlib.cl import BoundaryUnit
-from channel.ChannelCL import ChannelCL
+from ..ocnlib.cl import BoundaryUnit
+from ..channel.ChannelCL import ChannelCL
 
 from .directions import *
 from .MeshRouterCL import MeshRouterCL
