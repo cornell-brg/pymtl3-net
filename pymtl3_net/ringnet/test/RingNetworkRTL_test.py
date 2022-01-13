@@ -9,11 +9,11 @@ Author : Yanghui Ou, Cheng Tan
 """
 from pymtl3 import *
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
-from ocnlib.ifcs.packets import mk_ring_pkt
-from ocnlib.ifcs.positions import mk_ring_pos
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
-from ringnet.RingNetworkRTL import RingNetworkRTL
+from pymtl3_net.ocnlib.ifcs.packets import mk_ring_pkt
+from pymtl3_net.ocnlib.ifcs.positions import mk_ring_pos
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ringnet.RingNetworkRTL import RingNetworkRTL
 
 from ..RingNetworkFL import ringnet_fl
 
