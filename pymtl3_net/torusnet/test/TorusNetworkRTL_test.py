@@ -11,14 +11,14 @@ import pytest
 import hypothesis
 from hypothesis import strategies as st
 
-from ocnlib.ifcs.packets import mk_mesh_pkt
-from ocnlib.ifcs.positions import mk_mesh_pos
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.ifcs.packets import mk_mesh_pkt
+from pymtl3_net.ocnlib.ifcs.positions import mk_mesh_pos
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
-from torusnet.TorusNetworkFL import torusnet_fl
-from torusnet.TorusNetworkRTL import TorusNetworkRTL
+from pymtl3_net.torusnet.TorusNetworkFL import torusnet_fl
+from pymtl3_net.torusnet.TorusNetworkRTL import TorusNetworkRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -153,7 +153,12 @@ class TorusNetwork_Tests:
     run_sim( th, cmdline_opts )
 
   @pytest.mark.skipif('CI' in os.environ, reason='too long on CI')
-  @hypothesis.settings( deadline=None, max_examples=5 )
+  # FIXME: figure out a way to work around the health check
+  @hypothesis.settings(
+    deadline=None,
+    max_examples=5,
+    suppress_health_check=[ hypothesis.HealthCheck.function_scoped_fixture ],
+  )
   # @hypothesis.reproduce_failure('4.24.4', 'AAMDAQEAAAQAAA==') #(1:0)>(0:4)
   @hypothesis.given(
     ncols = st.integers(2, 8),

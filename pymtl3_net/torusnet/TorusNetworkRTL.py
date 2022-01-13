@@ -6,8 +6,8 @@
 # Author : Cheng Tan
 #   Date : Mar 10, 2019
 
-from channel.ChannelRTL import ChannelRTL
-from ocnlib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
+from pymtl3_net.channel.ChannelRTL import ChannelRTL
+from pymtl3_net.ocnlib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
                                       RecvRTL2CreditSendRTL)
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL

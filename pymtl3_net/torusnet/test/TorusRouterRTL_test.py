@@ -11,15 +11,15 @@ from itertools import product
 
 import pytest
 
-from ocnlib.ifcs.CreditIfc import CreditRecvRTL2SendRTL, RecvRTL2CreditSendRTL
-from ocnlib.ifcs.packets import mk_mesh_pkt
-from ocnlib.ifcs.positions import mk_mesh_pos
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.ifcs.CreditIfc import CreditRecvRTL2SendRTL, RecvRTL2CreditSendRTL
+from pymtl3_net.ocnlib.ifcs.packets import mk_mesh_pkt
+from pymtl3_net.ocnlib.ifcs.positions import mk_mesh_pos
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
-from torusnet.TorusRouterFL import TorusRouterFL
-from torusnet.TorusRouterRTL import TorusRouterRTL
+from pymtl3_net.torusnet.TorusRouterFL import TorusRouterFL
+from pymtl3_net.torusnet.TorusRouterRTL import TorusRouterRTL
 
 #-------------------------------------------------------------------------
 # TestHarness

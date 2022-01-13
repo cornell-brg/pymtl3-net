@@ -6,7 +6,7 @@
 # Author : Yanghui Ou
 #   Date : Mar 21, 2019
 
-from channel.ChannelCL import ChannelCL
+from pymtl3_net.channel.ChannelCL import ChannelCL
 from directions import *
 from pymtl3 import *
 from TorusRouterCL import TorusRouterCL

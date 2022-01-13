@@ -13,12 +13,12 @@ import pytest
 from pymtl3 import *
 from pymtl3.stdlib.queues import BypassQueueRTL
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
-from ocnlib.ifcs.packets import mk_mesh_pkt
-from ocnlib.ifcs.positions import mk_mesh_pos
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
-from torusnet.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
-from torusnet.RouteUnitDorFL import RouteUnitDorFL
+from pymtl3_net.ocnlib.ifcs.packets import mk_mesh_pkt
+from pymtl3_net.ocnlib.ifcs.positions import mk_mesh_pos
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.torusnet.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
+from pymtl3_net.torusnet.RouteUnitDorFL import RouteUnitDorFL
 
 #-------------------------------------------------------------------------
 # TestHarness
