@@ -6,12 +6,12 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : Mar 8, 2019
 
-from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
+from pymtl3_net.cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
 from pymtl3 import *
-from router.InputUnitRTL import InputUnitRTL
-from router.OutputUnitRTL import OutputUnitRTL
-from router.Router import Router
-from router.SwitchUnitRTL import SwitchUnitRTL
+from pymtl3_net.router.InputUnitRTL import InputUnitRTL
+from pymtl3_net.router.OutputUnitRTL import OutputUnitRTL
+from pymtl3_net.router.Router import Router
+from pymtl3_net.router.SwitchUnitRTL import SwitchUnitRTL
 
 
 class CMeshRouterRTL( Router ):

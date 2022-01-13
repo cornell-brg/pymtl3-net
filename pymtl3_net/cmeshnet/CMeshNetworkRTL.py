@@ -7,7 +7,7 @@ RTL implementation of concetrated mesh network.
 Author : Cheng Tan
   Date : Mar 10, 2019
 """
-from channel.ChannelRTL import ChannelRTL
+from pymtl3_net.channel.ChannelRTL import ChannelRTL
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
 

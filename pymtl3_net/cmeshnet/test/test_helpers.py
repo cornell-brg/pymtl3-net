@@ -6,7 +6,7 @@
 # Author : Yanghui Ou
 #   Date : Apr 30, 2019
 
-from cmeshnet.directions import *
+from pymtl3_net.cmeshnet.directions import *
 
 
 def dor_routing( src_x, src_y, dst_x, dst_y,

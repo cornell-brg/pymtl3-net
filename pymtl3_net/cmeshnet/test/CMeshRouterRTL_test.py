@@ -11,13 +11,13 @@ from pymtl3 import *
 from pymtl3.stdlib.test_utils import TestVectorSimulator
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 
-from ocnlib.ifcs.packets import *
-from ocnlib.ifcs.positions import *
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
-from cmeshnet.CMeshRouterRTL import CMeshRouterRTL
-from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
-from router.InputUnitRTL import InputUnitRTL
+from pymtl3_net.ocnlib.ifcs.packets import *
+from pymtl3_net.ocnlib.ifcs.positions import *
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.cmeshnet.CMeshRouterRTL import CMeshRouterRTL
+from pymtl3_net.cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
+from pymtl3_net.router.InputUnitRTL import InputUnitRTL
 from test_helpers import dor_routing
 
 #-------------------------------------------------------------------------

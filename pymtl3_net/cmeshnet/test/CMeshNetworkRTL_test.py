@@ -12,16 +12,16 @@ from pymtl3.stdlib.queues import NormalQueueRTL
 from pymtl3.stdlib.test_utils import TestVectorSimulator
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 
-from ocnlib.ifcs.packets import *
-from ocnlib.ifcs.positions import *
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
-from cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
-from cmeshnet.DORXCMeshRouteUnitRTL import DORXCMeshRouteUnitRTL
-from cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
-from meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
-from meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
-from meshnet.MeshNetworkRTL import MeshNetworkRTL
+from pymtl3_net.ocnlib.ifcs.packets import *
+from pymtl3_net.ocnlib.ifcs.positions import *
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
+from pymtl3_net.cmeshnet.DORXCMeshRouteUnitRTL import DORXCMeshRouteUnitRTL
+from pymtl3_net.cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
+from pymtl3_net.meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
+from pymtl3_net.meshnet.DORYMeshRouteUnitRTL import DORYMeshRouteUnitRTL
+from pymtl3_net.meshnet.MeshNetworkRTL import MeshNetworkRTL
 
 
 #-------------------------------------------------------------------------
