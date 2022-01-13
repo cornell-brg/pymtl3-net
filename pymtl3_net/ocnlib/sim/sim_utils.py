@@ -31,8 +31,8 @@ from pymtl3_net.ocnlib.sim.CLNetWrapper import CLNetWrapper
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import VerilogTranslationPass
 from pymtl3.passes import VcdGenerationPass
-from ringnet import RingNetworkRTL
-from torusnet import TorusNetworkRTL
+from pymtl3_net.ringnet import RingNetworkRTL
+from pymtl3_net.torusnet import TorusNetworkRTL
 
 seed( 0xfaceb00c )
 
