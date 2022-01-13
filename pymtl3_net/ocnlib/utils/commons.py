@@ -120,7 +120,7 @@ def run_sim(
     getattr( th, dut_name ).set_metadata( VerilogTBGenPass.case_name, dump_vtb )
     th.apply( VerilogTBGenPass() )
 
-  th.apply( DefaultPassGroup(print_line_trace=line_trace) )
+  th.apply( DefaultPassGroup(linetrace=line_trace) )
   th.sim_reset()
 
   # Run simulation

@@ -16,7 +16,8 @@ from pymtl3.datatypes import strategies as pst
 from pymtl3.stdlib.queues import BypassQueueCL, NormalQueueCL, PipeQueueCL
 from pymtl3.stdlib.test_utils.test_sinks import TestSinkCL
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
-from router.OutputUnitCL import OutputUnitCL
+
+from pymtl3_net.router.OutputUnitCL import OutputUnitCL
 
 from .InputUnitCL_test import InputUnitCL_Tests as BaseTests
 

@@ -11,13 +11,14 @@ import hypothesis
 import pytest
 from hypothesis import strategies as st
 
-from ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.router.InputUnitCL import InputUnitCL
+
 from pymtl3 import *
 from pymtl3.datatypes import strategies as pst
 from pymtl3.stdlib.queues import BypassQueueCL, NormalQueueCL, PipeQueueCL
 from pymtl3.stdlib.test_utils.test_sinks import TestSinkCL
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
-from router.InputUnitCL import InputUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness

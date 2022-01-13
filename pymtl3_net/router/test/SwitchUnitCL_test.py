@@ -11,9 +11,10 @@ import pytest
 from pymtl3 import *
 from pymtl3.stdlib.queues import BypassQueueCL
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkCL as TestSinkCL
-from router.SwitchUnitCL import SwitchUnitCL
+
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkCL as TestSinkCL
+from pymtl3_net.router.SwitchUnitCL import SwitchUnitCL
 
 #-------------------------------------------------------------------------
 # TestHarness
