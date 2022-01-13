@@ -13,7 +13,7 @@ from ..Table import Table
 def test_sanity_check():
   dut = Table( Bits8, 8 )
   dut.elaborate()
-  dut.apply( DefaultPassGroup() )
+  dut.apply( DefaultPassGroup( linetrace=True ) )
   dut.sim_reset()
   dut.sim_tick()
   dut.sim_tick()
@@ -23,7 +23,7 @@ def test_adhoc_8( cmdline_opts ):
   print()
   dut = Table( Bits8, 4 )
   dut.elaborate()
-  dut.apply( DefaultPassGroup() )
+  dut.apply( DefaultPassGroup( linetrace=True ) )
   dut.sim_reset()
 
   # Cycle 1

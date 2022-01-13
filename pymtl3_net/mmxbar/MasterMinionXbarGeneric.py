@@ -14,7 +14,7 @@ Author : Yanghui Ou
 '''
 from pymtl3 import *
 from pymtl3.stdlib.mem import MemMasterIfcRTL, MemMinionIfcRTL
-from xbar.XbarRTL import XbarRTL
+from pymtl3_net.xbar.XbarRTL import XbarRTL
 
 from .adapters import DstLogicSingleResp, ReqAdapter, RespAdapter
 from .msg_types import mk_req_msg, mk_resp_msg
