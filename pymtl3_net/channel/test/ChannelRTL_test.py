@@ -8,8 +8,8 @@
 
 import pytest
 
-from channel.ChannelRTL import ChannelRTL
-from ocnlib.utils import run_sim
+from pymtl3_net.channel.ChannelRTL import ChannelRTL
+from pymtl3_net.ocnlib.utils import run_sim
 from pymtl3 import *
 from pymtl3.stdlib.queues import NormalQueueRTL
 from pymtl3.stdlib.test_utils import TestVectorSimulator
