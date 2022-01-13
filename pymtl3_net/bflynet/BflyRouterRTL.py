@@ -10,11 +10,11 @@ Author : Cheng Tan, Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
 
-from ocnlib.ifcs.PhysicalDimension import PhysicalDimension
-from router.InputUnitRTL import InputUnitRTL
-from router.OutputUnitRTL import OutputUnitRTL
-from router.Router import Router
-from router.SwitchUnitRTL import SwitchUnitRTL
+from pymtl3_net.ocnlib.ifcs.PhysicalDimension import PhysicalDimension
+from pymtl3_net.router.InputUnitRTL import InputUnitRTL
+from pymtl3_net.router.OutputUnitRTL import OutputUnitRTL
+from pymtl3_net.router.Router import Router
+from pymtl3_net.router.SwitchUnitRTL import SwitchUnitRTL
 
 from .DTRBflyRouteUnitRTL import DTRBflyRouteUnitRTL
 

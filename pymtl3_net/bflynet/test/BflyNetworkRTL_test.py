@@ -6,11 +6,11 @@
 # Author : Cheng Tan, Yanghui Ou
 #   Date : April 8, 2019
 
-from bflynet.BflyNetworkRTL import BflyNetworkRTL
-from ocnlib.ifcs.packets import *
-from ocnlib.ifcs.positions import *
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.bflynet.BflyNetworkRTL import BflyNetworkRTL
+from pymtl3_net.ocnlib.ifcs.packets import *
+from pymtl3_net.ocnlib.ifcs.positions import *
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.stdlib.queues import NormalQueueRTL
 from pymtl3.stdlib.test_utils import TestVectorSimulator

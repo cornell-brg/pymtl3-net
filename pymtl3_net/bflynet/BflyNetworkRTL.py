@@ -10,8 +10,8 @@ Author : Cheng Tan
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
 
-from channel.ChannelRTL import ChannelRTL
-from ocnlib.ifcs.PhysicalDimension import PhysicalDimension
+from pymtl3_net.channel.ChannelRTL import ChannelRTL
+from pymtl3_net.ocnlib.ifcs.PhysicalDimension import PhysicalDimension
 
 from .BflyRouterRTL import BflyRouterRTL
 

@@ -9,18 +9,18 @@
 import random
 import pytest
 
-from bflynet.BflyRouterRTL import BflyRouterRTL
-from bflynet.DTRBflyRouteUnitRTL import DTRBflyRouteUnitRTL
-from ocnlib.ifcs.packets import mk_bfly_pkt
-from ocnlib.ifcs.positions import mk_bfly_pos
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.bflynet.BflyRouterRTL import BflyRouterRTL
+from pymtl3_net.bflynet.DTRBflyRouteUnitRTL import DTRBflyRouteUnitRTL
+from pymtl3_net.ocnlib.ifcs.packets import mk_bfly_pkt
+from pymtl3_net.ocnlib.ifcs.positions import mk_bfly_pos
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import TestVectorSimulator
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
-from router.InputUnitRTL import InputUnitRTL
-from router.OutputUnitRTL import OutputUnitRTL
-from router.SwitchUnitRTL import SwitchUnitRTL
+from pymtl3_net.router.InputUnitRTL import InputUnitRTL
+from pymtl3_net.router.OutputUnitRTL import OutputUnitRTL
+from pymtl3_net.router.SwitchUnitRTL import SwitchUnitRTL
 
 random.seed( 'deadbeef' )
 
