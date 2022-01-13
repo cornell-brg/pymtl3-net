@@ -7,7 +7,7 @@ An input unit with a credit based interface.
 Author : Yanghui Ou
   Date : June 22, 2019
 """
-from ocnlib.ifcs.CreditIfc import CreditRecvIfcRTL
+from pymtl3_net.ocnlib.ifcs.CreditIfc import CreditRecvIfcRTL
 from pymtl3 import *
 from pymtl3.stdlib.ifcs import GiveIfcRTL
 from pymtl3.stdlib.basic_rtl.arbiters import RoundRobinArbiterEn

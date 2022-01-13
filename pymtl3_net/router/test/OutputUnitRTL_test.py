@@ -14,7 +14,8 @@ from pymtl3.stdlib.queues import (BypassQueueRTL, NormalQueueRTL,
                                       PipeQueueRTL)
 from pymtl3.stdlib.test_utils.test_sinks import TestSinkCL
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
-from router.OutputUnitRTL import OutputUnitRTL
+
+from pymtl3_net.router.OutputUnitRTL import OutputUnitRTL
 
 from .OutputUnitCL_test import OutputUnitCL_Tests as BaseTests
 

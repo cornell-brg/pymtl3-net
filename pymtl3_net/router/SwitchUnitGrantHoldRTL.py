@@ -12,7 +12,7 @@ Author : Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.basic_rtl import Mux, Encoder
 from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, SendIfcRTL
-from ocnlib.rtl import Counter, GrantHoldArbiter
+from pymtl3_net.ocnlib.rtl import Counter, GrantHoldArbiter
 
 class SwitchUnitGrantHoldRTL( Component ):
 

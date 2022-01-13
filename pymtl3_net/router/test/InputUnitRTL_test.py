@@ -15,7 +15,8 @@ from pymtl3.stdlib.queues import (BypassQueueRTL, NormalQueueRTL,
 from pymtl3.stdlib.test_utils import TestVectorSimulator
 from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
-from router.InputUnitRTL import InputUnitRTL
+
+from pymtl3_net.router.InputUnitRTL import InputUnitRTL
 
 from .InputUnitCL_test import InputUnitCL_Tests as BaseTests
 

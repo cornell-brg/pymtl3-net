@@ -10,8 +10,9 @@ Test for SwitchUnitRTL.
 from pymtl3 import *
 from pymtl3.stdlib.test_utils.test_sinks import TestSinkCL
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
-from router.SwitchUnitRTL import SwitchUnitRTL
-from ocnlib.ifcs.packets import mk_generic_pkt
+
+from pymtl3_net.router.SwitchUnitRTL import SwitchUnitRTL
+from pymtl3_net.ocnlib.ifcs.packets import mk_generic_pkt
 
 #-------------------------------------------------------------------------
 # Test cases
