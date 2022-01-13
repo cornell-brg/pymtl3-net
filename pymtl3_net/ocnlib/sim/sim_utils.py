@@ -21,13 +21,13 @@ from random import randint, seed
 # TODO: remove this line and use globally installed pymtl3-net
 sys.path.insert(0, os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 
-from bflynet import BflyNetworkRTL
-from cmeshnet import CMeshNetworkRTL
-from meshnet import MeshNetworkCL, MeshNetworkRTL
-from ocnlib.ifcs.packets import (mk_bfly_pkt, mk_cmesh_pkt, mk_mesh_pkt,
+from pymtl3_net.bflynet import BflyNetworkRTL
+from pymtl3_net.cmeshnet import CMeshNetworkRTL
+from pymtl3_net.meshnet import MeshNetworkCL, MeshNetworkRTL
+from pymtl3_net.ocnlib.ifcs.packets import (mk_bfly_pkt, mk_cmesh_pkt, mk_mesh_pkt,
                                     mk_ring_pkt)
-from ocnlib.ifcs.positions import mk_bfly_pos, mk_mesh_pos, mk_ring_pos
-from ocnlib.sim.CLNetWrapper import CLNetWrapper
+from pymtl3_net.ocnlib.ifcs.positions import mk_bfly_pos, mk_mesh_pos, mk_ring_pos
+from pymtl3_net.ocnlib.sim.CLNetWrapper import CLNetWrapper
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import VerilogTranslationPass
 from pymtl3.passes import VcdGenerationPass

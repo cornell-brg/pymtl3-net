@@ -12,8 +12,8 @@ from pymtl3.stdlib.queues import NormalQueueRTL
 from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
 
-from ocnlib.utils import run_sim
-from ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
 
 from .CreditIfc import (CreditRecvIfcRTL, CreditRecvRTL2SendRTL,
                         CreditSendIfcRTL, RecvRTL2CreditSendRTL)

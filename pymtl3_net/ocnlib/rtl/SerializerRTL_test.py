@@ -14,7 +14,7 @@ from pymtl3.datatypes.strategies import bits
 from pymtl3 import *
 from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL as TestSource
 from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL as TestSink
-from ocnlib.utils import run_sim
+from pymtl3_net.ocnlib.utils import run_sim
 # from pymtl3.stdlib.test_utils import run_sim
 
 from .SerializerRTL import SerializerRTL
@@ -149,7 +149,12 @@ def test_stream( cmdline_opts ):
 # test case: pyh2
 #-------------------------------------------------------------------------
 
-@hypothesis.settings( deadline=None, max_examples=100 if 'CI' not in os.environ else 5 )
+# FIXME: figure out a way to work around the health check
+@hypothesis.settings(
+  deadline=None,
+  max_examples=100 if 'CI' not in os.environ else 5,
+  suppress_health_check = [ hypothesis.HealthCheck.function_scoped_fixture ],
+)
 @hypothesis.given(
   out_nbits   = st.integers(1, 64),
   max_nblocks = st.integers(2, 15),
