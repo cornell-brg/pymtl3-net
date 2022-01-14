@@ -9,7 +9,7 @@
 import hypothesis
 from hypothesis import strategies as st
 from pymtl3 import *
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 
 from pymtl3_net.router.InputUnitRTL import InputUnitRTL
 from pymtl3_net.meshnet.DORXMeshRouteUnitRTL import DORXMeshRouteUnitRTL
@@ -18,7 +18,7 @@ from pymtl3_net.meshnet.MeshRouterRTL import MeshRouterRTL
 from pymtl3_net.ocnlib.ifcs.packets import mk_mesh_pkt
 from pymtl3_net.ocnlib.ifcs.positions import mk_mesh_pos
 from pymtl3_net.ocnlib.utils import run_sim
-from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.test.stream_sinks import NetSinkRTL as TestNetSinkRTL
 from pymtl3_net.router.OutputUnitRTL import OutputUnitRTL
 from pymtl3_net.router.SwitchUnitRTL import SwitchUnitRTL
 
@@ -46,12 +46,12 @@ class TestHarness( Component ):
     MeshPos = mk_mesh_pos( ncols, nrows )
     s.dut = MeshRouterRTL( MsgType, MeshPos, InputUnitType = InputUnitRTL,
                            RouteUnitType = DORYMeshRouteUnitRTL )
-    match_func = lambda a, b : a.payload == b.payload
+    cmp_fn  = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL    ( MsgType, src_msgs[i],  src_initial,  src_interval  )
                 for i in range  ( s.dut.num_inports ) ]
     s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial,
-                match_func=match_func ) for i in range ( s.dut.num_outports ) ]
+                cmp_fn=cmp_fn ) for i in range ( s.dut.num_outports ) ]
 
     # Connections
 
@@ -75,7 +75,7 @@ class TestHarness( Component ):
     return srcs_done and sinks_done
 
   def line_trace( s ):
-    return "{}".format( s.dut.line_trace() )
+    return f'{s.dut.line_trace()} >>> {s.sinks[3].line_trace()}'
 
 #-------------------------------------------------------------------------
 # Test cases
@@ -142,7 +142,7 @@ def test_h2( cmdline_opts ):
     "top.dut.construct",
     RouteUnitType = DORYMeshRouteUnitRTL
   )
-  run_sim( th, cmdline_opts, max_cycles=10 )
+  run_sim( th, cmdline_opts, max_cycles=20 )
 
 def test_h3( cmdline_opts ):
   pos_x, pos_y, ncols, nrows = 0, 1, 2, 2
@@ -159,4 +159,4 @@ def test_h3( cmdline_opts ):
     "top.dut.construct",
     RouteUnitType = DORYMeshRouteUnitRTL
   )
-  run_sim( th, cmdline_opts, max_cycles=10 )
+  run_sim( th, cmdline_opts, max_cycles=20 )

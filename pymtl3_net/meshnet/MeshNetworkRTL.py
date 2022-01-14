@@ -8,7 +8,7 @@ Author : Yanghui Ou, Cheng Tan
   Date : Mar 10, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 from pymtl3_net.channel.ChannelRTL import ChannelRTL
 
@@ -86,22 +86,22 @@ class MeshNetworkRTL( Component ):
 
       if i // ncols == 0:
         s.routers[i].send[SOUTH].rdy         //= 0
-        s.routers[i].recv[SOUTH].en          //= 0
+        s.routers[i].recv[SOUTH].val         //= 0
         s.routers[i].recv[SOUTH].msg.payload //= 0
 
       if i // ncols == nrows - 1:
         s.routers[i].send[NORTH].rdy         //= 0
-        s.routers[i].recv[NORTH].en          //= 0
+        s.routers[i].recv[NORTH].val         //= 0
         s.routers[i].recv[NORTH].msg.payload //= 0
 
       if i % ncols == 0:
         s.routers[i].send[WEST].rdy          //= 0
-        s.routers[i].recv[WEST].en           //= 0
+        s.routers[i].recv[WEST].val          //= 0
         s.routers[i].recv[WEST].msg.payload  //= 0
 
       if i % ncols == ncols - 1:
         s.routers[i].send[EAST].rdy          //= 0
-        s.routers[i].recv[EAST].en           //= 0
+        s.routers[i].recv[EAST].val          //= 0
         s.routers[i].recv[EAST].msg.payload  //= 0
 
   def line_trace( s ):
@@ -109,8 +109,8 @@ class MeshNetworkRTL( Component ):
     send_lst = []
     recv_lst = []
     for r in s.routers:
-      has_recv = any([ r.recv[i].en for i in range(5) ])
-      has_send = any([ r.send[i].en for i in range(5) ])
+      has_recv = any([ r.recv[i].val & r.recv[i].rdy for i in range(5) ])
+      has_send = any([ r.send[i].val & r.send[i].rdy for i in range(5) ])
       if has_send:
         send_lst.append( f'{r.pos}' )
       if has_recv:
