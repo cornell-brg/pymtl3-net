@@ -8,7 +8,7 @@ Author : Cheng Tan
   Date : April 6, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import SendIfcRTL, RecvIfcRTL
+from pymtl3.stdlib.stream.ifcs import SendIfcRTL, RecvIfcRTL
 
 from pymtl3_net.channel.ChannelRTL import ChannelRTL
 from pymtl3_net.ocnlib.ifcs.PhysicalDimension import PhysicalDimension
@@ -102,8 +102,8 @@ class BflyNetworkRTL( Component ):
       send_lst = []
       recv_lst = []
       for r in s.routers:
-        has_recv = any([ r.recv[i].en for i in range(s.k_ary) ])
-        has_send = any([ r.send[i].en for i in range(s.k_ary) ])
+        has_recv = any([ r.recv[i].val & r.recv[i].rdy for i in range(s.k_ary) ])
+        has_send = any([ r.send[i].val & r.send[i].rdy for i in range(s.k_ary) ])
         if has_send:
           send_lst.append( f'{r.pos}' )
         if has_recv:

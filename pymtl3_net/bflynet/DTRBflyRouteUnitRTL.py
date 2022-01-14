@@ -8,10 +8,8 @@ destination tag routing.
 Author : Yanghui Ou, Cheng Tan
   Date : April 6, 2019
 """
-from copy import deepcopy
-
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
+from pymtl3.stdlib.stream.ifcs import SendIfcRTL, RecvIfcRTL
 
 
 class DTRBflyRouteUnitRTL( Component ):
@@ -24,53 +22,55 @@ class DTRBflyRouteUnitRTL( Component ):
     k_ary    = num_outports
     OutType  = mk_bits( clog2( s.num_outports ) )
     rows     = k_ary ** ( n_fly - 1 )
-    DstType = mk_bits( clog2(k_ary) * n_fly )
+    DstType  = mk_bits( clog2(k_ary) * n_fly )
     RowWidth = clog2( k_ary )
-    END = n_fly * RowWidth
-    BEGIN = END - RowWidth
+    END      = n_fly * RowWidth
+    BEGIN    = END - RowWidth
 
     # Interface
 
-    s.get  = GetIfcRTL( PacketType )
-    s.give = [ GiveIfcRTL(PacketType ) for _ in range ( s.num_outports ) ]
+    s.recv = RecvIfcRTL( PacketType )
+    s.send = [ SendIfcRTL(PacketType ) for _ in range ( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Componets
 
     s.out_dir  = Wire( OutType )
-    s.give_rdy = [ Wire() for _ in range( s.num_outports ) ]
-    s.give_ens = Wire( mk_bits( s.num_outports ) )
+    s.send_val = [ Wire() for _ in range( s.num_outports ) ]
+    s.send_rdy = Wire( mk_bits( s.num_outports ) )
 
     # Connections
 
     for i in range( s.num_outports ):
-      s.give_ens[i] //= s.give[i].en
-      s.give_rdy[i] //= s.give[i].rdy
+      s.send_rdy[i] //= s.send[i].rdy
+      s.send_val[i] //= s.send[i].val
 
     # Routing logic
 
     @update
     def up_ru_routing():
       for i in range( s.num_outports ):
-        s.give_rdy[i] @= 0
+        s.send_val[i] @= 0
 
-      if s.get.rdy:
-        s.out_dir @= s.get.ret.dst[BEGIN : END]
-        s.give_rdy[ s.out_dir ] @= 1
+      if s.recv.val:
+        s.out_dir @= s.recv.msg.dst[BEGIN : END]
+        s.send_val[ s.out_dir ] @= 1
 
     @update
-    def up_ru_get_en():
-      s.get.en @= s.give_ens > 0
+    def up_ru_send():
+      s.recv.rdy @= s.send_rdy > 0
+
       for i in range( s.num_outports ):
-        s.give[i].ret @= s.get.ret
-      if s.get.rdy:
-        s.give[ s.out_dir ].ret.dst @= s.get.ret.dst << RowWidth
+        s.send[i].msg @= s.recv.msg
+
+      if s.recv.val:
+        s.send[ s.out_dir ].msg.dst @= s.recv.msg.dst << RowWidth
 
   # Line trace
 
   def line_trace( s ):
     out_str = [ "" for _ in range( s.num_outports ) ]
     for i in range (s.num_outports):
-      out_str[i] = "{}".format( s.give[i] )
+      out_str[i] = "{}".format( s.send[i] )
 
-    return "{}({}){}".format( s.get, s.out_dir, "|".join( out_str ) )
+    return "{}({}){}".format( s.recv, s.out_dir, "|".join( out_str ) )

@@ -10,11 +10,11 @@ from pymtl3_net.bflynet.BflyNetworkRTL import BflyNetworkRTL
 from pymtl3_net.ocnlib.ifcs.packets import *
 from pymtl3_net.ocnlib.ifcs.positions import *
 from pymtl3_net.ocnlib.utils import run_sim
-from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.test.stream_sinks import NetSinkRTL as TestNetSinkRTL
+
 from pymtl3 import *
 from pymtl3.stdlib.queues import NormalQueueRTL
-from pymtl3.stdlib.test_utils import TestVectorSimulator
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
@@ -32,11 +32,11 @@ class TestHarness( Component ):
     BflyPos  = mk_bfly_pos( r_rows, n_fly )
     s.dut  = BflyNetworkRTL( MsgType, BflyPos, k_ary, n_fly, 0)
 
-    match_func = lambda a,b : a.payload == b.payload and a.opaque == b.opaque
+    cmp_fn  = lambda a,b : a.payload == b.payload and a.opaque == b.opaque
     s.srcs  = [ TestSrcRTL ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_terminals ) ]
     s.sinks = [ TestNetSinkRTL ( MsgType, sink_msgs[i], sink_initial,
-              sink_interval, match_func=match_func )
+              sink_interval, cmp_fn=cmp_fn )
               for i in range ( s.dut.num_terminals ) ]
 
     # Connections
@@ -55,7 +55,8 @@ class TestHarness( Component ):
     return srcs_done and sinks_done
 
   def line_trace( s ):
-    return s.dut.line_trace()
+    # return s.dut.line_trace()
+    return '|'.join([ x.line_trace() for x in s.sinks ])
 
 #-------------------------------------------------------------------------
 # Test cases (specific for 4-ary 2-fly butterfly)

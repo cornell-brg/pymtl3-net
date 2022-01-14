@@ -8,7 +8,7 @@ Author : Cheng Tan, Yanghui Ou
   Date : April 6, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 from pymtl3_net.ocnlib.ifcs.PhysicalDimension import PhysicalDimension
 from pymtl3_net.router.InputUnitRTL import InputUnitRTL
@@ -21,30 +21,10 @@ from .DTRBflyRouteUnitRTL import DTRBflyRouteUnitRTL
 
 class BflyRouterRTL( Component ):
 
-  # def construct( s,
-  #   PacketType,
-  #   PositionType,
-  #   k_ary = 2,
-  #   InputUnitType = InputUnitRTL,
-  #   RouteUnitType = DTRBflyRouteUnitRTL,
-  #   SwitchUnitType = SwitchUnitRTL
-  # ):
-
-  #   super().construct(
-  #     PacketType,
-  #     PositionType,
-  #     k_ary,
-  #     k_ary,
-  #     InputUnitType,
-  #     RouteUnitType,
-  #     SwitchUnitType,
-  #     OutputUnitRTL,
-  #   )
-
-  def construct( s, 
+  def construct( s,
     PacketType, PositionType, k_ary, n_fly,
-    InputUnitType  = InputUnitRTL, 
-    RouteUnitType  = DTRBflyRouteUnitRTL, 
+    InputUnitType  = InputUnitRTL,
+    RouteUnitType  = DTRBflyRouteUnitRTL,
     SwitchUnitType = SwitchUnitRTL,
     OutputUnitType = OutputUnitRTL,
   ):
@@ -77,15 +57,15 @@ class BflyRouterRTL( Component ):
 
     for i in range( s.num_inports ):
       s.recv[i]             //= s.input_units[i].recv
-      s.input_units[i].give //= s.route_units[i].get
+      s.input_units[i].send //= s.route_units[i].recv
       s.pos                 //= s.route_units[i].pos
 
     for i in range( s.num_inports ):
       for j in range( s.num_outports ):
-        s.route_units[i].give[j] //= s.switch_units[j].get[i]
+        s.route_units[i].send[j] //= s.switch_units[j].recv[i]
 
     for j in range( s.num_outports ):
-      s.switch_units[j].give //= s.output_units[j].get
+      s.switch_units[j].send //= s.output_units[j].recv
       s.output_units[j].send //= s.send[j]
 
   # Line trace
