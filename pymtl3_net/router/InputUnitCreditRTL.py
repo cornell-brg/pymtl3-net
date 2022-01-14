@@ -9,10 +9,10 @@ Author : Yanghui Ou
 """
 from pymtl3_net.ocnlib.ifcs.CreditIfc import CreditRecvIfcRTL
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import GiveIfcRTL
+from pymtl3.stdlib.stream.ifcs import SendIfcRTL
 from pymtl3.stdlib.basic_rtl.arbiters import RoundRobinArbiterEn
 from pymtl3.stdlib.basic_rtl import Encoder
-from pymtl3.stdlib.queues import NormalQueueRTL
+from pymtl3.stdlib.stream.queues import NormalQueueRTL
 
 
 class InputUnitCreditRTL( Component ):
@@ -24,29 +24,30 @@ class InputUnitCreditRTL( Component ):
     s.vc = vc
 
     # Interface
+    # FIXME: Implement ISLIP so that only one send interface is needed
     s.recv = CreditRecvIfcRTL( PacketType, vc=vc )
-    s.give = [ GiveIfcRTL( PacketType ) for _ in range( vc ) ]
+    s.send = [ SendIfcRTL( PacketType ) for _ in range( vc ) ]
 
     s.buffers = [ QueueType( PacketType, num_entries=credit_line )
                   for _ in range( vc ) ]
 
     for i in range( vc ):
-      s.buffers[i].enq.msg //= s.recv.msg
-      s.buffers[i].deq     //= s.give[i]
-      s.recv.yum[i]        //= s.give[i].en
+      s.buffers[i].recv.msg //= s.recv.msg
+      s.buffers[i].send     //= s.send[i]
+      s.recv.yum[i]         //= lambda: s.send[i].val & s.send[i].rdy
 
     @update
     def up_enq():
       if s.recv.en:
         for i in range( vc ):
-          s.buffers[i].enq.en @= s.recv.msg.vc_id == i
+          s.buffers[i].recv.val @= ( s.recv.msg.vc_id == i )
       else:
         for i in range( vc ):
-          s.buffers[i].enq.en @= 0
+          s.buffers[i].recv.val @= 0
 
   def line_trace( s ):
     return "{}({}){}".format(
       s.recv,
       ",".join([ str(s.buffers[i].count) for i in range( s.vc ) ]),
-      "|".join([ str(s.give[i]) for i in range( s.vc ) ]),
+      "|".join([ str(s.send[i]) for i in range( s.vc ) ]),
     )

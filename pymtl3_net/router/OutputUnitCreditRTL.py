@@ -10,7 +10,7 @@ Author : Yanghui Ou
 from pymtl3_net.ocnlib.ifcs.CreditIfc import CreditSendIfcRTL, enrdy_to_str
 from pymtl3_net.ocnlib.rtl import Counter
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import GetIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL
 
 
 class OutputUnitCreditRTL( Component ):
@@ -19,29 +19,30 @@ class OutputUnitCreditRTL( Component ):
     assert vc > 1
 
     # Interface
-    s.get = GetIfcRTL( MsgType )
+    s.recv = RecvIfcRTL( MsgType )
     s.send = CreditSendIfcRTL( MsgType, vc )
 
     s.MsgType = MsgType
-    s.vc    = vc
+    s.vc      = vc
 
     # Loval types
     credit_type = mk_bits( clog2(credit_line+1) )
 
     s.credit = [ Counter( credit_type, credit_line ) for _ in range( vc ) ]
 
-    s.get.ret //= s.send.msg
+    s.recv.msg //= s.send.msg
 
     @update
     def up_credit_send():
-      s.send.en @= 0
-      s.get.en  @= 0
-      if s.get.rdy:
-        # print( str(s) + " : " + str(s.get.ret) )
+      s.send.en  @= 0
+      s.recv.rdy @= 0
+      # NOTE: Here the recv.rdy depends on recv.val.
+      #       Be careful about combinational loop.
+      if s.recv.val:
         for i in range( vc ):
-          if (i == s.get.ret.vc_id) & (s.credit[i].count > 0):
-            s.send.en @= 1
-            s.get.en  @= 1
+          if (i == s.recv.msg.vc_id) & (s.credit[i].count > 0):
+            s.send.en  @= 1
+            s.recv.rdy @= 1
 
     @update
     def up_counter_decr():
@@ -55,7 +56,7 @@ class OutputUnitCreditRTL( Component ):
 
   def line_trace( s ):
     return "{}({}){}".format(
-      s.get,
+      s.recv,
       ",".join( [ str(s.credit[i].count) for i in range(s.vc) ] ),
       s.send,
     )
