@@ -10,12 +10,12 @@ Author : Cheng Tan, Yanghui Ou
 from pymtl3 import *
 from pymtl3.stdlib.queues import NormalQueueRTL
 from pymtl3.stdlib.test_utils import TestVectorSimulator
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 
 from pymtl3_net.ocnlib.ifcs.packets import *
 from pymtl3_net.ocnlib.ifcs.positions import *
 from pymtl3_net.ocnlib.utils import run_sim
-from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.test.stream_sinks import NetSinkRTL as TestNetSinkRTL
 from pymtl3_net.cmeshnet.CMeshNetworkRTL import CMeshNetworkRTL
 from pymtl3_net.cmeshnet.DORXCMeshRouteUnitRTL import DORXCMeshRouteUnitRTL
 from pymtl3_net.cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
@@ -41,9 +41,9 @@ def run_vector_test( model, PacketType, test_vectors, ncols, nrows ):
 
       # Enable the network interface on specific router
       for i in range (num_routers):
-        model.recv[i].en @= 0
+        model.recv[i].val @= 0
       model.recv[router_id].msg @= pkt
-      model.recv[router_id].en  @= 1
+      model.recv[router_id].val  @= 1
 
     for i in range (num_routers*4):
       model.send[i].rdy @= 1
@@ -103,13 +103,13 @@ class TestHarness( Component ):
 
     MeshPos = mk_mesh_pos( ncols, nrows )
     s.dut = CMeshNetworkRTL( MsgType, MeshPos, ncols, nrows, 2, 0)
-    match_func = lambda a, b : a.payload == b.payload and a.dst_x == b.dst_x and\
+    cmp_fn = lambda a, b : a.payload == b.payload and a.dst_x == b.dst_x and\
                                a.dst_y == b.dst_y
 
     s.srcs  = [ TestSrcRTL   ( MsgType, src_msgs[i],  src_initial,  src_interval  )
               for i in range ( s.dut.num_terminals ) ]
     s.sinks = [ TestNetSinkRTL  ( MsgType, sink_msgs[i], sink_initial,
-                sink_interval, match_func=match_func)
+                sink_interval, cmp_fn=cmp_fn )
                 for i in range ( s.dut.num_terminals ) ]
 
     # Connections

@@ -9,12 +9,12 @@
 """
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import TestVectorSimulator
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 
 from pymtl3_net.ocnlib.ifcs.packets import *
 from pymtl3_net.ocnlib.ifcs.positions import *
 from pymtl3_net.ocnlib.utils import run_sim
-from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.test.stream_sinks import NetSinkRTL as TestNetSinkRTL
 from pymtl3_net.cmeshnet.CMeshRouterRTL import CMeshRouterRTL
 from pymtl3_net.cmeshnet.DORYCMeshRouteUnitRTL import DORYCMeshRouteUnitRTL
 from pymtl3_net.router.InputUnitRTL import InputUnitRTL
@@ -38,10 +38,10 @@ def run_vector_test( model, PacketType, test_vectors,
                       test_vector[1], 1, test_vector[2][i] )
 
         model.recv[i].msg @= pkt
-        model.recv[i].en  @= 1
+        model.recv[i].val @= 1
       # elif model.recv[i].rdy == 0:
       else:
-        model.recv[i].en  @= 0
+        model.recv[i].val  @= 0
 
     for i in range( model.num_outports ):
       model.send[i].rdy @= 1
@@ -49,7 +49,7 @@ def run_vector_test( model, PacketType, test_vectors,
   def tv_out( model, test_vector ):
 
     for i in range( model.num_outports ):
-      if model.send[i].en == 1:
+      if model.send[i].val == 1:
         pkt = model.send[i].msg
         # print('??', test_vector[4][i])
         assert test_vector[4][i] == 'x' or pkt.payload == test_vector[4][i]
@@ -93,12 +93,12 @@ class TestHarness( Component ):
     MeshPos = mk_mesh_pos( ncols, nrows )
     s.dut = CMeshRouterRTL( MsgType, MeshPos, 8, 8,
                             RouteUnitType = DORYCMeshRouteUnitRTL )
-    match_func = lambda a, b : a.payload == b.payload
+    cmp_fn = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL ( MsgType, src_msgs[i], src_initial, src_interval )
               for i in range ( 8 ) ]
     s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i], sink_initial,
-              sink_interval, match_func=match_func ) for i in range ( 8 ) ]
+              sink_interval, cmp_fn=cmp_fn ) for i in range ( 8 ) ]
 
     # Connections
 
