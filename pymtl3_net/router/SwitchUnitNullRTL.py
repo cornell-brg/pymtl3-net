@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Feb 21, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 class SwitchUnitNullRTL( Component ):
 
@@ -18,14 +18,14 @@ class SwitchUnitNullRTL( Component ):
 
     # Interface
 
-    s.get  = [ GetIfcRTL( Type ) for _ in range( num_inports )  ]
+    s.recv = [ RecvIfcRTL( Type ) for _ in range( num_inports )  ]
     s.hold = [ InPort() for _ in range( num_inports ) ]
-    s.give = GiveIfcRTL( Type )
+    s.send = SendIfcRTL( Type )
 
-    connect( s.give, s.get[0] )
+    connect( s.send, s.recv[0] )
 
   def line_trace( s ):
-    in_trace  = '|'.join( [ str(p) for p in s.get ] )
+    in_trace  = '|'.join( [ str(p) for p in s.recv ] )
     hold      = ''.join([ '^' if h else '.' for h in s.hold ])
-    out_trace = f'{s.give}'
+    out_trace = f'{s.send}'
     return f'{in_trace}({hold}){out_trace}'
