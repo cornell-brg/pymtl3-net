@@ -8,10 +8,10 @@ Author : Yanghui Ou
   Date : June 10, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3.stdlib.basic_rtl.arbiters import RoundRobinArbiterEn
 from pymtl3.stdlib.basic_rtl import Encoder
-from pymtl3.stdlib.queues import BypassQueueRTL
+from pymtl3.stdlib.stream.queues import BypassQueueRTL
 
 from pymtl3_net.ocnlib.rtl import Counter
 
@@ -125,21 +125,24 @@ class RecvRTL2CreditSendRTL( Component ):
     CreditType = mk_bits( clog2(credit_line+1) )
 
     # FIXME: use multiple buffers to avoid deadlock.
-    s.buffer = BypassQueueRTL( MsgType, num_entries=1 )
+    # s.buffer = BypassQueueRTL( MsgType, num_entries=1 )
     s.credit = [ Counter( CreditType, credit_line ) for _ in range( vc ) ]
 
-    s.recv           //=  s.buffer.enq
-    s.buffer.deq.ret //=  s.send.msg
+    # s.recv           //=  s.buffer.enq
+    # s.buffer.deq.ret //=  s.send.msg
+    s.recv.msg //= s.send.msg
 
     @update
     def up_credit_send():
-      s.send.en @= 0
-      s.buffer.deq.en @= 0
-      if s.buffer.deq.rdy:
+      s.send.en  @= 0
+      s.recv.rdy @= 0
+      # NOTE: recv.rdy depends on recv.val.
+      #       Be careful about combinationl loop.
+      if s.recv.val:
         for i in range( vc ):
-          if ( i == s.buffer.deq.ret.vc_id ) & ( s.credit[i].count > 0 ):
-            s.send.en @= 1
-            s.buffer.deq.en @= 1
+          if ( i == s.recv.msg.vc_id ) & ( s.credit[i].count > 0 ):
+            s.send.en  @= 1
+            s.recv.rdy @= 1
 
     @update
     def up_counter_decr():
@@ -152,9 +155,8 @@ class RecvRTL2CreditSendRTL( Component ):
       s.credit[i].load_value //= 0
 
   def line_trace( s ):
-    return "{}({},{}){}".format(
+    return "{}({}){}".format(
       s.recv,
-      s.buffer.line_trace(),
       ",".join( [ str(s.credit[i].count) for i in range(s.vc) ] ),
       s.send,
     )
@@ -170,7 +172,7 @@ class CreditRecvRTL2SendRTL( Component ):
     s.send = SendIfcRTL( MsgType )
 
     s.MsgType = MsgType
-    s.vc    = vc
+    s.vc      = vc
 
     # Components
 
@@ -182,36 +184,39 @@ class CreditRecvRTL2SendRTL( Component ):
     s.encoder = Encoder( in_nbits=vc, out_nbits=clog2(vc) )
 
     for i in range( vc ):
-      s.buffers[i].enq.msg //= s.recv.msg
-      s.buffers[i].deq.rdy //= s.arbiter.reqs[i]
+      s.buffers[i].recv.msg //= s.recv.msg
+      s.buffers[i].send.val //= s.arbiter.reqs[i]
     s.arbiter.grants //= s.encoder.in_
-    s.arbiter.en     //= s.send.en
+    s.arbiter.en     //= s.send.val
 
     @update
     def up_enq():
       if s.recv.en:
         for i in range( vc ):
-          s.buffers[i].enq.en @= s.recv.msg.vc_id == i
+          s.buffers[i].recv.val @= ( s.recv.msg.vc_id == i )
       else:
         for i in range( vc ):
-          s.buffers[i].enq.en @= 0
+          s.buffers[i].recv.val @= 0
 
+    # TODO: add some assertions to make sure val/rdy are both high
+    #       when they should.
     @update
     def up_deq_and_send():
       for i in range( vc ):
-        s.buffers[i].deq.en @= 0
+        s.buffers[i].send.rdy @= 0
 
-      s.send.msg @= s.buffers[ s.encoder.out ].deq.ret
-      if s.send.rdy & ( s.arbiter.grants > 0 ):
-        s.send.en @= 1
-        s.buffers[ s.encoder.out ].deq.en @= 1
+      s.send.msg @= s.buffers[ s.encoder.out ].send.msg
+
+      if s.arbiter.grants > 0:
+        s.send.val @= 1
+        s.buffers[ s.encoder.out ].send.rdy @= 1
       else:
-        s.send.en @= 0
+        s.send.val @= 0
 
     @update
     def up_yummy():
       for i in range( vc ):
-        s.recv.yum[i] @= s.buffers[i].deq.en
+        s.recv.yum[i] @= s.buffers[i].recv.val & s.buffers[i].recv.rdy
 
   def line_trace( s ):
     return "{}(){}".format( s.recv, s.send )
