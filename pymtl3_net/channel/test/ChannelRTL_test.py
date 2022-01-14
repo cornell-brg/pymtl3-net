@@ -11,10 +11,9 @@ import pytest
 from pymtl3_net.channel.ChannelRTL import ChannelRTL
 from pymtl3_net.ocnlib.utils import run_sim
 from pymtl3 import *
-from pymtl3.stdlib.queues import NormalQueueRTL
-from pymtl3.stdlib.test_utils import TestVectorSimulator
-from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from pymtl3.stdlib.stream.queues import NormalQueueRTL
+from pymtl3.stdlib.stream.SinkRTL import SinkRTL as TestSinkRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 
 #-------------------------------------------------------------------------
 # TestHarness
