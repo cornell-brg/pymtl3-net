@@ -63,9 +63,9 @@ class InputUnitCL_Tests:
 
   def test_normal2_simple( s ):
     test_msgs = [ b16( 4 ), b16( 1 ), b16( 2 ), b16( 3 ) ]
-    arrival_time = [ 2, 3, 4, 5 ]
+    # arrival_time = [ 2, 3, 4, 5 ]
     th = s.TestHarness( Bits16, test_msgs, test_msgs )
-    th.set_param( "top.sink.construct", arrival_time=arrival_time )
+    th.set_param( "top.sink.construct" )
     run_sim( th )
 
   def test_hypothesis( s ):

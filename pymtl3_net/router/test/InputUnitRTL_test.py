@@ -10,11 +10,12 @@ Author: Yanghui Ou
 import pytest
 
 from pymtl3 import *
-from pymtl3.stdlib.queues import (BypassQueueRTL, NormalQueueRTL,
+from pymtl3.stdlib.stream.queues import (BypassQueueRTL, NormalQueueRTL,
                                       PipeQueueRTL)
 from pymtl3.stdlib.test_utils import TestVectorSimulator
-from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+
+from pymtl3.stdlib.stream.SinkRTL import SinkRTL as TestSinkRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 
 from pymtl3_net.router.InputUnitRTL import InputUnitRTL
 
@@ -29,14 +30,14 @@ def run_tv_test( dut, test_vectors ):
   # Define input/output functions
 
   def tv_in( dut, tv ):
-    dut.recv.en  @= tv[0]
-    dut.recv.msg @= tv[2]
-    dut.give.en  @= tv[3]
+    dut.recv.val  @= tv[0]
+    dut.recv.msg  @= tv[2]
+    dut.send.rdy  @= tv[3]
 
   def tv_out( dut, tv ):
     if tv[1] != '?': assert dut.recv.rdy == tv[1]
-    if tv[4] != '?': assert dut.give.rdy == tv[4]
-    if tv[5] != '?': assert dut.give.ret == tv[5]
+    if tv[4] != '?': assert dut.send.val == tv[4]
+    if tv[5] != '?': assert dut.send.msg == tv[5]
 
   # Run the test
 
@@ -46,17 +47,17 @@ def run_tv_test( dut, test_vectors ):
 def test_pipe_Bits():
 
   run_tv_test( InputUnitRTL( Bits32 ), [
-    #  enq.en  enq.rdy  enq.msg  deq.en  deq.rdy deq.ret
-    [   1,      1,       123,      0,       0,    '?'  ],
-    [   1,      1,       345,      0,       1,    123  ],
-    [   0,      0,       567,      0,       1,    123  ],
-    [   0,      0,       567,      1,       1,    123  ],
-    [   0,      1,       567,      1,       1,    345  ],
-    [   1,      1,       567,      0,       0,    '?'  ],
-    [   1,      1,       0  ,      1,       1,    567  ],
-    [   1,      1,       1  ,      1,       1,    0    ],
-    [   1,      1,       2  ,      1,       1,    1    ],
-    [   0,      1,       2  ,      1,       1,    2    ],
+    #  enq.val  enq.rdy  enq.msg   deq.rdy  deq.val deq.msg
+    [   1,      1,       123,      0,       0,      '?'  ],
+    [   1,      1,       345,      0,       1,      123  ],
+    [   0,      0,       567,      0,       1,      123  ],
+    [   0,      0,       567,      1,       1,      123  ],
+    [   0,      1,       567,      1,       1,      345  ],
+    [   1,      1,       567,      0,       0,      '?'  ],
+    [   1,      1,       0  ,      1,       1,      567  ],
+    [   1,      1,       1  ,      1,       1,      0    ],
+    [   1,      1,       2  ,      1,       1,      1    ],
+    [   0,      1,       2  ,      1,       1,      2    ],
 ] )
 
 #-------------------------------------------------------------------------
@@ -72,14 +73,14 @@ class TestHarness( Component ):
     s.sink = TestSinkRTL  ( MsgType, sink_msgs )
 
     # Connections
-    s.src.send     //= s.dut.recv
-    s.dut.give.ret //= s.sink.recv.msg
+    s.src.send //= s.dut.recv
+    s.dut.send //= s.sink.recv
 
-    @update
-    def up_give_en():
-      both_rdy = s.dut.give.rdy & s.sink.recv.rdy
-      s.dut.give.en  @= both_rdy
-      s.sink.recv.en @= both_rdy
+    # @update
+    # def up_give_en():
+    #   both_rdy = s.dut.give.rdy & s.sink.recv.rdy
+    #   s.dut.give.en  @= both_rdy
+    #   s.sink.recv.en @= both_rdy
 
   def done( s ):
     return s.src.done() and s.sink.done()
