@@ -2,7 +2,7 @@
 ==========================================================================
 RingRouteUnitRTL.py
 ==========================================================================
-A ring route unit with get/give interface.
+A ring route unit with val/rdy interface.
 
 Author : Yanghui Ou, Cheng Tan
   Date : April 6, 2019
@@ -10,7 +10,7 @@ Author : Yanghui Ou, Cheng Tan
 from copy import deepcopy
 
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 from .directions import *
 
@@ -28,44 +28,44 @@ class RingRouteUnitRTL( Component ):
 
     # Interface
 
-    s.get  = GetIfcRTL( PacketType )
-    s.give = [ GiveIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
+    s.recv = RecvIfcRTL( PacketType )
+    s.send = [ SendIfcRTL (PacketType) for _ in range ( s.num_outports ) ]
     s.pos  = InPort( PositionType )
 
     # Componets
 
     s.out_dir  = Wire( mk_bits( clog2( s.num_outports ) ) )
-    s.give_ens = Wire( mk_bits( s.num_outports ) )
+    s.send_rdy = Wire( mk_bits( s.num_outports ) )
 
-    s.left_dist  = Wire( DistType )
-    s.right_dist = Wire( DistType )
-    s.give_msg_wire = Wire( PacketType )
+    s.left_dist     = Wire( DistType )
+    s.right_dist    = Wire( DistType )
+    s.send_msg_wire = Wire( PacketType )
 
     # Connections
 
     for i in range( s.num_outports ):
-      s.give_ens[i] //= s.give[i].en
+      s.send_rdy[i] //= s.send[i].rdy
 
     # Routing logic
     @update
     def up_left_right_dist():
-      if s.get.ret.dst < s.pos:
-        s.left_dist  @= zext(s.pos, DistType) - zext(s.get.ret.dst, DistType)
-        s.right_dist @= zext(s.last_idx, DistType) - zext(s.pos, DistType) + zext(s.get.ret.dst, DistType) + 1
+      if s.recv.msg.dst < s.pos:
+        s.left_dist  @= zext(s.pos, DistType) - zext(s.recv.msg.dst, DistType)
+        s.right_dist @= zext(s.last_idx, DistType) - zext(s.pos, DistType) + zext(s.recv.msg.dst, DistType) + 1
       else:
-        s.left_dist  @= 1 + zext(s.last_idx, DistType) + zext(s.pos, DistType) - zext(s.get.ret.dst, DistType)
-        s.right_dist @= zext(s.get.ret.dst, DistType) - zext(s.pos, DistType)
+        s.left_dist  @= 1 + zext(s.last_idx, DistType) + zext(s.pos, DistType) - zext(s.recv.msg.dst, DistType)
+        s.right_dist @= zext(s.recv.msg.dst, DistType) - zext(s.pos, DistType)
 
     @update
     def up_ru_routing():
 
       s.out_dir @= 0
-      s.give_msg_wire @= s.get.ret
+      s.send_msg_wire @= s.recv.msg
       for i in range( s.num_outports ):
-        s.give[i].rdy @= 0
+        s.send[i].val @= 0
 
-      if s.get.rdy:
-        if s.pos == s.get.ret.dst:
+      if s.recv.val:
+        if s.pos == s.recv.msg.dst:
           s.out_dir @= SELF
         elif s.left_dist < s.right_dist:
           s.out_dir @= LEFT
@@ -73,22 +73,22 @@ class RingRouteUnitRTL( Component ):
           s.out_dir @= RIGHT
 
         if ( s.pos == s.last_idx ) & ( s.out_dir == RIGHT ):
-          s.give_msg_wire.vc_id @= 1
+          s.send_msg_wire.vc_id @= 1
         elif ( s.pos == 0 ) & ( s.out_dir == LEFT ):
-          s.give_msg_wire.vc_id @= 1
+          s.send_msg_wire.vc_id @= 1
 
-        s.give[ s.out_dir ].rdy @= 1
-        s.give[ s.out_dir ].ret @= s.give_msg_wire
+        s.send[ s.out_dir ].val @= 1
+        s.send[ s.out_dir ].msg @= s.send_msg_wire
 
     @update
-    def up_ru_get_en():
-      s.get.en @= s.give_ens > 0
+    def up_ru_recv_rdy():
+      s.recv.rdy @= s.send_rdy[ s.out_dir ]
 
   # Line trace
   def line_trace( s ):
 
     out_str = [ "" for _ in range( s.num_outports ) ]
     for i in range (s.num_outports):
-      out_str[i] = f"{s.give[i]}"
+      out_str[i] = f"{s.send[i]}"
 
-    return "{}({}){}".format( s.get, s.out_dir, "|".join( out_str ) )
+    return "{}({}){}".format( s.recv, s.out_dir, "|".join( out_str ) )

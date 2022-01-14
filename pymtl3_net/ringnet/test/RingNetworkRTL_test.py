@@ -8,11 +8,11 @@ Author : Yanghui Ou, Cheng Tan
   Date : June 28, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 from pymtl3_net.ocnlib.ifcs.packets import mk_ring_pkt
 from pymtl3_net.ocnlib.ifcs.positions import mk_ring_pos
 from pymtl3_net.ocnlib.utils import run_sim
-from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.test.stream_sinks import NetSinkRTL as TestNetSinkRTL
 from pymtl3_net.ringnet.RingNetworkRTL import RingNetworkRTL
 
 from ..RingNetworkFL import ringnet_fl
@@ -27,13 +27,13 @@ class TestHarness( Component ):
 
     s.num_routers = num_routers
     RingPos = mk_ring_pos( num_routers )
-    match_func = lambda a, b : a.payload == b.payload
+    cmp_fn = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL( MsgType, src_msgs[i] )
               for i in range( num_routers ) ]
     s.dut   = RingNetworkRTL( MsgType, RingPos, num_routers, 0)
     s.sinks = [ TestNetSinkRTL( MsgType, sink_msgs[i],
-              match_func = match_func )
+              cmp_fn = cmp_fn )
               for i in range( num_routers ) ]
 
     # Connections

@@ -17,7 +17,7 @@ from pymtl3_net.router.SwitchUnitRTL import SwitchUnitRTL
 from .RingRouteUnitRTL import RingRouteUnitRTL
 
 
-class RingRouterRTL( Router ):
+class RingRouterRTL( Component ):
 
   def construct( s,
     PacketType,
@@ -64,15 +64,15 @@ class RingRouterRTL( Router ):
       s.recv[i] //= s.input_units[i].recv
       for j in range( s.vc ):
         ru_idx = i * s.vc + j
-        s.input_units[i].give[j] //= s.route_units[ru_idx].get
+        s.input_units[i].send[j] //= s.route_units[ru_idx].recv
         s.pos                    //= s.route_units[ru_idx].pos
 
     for i in range( s.num_route_units ):
       for j in range( s.num_outports ):
-        s.route_units[i].give[j] //= s.switch_units[j].get[i]
+        s.route_units[i].send[j] //= s.switch_units[j].recv[i]
 
     for j in range( s.num_outports ):
-      s.switch_units[j].give //= s.output_units[j].get
+      s.switch_units[j].send //= s.output_units[j].recv
       s.output_units[j].send //= s.send[j]
 
   # Line trace
