@@ -69,7 +69,7 @@ class NetSinkRTL( Component ):
 
         s.idx = 0
         s.count = initial_delay
-        s.recv.rdy <<= (s.idx < len(s.msgs)) & (s.count == 0)
+        s.recv.rdy <<= (s.idx < s.nmsgs) & (s.count == 0)
 
       else:
         s.cycle_count += 1
@@ -79,7 +79,7 @@ class NetSinkRTL( Component ):
           msg = s.recv.msg
 
           # Sanity check
-          if s.idx >= len(s.msgs):
+          if s.idx >= s.nmsgs:
             s.error_msg = ( 'Test Sink received more msgs than expected!\n'
                            f'Received : {msg}' )
 
@@ -117,7 +117,7 @@ class NetSinkRTL( Component ):
           s.count -= 1
           s.recv.rdy <<= 0
         else: # s.count == 0
-          s.recv.rdy <<= (s.idx < len(s.msgs))
+          s.recv.rdy <<= (s.idx < s.nmsgs)
 
   def done( s ):
     return s.done_flag
@@ -125,4 +125,4 @@ class NetSinkRTL( Component ):
   # Line trace
 
   def line_trace( s ):
-    return f"{s.recv}"
+    return f"{s.recv}({s.idx}/{s.nmsgs}:{s.done_flag})"
