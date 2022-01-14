@@ -10,10 +10,10 @@ Author : Yanghui Ou, Cheng Tan
 import pytest
 
 from pymtl3 import *
-from pymtl3.stdlib.queues import (BypassQueueRTL, NormalQueueRTL,
-                                      PipeQueueRTL)
-from pymtl3.stdlib.test_utils.test_sinks import TestSinkCL
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL
+from pymtl3.stdlib.stream.queues import (BypassQueueRTL, NormalQueueRTL,
+                                         PipeQueueRTL)
+from pymtl3.stdlib.stream.SinkRTL import SinkRTL as TestSinkRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 
 from pymtl3_net.router.OutputUnitRTL import OutputUnitRTL
 
@@ -27,14 +27,12 @@ class TestHarness( Component ):
 
   def construct( s, MsgType, src_msgs, sink_msgs ):
 
-    s.src   = TestSrcCL( MsgType, src_msgs )
-    s.src_q = BypassQueueRTL( MsgType, num_entries=1 )
-    s.dut   = OutputUnitRTL( MsgType )
-    s.sink  = TestSinkCL( MsgType, sink_msgs )
+    s.src  = TestSrcRTL( MsgType, src_msgs )
+    s.dut  = OutputUnitRTL( MsgType )
+    s.sink = TestSinkRTL( MsgType, sink_msgs )
 
     # Connections
-    s.src.send  //= s.src_q.enq
-    s.src_q.deq //= s.dut.get
+    s.src.send  //= s.dut.recv
     s.dut.send  //= s.sink.recv
 
   def done( s ):

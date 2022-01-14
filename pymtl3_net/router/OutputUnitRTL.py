@@ -2,63 +2,53 @@
 ==========================================================================
 OutputUnitRTL.py
 ==========================================================================
-RTL implementation of OutputUnit.
+RTL implementation of OutputUnit with val/rdy stream interface.
 
 Author : Yanghui Ou, Cheng Tan
   Date : Feb 28, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import GetIfcRTL, SendIfcRTL
-from pymtl3.stdlib.queues import NormalQueueRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.queues import NormalQueueRTL
 
 
 class OutputUnitRTL( Component ):
   def construct( s, PacketType, QueueType=None ):
 
     # Local parameter
-    gating_out = PacketType()
+    # gating_out = PacketType()
+    # TODO: add data gating support
 
     # Interface
-    s.get  = GetIfcRTL ( PacketType )
+    s.recv = RecvIfcRTL( PacketType )
     s.send = SendIfcRTL( PacketType )
 
     s.QueueType = QueueType
 
+    #---------------------------------------------------------------------
     # If no queue type is assigned
+    #---------------------------------------------------------------------
+
     if s.QueueType != None:
 
       # Component
       s.queue = QueueType( PacketType )
 
       # Connections
-      s.get.ret       //= s.queue.enq.msg
-      s.queue.deq.ret //= s.send.msg
+      s.recv       //= s.queue.recv
+      s.queue.send //= s.send
 
-      @update
-      def up_get_deq():
-        both_rdy = s.get.rdy & s.queue.enq.rdy
-        s.get.en       @= both_rdy
-        s.queue.enq.en @= both_rdy
-
-      @update
-      def up_deq_send():
-        both_rdy = s.send.rdy & s.queue.deq.rdy
-        s.send.en      @= both_rdy
-        s.queue.deq.en @= both_rdy
-
+    #---------------------------------------------------------------------
     # No ouput queue
+    #---------------------------------------------------------------------
+
     else:
 
-      s.send.msg //= lambda: s.get.ret if s.send.en else PacketType()
-
-      @update
-      def up_get_send():
-        both_rdy = s.get.rdy & s.send.rdy
-        s.get.en  @= both_rdy
-        s.send.en @= both_rdy
+      s.send //= s.recv
 
   def line_trace( s ):
     if s.QueueType != None:
-      return "{}({}){}".format( s.get, s.queue.count, s.send )
+      return "{}({}){}".format( s.recv, s.queue.count, s.send )
     else:
-      return "{}(0){}".format( s.get, s.send)
+      return "{}(0){}".format( s.recv, s.send)
+
