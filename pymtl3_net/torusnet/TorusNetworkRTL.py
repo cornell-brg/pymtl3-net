@@ -10,7 +10,7 @@ from pymtl3_net.channel.ChannelRTL import ChannelRTL
 from pymtl3_net.ocnlib.ifcs.CreditIfc import (CreditRecvRTL2SendRTL,
                                       RecvRTL2CreditSendRTL)
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 from .directions import *
 from .TorusRouterRTL import TorusRouterRTL

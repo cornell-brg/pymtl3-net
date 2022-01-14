@@ -11,12 +11,12 @@ from itertools import product
 import pytest
 
 from pymtl3 import *
-from pymtl3.stdlib.queues import BypassQueueRTL
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from pymtl3.stdlib.stream.queues import BypassQueueRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 from pymtl3_net.ocnlib.ifcs.packets import mk_mesh_pkt
 from pymtl3_net.ocnlib.ifcs.positions import mk_mesh_pos
 from pymtl3_net.ocnlib.utils import run_sim
-from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.test.stream_sinks import NetSinkRTL as TestNetSinkRTL
 from pymtl3_net.torusnet.DORYTorusRouteUnitRTL import DORYTorusRouteUnitRTL
 from pymtl3_net.torusnet.RouteUnitDorFL import RouteUnitDorFL
 
@@ -31,29 +31,20 @@ class TestHarness( Component ):
     outports = 5
     MeshPos = mk_mesh_pos( ncols, nrows )
 
-    match_func = lambda a, b : a.src_x == b.src_x and a.src_y == b.src_y and \
+    cmp_fn = lambda a, b : a.src_x == b.src_x and a.src_y == b.src_y and \
                                a.dst_y == b.dst_y and a.payload == b.payload
 
 
     s.src   = TestSrcRTL( PktType, src_msgs )
-    s.src_q = BypassQueueRTL( PktType, num_entries=1 )
     s.dut   = DORYTorusRouteUnitRTL( PktType, MeshPos, ncols=ncols, nrows=nrows )
-    s.sinks = [ TestNetSinkRTL( PktType, sink_msgs[i], match_func=match_func )
+    s.sinks = [ TestNetSinkRTL( PktType, sink_msgs[i], cmp_fn=cmp_fn )
                 for i in range ( outports ) ]
 
     # Connections
-    s.src.send  //= s.src_q.enq
-    s.src_q.deq //= s.dut.get
+    s.src.send  //= s.dut.recv
 
     for i in range ( outports ):
-      s.dut.give[i].ret //= s.sinks[i].recv.msg
-
-    @update
-    def up_give_en():
-      for i in range (outports):
-        both_rdy = s.dut.give[i].rdy & s.sinks[i].recv.rdy
-        s.dut.give[i].en   @= both_rdy
-        s.sinks[i].recv.en @= both_rdy
+      s.dut.send[i] //= s.sinks[i].recv
 
     s.dut.pos //= MeshPos( pos_x, pos_y )
 

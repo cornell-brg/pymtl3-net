@@ -14,9 +14,9 @@ from hypothesis import strategies as st
 from pymtl3_net.ocnlib.ifcs.packets import mk_mesh_pkt
 from pymtl3_net.ocnlib.ifcs.positions import mk_mesh_pos
 from pymtl3_net.ocnlib.utils import run_sim
-from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.test.stream_sinks import NetSinkRTL as TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 from pymtl3_net.torusnet.TorusNetworkFL import torusnet_fl
 from pymtl3_net.torusnet.TorusNetworkRTL import TorusNetworkRTL
 
@@ -30,12 +30,12 @@ class TestHarness( Component ):
 
     s.nrouters = ncols * nrows
     MeshPos = mk_mesh_pos( ncols, nrows )
-    match_func = lambda a, b : a.payload == b.payload
+    cmp_fn = lambda a, b : a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL   ( PktType, src_msgs[i] )
                 for i in range ( s.nrouters ) ]
     s.dut   = TorusNetworkRTL( PktType, MeshPos, ncols, nrows, 0)
-    s.sinks = [ TestNetSinkRTL  ( PktType, sink_msgs[i], match_func=match_func )
+    s.sinks = [ TestNetSinkRTL  ( PktType, sink_msgs[i], cmp_fn =cmp_fn )
                 for i in range ( s.nrouters ) ]
 
     # Connections

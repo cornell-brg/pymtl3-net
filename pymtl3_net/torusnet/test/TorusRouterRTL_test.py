@@ -15,9 +15,9 @@ from pymtl3_net.ocnlib.ifcs.CreditIfc import CreditRecvRTL2SendRTL, RecvRTL2Cred
 from pymtl3_net.ocnlib.ifcs.packets import mk_mesh_pkt
 from pymtl3_net.ocnlib.ifcs.positions import mk_mesh_pos
 from pymtl3_net.ocnlib.utils import run_sim
-from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.test.stream_sinks import NetSinkRTL as TestNetSinkRTL
 from pymtl3 import *
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 from pymtl3_net.torusnet.TorusRouterFL import TorusRouterFL
 from pymtl3_net.torusnet.TorusRouterRTL import TorusRouterRTL
 
@@ -39,13 +39,13 @@ class TestHarness( Component ):
 
     MeshPos = mk_mesh_pos( ncols, nrows )
 
-    match_func = lambda a, b : a.src_x == b.src_x and a.src_y == b.src_y and \
+    cmp_fn= lambda a, b : a.src_x == b.src_x and a.src_y == b.src_y and \
                                a.dst_y == b.dst_y and a.payload == b.payload
 
     s.srcs  = [ TestSrcRTL( PktType, src_msgs[i] )
                 for i in range( 5 ) ]
     s.dut   = TorusRouterRTL( PktType, MeshPos, ncols=ncols, nrows=nrows )
-    s.sinks = [ TestNetSinkRTL( PktType, sink_msgs[i], match_func=match_func )
+    s.sinks = [ TestNetSinkRTL( PktType, sink_msgs[i], cmp_fn=cmp_fn )
                 for i in range( 5 ) ]
 
     s.src_adapters  = [ RecvRTL2CreditSendRTL( PktType, vc=2 )
