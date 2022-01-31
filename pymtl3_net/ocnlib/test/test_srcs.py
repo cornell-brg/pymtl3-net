@@ -9,7 +9,10 @@ Author : Yanghui Ou
 '''
 from collections import deque
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvCL2SendRTL, SendIfcRTL
+from pymtl3.stdlib.ifcs import RecvCL2SendRTL
+from pymtl3.stdlib.stream.ifcs import SendIfcRTL
+
+from ..ifcs.enrdy_adapters import Recv2OutValRdy
 
 #-------------------------------------------------------------------------
 # MflitPacketSourceCL
@@ -76,9 +79,11 @@ class MflitPacketSourceRTL( Component ):
     s.src_cl  = MflitPacketSourceCL( Format, pkts, initial_delay, flit_interval_delay,
                                          packet_interval_delay )
     s.adapter = RecvCL2SendRTL( PhitType )
+    s.ifc     = Recv2OutValRdy( PhitType )
 
     connect( s.src_cl.send,  s.adapter.recv )
-    connect( s.adapter.send, s.send         )
+    connect( s.adapter.send, s.ifc.recv     )
+    connect( s.ifc.send,     s.send         )
 
   def done( s ):
     return s.src_cl.done()

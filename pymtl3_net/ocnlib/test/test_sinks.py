@@ -8,9 +8,11 @@ Author : Yanghui Ou
   Date : Feb 3, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvRTL2SendCL, RecvIfcRTL
+from pymtl3.stdlib.ifcs import RecvRTL2SendCL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL
 
 from ..packets import MflitPacket as Packet
+from ..ifcs.enrdy_adapters import InValRdy2Send
 
 #-------------------------------------------------------------------------
 # MflitPacketSinkCL
@@ -130,8 +132,10 @@ class MflitPacketSinkRTL( Component ):
     s.sink_cl  = MflitPacketSinkCL( Format, pkts, initial_delay, flit_interval_delay,
                                          packet_interval_delay , cmp_fn )
     s.adapter = RecvRTL2SendCL( s.PhitType )
+    s.ifc     = InValRdy2Send ( s.PhitType )
 
-    connect( s.recv,         s.adapter.recv )
+    connect( s.recv,         s.ifc.recv     )
+    connect( s.ifc.send,     s.adapter.recv )
     connect( s.adapter.send, s.sink_cl.recv )
 
   def done( s ):
