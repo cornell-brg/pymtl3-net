@@ -521,14 +521,14 @@ def net_simulate( topo, opts ):
       if len( src_q[i] ) > 0 and net.recv[i].rdy:
         recv_pkt = src_q[i].popleft()
         net.recv[i].msg @= recv_pkt
-        net.recv[i].en  @= 1
+        net.recv[i].val  @= 1
         if int(recv_pkt.payload) > 0:
           mpkt_injected += 1
       else:
-        net.recv[i].en  @= 0
+        net.recv[i].val  @= 0
 
       # Receive packets from network
-      if net.send[i].en:
+      if net.send[i].val:
         total_received += 1
         if int(net.send[i].msg.payload) > 0:
           timestamp = int(net.send[i].msg.payload)
@@ -811,7 +811,7 @@ def smoke_test( topo, opts ):
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )
   net.elaborate()
-  net.apply( DefaultPassGroup() )
+  net.apply( DefaultPassGroup(linetrace=True) )
 
   vprint( f' - resetting network')
   net.sim_reset()
@@ -824,6 +824,8 @@ def smoke_test( topo, opts ):
     net.send[i].rdy @= 1 # Always ready
 
   # Inject a packet to port 0
+
+  net.recv[0].val  @= 1
   while not net.recv[0].rdy:
     if opts.trace:
       print( f'{ncycles:3}: {net.line_trace()}' )
@@ -834,17 +836,17 @@ def smoke_test( topo, opts ):
   pkt_opts.pattern = 'complement'
   pkt = _pkt_gen_dict[ topo ]( pkt_opts, p_type(1024), 0 )
   net.recv[0].msg @= pkt
-  net.recv[0].en  @= 1
+  net.recv[0].val  @= 1
 
   # Tick one cycle and stops injecting
   if opts.trace:
     print( f'{ncycles:3}: {net.line_trace()}' )
   net.sim_tick()
   ncycles += 1
-  net.recv[0].en @= 0
+  net.recv[0].val @= 0
 
   # Wait until packets arrives
-  while not net.send[ nports-1 ].en:
+  while not net.send[ nports-1 ].val:
     if opts.trace:
       print( f'{ncycles:3}: {net.line_trace()}' )
     net.sim_tick()
