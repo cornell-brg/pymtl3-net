@@ -10,8 +10,11 @@ Author : Yanghui Ou
 import pytest
 from pymtl3 import *
 from pymtl3.stdlib.mem import mk_mem_msg, MemMsgType, MagicMemoryCL as MemoryCL
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcCL as TestSource
-from pymtl3.stdlib.test_utils.test_sinks import TestSinkCL as TestSink
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSource
+from pymtl3.stdlib.stream.SinkRTL import SinkRTL as TestSink
+from pymtl3.stdlib.stream.ifcs import MinionIfcRTL
+from pymtl3.stdlib.stream.valrdy_master_minion_ifcs import MasterIfcCL
+# from pymtl3.stdlib.stream.valrdy_master_minion_ifcs import ValRdyMasterMinionRTL2CLAdapter
 from pymtl3.stdlib.test_utils import run_sim, mk_test_case_table
 
 from ..MasterMinionXbarGeneric import MasterMinionXbarGeneric as Xbar
@@ -56,6 +59,89 @@ def mk_src_sink_msgs( msgs ):
   return src_msgs, sink_msgs
 
 #-------------------------------------------------------------------------
+# Adapter
+#-------------------------------------------------------------------------
+
+from pymtl3.extra import clone_deepcopy
+
+class ValRdyMasterMinionRTL2CLAdapter( Component ):
+
+  def req_rdy( s ):
+    return s.req_entry is not None
+
+  def req( s ):
+    assert s.req_entry is not None
+    ret = s.req_entry
+    s.req_entry = None
+    return ret
+
+  def resp_rdy( s ):
+    return s.resp_entry is None
+
+  def resp( s, msg ):
+    s.resp_entry = clone_deepcopy( msg )
+
+  def construct( s, ReqType, RespType ):
+    s.left  = MinionIfcRTL( ReqType, RespType )
+    s.right = MasterIfcCL( ReqType, RespType, resp=s.resp, resp_rdy=s.resp_rdy )
+
+    # Req side
+
+    s.req_entry = None
+
+    @update_ff
+    def up_left_req_rdy():
+      s.left.req.rdy <<= (s.req_entry is None)
+
+    @update_once
+    def up_left_req_msg():
+      if s.req_entry is None:
+        if s.left.req.val:
+          s.req_entry = clone_deepcopy( s.left.req.msg )
+
+    @update_once
+    def up_right_req():
+      if ( not s.req_entry is None ) and s.right.req.rdy():
+        s.right.req( clone_deepcopy( s.req_entry ) )
+        s.req_entry = None
+
+
+    s.add_constraints(
+      U( up_left_req_msg ) < M( s.req ),
+      U( up_left_req_msg ) < M( s.req_rdy    ),
+      U(up_left_req_msg  ) < U( up_right_req ),
+    )
+
+    # Resp side
+
+    s.resp_entry = None
+    s.resp_sent  = Wire()
+
+    @update_once
+    def up_right_resp():
+      if s.resp_entry is None:
+        s.left.resp.val @= 0
+      else:
+        s.left.resp.val @= 1
+        s.left.resp.msg @= s.resp_entry
+
+    @update_ff
+    def up_resp_sent():
+      s.resp_sent <<= s.left.resp.val & s.left.resp.rdy
+
+    @update_once
+    def up_clear():
+      if s.resp_sent: # constraints reverse this
+        s.resp_entry = None
+
+    s.add_constraints(
+      U( up_clear )   < M( s.resp ),
+      U( up_clear )   < M( s.resp_rdy ),
+      M( s.resp )     < U( up_right_resp ),
+      M( s.resp_rdy ) < U( up_right_resp )
+    )
+
+#-------------------------------------------------------------------------
 # TestHarness
 #-------------------------------------------------------------------------
 
@@ -68,6 +154,8 @@ class TestHarness( Component ):
     s.src  = [ TestSource( Req, src_msgs[i] ) for i in range( ncaches ) ]
     s.sink = [ TestSink( Resp, sink_msgs[i] ) for i in range( ncaches ) ]
     s.dut  = Xbar( Req, Resp, ncaches, 1, max_req_in_flight )
+
+    s.adapter = ValRdyMasterMinionRTL2CLAdapter( Req, Resp )
     s.mem  = MemoryCL( 1, [ ( Req, Resp ) ], latency=5 )
 
     # Connections
@@ -76,7 +164,8 @@ class TestHarness( Component ):
       connect( s.src[i].send,        s.dut.minion[i].req )
       connect( s.dut.minion[i].resp, s.sink[i].recv      )
 
-    connect( s.dut.master[0], s.mem.ifc[0] )
+    connect( s.dut.master[0], s.adapter.left )
+    connect( s.adapter.right, s.mem.ifc[0] )
 
   def done( s ):
     src_done = True

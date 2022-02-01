@@ -9,7 +9,7 @@ Author : Yanghui Ou
   Date : Apr 11, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.mem import MemMasterIfcRTL, MemMinionIfcRTL
+from pymtl3.stdlib.stream.ifcs import MasterIfcRTL, MinionIfcRTL
 from pymtl3_net.ocnlib.utils.commons import has_field, get_field_type
 
 from .msg_types import mk_req_msg, mk_resp_msg
@@ -66,15 +66,15 @@ class ReqAdapter( Component ):
 
     # Interface
 
-    s.minion = MemMinionIfcRTL( Req,    Resp    )
-    s.master = MemMasterIfcRTL( NetReq, NetResp )
+    s.minion = MinionIfcRTL( Req,    Resp    )
+    s.master = MasterIfcRTL( NetReq, NetResp )
 
     # Opaque table
 
     s.opq_table = Table( OpaqueT, max_req_in_flight )
-    s.opq_table.alloc.en    //= s.minion.req.en
+    s.opq_table.alloc.en    //= lambda: s.minion.req.val & s.minion.req.rdy
     s.opq_table.alloc.msg   //= s.minion.req.msg.opaque
-    s.opq_table.dealloc.en  //= s.master.resp.en
+    s.opq_table.dealloc.en  //= lambda: s.minion.resp.val & s.minion.resp.rdy
     s.opq_table.dealloc.msg //= s.master.resp.msg.payload.opaque[ sl_idx ]
 
     # Destination logic
@@ -85,11 +85,11 @@ class ReqAdapter( Component ):
 
     # Logic
 
-    s.minion.req.rdy //= lambda: s.opq_table.alloc.rdy & s.master.req.rdy
-    s.minion.resp.en //= lambda: s.master.resp.en
+    s.minion.req.rdy  //= lambda: s.opq_table.alloc.rdy & s.master.req.rdy
+    s.minion.resp.val //= lambda: s.master.resp.val & s.opq_table.dealloc.rdy
 
-    s.master.req.en   //= lambda: s.minion.req.en
-    s.master.resp.rdy //= lambda: s.minion.resp.rdy
+    s.master.req.val  //= lambda: s.minion.req.val & s.opq_table.alloc.rdy
+    s.master.resp.rdy //= s.minion.resp.rdy
 
     @update
     def up_master_req_msg():
@@ -139,15 +139,15 @@ class RespAdapter( Component ):
 
     # Interface
 
-    s.minion = MemMinionIfcRTL( NetReq, NetResp )
-    s.master = MemMasterIfcRTL( Req,    Resp    )
+    s.minion = MinionIfcRTL( NetReq, NetResp )
+    s.master = MasterIfcRTL( Req,    Resp    )
 
     # Logic
 
-    s.minion.req.rdy //= s.master.req.rdy
-    s.minion.resp.en //= s.master.resp.en
+    s.minion.req.rdy  //= s.master.req.rdy
+    s.minion.resp.val //= s.master.resp.val
 
-    s.master.req.en   //= s.minion.req.en
+    s.master.req.val  //= s.minion.req.val
     s.master.resp.rdy //= s.minion.resp.rdy
 
     @update

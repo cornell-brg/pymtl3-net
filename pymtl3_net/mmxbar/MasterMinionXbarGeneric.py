@@ -13,7 +13,7 @@ Author : Yanghui Ou
   Date : Apr 15, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.mem import MemMasterIfcRTL, MemMinionIfcRTL
+from pymtl3.stdlib.stream.ifcs import MasterIfcRTL, MinionIfcRTL
 from pymtl3_net.xbar.XbarRTL import XbarRTL
 
 from .adapters import DstLogicSingleResp, ReqAdapter, RespAdapter
@@ -30,8 +30,8 @@ class MasterMinionXbarGeneric( Component ):
 
     # Interface
 
-    s.minion = [ MemMinionIfcRTL( Req, Resp ) for _ in range( num_requesters ) ]
-    s.master = [ MemMasterIfcRTL( Req, Resp ) for _ in range( num_responders ) ]
+    s.minion = [ MinionIfcRTL( Req, Resp ) for _ in range( num_requesters ) ]
+    s.master = [ MasterIfcRTL( Req, Resp ) for _ in range( num_responders ) ]
 
     # Component
 
@@ -54,6 +54,7 @@ class MasterMinionXbarGeneric( Component ):
       s.resp_adapter[i].master      //= s.master[i]
 
   def line_trace( s ):
+    # minion = ' || '.join( f'{ifc}[{adapter.line_trace()}]' for ifc, adapter in zip( s.minion, s.req_adapter ) )
     minion = ' || '.join( f'{ifc}' for ifc in s.minion )
     master = ' || '.join( f'{ifc}' for ifc in s.master )
     return f'{minion}(){master}'
