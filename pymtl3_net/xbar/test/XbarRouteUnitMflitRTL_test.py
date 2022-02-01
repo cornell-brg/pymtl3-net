@@ -9,7 +9,6 @@ Author : Yanghui Ou
 '''
 import pytest
 from pymtl3 import *
-from pymtl3.stdlib.queues import BypassQueueRTL
 from pymtl3.stdlib.test_utils import mk_test_case_table
 from pymtl3_net.ocnlib.utils import run_sim
 from pymtl3_net.ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
@@ -41,17 +40,13 @@ class TestHarness( Component ):
     sink_pkts = route_fl( Header, num_outports, pkts )
 
     s.src   = TestSource( Header, pkts )
-    s.src_q = BypassQueueRTL( PhitType, num_entries=1 )
     s.dut   = XbarRouteUnitMflitRTL( Header, num_outports )
     s.sink  = [ TestSink( Header, sink_pkts[i] ) for i in range( num_outports ) ]
 
-    s.src.send  //= s.src_q.enq
-    s.src_q.deq //= s.dut.get
+    s.src.send  //= s.dut.recv
 
     for i in range( num_outports ):
-      s.sink[i].recv.msg //= s.dut.give[i].ret
-      s.sink[i].recv.en  //= lambda: s.dut.give[i].rdy & s.sink[i].recv.rdy
-      s.dut.give[i].en   //= lambda: s.dut.give[i].rdy & s.sink[i].recv.rdy
+      s.sink[i].recv //= s.dut.send[i]
 
   def done( s ):
     sinks_done = True

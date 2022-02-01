@@ -13,8 +13,9 @@ Authour : Yanghui Ou
    Date : Feb 18, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL
-from pymtl3_net.ocnlib.rtl import Counter, GrantHoldArbiter
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+
+from pymtl3_net.ocnlib.rtl import Counter
 from pymtl3_net.ocnlib.utils import get_plen_type
 from pymtl3_net.ocnlib.utils.connects import connect_bitstruct
 
@@ -25,7 +26,7 @@ class XbarRouteUnitMflitRTL( Component ):
   #-----------------------------------------------------------------------
 
   def construct( s, HeaderFormat, num_outports=4, plen_field_name='plen' ):
-    # Meta data
+    # Local parameters
     s.num_outports = num_outports
     s.HeaderFormat = HeaderFormat
     s.PhitType     = mk_bits( HeaderFormat.nbits )
@@ -36,9 +37,9 @@ class XbarRouteUnitMflitRTL( Component ):
     s.STATE_BODY   = b1(1)
 
     # Interface
-    s.get  = GetIfcRTL( s.PhitType )
+    s.recv = RecvIfcRTL( s.PhitType )
 
-    s.give = [ GiveIfcRTL( s.PhitType ) for _ in range( s.num_outports ) ]
+    s.send = [ SendIfcRTL( s.PhitType ) for _ in range( s.num_outports ) ]
     s.hold = [ OutPort( Bits1 ) for _ in range( s.num_outports ) ]
 
     # Components
@@ -47,7 +48,7 @@ class XbarRouteUnitMflitRTL( Component ):
     s.state_next  = Wire()
     s.out_dir_r   = Wire( dir_nbits )
     s.out_dir     = Wire( dir_nbits )
-    s.any_give_en = Wire()
+    s.any_send_xfer = Wire()
 
     s.counter = Counter( PLenType )
     s.counter.incr //= 0
@@ -55,18 +56,18 @@ class XbarRouteUnitMflitRTL( Component ):
 
     @update
     def up_header():
-      s.header @= s.get.ret
+      s.header @= s.recv.msg
 
     for i in range( s.num_outports ):
-      s.get.ret //= s.give[i].ret
-    s.get.en //= s.any_give_en
+      s.recv.msg //= s.send[i].msg
+    s.recv.rdy //= lambda: s.send[ s.out_dir ].rdy
 
     @update
-    def up_any_give_en():
-      s.any_give_en @= 0
+    def up_any_send_xfer():
+      s.any_send_xfer @= 0
       for i in range( s.num_outports ):
-        if s.give[i].en:
-          s.any_give_en @= 1
+        if s.send[i].val & s.send[i].rdy:
+          s.any_send_xfer @= 1
 
     # State transition logic
     @update_ff
@@ -81,11 +82,11 @@ class XbarRouteUnitMflitRTL( Component ):
       s.state_next @= s.state
       if s.state == s.STATE_HEADER:
         # If the packet has body flits
-        if s.any_give_en & ( s.header.plen > 0 ):
+        if s.any_send_xfer & ( s.header.plen > 0 ):
           s.state_next @= s.STATE_BODY
 
       else: # STATE_BODY
-        if ( s.counter.count == 1 ) & s.any_give_en:
+        if ( s.counter.count == 1 ) & s.any_send_xfer:
           s.state_next @= s.STATE_HEADER
 
     # State output logic
@@ -94,7 +95,7 @@ class XbarRouteUnitMflitRTL( Component ):
       if s.state == s.STATE_HEADER:
         s.counter.decr @= 0
       else:
-        s.counter.decr @= s.any_give_en
+        s.counter.decr @= s.any_send_xfer
 
     @update
     def up_counter_load():
@@ -107,7 +108,7 @@ class XbarRouteUnitMflitRTL( Component ):
     # TODO: Figure out how to encode dest id
     @update
     def up_out_dir():
-      if ( s.state == s.STATE_HEADER ) & s.get.rdy:
+      if ( s.state == s.STATE_HEADER ) & s.recv.val:
         s.out_dir @= s.header.dst[0:dir_nbits]
       else:
         s.out_dir @= s.out_dir_r
@@ -117,9 +118,9 @@ class XbarRouteUnitMflitRTL( Component ):
       s.out_dir_r <<= s.out_dir
 
     @update
-    def up_give_rdy_hold():
+    def up_send_val_hold():
       for i in range( s.num_outports ):
-        s.give[i].rdy @= ( i == s.out_dir ) & s.get.rdy
+        s.send[i].val @= ( i == s.out_dir ) & s.recv.val
         s.hold[i]     @= ( i == s.out_dir ) & ( s.state == s.STATE_BODY )
 
   #-----------------------------------------------------------------------
@@ -127,11 +128,11 @@ class XbarRouteUnitMflitRTL( Component ):
   #-----------------------------------------------------------------------
 
   def line_trace( s ):
-    give_trace = '|'.join([ f'{ifc}' for ifc in s.give ])
+    send_trace = '|'.join([ f'{ifc}' for ifc in s.send ])
     hold  = ''.join([ '^' if h else '.' for h in s.hold ])
     count = f'{s.counter.count}'
     state = 'H' if s.state == s.STATE_HEADER else \
             'B' if s.state == s.STATE_BODY else   \
             '!'
     dir   = f'{s.out_dir}'
-    return f'{s.get}([{state}{count}]{dir}{hold}){give_trace}'
+    return f'{s.recv}([{state}{count}]{dir}{hold}){send_trace}'
