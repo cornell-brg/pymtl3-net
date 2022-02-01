@@ -67,7 +67,7 @@ def test_simple():
   ]
   th = TestHarness( SimpleFormat, pkts )
   th.elaborate()
-  th.apply( DefaultPassGroup() )
+  th.apply( DefaultPassGroup(linetrace=True) )
   th.sim_reset()
   for i in range(10):
     th.sim_tick()
@@ -87,7 +87,7 @@ def test_src_delay():
   th = TestHarness( SimpleFormat, pkts )
   th.set_param( 'top.src.construct', initial_delay=5, flit_interval_delay=2 )
   th.elaborate()
-  th.apply( DefaultPassGroup() )
+  th.apply( DefaultPassGroup(linetrace=True) )
   th.sim_reset()
   for i in range( 25 ):
     th.sim_tick()
@@ -106,7 +106,7 @@ def test_sink_delay():
   th = TestHarness( SimpleFormat, pkts )
   th.set_param( 'top.sink.construct', initial_delay=5, flit_interval_delay=2 )
   th.elaborate()
-  th.apply( DefaultPassGroup() )
+  th.apply( DefaultPassGroup(linetrace=True) )
   th.sim_reset()
   for i in range( 25 ):
     th.sim_tick()
@@ -128,7 +128,7 @@ def test_mix_delay():
   th.set_param( 'top.sink.construct', initial_delay=5, flit_interval_delay=2 )
   th.set_param( 'top.src.construct',  packet_interval_delay=5 )
   th.elaborate()
-  th.apply( DefaultPassGroup() )
+  th.apply( DefaultPassGroup(linetrace=True) )
   th.sim_reset()
   for i in range( 50 ):
     th.sim_tick()
@@ -146,7 +146,7 @@ def test_simple_rtl():
   ]
   th = TestHarnessRTL( SimpleFormat, pkts )
   th.elaborate()
-  th.apply( DefaultPassGroup() )
+  th.apply( DefaultPassGroup(linetrace=True) )
   th.sim_reset()
   for i in range(10):
     th.sim_tick()

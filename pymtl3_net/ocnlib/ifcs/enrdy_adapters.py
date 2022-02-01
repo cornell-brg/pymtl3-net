@@ -18,15 +18,15 @@ class InValRdy2Send( Component ):
 
   def construct( s, Type ):
 
-    s.in_  = InValRdyIfc( Type )
+    s.recv = InValRdyIfc( Type )
     s.send = SendIfcRTL ( Type )
 
-    s.in_.rdy  //= s.send.rdy
-    s.send.en  //= lambda: s.send.rdy & s.in_.val
-    s.send.msg //= s.in_.msg
+    s.recv.rdy //= s.send.rdy
+    s.send.en  //= lambda: s.send.rdy & s.recv.val
+    s.send.msg //= s.recv.msg
 
   def line_trace( s ):
-    return f'{s.in_}(){s.send}'
+    return f'{s.recv}(){s.send}'
 
 #-------------------------------------------------------------------------
 # Recv2OutValRdy
@@ -37,11 +37,11 @@ class Recv2OutValRdy( Component ):
   def construct( s, Type ):
 
     s.recv = RecvIfcRTL  ( Type )
-    s.out  = OutValRdyIfc( Type )
+    s.send = OutValRdyIfc( Type )
 
-    s.recv.rdy //= s.out.rdy
-    s.out.val  //= s.recv.en
-    s.out.msg  //= s.recv.msg
+    s.recv.rdy //= s.send.rdy
+    s.send.val  //= s.recv.en
+    s.send.msg  //= s.recv.msg
 
   def line_trace( s ):
-    return f"{s.recv}(){s.out}"
+    return f"{s.recv}(){s.send}"

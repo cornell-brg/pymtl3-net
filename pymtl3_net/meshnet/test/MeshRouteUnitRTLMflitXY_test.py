@@ -8,7 +8,6 @@ Author : Yanghui Ou
   Date : 11 Feb, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.queues import BypassQueueRTL
 
 from pymtl3_net.ocnlib.utils import run_sim
 from pymtl3_net.ocnlib.test.test_srcs import MflitPacketSourceRTL as TestSource
@@ -67,18 +66,14 @@ class TestHarness( Component ):
     sink_pkts = route_unit_fl( HeaderFormat, pkts, x, y )
 
     s.src   = TestSource( HeaderFormat, pkts )
-    s.src_q = BypassQueueRTL( PhitType, num_entries=1 )
     s.dut   = MeshRouteUnitRTLMflitXY( HeaderFormat, PositionType )
     s.sink  = [ TestSink( HeaderFormat, sink_pkts[i] ) for i in range(5) ]
 
-    s.src.send  //= s.src_q.enq
-    s.src_q.deq //= s.dut.get
+    s.src.send  //= s.dut.recv
     s.dut.pos   //= PositionType( x, y )
 
     for i in range(5):
-      s.sink[i].recv.msg //= s.dut.give[i].ret
-      s.sink[i].recv.en  //= lambda: s.dut.give[i].rdy & s.sink[i].recv.rdy
-      s.dut.give[i].en   //= lambda: s.dut.give[i].rdy & s.sink[i].recv.rdy
+      s.sink[i].recv //= s.dut.send[i]
 
   def done( s ):
     sinks_done = True
