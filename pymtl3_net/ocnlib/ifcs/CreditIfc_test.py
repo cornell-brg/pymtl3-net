@@ -8,12 +8,12 @@ Author : Yanghui Ou
   Date : June 10, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.queues import NormalQueueRTL
-from pymtl3.stdlib.test_utils.test_sinks import TestSinkRTL
-from pymtl3.stdlib.test_utils.test_srcs import TestSrcRTL
+from pymtl3.stdlib.stream.queues import NormalQueueRTL
+from pymtl3.stdlib.stream.SinkRTL import SinkRTL as TestSinkRTL
+from pymtl3.stdlib.stream.SourceRTL import SourceRTL as TestSrcRTL
 
 from pymtl3_net.ocnlib.utils import run_sim
-from pymtl3_net.ocnlib.test.net_sinks import TestNetSinkRTL
+from pymtl3_net.ocnlib.test.stream_sinks import NetSinkRTL as TestNetSinkRTL
 
 from .CreditIfc import (CreditRecvIfcRTL, CreditRecvRTL2SendRTL,
                         CreditSendIfcRTL, RecvRTL2CreditSendRTL)
@@ -74,4 +74,4 @@ def test_backpresure():
   ]
   th = TestHarness( Pkt, msgs, msgs )
   th.set_param( "top.sink.construct", initial_delay=20)
-  run_sim( th )
+  run_sim( th, max_cycles=100 )

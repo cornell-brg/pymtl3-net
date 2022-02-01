@@ -209,14 +209,14 @@ class CreditRecvRTL2SendRTL( Component ):
 
       if s.arbiter.grants > 0:
         s.send.val @= 1
-        s.buffers[ s.encoder.out ].send.rdy @= 1
+        s.buffers[ s.encoder.out ].send.rdy @= s.send.rdy
       else:
         s.send.val @= 0
 
     @update
     def up_yummy():
       for i in range( vc ):
-        s.recv.yum[i] @= s.buffers[i].recv.val & s.buffers[i].recv.rdy
+        s.recv.yum[i] @= s.buffers[i].send.val & s.buffers[i].send.rdy
 
   def line_trace( s ):
     return "{}(){}".format( s.recv, s.send )
