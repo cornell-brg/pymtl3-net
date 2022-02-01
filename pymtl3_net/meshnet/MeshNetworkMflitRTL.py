@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Feb 13, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 
 from .directions import *
 from .MeshRouterMflitRTL import MeshRouterMflitRTL
@@ -70,22 +70,22 @@ class MeshNetworkMflitRTL( Component ):
 
       if i // ncols == 0:
         s.routers[i].send[SOUTH].rdy //= 0
-        s.routers[i].recv[SOUTH].en  //= 0
+        s.routers[i].recv[SOUTH].val //= 0
         s.routers[i].recv[SOUTH].msg //= 0
 
       if i // ncols == nrows - 1:
         s.routers[i].send[NORTH].rdy //= 0
-        s.routers[i].recv[NORTH].en  //= 0
+        s.routers[i].recv[NORTH].val //= 0
         s.routers[i].recv[NORTH].msg //= 0
 
       if i % ncols == 0:
         s.routers[i].send[WEST].rdy //= 0
-        s.routers[i].recv[WEST].en  //= 0
+        s.routers[i].recv[WEST].val //= 0
         s.routers[i].recv[WEST].msg //= 0
 
       if i % ncols == ncols - 1:
         s.routers[i].send[EAST].rdy //= 0
-        s.routers[i].recv[EAST].en  //= 0
+        s.routers[i].recv[EAST].val //= 0
         s.routers[i].recv[EAST].msg //= 0
 
   #-----------------------------------------------------------------------

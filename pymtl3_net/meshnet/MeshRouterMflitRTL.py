@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Feb 13, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3_net.router.InputUnitRTL import InputUnitRTL
 from pymtl3_net.router.OutputUnitRTL import OutputUnitRTL
 from pymtl3_net.router.SwitchUnitGrantHoldRTL import SwitchUnitGrantHoldRTL
@@ -64,16 +64,16 @@ class MeshRouterMflitRTL( Component ):
 
     for i in range( s.num_inports ):
       s.recv[i]             //= s.input_units[i].recv
-      s.input_units[i].give //= s.route_units[i].get
+      s.input_units[i].send //= s.route_units[i].recv
       s.pos                 //= s.route_units[i].pos
 
     for i in range( s.num_inports ):
       for j in range( s.num_outports ):
-        s.route_units[i].give[j] //= s.switch_units[j].get[i]
+        s.route_units[i].send[j] //= s.switch_units[j].recv[i]
         s.route_units[i].hold[j] //= s.switch_units[j].hold[i]
 
     for j in range( s.num_outports ):
-      s.switch_units[j].give //= s.output_units[j].get
+      s.switch_units[j].send //= s.output_units[j].recv
       s.output_units[j].send //= s.send[j]
 
   #-----------------------------------------------------------------------
