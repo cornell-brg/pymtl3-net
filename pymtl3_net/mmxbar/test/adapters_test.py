@@ -73,13 +73,13 @@ def test_req_adhoc():
   assert dut.minion.req.rdy
   assert dut.master.resp.rdy
 
-  dut.minion.req.en  @= b1(1)
+  dut.minion.req.val @= b1(1)
   dut.minion.req.msg @= Req( rd, 0xa0, 0x1000, 0, 0 )
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
 
-  assert dut.master.req.en
+  assert dut.master.req.val
   assert dut.master.req.msg.payload.opaque[0:4] == 2
   assert dut.master.req.msg.payload.opaque[4:8] == 15
 
@@ -89,7 +89,7 @@ def test_req_adhoc():
   assert dut.minion.req.rdy
   assert dut.master.resp.rdy
 
-  dut.minion.req.en  @= b1(1)
+  dut.minion.req.val @= b1(1)
   dut.minion.req.msg @= Req( wr, 0xb0, 0x2000, 0, 0xfaceb00c )
 
   dut.sim_eval_combinational()
@@ -101,7 +101,7 @@ def test_req_adhoc():
   assert dut.minion.req.rdy
   assert dut.master.resp.rdy
 
-  dut.minion.req.en  @= b1(1)
+  dut.minion.req.val @= b1(1)
   dut.minion.req.msg @= Req( rd, 0xc0, 0x3000, 0, 0 )
 
   dut.sim_eval_combinational()
@@ -113,7 +113,7 @@ def test_req_adhoc():
   assert dut.minion.req.rdy
   assert dut.master.resp.rdy
 
-  dut.minion.req.en  @= b1(0)
+  dut.minion.req.val  @= b1(0)
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
@@ -124,7 +124,7 @@ def test_req_adhoc():
   assert dut.minion.req.rdy
   assert dut.master.resp.rdy
 
-  dut.minion.req.en  @= b1(0)
+  dut.minion.req.val  @= b1(0)
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
@@ -135,15 +135,15 @@ def test_req_adhoc():
   assert dut.minion.req.rdy
   assert dut.master.resp.rdy
 
-  dut.minion.req.en @= b1(0)
-  dut.master.resp.en @= b1(1)
+  dut.minion.req.val  @= b1(0)
+  dut.master.resp.val @= b1(1)
   dut.master.resp.msg.dst @= b4(2)
   dut.master.resp.msg.payload @= Resp( wr, 0xe2, 0, 0, 0 )
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
 
-  assert dut.minion.resp.en
+  assert dut.minion.resp.val
   assert dut.minion.resp.msg.opaque == 0xb0
 
   # cycle 9
@@ -152,8 +152,8 @@ def test_req_adhoc():
   assert dut.minion.req.rdy
   assert dut.master.resp.rdy
 
-  dut.minion.req.en @= b1(0)
-  dut.master.resp.en @= b1(0)
+  dut.minion.req.val  @= b1(0)
+  dut.master.resp.val @= b1(0)
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
@@ -185,14 +185,14 @@ def test_resp_adhoc():
   assert dut.minion.req.rdy
   assert dut.master.resp.rdy
 
-  dut.minion.req.en @= b1(1)
+  dut.minion.req.val @= b1(1)
   dut.minion.req.msg.dst @= b1(0)
   dut.minion.req.msg.payload @= Req( rd, 0xf2, 0x1000, 0, 0 )
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
 
-  assert dut.master.req.en
+  assert dut.master.req.val
   assert dut.master.req.msg == Req( rd, 0xf2, 0x1000, 0, 0 )
 
   # cycle 4
@@ -201,14 +201,14 @@ def test_resp_adhoc():
   assert dut.minion.req.rdy
   assert dut.master.resp.rdy
 
-  dut.minion.req.en @= b1(0)
-  dut.master.resp.en @= b1(1)
+  dut.minion.req.val  @= b1(0)
+  dut.master.resp.val @= b1(1)
   dut.master.resp.msg @= Resp( rd, 0xf2, 0, 0, 0xfaceb00c )
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
 
-  assert dut.minion.resp.en
+  assert dut.minion.resp.val
   assert dut.minion.resp.msg.dst == 2
   assert dut.minion.resp.msg.payload == Resp( rd, 0xf2, 0, 0, 0xfaceb00c )
 
@@ -218,8 +218,8 @@ def test_resp_adhoc():
   assert dut.minion.req.rdy
   assert dut.master.resp.rdy
 
-  dut.minion.req.en @= b1(0)
-  dut.master.resp.en @= b1(0)
+  dut.minion.req.val @= b1(0)
+  dut.master.resp.val @= b1(0)
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
