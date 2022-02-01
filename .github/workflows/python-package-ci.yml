@@ -45,7 +45,4 @@ jobs:
     - name: Test with pytest
       run: |
         mkdir -p build && cd build
-        pytest --cov-report xml --cov=pymtl3_net .. --tb=short --hypothesis-profile CI
-    - name: Upload code coverage report
-      run: |
-        codecov
+        pytest .. -v --tb=short --hypothesis-profile CI
