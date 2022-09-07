@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Apr 16, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import IStreamIfc, OStreamIfc
 
 class XbarRouteUnitRTL( Component ):
 
@@ -22,8 +22,8 @@ class XbarRouteUnitRTL( Component ):
 
     # Interface
 
-    s.recv = RecvIfcRTL( PacketType )
-    s.send = [ SendIfcRTL( PacketType ) for _ in range( num_outports ) ]
+    s.recv = IStreamIfc( PacketType )
+    s.send = [ OStreamIfc( PacketType ) for _ in range( num_outports ) ]
 
     # Componets
 

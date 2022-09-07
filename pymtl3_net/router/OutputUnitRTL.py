@@ -8,8 +8,8 @@ Author : Yanghui Ou, Cheng Tan
   Date : Feb 28, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
-from pymtl3.stdlib.stream.queues import NormalQueueRTL
+from pymtl3.stdlib.stream.ifcs import IStreamIfc, OStreamIfc
+from pymtl3.stdlib.stream import StreamNormalQueue
 
 
 class OutputUnitRTL( Component ):
@@ -20,8 +20,8 @@ class OutputUnitRTL( Component ):
     # TODO: add data gating support
 
     # Interface
-    s.recv = RecvIfcRTL( PacketType )
-    s.send = SendIfcRTL( PacketType )
+    s.recv = IStreamIfc( PacketType )
+    s.send = OStreamIfc( PacketType )
 
     s.QueueType = QueueType
 

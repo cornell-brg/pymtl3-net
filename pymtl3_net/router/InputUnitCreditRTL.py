@@ -9,7 +9,7 @@ Author : Yanghui Ou
 """
 from pymtl3_net.ocnlib.ifcs.CreditIfc import CreditRecvIfcRTL
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import OStreamIfc
 from pymtl3.stdlib.basic_rtl.arbiters import RoundRobinArbiterEn
 from pymtl3.stdlib.basic_rtl import Encoder
 from pymtl3.stdlib.stream.queues import NormalQueueRTL
@@ -26,7 +26,7 @@ class InputUnitCreditRTL( Component ):
     # Interface
     # FIXME: Implement ISLIP so that only one send interface is needed
     s.recv = CreditRecvIfcRTL( PacketType, vc=vc )
-    s.send = [ SendIfcRTL( PacketType ) for _ in range( vc ) ]
+    s.send = [ OStreamIfc( PacketType ) for _ in range( vc ) ]
 
     s.buffers = [ QueueType( PacketType, num_entries=credit_line )
                   for _ in range( vc ) ]

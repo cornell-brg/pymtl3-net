@@ -8,7 +8,7 @@
 
 from pymtl3_net.ocnlib.ifcs.PhysicalDimension import PhysicalDimension
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import IStreamIfc, OStreamIfc
 
 
 class Router( Component ):
@@ -24,8 +24,8 @@ class Router( Component ):
     # Interface
 
     s.pos  = InPort( PositionType )
-    s.recv = [ RecvIfcRTL( PacketType ) for _ in range( s.num_inports  ) ]
-    s.send = [ SendIfcRTL( PacketType ) for _ in range( s.num_outports ) ]
+    s.recv = [ IStreamIfc( PacketType ) for _ in range( s.num_inports  ) ]
+    s.send = [ OStreamIfc( PacketType ) for _ in range( s.num_outports ) ]
 
     # Components
 

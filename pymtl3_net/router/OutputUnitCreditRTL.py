@@ -10,7 +10,7 @@ Author : Yanghui Ou
 from pymtl3_net.ocnlib.ifcs.CreditIfc import CreditSendIfcRTL, enrdy_to_str
 from pymtl3_net.ocnlib.rtl import Counter
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL
+from pymtl3.stdlib.stream.ifcs import IStreamIfc
 
 
 class OutputUnitCreditRTL( Component ):
@@ -19,7 +19,7 @@ class OutputUnitCreditRTL( Component ):
     assert vc > 1
 
     # Interface
-    s.recv = RecvIfcRTL( MsgType )
+    s.recv = IStreamIfc( MsgType )
     s.send = CreditSendIfcRTL( MsgType, vc )
 
     s.MsgType = MsgType

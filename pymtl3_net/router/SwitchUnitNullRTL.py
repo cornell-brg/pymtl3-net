@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Feb 21, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import IStreamIfc, OStreamIfc
 
 class SwitchUnitNullRTL( Component ):
 
@@ -18,9 +18,9 @@ class SwitchUnitNullRTL( Component ):
 
     # Interface
 
-    s.recv = [ RecvIfcRTL( Type ) for _ in range( num_inports )  ]
+    s.recv = [ IStreamIfc( Type ) for _ in range( num_inports )  ]
     s.hold = [ InPort() for _ in range( num_inports ) ]
-    s.send = SendIfcRTL( Type )
+    s.send = OStreamIfc( Type )
 
     connect( s.send, s.recv[0] )
 

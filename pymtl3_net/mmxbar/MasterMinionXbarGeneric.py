@@ -13,7 +13,7 @@ Author : Yanghui Ou
   Date : Apr 15, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import MasterIfcRTL, MinionIfcRTL
+from pymtl3.stdlib.reqresp.ifcs import RequesterIfc, ResponderIfc
 from pymtl3_net.xbar.XbarRTL import XbarRTL
 
 from .adapters import DstLogicSingleResp, ReqAdapter, RespAdapter
@@ -30,8 +30,8 @@ class MasterMinionXbarGeneric( Component ):
 
     # Interface
 
-    s.minion = [ MinionIfcRTL( Req, Resp ) for _ in range( num_requesters ) ]
-    s.master = [ MasterIfcRTL( Req, Resp ) for _ in range( num_responders ) ]
+    s.minion = [ ResponderIfc( Req, Resp ) for _ in range( num_requesters ) ]
+    s.master = [ RequesterIfc( Req, Resp ) for _ in range( num_responders ) ]
 
     # Component
 

@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Feb 26, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.ifcs import IStreamIfc, OStreamIfc
 
 from .Counter import Counter
 
@@ -32,9 +32,9 @@ class DeserializerRTL( Component ):
 
     # Interface
 
-    s.recv = RecvIfcRTL( InType    )
+    s.recv = IStreamIfc( InType    )
     s.len  = InPort    ( CountType )
-    s.send = SendIfcRTL( OutType   )
+    s.send = OStreamIfc( OutType   )
 
     # Component
 

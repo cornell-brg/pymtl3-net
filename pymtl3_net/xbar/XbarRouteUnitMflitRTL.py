@@ -13,7 +13,7 @@ Authour : Yanghui Ou
    Date : Feb 18, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import IStreamIfc, OStreamIfc
 
 from pymtl3_net.ocnlib.rtl import Counter
 from pymtl3_net.ocnlib.utils import get_plen_type
@@ -37,9 +37,9 @@ class XbarRouteUnitMflitRTL( Component ):
     s.STATE_BODY   = b1(1)
 
     # Interface
-    s.recv = RecvIfcRTL( s.PhitType )
+    s.recv = IStreamIfc( s.PhitType )
 
-    s.send = [ SendIfcRTL( s.PhitType ) for _ in range( s.num_outports ) ]
+    s.send = [ OStreamIfc( s.PhitType ) for _ in range( s.num_outports ) ]
     s.hold = [ OutPort( Bits1 ) for _ in range( s.num_outports ) ]
 
     # Components

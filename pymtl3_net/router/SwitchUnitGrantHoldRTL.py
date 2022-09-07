@@ -10,9 +10,9 @@ Author : Yanghui Ou
   Date : Jan 26, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.basic_rtl import Mux, Encoder
-# from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, SendIfcRTL
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.primitive import Mux, Encoder
+# from pymtl3.stdlib.ifcs import GetIfcRTL, GiveIfcRTL, OStreamIfc
+from pymtl3.stdlib.stream.ifcs import IStreamIfc, OStreamIfc
 from pymtl3_net.ocnlib.rtl import Counter, GrantHoldArbiter
 
 class SwitchUnitGrantHoldRTL( Component ):
@@ -25,9 +25,9 @@ class SwitchUnitGrantHoldRTL( Component ):
     s.sel_width   = clog2( num_inports )
 
     # Interface
-    s.recv = [ RecvIfcRTL( s.Type ) for _ in range( num_inports )  ]
+    s.recv = [ IStreamIfc( s.Type ) for _ in range( num_inports )  ]
     s.hold = InPort(num_inports)
-    s.send = SendIfcRTL( s.Type )
+    s.send = OStreamIfc( s.Type )
 
     # Components
     s.granted_recv_val = Wire()
