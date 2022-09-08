@@ -24,8 +24,8 @@ class InputUnitRTL( Component ):
     # Component
 
     s.queue = QueueType( PacketType )
-    s.queue.recv //= s.recv
-    s.queue.send //= s.send
+    s.queue.istream //= s.recv
+    s.queue.ostream //= s.send
 
   def line_trace( s ):
     return f"{s.recv}({s.queue.count}){s.send}"
