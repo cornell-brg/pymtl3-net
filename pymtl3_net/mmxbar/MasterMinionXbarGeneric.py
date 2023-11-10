@@ -13,7 +13,7 @@ Author : Yanghui Ou
   Date : Apr 15, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import MasterIfcRTL, MinionIfcRTL
+from pymtl3.stdlib.reqresp.ifcs import RequesterIfc, ResponderIfc
 from pymtl3_net.xbar.XbarRTL import XbarRTL
 
 from .adapters import DstLogicSingleResp, ReqAdapter, RespAdapter
@@ -30,8 +30,8 @@ class MasterMinionXbarGeneric( Component ):
 
     # Interface
 
-    s.minion = [ MinionIfcRTL( Req, Resp ) for _ in range( num_requesters ) ]
-    s.master = [ MasterIfcRTL( Req, Resp ) for _ in range( num_responders ) ]
+    s.minion = [ ResponderIfc( Req, Resp ) for _ in range( num_requesters ) ]
+    s.master = [ RequesterIfc( Req, Resp ) for _ in range( num_responders ) ]
 
     # Component
 
@@ -45,12 +45,12 @@ class MasterMinionXbarGeneric( Component ):
 
     for i in range( num_requesters ):
       s.req_adapter[i].minion      //= s.minion[i]
-      s.req_adapter[i].master.req  //= s.req_net.recv[i]
-      s.req_adapter[i].master.resp //= s.resp_net.send[i]
+      s.req_adapter[i].master.reqstream  //= s.req_net.recv[i]
+      s.req_adapter[i].master.respstream //= s.resp_net.send[i]
 
     for i in range( num_responders ):
-      s.resp_adapter[i].minion.req  //= s.req_net.send[i]
-      s.resp_adapter[i].minion.resp //= s.resp_net.recv[i]
+      s.resp_adapter[i].minion.reqstream  //= s.req_net.send[i]
+      s.resp_adapter[i].minion.respstream //= s.resp_net.recv[i]
       s.resp_adapter[i].master      //= s.master[i]
 
   def line_trace( s ):

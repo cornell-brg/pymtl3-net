@@ -8,7 +8,7 @@ Author : Yanghui Ou
   Date : Feb 18, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
+from pymtl3.stdlib.stream.ifcs import IStreamIfc, OStreamIfc
 from pymtl3_net.router.InputUnitRTL import InputUnitRTL
 from pymtl3_net.router.OutputUnitRTL import OutputUnitRTL
 from pymtl3_net.router.SwitchUnitGrantHoldRTL import SwitchUnitGrantHoldRTL
@@ -47,8 +47,8 @@ class XbarMflitRTL( Component ):
 
     # Interface
 
-    s.recv = [ RecvIfcRTL( s.PhitType ) for _ in range( s.num_inports  ) ]
-    s.send = [ SendIfcRTL( s.PhitType ) for _ in range( s.num_outports ) ]
+    s.recv = [ IStreamIfc( s.PhitType ) for _ in range( s.num_inports  ) ]
+    s.send = [ OStreamIfc( s.PhitType ) for _ in range( s.num_outports ) ]
 
     # Components
 

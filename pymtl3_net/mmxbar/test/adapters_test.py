@@ -56,13 +56,13 @@ def test_req_adhoc():
   dut.elaborate()
   dut.apply( DefaultPassGroup(linetrace=True) )
 
-  dut.minion.resp.rdy @= b1(1)
-  dut.master.req.rdy  @= b1(1)
+  dut.minion.respstream.rdy @= b1(1)
+  dut.master.reqstream.rdy  @= b1(1)
 
   dut.sim_reset()
 
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
@@ -70,27 +70,27 @@ def test_req_adhoc():
   # cycle 3
 
   dut.sim_tick()
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
-  dut.minion.req.val @= b1(1)
-  dut.minion.req.msg @= Req( rd, 0xa0, 0x1000, 0, 0 )
+  dut.minion.reqstream.val @= b1(1)
+  dut.minion.reqstream.msg @= Req( rd, 0xa0, 0x1000, 0, 0 )
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
 
-  assert dut.master.req.val
-  assert dut.master.req.msg.payload.opaque[0:4] == 2
-  assert dut.master.req.msg.payload.opaque[4:8] == 15
+  assert dut.master.reqstream.val
+  assert dut.master.reqstream.msg.payload.opaque[0:4] == 2
+  assert dut.master.reqstream.msg.payload.opaque[4:8] == 15
 
   # cycle 4
 
   dut.sim_tick()
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
-  dut.minion.req.val @= b1(1)
-  dut.minion.req.msg @= Req( wr, 0xb0, 0x2000, 0, 0xfaceb00c )
+  dut.minion.reqstream.val @= b1(1)
+  dut.minion.reqstream.msg @= Req( wr, 0xb0, 0x2000, 0, 0xfaceb00c )
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
@@ -98,11 +98,11 @@ def test_req_adhoc():
   # cycle 5
 
   dut.sim_tick()
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
-  dut.minion.req.val @= b1(1)
-  dut.minion.req.msg @= Req( rd, 0xc0, 0x3000, 0, 0 )
+  dut.minion.reqstream.val @= b1(1)
+  dut.minion.reqstream.msg @= Req( rd, 0xc0, 0x3000, 0, 0 )
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
@@ -110,10 +110,10 @@ def test_req_adhoc():
   # cycle 6
 
   dut.sim_tick()
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
-  dut.minion.req.val  @= b1(0)
+  dut.minion.reqstream.val  @= b1(0)
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
@@ -121,10 +121,10 @@ def test_req_adhoc():
   # cycle 7
 
   dut.sim_tick()
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
-  dut.minion.req.val  @= b1(0)
+  dut.minion.reqstream.val  @= b1(0)
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
@@ -132,28 +132,28 @@ def test_req_adhoc():
   # cycle 8
 
   dut.sim_tick()
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
-  dut.minion.req.val  @= b1(0)
-  dut.master.resp.val @= b1(1)
-  dut.master.resp.msg.dst @= b4(2)
-  dut.master.resp.msg.payload @= Resp( wr, 0xe2, 0, 0, 0 )
+  dut.minion.reqstream.val  @= b1(0)
+  dut.master.respstream.val @= b1(1)
+  dut.master.respstream.msg.dst @= b4(2)
+  dut.master.respstream.msg.payload @= Resp( wr, 0xe2, 0, 0, 0 )
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
 
-  assert dut.minion.resp.val
-  assert dut.minion.resp.msg.opaque == 0xb0
+  assert dut.minion.respstream.val
+  assert dut.minion.respstream.msg.opaque == 0xb0
 
   # cycle 9
 
   dut.sim_tick()
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
-  dut.minion.req.val  @= b1(0)
-  dut.master.resp.val @= b1(0)
+  dut.minion.reqstream.val  @= b1(0)
+  dut.master.respstream.val @= b1(0)
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
@@ -168,13 +168,13 @@ def test_resp_adhoc():
   dut.elaborate()
   dut.apply( DefaultPassGroup(linetrace=True) )
 
-  dut.minion.resp.rdy @= b1(1)
-  dut.master.req.rdy  @= b1(1)
+  dut.minion.respstream.rdy @= b1(1)
+  dut.master.reqstream.rdy  @= b1(1)
 
   dut.sim_reset()
 
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
@@ -182,44 +182,44 @@ def test_resp_adhoc():
   # cycle 3
 
   dut.sim_tick()
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
-  dut.minion.req.val @= b1(1)
-  dut.minion.req.msg.dst @= b1(0)
-  dut.minion.req.msg.payload @= Req( rd, 0xf2, 0x1000, 0, 0 )
+  dut.minion.reqstream.val @= b1(1)
+  dut.minion.reqstream.msg.dst @= b1(0)
+  dut.minion.reqstream.msg.payload @= Req( rd, 0xf2, 0x1000, 0, 0 )
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
 
-  assert dut.master.req.val
-  assert dut.master.req.msg == Req( rd, 0xf2, 0x1000, 0, 0 )
+  assert dut.master.reqstream.val
+  assert dut.master.reqstream.msg == Req( rd, 0xf2, 0x1000, 0, 0 )
 
   # cycle 4
 
   dut.sim_tick()
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
-  dut.minion.req.val  @= b1(0)
-  dut.master.resp.val @= b1(1)
-  dut.master.resp.msg @= Resp( rd, 0xf2, 0, 0, 0xfaceb00c )
+  dut.minion.reqstream.val  @= b1(0)
+  dut.master.respstream.val @= b1(1)
+  dut.master.respstream.msg @= Resp( rd, 0xf2, 0, 0, 0xfaceb00c )
 
   dut.sim_eval_combinational()
   dut.print_line_trace()
 
-  assert dut.minion.resp.val
-  assert dut.minion.resp.msg.dst == 2
-  assert dut.minion.resp.msg.payload == Resp( rd, 0xf2, 0, 0, 0xfaceb00c )
+  assert dut.minion.respstream.val
+  assert dut.minion.respstream.msg.dst == 2
+  assert dut.minion.respstream.msg.payload == Resp( rd, 0xf2, 0, 0, 0xfaceb00c )
 
   # cycle 5
 
   dut.sim_tick()
-  assert dut.minion.req.rdy
-  assert dut.master.resp.rdy
+  assert dut.minion.reqstream.rdy
+  assert dut.master.respstream.rdy
 
-  dut.minion.req.val @= b1(0)
-  dut.master.resp.val @= b1(0)
+  dut.minion.reqstream.val @= b1(0)
+  dut.master.respstream.val @= b1(0)
 
   dut.sim_eval_combinational()
   dut.print_line_trace()

@@ -9,7 +9,7 @@ Author : Yanghui Ou
   Date : Apr 11, 2020
 '''
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import MasterIfcRTL, MinionIfcRTL
+from pymtl3.stdlib.reqresp.ifcs import RequesterIfc, ResponderIfc
 from pymtl3_net.ocnlib.utils.commons import has_field, get_field_type
 
 from .msg_types import mk_req_msg, mk_resp_msg
@@ -66,42 +66,42 @@ class ReqAdapter( Component ):
 
     # Interface
 
-    s.minion = MinionIfcRTL( Req,    Resp    )
-    s.master = MasterIfcRTL( NetReq, NetResp )
+    s.minion = ResponderIfc( Req,    Resp    )
+    s.master = RequesterIfc( NetReq, NetResp )
 
     # Opaque table
 
     s.opq_table = Table( OpaqueT, max_req_in_flight )
-    s.opq_table.alloc.en    //= lambda: s.minion.req.val & s.minion.req.rdy
-    s.opq_table.alloc.msg   //= s.minion.req.msg.opaque
-    s.opq_table.dealloc.en  //= lambda: s.minion.resp.val & s.minion.resp.rdy
-    s.opq_table.dealloc.msg //= s.master.resp.msg.payload.opaque[ sl_idx ]
+    s.opq_table.alloc.en    //= lambda: s.minion.reqstream.val & s.minion.reqstream.rdy
+    s.opq_table.alloc.msg   //= s.minion.reqstream.msg.opaque
+    s.opq_table.dealloc.en  //= lambda: s.minion.respstream.val & s.minion.respstream.rdy
+    s.opq_table.dealloc.msg //= s.master.respstream.msg.payload.opaque[ sl_idx ]
 
     # Destination logic
 
     s.dst_logic = DstLogicT( Req, SrcT, DstT )
-    s.dst_logic.in_req    //= s.minion.req.msg
+    s.dst_logic.in_req    //= s.minion.reqstream.msg
     s.dst_logic.in_src_id //= id
 
     # Logic
 
-    s.minion.req.rdy  //= lambda: s.opq_table.alloc.rdy & s.master.req.rdy
-    s.minion.resp.val //= lambda: s.master.resp.val & s.opq_table.dealloc.rdy
+    s.minion.reqstream.rdy  //= lambda: s.opq_table.alloc.rdy & s.master.reqstream.rdy
+    s.minion.respstream.val //= lambda: s.master.respstream.val & s.opq_table.dealloc.rdy
 
-    s.master.req.val  //= lambda: s.minion.req.val & s.opq_table.alloc.rdy
-    s.master.resp.rdy //= s.minion.resp.rdy
+    s.master.reqstream.val  //= lambda: s.minion.reqstream.val & s.opq_table.alloc.rdy
+    s.master.respstream.rdy //= s.minion.respstream.rdy
 
     @update
     def up_master_req_msg():
-      s.master.req.msg.dst @= s.dst_logic.out_dst
-      s.master.req.msg.payload @= s.minion.req.msg
-      s.master.req.msg.payload.opaque[ sl_src ] @= id
-      s.master.req.msg.payload.opaque[ sl_idx ] @= s.opq_table.alloc.ret
+      s.master.reqstream.msg.dst @= s.dst_logic.out_dst
+      s.master.reqstream.msg.payload @= s.minion.reqstream.msg
+      s.master.reqstream.msg.payload.opaque[ sl_src ] @= id
+      s.master.reqstream.msg.payload.opaque[ sl_idx ] @= s.opq_table.alloc.ret
 
     @update
     def up_minion_resp_msg():
-      s.minion.resp.msg @= s.master.resp.msg.payload
-      s.minion.resp.msg.opaque @= s.opq_table.dealloc.ret
+      s.minion.respstream.msg @= s.master.respstream.msg.payload
+      s.minion.respstream.msg.opaque @= s.opq_table.dealloc.ret
 
   def line_trace( s ):
     return f'{s.minion}({s.opq_table.line_trace()}){s.master}'
@@ -139,25 +139,25 @@ class RespAdapter( Component ):
 
     # Interface
 
-    s.minion = MinionIfcRTL( NetReq, NetResp )
-    s.master = MasterIfcRTL( Req,    Resp    )
+    s.minion = ResponderIfc( NetReq, NetResp )
+    s.master = RequesterIfc( Req,    Resp    )
 
     # Logic
 
-    s.minion.req.rdy  //= s.master.req.rdy
-    s.minion.resp.val //= s.master.resp.val
+    s.minion.reqstream.rdy  //= s.master.reqstream.rdy
+    s.minion.respstream.val //= s.master.respstream.val
 
-    s.master.req.val  //= s.minion.req.val
-    s.master.resp.rdy //= s.minion.resp.rdy
+    s.master.reqstream.val  //= s.minion.reqstream.val
+    s.master.respstream.rdy //= s.minion.respstream.rdy
 
     @update
     def up_master_req_msg():
-      s.master.req.msg @= s.minion.req.msg.payload
+      s.master.reqstream.msg @= s.minion.reqstream.msg.payload
 
     @update
     def up_minion_resp_msg():
-      s.minion.resp.msg.dst @= s.master.resp.msg.opaque[ sl_src ]
-      s.minion.resp.msg.payload @= s.master.resp.msg
+      s.minion.respstream.msg.dst @= s.master.respstream.msg.opaque[ sl_src ]
+      s.minion.respstream.msg.payload @= s.master.respstream.msg
 
   def line_trace( s ):
     return f'{s.minion}({s.id}){s.master}'

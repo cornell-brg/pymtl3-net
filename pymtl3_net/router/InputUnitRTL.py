@@ -8,24 +8,24 @@ Author : Yanghui Ou, Cheng Tan
   Date : Mar 23, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import SendIfcRTL, RecvIfcRTL
-from pymtl3.stdlib.stream.queues import NormalQueueRTL
+from pymtl3.stdlib.stream.ifcs import OStreamIfc, IStreamIfc
+from pymtl3.stdlib.stream import StreamNormalQueue
 
 
 class InputUnitRTL( Component ):
 
-  def construct( s, PacketType, QueueType=NormalQueueRTL ):
+  def construct( s, PacketType, QueueType=StreamNormalQueue ):
 
     # Interface
 
-    s.recv = RecvIfcRTL( PacketType )
-    s.send = SendIfcRTL( PacketType )
+    s.recv = IStreamIfc( PacketType )
+    s.send = OStreamIfc( PacketType )
 
     # Component
 
     s.queue = QueueType( PacketType )
-    s.queue.recv //= s.recv
-    s.queue.send //= s.send
+    s.queue.istream //= s.recv
+    s.queue.ostream //= s.send
 
   def line_trace( s ):
     return f"{s.recv}({s.queue.count}){s.send}"

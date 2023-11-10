@@ -2,16 +2,14 @@
 =========================================================================
 SwitchUnitRTL.py
 =========================================================================
-A switch unit with GetIfcRTL and SendIfcRTL.
+A switch unit with GetIfcRTL and OStreamIfc.
 
 Author : Yanghui Ou, Cheng Tan
   Date : Feb 28, 2019
 """
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import SendIfcRTL, RecvIfcRTL
-from pymtl3.stdlib.basic_rtl import Mux
-from pymtl3.stdlib.basic_rtl import RoundRobinArbiterEn
-from pymtl3.stdlib.basic_rtl import Encoder
+from pymtl3.stdlib.stream.ifcs import OStreamIfc, IStreamIfc
+from pymtl3.stdlib.primitive import Mux, RoundRobinArbiterEn, Encoder
 
 
 class SwitchUnitRTL( Component ):
@@ -25,8 +23,8 @@ class SwitchUnitRTL( Component ):
 
     # Interface
 
-    s.recv = [ RecvIfcRTL( PacketType ) for _ in range( s.num_inports ) ]
-    s.send = SendIfcRTL( PacketType )
+    s.recv = [ IStreamIfc( PacketType ) for _ in range( s.num_inports ) ]
+    s.send = OStreamIfc( PacketType )
 
     # Components
 
