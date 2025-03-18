@@ -455,7 +455,7 @@ def net_simulate( topo, opts ):
 
   if opts.dump_vcd:
     vprint( f' - enabling vcd dumping' )
-    net.config_tracing = TracingConfigs( tracing='vcd', vcd_file_name=f'{topo}-{nports}-{opts.injection_rate}' )
+    net.set_metadata( VcdGenerationPass.vcd_file_name, f'{topo}-{nports}-test' )
 
   # Elaborating network instance
   vprint( f' - elaborating {topo}' )
@@ -805,7 +805,6 @@ def smoke_test( topo, opts ):
 
   if opts.dump_vcd:
     vprint( f' - enabling vcd dumping' )
-    # net.config_tracing = TracingConfigs( tracing='vcd', vcd_file_name=f'{topo}-{nports}-test' )
     net.set_metadata( VcdGenerationPass.vcd_file_name, f'{topo}-{nports}-test' )
 
   # Elaborating network instance
